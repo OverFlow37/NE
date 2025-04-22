@@ -3,9 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-/// <summary>
-/// 인스펙터에서 직접 에이전트의 스케줄을 테스트하기 위한 컴포넌트
-/// </summary>
+// 인스펙터에서 직접 에이전트의 스케줄을 테스트하기 위한 컴포넌트
 public class ScheduleTester : MonoBehaviour
 {
     [Header("에이전트 참조")]
@@ -76,9 +74,7 @@ public class ScheduleTester : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// 현재 정보 업데이트 코루틴
-    /// </summary>
+    // 현재 정보 업데이트 코루틴
     private IEnumerator UpdateInfoRoutine()
     {
         while (true)
@@ -107,9 +103,7 @@ public class ScheduleTester : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// 인스펙터에서 설정한 값으로 활동 추가
-    /// </summary>
+    // 인스펙터에서 설정한 값으로 활동 추가
     public void AddActivity()
     {
         if (mScheduler == null)
@@ -160,9 +154,7 @@ public class ScheduleTester : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// 시간 문자열 파싱 (시:분 또는 시:분:초 형식)
-    /// </summary>
+    // 시간 문자열 파싱 (시:분 또는 시:분:초 형식)
     private TimeSpan ParseTimeInput(string timeString)
     {
         // 시:분 형식 확인
@@ -174,9 +166,7 @@ public class ScheduleTester : MonoBehaviour
         return TimeSpan.Parse(timeString);
     }
 
-    /// <summary>
-    /// 현재 활동 완료 처리
-    /// </summary>
+    // 현재 활동 완료 처리
     public void CompleteCurrentActivity()
     {
         if (mScheduler != null)
@@ -186,9 +176,7 @@ public class ScheduleTester : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// 모든 스케줄 지우기
-    /// </summary>
+    // 모든 스케줄 지우기
     public void ClearAllSchedule()
     {
         if (mScheduler != null)
@@ -198,9 +186,7 @@ public class ScheduleTester : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// 시간 속도 적용
-    /// </summary>
+    // 시간 속도 적용
     public void ApplyTimeScale()
     {
         if (mScheduler != null)
@@ -210,9 +196,8 @@ public class ScheduleTester : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// 빠른 테스트를 위한 사전 정의된 일정 추가
-    /// </summary>
+
+    // 빠른 테스트를 위한 사전 정의된 일정 추가
     [ContextMenu("Add Test Schedule")]
     public void AddTestSchedule()
     {
@@ -242,9 +227,7 @@ public class ScheduleTester : MonoBehaviour
         Debug.Log("테스트 스케줄 추가 완료");
     }
 
-    /// <summary>
-    /// 커스텀 활동 추가 도우미 메서드
-    /// </summary>
+    // 커스텀 활동 추가 도우미 메서드
     private void AddCustomActivity(string activity, string start, string end, string location, int priority)
     {
         try
