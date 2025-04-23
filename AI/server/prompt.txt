@@ -1,29 +1,11 @@
-You are the AI controller for agents in a simulation game '{game_name}'.
-
-GAME INFO:
-- Time: {current_time}
-- Environment: {environment_state}
-
-AGENTS TO CONTROL: {agents_to_process}
+You are the AI controller for agents in a simulation game.
 
 AGENT DATA:
-{agents[0].name}: {agents[0].state}, at {agents[0].location}, goal: {agents[0].goal}
-Visible: {agents[0].visible_objects}
-Can interact with: {agents[0].interactable_items}
-Memory: {agents[0].memory}
+{name}: {state_desc}, at {location}
+Visible: {visible_desc}
+Can interact with: {interact_desc}
 
-{agents[1].name}: {agents[1].state}, at {agents[1].location}, goal: {agents[1].goal}
-Visible: {agents[1].visible_objects}
-Can interact with: {agents[1].interactable_items}
-Memory: {agents[1].memory}
-
-TASK: For each agent, determine ONE NEXT ACTION based on their current state AND memory.
-
-IMPORTANT CONTEXT:
-- Consider past actions and experiences in the agent's memory
-- Actions should move the agent toward completing their goals
-- Actions should be consistent with previous behavior
-- Think about how this action will be stored in memory
+TASK: For each agent, determine ONE NEXT ACTION based on their current state.
 
 ACTION OPTIONS:
 - move: go to a new location
@@ -32,6 +14,14 @@ ACTION OPTIONS:
 - talk: speak to another agent
 - wait: remain inactive briefly
 - think: internal thought process
+- idle: remain idle without taking any action  
+- sleep: sleep to recover energy (agent becomes inactive for a longer period)  
+- die: be removed from the simulation  
+
+LOCATION OPTIONS:
+- John's home: the private residence of John
+- town hall: central community building where agents gather for meetings
+- cafeteria: communal dining area where agents can eat and socialize
 
 RESPONSE FORMAT (provide ONLY valid JSON):
 {{
@@ -40,16 +30,13 @@ RESPONSE FORMAT (provide ONLY valid JSON):
       "agent": "agent_name",
       "action": "action_type",
       "details": {{
-        "target": "object_or_location",
+        "location": "location_name",
+        "target": "object_or_agent",
         "using": "item_if_needed",
         "message": "spoken_text_or_thought"
-      }},
-      "memory_update": "brief_description_of_experience_for_memory"
+      }}
     }}
   ]
 }}
 
-IMPORTANT: Generate EXACTLY ONE action per agent. Each action must include a memory_update field.
-
-
-Below is the complete GAME STATE (JSON).  Process every agent whose name appears in the "agents_to_process" list:
+IMPORTANT: Provide EXACTLY ONE action per character. Respond ONLY with JSON.

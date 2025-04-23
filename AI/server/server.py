@@ -17,8 +17,7 @@ def receive_data():
     payload = request.get_json()
     print("Unity로부터 받은 데이터:", payload)
 
-    instruction = open('prompt.txt', encoding='utf-8').read()
-    prompt = jp.format_prompt(instruction, payload)
+    prompt = jp.format_prompt(payload)
     answer = jp.get_response(prompt, 'http://localhost:11434/api/generate')
 
     # 1) 펜스 제거
