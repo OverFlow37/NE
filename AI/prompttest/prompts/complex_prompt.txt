@@ -1,18 +1,19 @@
-You are the AI controller for agents in a simulation game '{game_name}'.
+You are the AI controller for agents in a simulation game.
 
-GAME INFO:
-- Time: {current_time}
-- Environment: {environment_state}
-
-AGENTS TO CONTROL: {agents_to_process}
+CURRENT TIME: {current_time}
+ENVIRONMENT: {environment_state}
 
 AGENT DATA:
-{agents[0].name}: {agents[0].state}, at {agents[0].location}, goal: {agents[0].goal}
-Visible: {agents[0].visible_objects}
-Can interact with: {agents[0].interactable_items}
-Memories: {agents[0].memory}
+{agent.name}
+- State: {agent.state.phrases}
+- Personality: {agent.personality}
+- Location: {agent.location}
+- Visible objects: {agent.visible_objects}
+- Interactable items: {agent.interactable_items}
+- Nearby agents: {agent.nearby_agents}
+- Memories: {agent.memories}
 
-TASK: For each agent, determine ONE NEXT ACTION based on their current state.
+TASK: Determine the next action for this agent based on their current state, personality, and environment.
 
 ACTION OPTIONS:
 - move: go to a new location  
@@ -22,7 +23,7 @@ ACTION OPTIONS:
 - wait: remain inactive briefly  
 - think: internal thought process  
 - idle: remain idle without taking any action  
-- sleep: sleep to recover energy (agent becomes inactive for a longer period)  
+- sleep: sleep to recover energy
 - die: be removed from the simulation  
 
 LOCATION OPTIONS:
@@ -33,28 +34,44 @@ LOCATION OPTIONS:
 MEMORY RATING RULES:
 On a scale of 1 to 10, where  
 1 = purely mundane (e.g., brushing teeth, making bed)  
+3 = minor daily event (e.g., short conversation, shopping)
+5 = moderately significant (e.g., playing games with friends)
+7 = important event (e.g., having dinner with friends)
 10 = extremely poignant (e.g., a breakup, college acceptance)  
 rate the poignancy of any newly generated memory.
 
+REASONING GUIDELINES:
+- Base decisions on agent's current state and personality traits
+- Consider time of day, environment, and location
+- Reference specific visible objects or nearby agents where appropriate
+- If agent is hungry (hunger > 6), prioritize finding food
+- If agent is sleepy (sleepiness > 7), prioritize rest
+- If agent is lonely (loneliness > 5), prioritize social interaction
+- If agent is stressed (stress > 6), prioritize relaxation
+- Account for personality traits in decision making (e.g., introverted agents may prefer solitary activities)
+
 RESPONSE FORMAT (provide ONLY valid JSON):
 ```json
-{{
+{
   "actions": [
-    {{
+    {
       "agent": "agent_name",
       "action": "action_type",
-      "details": {{
-        "target": "object_or_location",
+      "details": {
+        "location": "location",
+        "target": "object_or_agent",
         "using": "item_if_needed",
         "message": "spoken_text_or_thought"
-      }},
-      "memory_update": {{
+      },
+      "memory_update": {
         "action": "with_whom_and_where_action_took_place",
         "time": "{current_time}", 
         "importance": importance_rating
-      }}
-    }}
+      },
+      "reason": "Detailed explanation of why this action was chosen based on state, personality, etc."
+    }
   ]
-}}
+}
+```
 
-IMPORTANT: Provide EXACTLY ONE action per character. Respond ONLY with JSON.
+IMPORTANT: Provide EXACTLY ONE action. Respond ONLY with JSON. The "reason" field and "memory_update" field are for internal processing and will not be sent to Unity. The "memory_update" will be saved to the memory database for future decision making.

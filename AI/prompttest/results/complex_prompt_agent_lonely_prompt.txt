@@ -1,20 +1,23 @@
 You are the AI controller for agents in a simulation game.
 
-CURRENT TIME: 2025.04.23.17:51
-ENVIRONMENT: Weather: Light Rain, Temperature: Cool
+CURRENT TIME: 2025.04.23.17:52
+ENVIRONMENT: Afternoon, bright day
 
 AGENT DATA:
 John
-- State: hungry, very sleepy, very lonely, very stressed, not happy
-- Personality: introverted, thoughtful, creative
+- State: hungry, not sleepy, very lonely, not stressed, not happy
+- Personality: introverted, practical, punctual
 - Location: John's home
-- Visible objects: [{"location": "John's home", "objects": ["sofa", "TV", "bookshelf", "window", "phone", "laptop"]}]
-- Interactable items: [{"location": "John's home", "objects": ["TV remote", "phone", "laptop", "books", "snacks", "tea kettle"]}]
+- Visible objects: [{"location": "John's home", "objects": ["TV", "sofa", "phone", "book", "laptop", "kitchen table"]}]
+- Interactable items: [{"location": "John's home", "objects": ["TV", "sofa", "phone", "book", "laptop", "kitchen table"]}]
 - Nearby agents: []
 - Memories: -Relaxed at John's home.
 -Had a drink with Sarah at cafeteria.
 -Had a drink with Alice at cafeteria.
 -Auto-fixed action at John's home
+-Auto-fixed action at John's home
+-Auto-fixed action at cafeteria
+-eating pastries
 -eating at town hall
 -Auto-fixed action at John's home
 -Auto-fixed action at town hall
@@ -38,9 +41,6 @@ John
 -eating at town hall
 -working at the desk
 -working at the desk
--Auto-fixed action at John's home
--Auto-fixed action at John's home
--eating pastries
 
 TASK: Determine the next action for this agent based on their current state, personality, and environment.
 
@@ -94,7 +94,7 @@ RESPONSE FORMAT (provide ONLY valid JSON):
       },
       "memory_update": {
         "action": "with_whom_and_where_action_took_place",
-        "time": "2025.04.23.17:51", 
+        "time": "2025.04.23.17:52", 
         "importance": importance_rating
       },
       "reason": "Detailed explanation of why this action was chosen based on state, personality, etc."

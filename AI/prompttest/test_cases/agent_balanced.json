@@ -1,0 +1,28 @@
+{
+  "agent":
+    {
+      "name": "John",
+      "location": "cafeteria",
+      "personality": "introverted, practical, punctual",
+      "state": {
+        "hunger": 4,
+        "sleepiness": 3,
+        "loneliness": 4,
+        "stress": 3,
+        "happiness": 6
+      },
+      "visible_objects": [
+        {
+          "location": "cafeteria",
+          "objects": ["coffee machine", "pastries", "tables", "chairs", "newspaper"]
+        }
+      ],
+      "interactable_items": [
+        {
+          "location": "cafeteria",
+          "objects": ["coffee machine", "pastries", "tables", "chairs", "newspaper"]
+        }
+      ],
+      "nearby_agents": []
+    }
+}

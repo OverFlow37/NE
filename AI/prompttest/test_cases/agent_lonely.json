@@ -1,0 +1,28 @@
+{
+  "agent":
+    {
+      "name": "John",
+      "location": "John's home",
+      "personality": "introverted, practical, punctual",
+      "state": {
+        "hunger": 4,
+        "sleepiness": 2,
+        "loneliness": 7,
+        "stress": 3,
+        "happiness": 3
+      },
+      "visible_objects": [
+        {
+          "location": "John's home",
+          "objects": ["TV", "sofa", "phone", "book", "laptop", "kitchen table"]
+        }
+      ],
+      "interactable_items": [
+        {
+          "location": "John's home",
+          "objects": ["TV", "sofa", "phone", "book", "laptop", "kitchen table"]
+        }
+      ],
+      "nearby_agents": []
+    }
+}

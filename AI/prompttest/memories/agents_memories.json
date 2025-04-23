@@ -149,161 +149,437 @@
       "action": "Relaxed at John's home.",
       "time": "2025.04.23.21:00",
       "importance": 2
+    },
+    {
+      "action": "Auto-fixed action at John's home",
+      "time": "2025.04.23.16:47",
+      "importance": 3
+    },
+    {
+      "action": "Auto-fixed action at John's home",
+      "time": "2025.04.23.16:47",
+      "importance": 3
+    },
+    {
+      "action": "eating pastries",
+      "time": "2025.04.23.16:47",
+      "importance": 5
+    },
+    {
+      "action": "eating at town hall",
+      "time": "2025.04.23.16:47",
+      "importance": 5
+    },
+    {
+      "action": "Auto-fixed action at John's home",
+      "time": "2025.04.23.16:47",
+      "importance": 3
+    },
+    {
+      "action": "working at the desk",
+      "time": "2025.04.23.16:48",
+      "importance": 5
+    },
+    {
+      "action": "working at the desk",
+      "time": "2025.04.23.16:48",
+      "importance": 7
+    },
+    {
+      "action": "Auto-fixed action at John's home",
+      "time": "2025.04.23.17:08",
+      "importance": 3
+    },
+    {
+      "action": "Auto-fixed action at John's home",
+      "time": "2025.04.23.17:08",
+      "importance": 3
+    },
+    {
+      "action": "Auto-fixed action at cafeteria",
+      "time": "2025.04.23.17:08",
+      "importance": 3
+    },
+    {
+      "action": "eating at town hall",
+      "time": "2025.04.23.17:08",
+      "importance": 5
+    },
+    {
+      "action": "Auto-fixed action at John's home",
+      "time": "2025.04.23.17:09",
+      "importance": 3
+    },
+    {
+      "action": "Auto-fixed action at town hall",
+      "time": "2025.04.23.17:09",
+      "importance": 3
+    },
+    {
+      "action": "Auto-fixed action at town hall",
+      "time": "2025.04.23.17:09",
+      "importance": 3
+    },
+    {
+      "action": "Auto-fixed action at John's home",
+      "time": "2025.04.23.17:11",
+      "importance": 3
+    },
+    {
+      "action": "Auto-fixed action at John's home",
+      "time": "2025.04.23.17:11",
+      "importance": 3
+    },
+    {
+      "action": "Auto-fixed action at cafeteria",
+      "time": "2025.04.23.17:11",
+      "importance": 3
+    },
+    {
+      "action": "eating at town hall",
+      "time": "2025.04.23.17:11",
+      "importance": 7
+    },
+    {
+      "action": "Auto-fixed action at John's home",
+      "time": "2025.04.23.17:12",
+      "importance": 3
+    },
+    {
+      "action": "Auto-fixed action at town hall",
+      "time": "2025.04.23.17:12",
+      "importance": 3
+    },
+    {
+      "action": "eating at town hall",
+      "time": "2025.04.23.17:12",
+      "importance": 7
+    },
+    {
+      "action": "Auto-fixed action at John's home",
+      "time": "2025.04.23.17:47",
+      "importance": 3
+    },
+    {
+      "action": "Auto-fixed action at John's home",
+      "time": "2025.04.23.17:47",
+      "importance": 3
+    },
+    {
+      "action": "eating pastries",
+      "time": "2025.04.23.17:47",
+      "importance": 5
+    },
+    {
+      "action": "eating at town hall",
+      "time": "2025.04.23.17:48",
+      "importance": 7
+    },
+    {
+      "action": "Auto-fixed action at John's home",
+      "time": "2025.04.23.17:48",
+      "importance": 3
+    },
+    {
+      "action": "Auto-fixed action at town hall",
+      "time": "2025.04.23.17:48",
+      "importance": 3
+    },
+    {
+      "action": "Auto-fixed action at town hall",
+      "time": "2025.04.23.17:48",
+      "importance": 3
+    },
+    {
+      "action": "Auto-fixed action at John's home",
+      "time": "2025.04.23.17:51",
+      "importance": 3
+    },
+    {
+      "action": "Auto-fixed action at John's home",
+      "time": "2025.04.23.17:51",
+      "importance": 3
+    },
+    {
+      "action": "Auto-fixed action at cafeteria",
+      "time": "2025.04.23.17:51",
+      "importance": 3
+    },
+    {
+      "action": "eating pastries",
+      "time": "2025.04.23.17:51",
+      "importance": 7
+    },
+    {
+      "action": "Auto-fixed action at John's home",
+      "time": "2025.04.23.17:52",
+      "importance": 3
+    },
+    {
+      "action": "Auto-fixed action at town hall",
+      "time": "2025.04.23.17:52",
+      "importance": 3
+    },
+    {
+      "action": "Auto-fixed action at town hall",
+      "time": "2025.04.23.17:52",
+      "importance": 3
     }
   ],
-  "Sarah":[
-    [
-      {
-        "action": "I was hungry, so I went to the town hall, bought an apple, and ate it.",
-        "time": "2025.04.22.09:14",
-        "importance": 2
-      },
-      {
-        "action": "Talked with Alice at town hall.",
-        "time": "2025.04.22.10:17",
-        "importance": 3
-      },
-      {
-        "action": "Talked with John at town hall.",
-        "time": "2025.04.22.10:17",
-        "importance": 3
-      },
-      {
-        "action": "Relaxed at John's home.",
-        "time": "2025.04.22.11:30",
-        "importance": 1
-      },
-      {
-        "action": "Had coffee with Tom at cafeteria.",
-        "time": "2025.04.22.13:00",
-        "importance": 3
-      },
-      {
-        "action": "Had coffee with Alice at cafeteria.",
-        "time": "2025.04.22.13:00",
-        "importance": 3
-      },
-      {
-        "action": "Attended a class at town hall.",
-        "time": "2025.04.22.14:00",
-        "importance": 4
-      },
-      {
-        "action": "Watched a movie at John's home with Tom.",
-        "time": "2025.04.22.15:00",
-        "importance": 6
-      },
-      {
-        "action": "Watched a movie at John's home with John.",
-        "time": "2025.04.22.15:00",
-        "importance": 6
-      },
-      {
-        "action": "Took a walk at town hall.",
-        "time": "2025.04.22.18:00",
-        "importance": 2
-      },
-      {
-        "action": "Had dinner with Alice at cafeteria.",
-        "time": "2025.04.22.19:00",
-        "importance": 7
-      },
-      {
-        "action": "Had dinner with Tom at cafeteria.",
-        "time": "2025.04.22.19:00",
-        "importance": 7
-      },
-      {
-        "action": "Had dinner with John at cafeteria.",
-        "time": "2025.04.22.19:00",
-        "importance": 7
-      },
-      {
-        "action": "Had dinner at John's home.",
-        "time": "2025.04.22.19:30",
-        "importance": 2
-      },
-      {
-        "action": "Relaxed at John's home.",
-        "time": "2025.04.22.20:00",
-        "importance": 1
-      },
-      {
-        "action": "Played games at John's home with Tom.",
-        "time": "2025.04.22.21:00",
-        "importance": 5
-      },
-      {
-        "action": "Played games at John's home with John.",
-        "time": "2025.04.22.21:00",
-        "importance": 5
-      },
-      {
-        "action": "Slept at John's home.",
-        "time": "2025.04.22.23:00",
-        "importance": 1
-      },
-      {
-        "action": "Ate a meal at John's home.",
-        "time": "2025.04.23.08:00",
-        "importance": 2
-      },
-      {
-        "action": "Went to work at town hall.",
-        "time": "2025.04.23.09:00",
-        "importance": 4
-      },
-      {
-        "action": "Read a book at town hall.",
-        "time": "2025.04.23.10:00",
-        "importance": 3
-      },
-      {
-        "action": "Exercised with Alice at town hall.",
-        "time": "2025.04.23.12:00",
-        "importance": 5
-      },
-      {
-        "action": "Exercised with Tom at town hall.",
-        "time": "2025.04.23.12:00",
-        "importance": 5
-      },
-      {
-        "action": "Bought and ate a simple lunch at cafeteria.",
-        "time": "2025.04.23.13:00",
-        "importance": 2
-      },
-      {
-        "action": "Had lunch at town hall.",
-        "time": "2025.04.23.12:30",
-        "importance": 3
-      },
-      {
-        "action": "Attended a class at town hall.",
-        "time": "2025.04.23.14:00",
-        "importance": 3
-      },
-      {
-        "action": "Did work at town hall.",
-        "time": "2025.04.23.15:00",
-        "importance": 3
-      },
-      {
-        "action": "Had a drink with John at cafeteria.",
-        "time": "2025.04.23.18:00",
-        "importance": 6
-      },
-      {
-        "action": "Had a drink with Alice at cafeteria.",
-        "time": "2025.04.23.18:00",
-        "importance": 6
-      },
-      {
-        "action": "Relaxed at John's home.",
-        "time": "2025.04.23.21:00",
-        "importance": 2
-      }
-    ]
-    
+  "Sarah": [
+    {
+      "action": "I was hungry, so I went to the town hall, bought an apple, and ate it.",
+      "time": "2025.04.22.09:14",
+      "importance": 2
+    },
+    {
+      "action": "Talked with Alice at town hall.",
+      "time": "2025.04.22.10:17",
+      "importance": 3
+    },
+    {
+      "action": "Talked with John at town hall.",
+      "time": "2025.04.22.10:17",
+      "importance": 3
+    },
+    {
+      "action": "Relaxed at John's home.",
+      "time": "2025.04.22.11:30",
+      "importance": 1
+    },
+    {
+      "action": "Had coffee with Tom at cafeteria.",
+      "time": "2025.04.22.13:00",
+      "importance": 3
+    },
+    {
+      "action": "Had coffee with Alice at cafeteria.",
+      "time": "2025.04.22.13:00",
+      "importance": 3
+    },
+    {
+      "action": "Attended a class at town hall.",
+      "time": "2025.04.22.14:00",
+      "importance": 4
+    },
+    {
+      "action": "Watched a movie at John's home with Tom.",
+      "time": "2025.04.22.15:00",
+      "importance": 6
+    },
+    {
+      "action": "Watched a movie at John's home with John.",
+      "time": "2025.04.22.15:00",
+      "importance": 6
+    },
+    {
+      "action": "Took a walk at town hall.",
+      "time": "2025.04.22.18:00",
+      "importance": 2
+    },
+    {
+      "action": "Had dinner with Alice at cafeteria.",
+      "time": "2025.04.22.19:00",
+      "importance": 7
+    },
+    {
+      "action": "Had dinner with Tom at cafeteria.",
+      "time": "2025.04.22.19:00",
+      "importance": 7
+    },
+    {
+      "action": "Had dinner with John at cafeteria.",
+      "time": "2025.04.22.19:00",
+      "importance": 7
+    },
+    {
+      "action": "Had dinner at John's home.",
+      "time": "2025.04.22.19:30",
+      "importance": 2
+    },
+    {
+      "action": "Relaxed at John's home.",
+      "time": "2025.04.22.20:00",
+      "importance": 1
+    },
+    {
+      "action": "Played games at John's home with Tom.",
+      "time": "2025.04.22.21:00",
+      "importance": 5
+    },
+    {
+      "action": "Played games at John's home with John.",
+      "time": "2025.04.22.21:00",
+      "importance": 5
+    },
+    {
+      "action": "Slept at John's home.",
+      "time": "2025.04.22.23:00",
+      "importance": 1
+    },
+    {
+      "action": "Ate a meal at John's home.",
+      "time": "2025.04.23.08:00",
+      "importance": 2
+    },
+    {
+      "action": "Went to work at town hall.",
+      "time": "2025.04.23.09:00",
+      "importance": 4
+    },
+    {
+      "action": "Read a book at town hall.",
+      "time": "2025.04.23.10:00",
+      "importance": 3
+    },
+    {
+      "action": "Exercised with Alice at town hall.",
+      "time": "2025.04.23.12:00",
+      "importance": 5
+    },
+    {
+      "action": "Exercised with Tom at town hall.",
+      "time": "2025.04.23.12:00",
+      "importance": 5
+    },
+    {
+      "action": "Bought and ate a simple lunch at cafeteria.",
+      "time": "2025.04.23.13:00",
+      "importance": 2
+    },
+    {
+      "action": "Had lunch at town hall.",
+      "time": "2025.04.23.12:30",
+      "importance": 3
+    },
+    {
+      "action": "Attended a class at town hall.",
+      "time": "2025.04.23.14:00",
+      "importance": 3
+    },
+    {
+      "action": "Did work at town hall.",
+      "time": "2025.04.23.15:00",
+      "importance": 3
+    },
+    {
+      "action": "Had a drink with John at cafeteria.",
+      "time": "2025.04.23.18:00",
+      "importance": 6
+    },
+    {
+      "action": "Had a drink with Alice at cafeteria.",
+      "time": "2025.04.23.18:00",
+      "importance": 6
+    },
+    {
+      "action": "Relaxed at John's home.",
+      "time": "2025.04.23.21:00",
+      "importance": 2
+    }
+  ],
+  "Alice": [
+    {
+      "action": "Talked with John at town hall.",
+      "time": "2025.04.22.10:17",
+      "importance": 3
+    },
+    {
+      "action": "Talked with Sarah at town hall.",
+      "time": "2025.04.22.10:17",
+      "importance": 3
+    },
+    {
+      "action": "Had coffee with John at cafeteria.",
+      "time": "2025.04.22.13:00",
+      "importance": 3
+    },
+    {
+      "action": "Had coffee with Sarah at cafeteria.",
+      "time": "2025.04.22.13:00",
+      "importance": 3
+    },
+    {
+      "action": "Had dinner with John at cafeteria.",
+      "time": "2025.04.22.19:00",
+      "importance": 7
+    },
+    {
+      "action": "Had dinner with Sarah at cafeteria.",
+      "time": "2025.04.22.19:00",
+      "importance": 7
+    },
+    {
+      "action": "Exercised with John at town hall.",
+      "time": "2025.04.23.12:00",
+      "importance": 5
+    },
+    {
+      "action": "Exercised with Sarah at town hall.",
+      "time": "2025.04.23.12:00",
+      "importance": 5
+    },
+    {
+      "action": "Had a drink with John at cafeteria.",
+      "time": "2025.04.23.18:00",
+      "importance": 6
+    },
+    {
+      "action": "Had a drink with Sarah at cafeteria.",
+      "time": "2025.04.23.18:00",
+      "importance": 6
+    }
+  ],
+  "Tom": [
+    {
+      "action": "Had coffee with John at cafeteria.",
+      "time": "2025.04.22.13:00",
+      "importance": 3
+    },
+    {
+      "action": "Had coffee with Sarah at cafeteria.",
+      "time": "2025.04.22.13:00",
+      "importance": 3
+    },
+    {
+      "action": "Watched a movie at John's home with John.",
+      "time": "2025.04.22.15:00",
+      "importance": 6
+    },
+    {
+      "action": "Watched a movie at John's home with Sarah.",
+      "time": "2025.04.22.15:00",
+      "importance": 6
+    },
+    {
+      "action": "Had dinner with John at cafeteria.",
+      "time": "2025.04.22.19:00",
+      "importance": 7
+    },
+    {
+      "action": "Had dinner with Sarah at cafeteria.",
+      "time": "2025.04.22.19:00",
+      "importance": 7
+    },
+    {
+      "action": "Played games at John's home with John.",
+      "time": "2025.04.22.21:00",
+      "importance": 5
+    },
+    {
+      "action": "Played games at John's home with Sarah.",
+      "time": "2025.04.22.21:00",
+      "importance": 5
+    },
+    {
+      "action": "Exercised with John at town hall.",
+      "time": "2025.04.23.12:00",
+      "importance": 5
+    },
+    {
+      "action": "Exercised with Sarah at town hall.",
+      "time": "2025.04.23.12:00",
+      "importance": 5
+    }
   ]
 }

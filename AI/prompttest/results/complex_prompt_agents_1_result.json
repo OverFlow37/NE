@@ -1,14 +1,48 @@
 {
   "template": "complex_prompt",
   "test_case": "agents_1",
-  "prompt_tokens": 471,
-  "response_time": 9.833786725997925,
+  "prompt_tokens": 547,
+  "response_time": 10.298306226730347,
   "is_valid_json": true,
-  "response": "```json\n{\n  \"actions\": [\n    {\n      \"agent\": \"John\",\n      \"action\": \"move\",\n      \"details\": {\n        \"target\": \"cafeteria\",\n        \"using\": null,\n        \"message\": \"I'm very hungry, let's get something to eat.\"\n      },\n      \"memory_update\": {\n        \"action\": \"ate a simple lunch at cafeteria\",\n        \"time\": \"Morning, Day 2\",\n        \"importance\": 6\n      }\n    }\n  ]\n}\n```",
+  "response": "```json\n{\n  \"actions\": [\n    {\n      \"agent\": \"John\",\n      \"action\": \"eat\",\n      \"details\": {\n        \"location\": \"John's home\",\n        \"target\": \"pastries\",\n        \"using\": null,\n        \"message\": null\n      },\n      \"memory_update\": {\n        \"action\": \"eating pastries at John's home\",\n        \"time\": \"2025.04.23.17:51\",\n        \"importance\": 5\n      },\n      \"reason\": \"John is very hungry and his personality is practical. Eating pastries at home aligns with his current state and location. This is a moderately significant event given his hunger.\"\n    }\n  ]\n}\n```",
   "status": "success",
-  "extracted_json": "{\n  \"actions\": [\n    {\n      \"agent\": \"John\",\n      \"action\": \"move\",\n      \"details\": {\n        \"target\": \"cafeteria\",\n        \"using\": null,\n        \"message\": \"I'm very hungry, let's get something to eat.\"\n      }\n    }\n  ]\n}",
+  "extracted_json": {
+    "actions": [
+      {
+        "agent": "John",
+        "action": "eat",
+        "details": {
+          "location": "John's home",
+          "target": "pastries",
+          "using": null,
+          "message": "Auto-fixed action."
+        },
+        "memory_update": {
+          "action": "Auto-fixed action at John's home",
+          "time": "2025.04.23.17:51",
+          "importance": 3
+        },
+        "reason": "John is very hungry and his personality is practical. Eating pastries at home aligns with his current state and location. This is a moderately significant event given his hunger."
+      }
+    ]
+  },
+  "unity_json": {
+    "actions": [
+      {
+        "agent": "John",
+        "action": "eat",
+        "details": {
+          "location": "John's home",
+          "target": "pastries",
+          "using": null,
+          "message": "Auto-fixed action."
+        }
+      }
+    ]
+  },
+  "memory_updates": 1,
   "fixed": true,
-  "timestamp": "2025-04-23 09:20:53",
+  "timestamp": "2025-04-23 17:51:27",
   "expected_agents": 1,
   "actual_agents": 1
 }
