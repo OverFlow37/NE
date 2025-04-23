@@ -1,6 +1,38 @@
 @echo off
 setlocal
 
+
+
+REM --------------------------------------------------------
+REM  Setup & Activate Python Virtual Environment (venv)
+REM --------------------------------------------------------
+if not exist "%~dp0venv\Scripts\activate.bat" (
+    echo [INFO] Virtual environment not found. Creating venv...
+    python -m venv "%~dp0venv"
+)
+
+echo [INFO] Activating virtual environment...
+call "%~dp0venv\Scripts\activate.bat"
+
+REM --------------------------------------------------------
+REM  (Optional) Install dependencies if requirements.txt exists
+REM --------------------------------------------------------
+if exist "%~dp0requirements.txt" (
+    echo [INFO] Installing Python dependencies...
+    pip install -r "%~dp0requirements.txt"
+)
+
+
+
+
+REM ----------------------------------------------------------------
+REM  Flask 서버 실행 (새 창에서 백그라운드로 실행)
+REM ----------------------------------------------------------------
+start "Flask Server" cmd /k "python "%~dp0server.py""
+
+REM 서버가 완전히 기동될 때까지 잠시 대기 (옵션)
+timeout /t 2 >nul
+
 REM CUDA_PATH 환경변수 확인 및 bin 폴더 우선 지정
 if defined CUDA_PATH (
     set "PATH=%CUDA_PATH%\bin;%PATH%"
