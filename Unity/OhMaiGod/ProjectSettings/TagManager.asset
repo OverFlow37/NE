@@ -4,9 +4,9 @@
 TagManager:
   serializedVersion: 3
   tags:
-  - Ground
-  - Obstacle
-  - ScoreZone
+  - Wall
+  - NPC
+  - Target
   layers:
   - Default
   - TransparentFX
@@ -15,9 +15,9 @@ TagManager:
   - Water
   - UI
   - 
-  - 
-  - 
-  - 
+  - Wall
+  - Obstacle
+  - NPC
   - 
   - 
   - 
