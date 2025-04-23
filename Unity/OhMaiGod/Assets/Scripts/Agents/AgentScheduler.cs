@@ -391,11 +391,8 @@ public class AgentScheduler : MonoBehaviour
     // 초기 일정 로드 (테스트용)
     private void LoadInitialSchedule()
     {
-        // 테스트용 더미 일정 생성
-        if (mDailySchedule.Count == 0)
-        {
-            CreateDummySchedule();
-        }
+        // 더 이상 더미 일정을 자동으로 생성하지 않음
+        // AIBridgeTest를 통해 실제 일정을 받아올 예정
     }
 
     // 테스트용 더미 일정 생성
