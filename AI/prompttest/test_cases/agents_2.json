@@ -1,0 +1,90 @@
+{
+  "game_name": "Virtual Life Simulation",
+  "current_time": "Evening, Day 2",
+  "environment_state": "Weather: Light Rain, Temperature: Cool",
+  "agents": [
+    {
+      "name": "John",
+      "state": {
+        "hunger": 5,
+        "sleepiness": 7,
+        "loneliness": 8,
+        "stress": 9,
+        "happiness": 3
+      },
+      "location": "John's home",
+      "personality": "introverted, thoughtful, creative",
+      "visible_objects": [
+        {
+          "location": "John's home",
+          "objects": [
+            "sofa",
+            "TV",
+            "bookshelf",
+            "window",
+            "phone",
+            "laptop"
+          ]
+        }
+      ],
+      "interactable_items": [
+        {
+          "location": "John's home",
+          "objects": [
+            "TV remote",
+            "phone",
+            "laptop",
+            "books",
+            "snacks",
+            "tea kettle"
+          ]
+        }
+      ],
+      "nearby_agents": [],
+      "memory": "Had a stressful day at work. Client was unhappy with the presentation."
+    },
+    {
+      "name": "Sarah",
+      "state": {
+        "hunger": 2,
+        "sleepiness": 4,
+        "loneliness": 7,
+        "stress": 3,
+        "happiness": 6
+      },
+      "location": "cafeteria",
+      "personality": "extroverted, friendly, adventurous",
+      "visible_objects": [
+        {
+          "location": "cafeteria",
+          "objects": [
+            "dining table",
+            "menu",
+            "other patrons",
+            "entrance",
+            "bar"
+          ]
+        }
+      ],
+      "interactable_items": [
+        {
+          "location": "cafeteria",
+          "objects": [
+            "menu",
+            "food",
+            "drink",
+            "phone",
+            "purse"
+          ]
+        }
+      ],
+      "nearby_agents": ["John", "waitstaff"],
+      "memory": "Saw an interesting art exhibition this afternoon. Planning to tell friends about it."
+    }
+  ],
+  "agents_to_process": ["John", "Sarah"],
+  "history": [
+    "Sarah arrived at the restaurant at 7pm.",
+    "Mark finished his work project and closed his laptop."
+  ]
+}
