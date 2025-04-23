@@ -28,30 +28,30 @@ start "Flask Server" cmd /k "cd /d %~dp0 && python -u server.py && pause"
 REM Wait for server to initialize
 timeout /t 2 >nul
 
-REM --------------------------------------------------------
-REM  Set CUDA path (if available) or use default
-REM --------------------------------------------------------
-if defined CUDA_PATH (
-    set "PATH=%CUDA_PATH%\bin;%PATH%"
-) else (
-    set "PATH=C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.8\bin;%PATH%"
-)
+@REM REM --------------------------------------------------------
+@REM REM  Set CUDA path (if available) or use default
+@REM REM --------------------------------------------------------
+@REM if defined CUDA_PATH (
+@REM     set "PATH=%CUDA_PATH%\bin;%PATH%"
+@REM ) else (
+@REM     set "PATH=C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.8\bin;%PATH%"
+@REM )
 
-REM Force GPU usage
-set OLLAMA_CUDA=1
+@REM REM Force GPU usage
+@REM set OLLAMA_CUDA=1
 
-REM Set Ollama model path (absolute path)
-set "OLLAMA_MODELS=%~dp0models"
+@REM REM Set Ollama model path (absolute path)
+@REM set "OLLAMA_MODELS=%~dp0models"
 
-REM --------------------------------------------------------
-REM  Display model path
-REM --------------------------------------------------------
-echo.
-echo ===============================
-echo   MODEL DIRECTORY:
-for %%I in ("%OLLAMA_MODELS%") do echo   %%~fI
-echo ===============================
-echo.
+@REM REM --------------------------------------------------------
+@REM REM  Display model path
+@REM REM --------------------------------------------------------
+@REM echo.
+@REM echo ===============================
+@REM echo   MODEL DIRECTORY:
+@REM for %%I in ("%OLLAMA_MODELS%") do echo   %%~fI
+@REM echo ===============================
+@REM echo.
 
 REM --------------------------------------------------------
 REM  List available Ollama models
