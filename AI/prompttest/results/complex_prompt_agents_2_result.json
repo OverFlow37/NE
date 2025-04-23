@@ -1,0 +1,14 @@
+{
+  "template": "complex_prompt",
+  "test_case": "agents_2",
+  "prompt_tokens": 815,
+  "response_time": 15.464965343475342,
+  "is_valid_json": true,
+  "response": "```json\n{\n  \"actions\": [\n    {\n      \"agent\": \"John\",\n      \"action\": \"move\",\n      \"details\": {\n        \"target\": \"cafeteria\",\n        \"using\": null,\n        \"message\": null\n      },\n      \"memory_update\": {\n        \"action\": \"talk_with_sarah_at_cafeteria\",\n        \"time\": \"Evening, Day 2\",\n        \"importance\": 7\n      }\n    },\n    {\n      \"agent\": \"Sarah\",\n      \"action\": \"move\",\n      \"details\": {\n        \"target\": \"John's home\",\n        \"using\": null,\n        \"message\": null\n      },\n      \"memory_update\": {\n        \"action\": \"talk_with_john_at_home\",\n        \"time\": \"Evening, Day 2\",\n        \"importance\": 6\n      }\n    }\n  ]\n}\n```",
+  "status": "success",
+  "extracted_json": "{\n  \"actions\": [\n    {\n      \"agent\": \"John\",\n      \"action\": \"move\",\n      \"details\": {\n        \"target\": \"cafeteria\",\n        \"using\": null,\n        \"message\": \"Auto-fixed action.\"\n      }\n    },\n    {\n      \"agent\": \"Sarah\",\n      \"action\": \"move\",\n      \"details\": {\n        \"target\": \"John's home\",\n        \"using\": null,\n        \"message\": \"Auto-fixed action.\"\n      }\n    }\n  ]\n}",
+  "fixed": true,
+  "timestamp": "2025-04-23 09:21:10",
+  "expected_agents": 2,
+  "actual_agents": 2
+}
