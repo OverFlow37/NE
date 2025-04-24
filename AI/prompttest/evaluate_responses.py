@@ -1,3 +1,7 @@
+"""
+쓰이지 않는 파일
+"""
+
 from pathlib import Path
 import json
 import statistics
@@ -36,6 +40,14 @@ def evaluate_responses():
             "perfectly_formatted": 0,   # 수정 없이 완벽한 형식
             "needed_fixes": 0,          # 수정이 필요했던 케이스
             "fix_success_rate": 0       # 수정 성공률
+        },
+        "reasoning_quality": {         # 추론 품질 관련 통계 (신규)
+            "total_score": 0,
+            "count": 0,
+            "memory_referenced": 0,    # 메모리 참조 횟수
+            "state_referenced": 0,     # 상태 참조 횟수
+            "environment_referenced": 0, # 환경 참조 횟수
+            "by_action_type": {}       # 행동 유형별 추론 품질
         }
     }
     
@@ -236,6 +248,21 @@ def evaluate_responses():
                         evaluation["memory_usage"]["tests_with_memory"]) * 100
         evaluation["memory_usage"]["quality_percentage"] = quality_rate
     
+    # 추론 품질 통계 계산 (있는 경우)
+    if evaluation["reasoning_quality"]["count"] > 0:
+        reasoning = evaluation["reasoning_quality"]
+        reasoning["avg_score"] = reasoning["total_score"] / reasoning["count"]
+        
+        # 참조 비율 계산
+        reasoning["memory_ref_percentage"] = (reasoning["memory_referenced"] / reasoning["count"]) * 100
+        reasoning["state_ref_percentage"] = (reasoning["state_referenced"] / reasoning["count"]) * 100
+        reasoning["env_ref_percentage"] = (reasoning["environment_referenced"] / reasoning["count"]) * 100
+        
+        # 행동 유형별 평균 점수 계산
+        for action_type, stats in reasoning["by_action_type"].items():
+            if stats["count"] > 0:
+                stats["avg_score"] = stats["total_score"] / stats["count"]
+    
     # 결과 저장
     with open("evaluation_summary.json", 'w') as f:
         json.dump(evaluation, f, indent=2)
@@ -304,6 +331,53 @@ def analyze_json_content(json_data, evaluation, template, agent_count):
                     if target not in evaluation["overall"]["targets"]:
                         evaluation["overall"]["targets"][target] = 0
                     evaluation["overall"]["targets"][target] += 1
+    
+        # 추가: reasoning 품질 평가
+        for action in actions:
+            if "reason" in action:
+                reason_text = action["reason"]
+                reason_length = len(reason_text.split())
+                reason_score = 0
+                
+                # 기본 점수 (길이 기반)
+                if reason_length < 10:
+                    reason_score = 1  # 매우 짧은 추론
+                elif reason_length < 20:
+                    reason_score = 2  # 짧은 추론
+                elif reason_length < 40:
+                    reason_score = 3  # 보통 추론
+                else:
+                    reason_score = 4  # 긴 추론
+                
+                # 질적 점수 추가 (키워드 기반)
+                if "memory" in reason_text.lower() or "remember" in reason_text.lower() or "recalled" in reason_text.lower():
+                    reason_score += 1
+                    evaluation["reasoning_quality"]["memory_referenced"] += 1
+                
+                if any(state in reason_text.lower() for state in ["hungry", "sleepy", "tired", "lonely", "stressed", "happy", "hunger", "sleepiness", "stress"]):
+                    reason_score += 1
+                    evaluation["reasoning_quality"]["state_referenced"] += 1
+            
+                
+                if any(env in reason_text.lower() for env in ["environment", "location", "time", "weather", "afternoon", "morning", "night"]):
+                    reason_score += 1
+                    evaluation["reasoning_quality"]["environment_referenced"] += 1
+                
+                # 행동 유형별 추론 품질 추적
+                action_type = action.get("action", "unknown")
+                if action_type not in evaluation["reasoning_quality"]["by_action_type"]:
+                    evaluation["reasoning_quality"]["by_action_type"][action_type] = {
+                        "total_score": 0,
+                        "count": 0
+                    }
+                
+                evaluation["reasoning_quality"]["by_action_type"][action_type]["total_score"] += reason_score
+                evaluation["reasoning_quality"]["by_action_type"][action_type]["count"] += 1
+                
+                # 전체 추론 점수 누적
+                evaluation["reasoning_quality"]["total_score"] += reason_score
+                evaluation["reasoning_quality"]["count"] += 1
+
 
 
 def print_summary(evaluation):
@@ -334,7 +408,31 @@ def print_summary(evaluation):
     print(f"캐시 적중: {evaluation['overall']['cache_hits']}")
     if "error_count" in evaluation["overall"]:
         print(f"오류 발생: {evaluation['overall']['error_count']}")
-    
+        
+    # 추론 품질 통계 (새 섹션)
+    if "reasoning_quality" in evaluation["overall"]:
+        reasoning = evaluation["reasoning_quality"]
+        if reasoning["count"] > 0:
+            avg_score = reasoning["total_score"] / reasoning["count"]
+            print("\n추론 품질 평가:")
+            print(f"  평균 추론 점수: {avg_score:.2f}/8.0")
+            
+            # 참조 통계
+            mem_pct = (reasoning["memory_referenced"] / reasoning["count"]) * 100
+            state_pct = (reasoning["state_referenced"] / reasoning["count"]) * 100
+            env_pct = (reasoning["environment_referenced"] / reasoning["count"]) * 100
+            
+            print(f"  메모리 참조: {mem_pct:.1f}%")
+            print(f"  상태 참조: {state_pct:.1f}%")
+            print(f"  환경 참조: {env_pct:.1f}%")
+            
+            # 행동 유형별 추론 품질
+            print("\n  행동 유형별 추론 품질:")
+            for action_type, stats in reasoning["by_action_type"].items():
+                if stats["count"] > 0:
+                    avg = stats["total_score"] / stats["count"]
+                    print(f"    - {action_type}: {avg:.2f}/8.0 (샘플 {stats['count']}개)")
+     
     # 행동 유형 통계
     if "action_types" in evaluation["overall"] and evaluation["overall"]["action_types"]:
         print("\n행동 유형 분포:")

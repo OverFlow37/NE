@@ -1,0 +1,48 @@
+{
+  "template": "complex_prompt",
+  "test_case": "agent_hungry",
+  "prompt_tokens": 493,
+  "response_time": 10.791697025299072,
+  "is_valid_json": true,
+  "response": "```json\n{\n  \"actions\": [\n    {\n      \"agent\": \"John\",\n      \"action\": \"eat\",\n      \"details\": {\n        \"location\": \"cafeteria\",\n        \"target\": \"food\",\n        \"using\": null,\n        \"message\": null\n      },\n      \"memory_update\": {\n        \"action\": \"eating at cafeteria\",\n        \"time\": \"2025.04.24.11:28\",\n        \"importance\": 7\n      },\n      \"reason\": \"John is very hungry and the cafeteria is the closest location to obtain food. His personality is practical, so he'll focus on immediate needs. The memory rating is 7 as it's a moderately significant event for a hungry individual.\"\n    }\n  ]\n}\n```",
+  "status": "success",
+  "extracted_json": {
+    "actions": [
+      {
+        "agent": "John",
+        "action": "eat",
+        "details": {
+          "location": "cafeteria",
+          "target": "food",
+          "using": null,
+          "message": "Auto-fixed action."
+        },
+        "memory_update": {
+          "action": "Auto-fixed action at cafeteria",
+          "time": "2025.04.24.11:28",
+          "importance": 3
+        },
+        "reason": "John is very hungry and the cafeteria is the closest location to obtain food. His personality is practical, so he'll focus on immediate needs. The memory rating is 7 as it's a moderately significant event for a hungry individual."
+      }
+    ]
+  },
+  "unity_json": {
+    "actions": [
+      {
+        "agent": "John",
+        "action": "eat",
+        "details": {
+          "location": "cafeteria",
+          "target": "food",
+          "using": null,
+          "message": "Auto-fixed action."
+        }
+      }
+    ]
+  },
+  "memory_updates": 1,
+  "fixed": true,
+  "timestamp": "2025-04-24 11:28:21",
+  "expected_agents": 1,
+  "actual_agents": 1
+}

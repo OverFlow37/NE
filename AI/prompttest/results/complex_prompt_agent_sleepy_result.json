@@ -1,0 +1,48 @@
+{
+  "template": "complex_prompt",
+  "test_case": "agent_sleepy",
+  "prompt_tokens": 497,
+  "response_time": 11.120342493057251,
+  "is_valid_json": true,
+  "response": "```json\n{\n  \"actions\": [\n    {\n      \"agent\": \"John\",\n      \"action\": \"think\",\n      \"details\": {\n        \"location\": \"town hall\",\n        \"target\": null,\n        \"using\": null,\n        \"message\": \"I need to clear my head. The meeting earlier was\u2026 stressful. Perhaps a quiet moment at the desk would help.\"\n      },\n      \"memory_update\": {\n        \"action\": \"internal_reflection\",\n        \"time\": \"2025.04.24.11:28\",\n        \"importance\": 5\n      },\n      \"reason\": \"John is stressed and sleepy. A quiet moment at the desk aligns with his introverted personality and provides a chance for introspection. This is a moderately significant event, as it addresses his current state.\"\n    }\n  ]\n}\n```",
+  "status": "success",
+  "extracted_json": {
+    "actions": [
+      {
+        "agent": "John",
+        "action": "think",
+        "details": {
+          "location": "town hall",
+          "target": null,
+          "using": null,
+          "message": "I need to clear my head. The meeting earlier was\u2026 stressful. Perhaps a quiet moment at the desk would help."
+        },
+        "memory_update": {
+          "action": "internal_reflection",
+          "time": "2025.04.24.11:28",
+          "importance": 5
+        },
+        "reason": "John is stressed and sleepy. A quiet moment at the desk aligns with his introverted personality and provides a chance for introspection. This is a moderately significant event, as it addresses his current state."
+      }
+    ]
+  },
+  "unity_json": {
+    "actions": [
+      {
+        "agent": "John",
+        "action": "think",
+        "details": {
+          "location": "town hall",
+          "target": null,
+          "using": null,
+          "message": "I need to clear my head. The meeting earlier was\u2026 stressful. Perhaps a quiet moment at the desk would help."
+        }
+      }
+    ]
+  },
+  "memory_updates": 1,
+  "fixed": true,
+  "timestamp": "2025-04-24 11:28:46",
+  "expected_agents": 1,
+  "actual_agents": 1
+}

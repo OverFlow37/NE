@@ -1,0 +1,48 @@
+{
+  "template": "complex_prompt",
+  "test_case": "agent_lonely",
+  "prompt_tokens": 498,
+  "response_time": 12.064749717712402,
+  "is_valid_json": true,
+  "response": "```json\n{\n  \"actions\": [\n    {\n      \"agent\": \"John\",\n      \"action\": \"think\",\n      \"details\": {\n        \"location\": \"John's home\",\n        \"target\": null,\n        \"using\": null,\n        \"message\": \"I feel so\u2026empty. The auto-fixed actions don't seem to help. Perhaps some quiet time with a book would be beneficial. I need to address this loneliness.\"\n      },\n      \"memory_update\": {\n        \"action\": \"internal_reflection\",\n        \"time\": \"2025.04.24.11:28\",\n        \"importance\": 7\n      },\n      \"reason\": \"John is experiencing high levels of loneliness and stress. A solitary activity like reading could provide a temporary distraction and a way to process his feelings. This aligns with his introverted personality and offers a proactive response to his negative state.\"\n    }\n  ]\n}\n```",
+  "status": "success",
+  "extracted_json": {
+    "actions": [
+      {
+        "agent": "John",
+        "action": "think",
+        "details": {
+          "location": "John's home",
+          "target": "none",
+          "using": null,
+          "message": "I feel so\u2026empty. The auto-fixed actions don't seem to help. Perhaps some quiet time with a book would be beneficial. I need to address this loneliness."
+        },
+        "memory_update": {
+          "action": "Auto-fixed action at John's home",
+          "time": "2025.04.24.11:28",
+          "importance": 3
+        },
+        "reason": "John is experiencing high levels of loneliness and stress. A solitary activity like reading could provide a temporary distraction and a way to process his feelings. This aligns with his introverted personality and offers a proactive response to his negative state."
+      }
+    ]
+  },
+  "unity_json": {
+    "actions": [
+      {
+        "agent": "John",
+        "action": "think",
+        "details": {
+          "location": "John's home",
+          "target": "none",
+          "using": null,
+          "message": "I feel so\u2026empty. The auto-fixed actions don't seem to help. Perhaps some quiet time with a book would be beneficial. I need to address this loneliness."
+        }
+      }
+    ]
+  },
+  "memory_updates": 1,
+  "fixed": true,
+  "timestamp": "2025-04-24 11:28:34",
+  "expected_agents": 1,
+  "actual_agents": 1
+}

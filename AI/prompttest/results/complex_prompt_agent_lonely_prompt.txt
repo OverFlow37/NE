@@ -1,17 +1,21 @@
 You are the AI controller for agents in a simulation game.
 
-CURRENT TIME: {current_time}
-ENVIRONMENT: {environment_state}
+CURRENT TIME: 2025.04.24.11:28
+ENVIRONMENT: Morning, clear sky
 
 AGENT DATA:
-{agent.name}
-- State: {agent.state.phrases}
-- Personality: {agent.personality}
-- Location: {agent.location}
-- Visible objects: {agent.visible_objects}
-- Interactable items: {agent.interactable_items}
-- Nearby agents: {agent.nearby_agents}
-- Memories: {agent.memories}
+John
+- State: not hungry, not sleepy, very lonely, stressed, not happy
+- Personality: introverted, practical, punctual
+- Location: John's home
+- Visible objects: [{"location": "John's home", "objects": ["TV", "sofa", "phone", "book", "laptop", "kitchen table"]}]
+- Interactable items: [{"location": "John's home", "objects": ["TV", "sofa", "phone", "book", "laptop", "kitchen table"]}]
+- Nearby agents: []
+- Memories: -Auto-fixed action at cafeteria
+-Auto-fixed action at cafeteria
+-Auto-fixed action at John's home
+-Auto-fixed action at town hall
+-internal_reflection
 
 TASK: Determine the next action for this agent based on their current state, personality, and environment.
 
@@ -65,7 +69,7 @@ RESPONSE FORMAT (provide ONLY valid JSON):
       },
       "memory_update": {
         "action": "with_whom_and_where_action_took_place",
-        "time": "{current_time}", 
+        "time": "2025.04.24.11:28", 
         "importance": importance_rating
       },
       "reason": "Detailed explanation of why this action was chosen based on state, personality, etc."

@@ -1,0 +1,48 @@
+{
+  "template": "complex_prompt",
+  "test_case": "agent_stressed",
+  "prompt_tokens": 497,
+  "response_time": 12.189014434814453,
+  "is_valid_json": true,
+  "response": "```json\n{\n  \"actions\": [\n    {\n      \"agent\": \"John\",\n      \"action\": \"think\",\n      \"details\": {\n        \"location\": \"town hall\",\n        \"target\": null,\n        \"using\": null,\n        \"message\": \"I need to address these work documents. The stress is building, and I need to focus. Perhaps a cup of coffee would help, but I\u2019ll start with the documents.\"\n      },\n      \"memory_update\": {\n        \"action\": \"internal_reflection\",\n        \"time\": \"2025.04.24.11:28\",\n        \"importance\": 5\n      },\n      \"reason\": \"John is currently stressed and needs to focus on his work. He is in the town hall, surrounded by work documents. A calm, methodical approach is consistent with his practical and punctual personality. Starting with the documents is a reasonable first step to manage his stress.\"\n    }\n  ]\n}\n```",
+  "status": "success",
+  "extracted_json": {
+    "actions": [
+      {
+        "agent": "John",
+        "action": "think",
+        "details": {
+          "location": "town hall",
+          "target": null,
+          "using": null,
+          "message": "I need to address these work documents. The stress is building, and I need to focus. Perhaps a cup of coffee would help, but I\u2019ll start with the documents."
+        },
+        "memory_update": {
+          "action": "internal_reflection",
+          "time": "2025.04.24.11:28",
+          "importance": 5
+        },
+        "reason": "John is currently stressed and needs to focus on his work. He is in the town hall, surrounded by work documents. A calm, methodical approach is consistent with his practical and punctual personality. Starting with the documents is a reasonable first step to manage his stress."
+      }
+    ]
+  },
+  "unity_json": {
+    "actions": [
+      {
+        "agent": "John",
+        "action": "think",
+        "details": {
+          "location": "town hall",
+          "target": null,
+          "using": null,
+          "message": "I need to address these work documents. The stress is building, and I need to focus. Perhaps a cup of coffee would help, but I\u2019ll start with the documents."
+        }
+      }
+    ]
+  },
+  "memory_updates": 1,
+  "fixed": true,
+  "timestamp": "2025-04-24 11:28:59",
+  "expected_agents": 1,
+  "actual_agents": 1
+}
