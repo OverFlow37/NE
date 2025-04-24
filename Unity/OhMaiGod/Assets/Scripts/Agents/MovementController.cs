@@ -25,6 +25,8 @@ public class MovementController : MonoBehaviour
     private float mLastTargetSearchTime;                             // 마지막 목표물 탐색 시간
     private float mLastPathUpdateTime;                               // 마지막 경로 업데이트 시간
     private NavMeshAgent mNavMeshAgent;                              // NavMesh 에이전트 (사용하는 경우)
+    private SpriteRenderer mSpriteRenderer;                          // 스프라이트 렌더러
+    private NPCLog mNPCLog;
 
     // 목적지 도착 이벤트
     public event System.Action OnDestinationReached;
@@ -35,12 +37,15 @@ public class MovementController : MonoBehaviour
     {
         mLastTargetSearchTime = Time.time;
         mLastPathUpdateTime = Time.time;
+        mNPCLog = GameObject.Find("NPCLog").GetComponent<NPCLog>();
+        mSpriteRenderer = GetComponent<SpriteRenderer>();
         FindAndMoveToTarget();
     }
 
     // 매 프레임 업데이트
     private void Update()
     {
+        if (mCurrentTarget == null) return;
         // 일정 간격으로 목표물 탐색
         if (Time.time - mLastTargetSearchTime >= mTargetSearchInterval)
         {
@@ -54,7 +59,7 @@ public class MovementController : MonoBehaviour
             UpdatePath();
             mLastPathUpdateTime = Time.time;
         }
-        
+
         if (!mIsMoving) return;
 
         // 이동 방식에 따른 처리
@@ -292,11 +297,18 @@ public class MovementController : MonoBehaviour
         
         // 목표 방향 계산
         Vector2 direction = (mTargetPosition - currentPosition).normalized;
-        
         // 이동 (2D)
         Vector3 movement = new Vector3(direction.x, direction.y, 0) * mMoveSpeed * Time.deltaTime;
         transform.position += movement;
-        
+        // 이동방향이 왼쪽이면 x축 플립
+        if (direction.x < 0)
+        {
+            mSpriteRenderer.flipX = true;
+        }
+        else
+        {
+            mSpriteRenderer.flipX = false;
+        }
         // 도착 확인
         float distance = Vector2.Distance(currentPosition, mTargetPosition);
         if (distance <= mReachedDistance)
@@ -308,11 +320,10 @@ public class MovementController : MonoBehaviour
     // 목적지 도착 처리
     private void OnReachedDestination()
     {
-        mIsMoving = false;
-
         // 현재 경로의 다음 지점으로 이동
         if (mCurrentPath != null && mCurrentPathIndex < mCurrentPath.Count - 1)
         {
+            mNPCLog.SetNPCLog($"{gameObject.name}이(가) 목적지({mCurrentTarget.name})로 이동 중");
             Debug.Log($"{gameObject.name}이(가) 목적지({mCurrentTarget.name})로 이동 중");
             mCurrentPathIndex++;
             mTargetPosition = new Vector2(
@@ -323,6 +334,9 @@ public class MovementController : MonoBehaviour
         }
         else
         {
+            mIsMoving = false;
+            transform.position = new Vector2(mTargetPosition.x, mTargetPosition.y);
+            mNPCLog.SetNPCLog($"{gameObject.name}이(가) 목적지({mCurrentTarget.name})에 도착함");
             Debug.Log($"{gameObject.name}이(가) 목적지({mCurrentTarget.name})에 도착함");
             mCurrentTarget = null;
             mCurrentPath = null;
