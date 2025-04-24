@@ -20,13 +20,106 @@ public class AgentController : MonoBehaviour
         PerformingActivity
     }
 
-    private enum AgentEmoteState
+    public enum EmoteType
     {
         HUNGER = 0,
         SLEEPINESS,
         LONELINESS,
-        HAPPINESS,
-        STRESS,
+        // HAPPINESS,
+        // STRESS,
+    }
+
+    [System.Serializable]
+    public struct EmoteState
+    {
+        [SerializeField] private int hunger;      // 1-10 범위의 배고픔 수치
+        [SerializeField] private int sleepiness;  // 1-10 범위의 졸림 수치
+        [SerializeField] private int loneliness;  // 1-10 범위의 외로움 수치
+
+        public int Hunger 
+        { 
+            get => hunger;
+            set => hunger = Mathf.Clamp(value, 1, 10);
+        }
+
+        public int Sleepiness
+        {
+            get => sleepiness;
+            set => sleepiness = Mathf.Clamp(value, 1, 10);
+        }
+
+        public int Loneliness
+        {
+            get => loneliness;
+            set => loneliness = Mathf.Clamp(value, 1, 10);
+        }
+
+        public int GetValue(EmoteType type)
+        {
+            switch (type)
+            {
+                case EmoteType.HUNGER:
+                    return Hunger;
+                case EmoteType.SLEEPINESS:
+                    return Sleepiness;
+                case EmoteType.LONELINESS:
+                    return Loneliness;
+                default:
+                    Debug.LogWarning($"알 수 없는 감정 상태: {type}");
+                    return 1;  // 기본값을 최솟값인 1로 반환
+            }
+        }
+
+        public void SetValue(EmoteType type, int value)
+        {
+            // 값을 1-10 범위로 제한
+            value = Mathf.Clamp(value, 1, 10);
+
+            switch (type)
+            {
+                case EmoteType.HUNGER:
+                    Hunger = value;
+                    break;
+                case EmoteType.SLEEPINESS:
+                    Sleepiness = value;
+                    break;
+                case EmoteType.LONELINESS:
+                    Loneliness = value;
+                    break;
+                default:
+                    Debug.LogWarning($"알 수 없는 감정 상태: {type}");
+                    break;
+            }
+        }
+    }
+
+    [System.Serializable]
+    public struct LocationEmoteEffect
+    {
+        public string locationName;        // 장소 이름
+        [Range(-10, 0)]
+        public int hungerEffect;          // 배고픔 변화량
+        [Range(-10, 0)]
+        public int sleepinessEffect;      // 졸림 변화량
+        [Range(-10, 0)]
+        public int lonelinessEffect;      // 외로움 변화량
+    }
+
+    [Header("Agent States")]
+    [SerializeField] private EmoteState emoteState;
+
+    [Header("Location Effects")]
+    [SerializeField] private LocationEmoteEffect[] locationEffects;    // 장소별 감정 상태 효과
+
+    // 감정 상태 접근을 위한 public 메서드들
+    public int GetEmoteValue(EmoteType type)
+    {
+        return emoteState.GetValue(type);
+    }
+
+    public void SetEmoteValue(EmoteType type, int value)
+    {
+        emoteState.SetValue(type, value);
     }
 
     [Header("Base Profile")]
@@ -62,17 +155,51 @@ public class AgentController : MonoBehaviour
             
         if (mMovement == null)
             mMovement = GetComponent<MovementController>();
+
+        // MovementController의 목적지 도착 이벤트 구독
+        if (mMovement != null)
+        {
+            mMovement.OnDestinationReached += HandleDestinationReached;
+        }
+
+        // 감정 상태 초기화
+        emoteState.SetValue(EmoteType.HUNGER, 1);
+        emoteState.SetValue(EmoteType.SLEEPINESS, 1);
+        emoteState.SetValue(EmoteType.LONELINESS, 1);
+    }
+
+    private void OnDestroy()
+    {
+        // 이벤트 구독 해제
+        if (mMovement != null)
+        {
+            mMovement.OnDestinationReached -= HandleDestinationReached;
+        }
+    }
+
+    // 목적지 도착 처리
+    private void HandleDestinationReached()
+    {
+        if (mShowDebugInfo)
+        {
+            Debug.Log($"{mName}: 목적지 도착 - {mMovement.TargetName}");
+        }
+
+        // 도착한 위치에 따라 감정 상태 업데이트
+        UpdateEmoteStateByLocation(mMovement.TargetName);
+
+        // 현재 상태가 이동 중이었다면 활동 시작
+        StartActivity();
     }
 
     private void Start()
     {
         if (mAutoStart)
         {
-            // 초기 AI 요청 (실제 구현에서는 AIBridge 사용)
-            // 지금은 AgentScheduler의 더미 데이터 사용
-            
             // 현재 상태 평가 시작
             StartCoroutine(EvaluateStateRoutine());
+            // 감정 상태 자동 증가 시작
+            StartCoroutine(AutoIncreaseEmoteStates());
         }
     }
 
@@ -115,30 +242,41 @@ public class AgentController : MonoBehaviour
         mCurrentActivity = _activity;
         
         // 현재 위치가 활동 위치와 다른 경우 이동 시작
-        if (NeedsToMoveForActivity(_activity))
-        {
-            // 활동 위치로 이동 시작
-            StartMovingToActivity();
-        }
-        else
-        {
-            // 이미 올바른 위치에 있으면 활동 시작
-            StartActivity();
-        }
+        // if (NeedsToMoveForActivity(_activity))
+        // {
+        //     // 활동 위치로 이동 시작
+        //     StartMovingToActivity();
+        // }
+        // else
+        // {
+        //     // 이미 올바른 위치에 있으면 활동 시작
+        //     StartActivity();
+        // }
+        StartMovingToActivity();
     }
 
-    // 목적지 도착 처리 (MovementController에서 호출)
-    public void OnReachedDestination()
+    // 위치에 따른 감정 상태 업데이트
+    private void UpdateEmoteStateByLocation(string locationName)
     {
-        if (mCurrentState == AgentActionState.MovingToLocation)
+        if (string.IsNullOrEmpty(locationName)) return;
+
+        // 해당 장소의 효과 찾기
+        var locationEffect = System.Array.Find(locationEffects, 
+            effect => effect.locationName.ToLower() == locationName.ToLower());
+
+        if (locationEffect.locationName != null)
         {
+            // 각 감정 상태에 효과 적용
+            SetEmoteValue(EmoteType.HUNGER, GetEmoteValue(EmoteType.HUNGER) + locationEffect.hungerEffect);
+            SetEmoteValue(EmoteType.SLEEPINESS, GetEmoteValue(EmoteType.SLEEPINESS) + locationEffect.sleepinessEffect);
+            SetEmoteValue(EmoteType.LONELINESS, GetEmoteValue(EmoteType.LONELINESS) + locationEffect.lonelinessEffect);
+
             if (mShowDebugInfo)
             {
-                Debug.Log($"{mName}: 목적지 도착 - {mCurrentActivity?.LocationName}");
+                Debug.Log($"{mName}의 현재 상태 - 배고픔: {GetEmoteValue(EmoteType.HUNGER)}, " +
+                         $"졸림: {GetEmoteValue(EmoteType.SLEEPINESS)}, " +
+                         $"외로움: {GetEmoteValue(EmoteType.LONELINESS)}");
             }
-            
-            // 활동 시작
-            StartActivity();
         }
     }
 
@@ -202,7 +340,7 @@ public class AgentController : MonoBehaviour
         // TODO: 실제 위치 확인 로직 구현
 
         // 지금은 MovementController에서 마지막 도착 위치 사용
-        return mMovement?.CurrentDestination ?? string.Empty;
+        return mMovement?.TargetName ?? string.Empty;
     }
 
     // 활동 위치로 이동 시작
@@ -239,8 +377,8 @@ public class AgentController : MonoBehaviour
             Debug.Log($"{mName}: {mCurrentActivity.LocationName}(으)로 이동 시작 ({mCurrentActivity.ActivityName} 위해)");
         }
         
-        // 이동 시작 (도착 시 OnReachedDestination 호출됨)
-        mMovement.MoveToLocation(mCurrentActivity.LocationName, OnReachedDestination);
+        // 이동 시작
+        mMovement.MoveToLocation(mCurrentActivity.LocationName);
     }
 
     private void StartActivity()
@@ -336,30 +474,37 @@ public class AgentController : MonoBehaviour
         }
     }
 
-    /// 활동 이름에 해당하는 애니메이션 트리거 가져오기
-    // private string GetAnimationTriggerForActivity(string _activityName)
-    // {
-    //     // 활동 이름 기반으로 애니메이션 트리거 결정
-    //     // 실제 구현에서는 더 복잡한 매핑 필요
-    //     switch (_activityName.ToLower())
-    //     {
-    //         case "아침 식사":
-    //         case "점심 식사":
-    //         case "저녁 식사":
-    //             return "Eating";
-                
-    //         case "오전 업무":
-    //         case "오후 업무":
-    //             return "Working";
-                
-    //         case "여가 시간":
-    //             return "Leisure";
-                
-    //         case "취침":
-    //             return "Sleeping";
-                
-    //         default:
-    //             return "Idle";
-    //     }
-    // }
+    // 감정 상태 자동 증가 코루틴
+    private IEnumerator AutoIncreaseEmoteStates()
+    {
+        TimeSpan lastIncreaseTime = mScheduler.GetCurrentGameTime();
+
+        while (true)
+        {
+            yield return new WaitForSeconds(1f); // 1초마다 체크
+
+            TimeSpan currentTime = mScheduler.GetCurrentGameTime();
+            TimeSpan timeDifference = currentTime - lastIncreaseTime;
+
+            // 게임 시간으로 30분이 지났는지 확인
+            if (timeDifference.TotalMinutes >= 30)
+            {
+                // 각 감정 상태 증가
+                SetEmoteValue(EmoteType.HUNGER, GetEmoteValue(EmoteType.HUNGER) + 1);
+                SetEmoteValue(EmoteType.SLEEPINESS, GetEmoteValue(EmoteType.SLEEPINESS) + 1);
+                SetEmoteValue(EmoteType.LONELINESS, GetEmoteValue(EmoteType.LONELINESS) + 1);
+
+                if (mShowDebugInfo)
+                {
+                    Debug.Log($"[게임시간 {currentTime:hh\\:mm}] {mName}의 감정 상태 자동 증가 - " +
+                            $"배고픔: {GetEmoteValue(EmoteType.HUNGER)}, " +
+                            $"졸림: {GetEmoteValue(EmoteType.SLEEPINESS)}, " +
+                            $"외로움: {GetEmoteValue(EmoteType.LONELINESS)}");
+                }
+
+                // 마지막 증가 시간 업데이트
+                lastIncreaseTime = currentTime;
+            }
+        }
+    }
 }
