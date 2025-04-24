@@ -5951,6 +5951,62 @@ PrefabInstance:
       propertyPath: emoteState.sleepiness
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 5857856110383237363, guid: 6b861d93a1bf71940b9855f2025edb6b, type: 3}
+      propertyPath: locationEffects.Array.size
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 5857856110383237363, guid: 6b861d93a1bf71940b9855f2025edb6b, type: 3}
+      propertyPath: locationEffects.Array.data[0].hungerEffect
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5857856110383237363, guid: 6b861d93a1bf71940b9855f2025edb6b, type: 3}
+      propertyPath: locationEffects.Array.data[0].locationName
+      value: BedRoom
+      objectReference: {fileID: 0}
+    - target: {fileID: 5857856110383237363, guid: 6b861d93a1bf71940b9855f2025edb6b, type: 3}
+      propertyPath: locationEffects.Array.data[1].hungerEffect
+      value: -2
+      objectReference: {fileID: 0}
+    - target: {fileID: 5857856110383237363, guid: 6b861d93a1bf71940b9855f2025edb6b, type: 3}
+      propertyPath: locationEffects.Array.data[1].locationName
+      value: Kitchen
+      objectReference: {fileID: 0}
+    - target: {fileID: 5857856110383237363, guid: 6b861d93a1bf71940b9855f2025edb6b, type: 3}
+      propertyPath: locationEffects.Array.data[2].hungerEffect
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5857856110383237363, guid: 6b861d93a1bf71940b9855f2025edb6b, type: 3}
+      propertyPath: locationEffects.Array.data[2].locationName
+      value: Livingroom
+      objectReference: {fileID: 0}
+    - target: {fileID: 5857856110383237363, guid: 6b861d93a1bf71940b9855f2025edb6b, type: 3}
+      propertyPath: locationEffects.Array.data[3].hungerEffect
+      value: -4
+      objectReference: {fileID: 0}
+    - target: {fileID: 5857856110383237363, guid: 6b861d93a1bf71940b9855f2025edb6b, type: 3}
+      propertyPath: locationEffects.Array.data[3].locationName
+      value: Cafeteria
+      objectReference: {fileID: 0}
+    - target: {fileID: 5857856110383237363, guid: 6b861d93a1bf71940b9855f2025edb6b, type: 3}
+      propertyPath: locationEffects.Array.data[0].lonelinessEffect
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5857856110383237363, guid: 6b861d93a1bf71940b9855f2025edb6b, type: 3}
+      propertyPath: locationEffects.Array.data[0].sleepinessEffect
+      value: -3
+      objectReference: {fileID: 0}
+    - target: {fileID: 5857856110383237363, guid: 6b861d93a1bf71940b9855f2025edb6b, type: 3}
+      propertyPath: locationEffects.Array.data[1].sleepinessEffect
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5857856110383237363, guid: 6b861d93a1bf71940b9855f2025edb6b, type: 3}
+      propertyPath: locationEffects.Array.data[2].lonelinessEffect
+      value: -3
+      objectReference: {fileID: 0}
+    - target: {fileID: 5857856110383237363, guid: 6b861d93a1bf71940b9855f2025edb6b, type: 3}
+      propertyPath: locationEffects.Array.data[3].lonelinessEffect
+      value: -4
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

@@ -93,8 +93,23 @@ public class AgentController : MonoBehaviour
         }
     }
 
+    [System.Serializable]
+    public struct LocationEmoteEffect
+    {
+        public string locationName;        // 장소 이름
+        [Range(-10, 0)]
+        public int hungerEffect;          // 배고픔 변화량
+        [Range(-10, 0)]
+        public int sleepinessEffect;      // 졸림 변화량
+        [Range(-10, 0)]
+        public int lonelinessEffect;      // 외로움 변화량
+    }
+
     [Header("Agent States")]
     [SerializeField] private EmoteState emoteState;
+
+    [Header("Location Effects")]
+    [SerializeField] private LocationEmoteEffect[] locationEffects;    // 장소별 감정 상태 효과
 
     // 감정 상태 접근을 위한 public 메서드들
     public int GetEmoteValue(EmoteType type)
@@ -243,31 +258,25 @@ public class AgentController : MonoBehaviour
     // 위치에 따른 감정 상태 업데이트
     private void UpdateEmoteStateByLocation(string locationName)
     {
-        switch (locationName.ToLower())
+        if (string.IsNullOrEmpty(locationName)) return;
+
+        // 해당 장소의 효과 찾기
+        var locationEffect = System.Array.Find(locationEffects, 
+            effect => effect.locationName.ToLower() == locationName.ToLower());
+
+        if (locationEffect.locationName != null)
         {
-            case "bedroom":
-                // 침실에 도착하면 졸림, 외로움 감소
-                SetEmoteValue(EmoteType.SLEEPINESS, GetEmoteValue(EmoteType.SLEEPINESS) - 1);
-                SetEmoteValue(EmoteType.LONELINESS, GetEmoteValue(EmoteType.LONELINESS) - 1);
-                break;
+            // 각 감정 상태에 효과 적용
+            SetEmoteValue(EmoteType.HUNGER, GetEmoteValue(EmoteType.HUNGER) + locationEffect.hungerEffect);
+            SetEmoteValue(EmoteType.SLEEPINESS, GetEmoteValue(EmoteType.SLEEPINESS) + locationEffect.sleepinessEffect);
+            SetEmoteValue(EmoteType.LONELINESS, GetEmoteValue(EmoteType.LONELINESS) + locationEffect.lonelinessEffect);
 
-            case "kitchen":
-            case "cafeteria":
-                // 주방이나 카페에 도착하면 배고픔 감소
-                SetEmoteValue(EmoteType.HUNGER, GetEmoteValue(EmoteType.HUNGER) - 1);
-                break;
-
-            case "livingroom":
-                // 거실에 도착하면 외로움 감소
-                SetEmoteValue(EmoteType.LONELINESS, GetEmoteValue(EmoteType.LONELINESS) - 1);
-                break;
-        }
-
-        if (mShowDebugInfo)
-        {
-            Debug.Log($"{mName}의 현재 상태 - 배고픔: {GetEmoteValue(EmoteType.HUNGER)}, " +
-                     $"졸림: {GetEmoteValue(EmoteType.SLEEPINESS)}, " +
-                     $"외로움: {GetEmoteValue(EmoteType.LONELINESS)}");
+            if (mShowDebugInfo)
+            {
+                Debug.Log($"{mName}의 현재 상태 - 배고픔: {GetEmoteValue(EmoteType.HUNGER)}, " +
+                         $"졸림: {GetEmoteValue(EmoteType.SLEEPINESS)}, " +
+                         $"외로움: {GetEmoteValue(EmoteType.LONELINESS)}");
+            }
         }
     }
 
