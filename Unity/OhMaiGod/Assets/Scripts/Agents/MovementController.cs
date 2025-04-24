@@ -15,6 +15,7 @@ public class MovementController : MonoBehaviour
     [SerializeField] private float mTargetSearchInterval = 2f;        // 목표물 탐색 간격
     [SerializeField] private float mPathUpdateInterval = 2f;          // 경로 업데이트 간격
     [SerializeField] private bool mUseNavMesh = false;               // NavMesh 사용 여부
+    [SerializeField] private bool mDrawPath = true;                   // 경로 그리기 여부
 
     // 이동 관련 변수들
     private List<Node> mCurrentPath;                                  // 현재 경로
@@ -351,6 +352,38 @@ public class MovementController : MonoBehaviour
             {
                 OnDestinationReached?.Invoke();
                 mDestinationReachedEventFired = true;
+            }
+        }
+    }
+
+    private void OnDrawGizmos()
+    {
+        // 현재 경로가 있는 경우에만 그리기
+        if (mCurrentPath != null && mCurrentPath.Count > 0 && mDrawPath)
+        {
+            Gizmos.color = Color.red;
+            
+            // 시작점부터 끝점까지 선으로 연결
+            for (int i = 0; i < mCurrentPath.Count - 1; i++)
+            {
+                Vector3 startPos = new Vector3(mCurrentPath[i].x + 0.5f, mCurrentPath[i].y + 0.5f, 0);
+                Vector3 endPos = new Vector3(mCurrentPath[i + 1].x + 0.5f, mCurrentPath[i + 1].y + 0.5f, 0);
+                Gizmos.DrawLine(startPos, endPos);
+            }
+
+            // 각 노드 위치에 구체 그리기
+            Gizmos.color = Color.yellow;
+            foreach (Node node in mCurrentPath)
+            {
+                Vector3 nodePos = new Vector3(node.x + 0.5f, node.y + 0.5f, 0);
+                Gizmos.DrawSphere(nodePos, 0.2f);
+            }
+
+            // 현재 목표 위치 표시
+            if (mTargetPosition != Vector2.zero)
+            {
+                Gizmos.color = Color.green;
+                Gizmos.DrawSphere(new Vector3(mTargetPosition.x, mTargetPosition.y, 0), 0.3f);
             }
         }
     }
