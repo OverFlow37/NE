@@ -88,7 +88,10 @@ public class AgentScheduler : MonoBehaviour
             return false;
         }
         
-        // 충돌 확인 (우선순위가 낮은 경우만 충돌 거부)
+        // 기존 일정 모두 취소하고 새 일정만 추가
+        ClearSchedule();
+        
+        /* 충돌 확인 (우선순위가 낮은 경우만 충돌 거부)
         var conflictingItems = mDailySchedule.Where(item => 
             !item.IsCompleted && 
             item.ConflictsWith(_item) && 
@@ -106,6 +109,7 @@ public class AgentScheduler : MonoBehaviour
             }
             return false;
         }
+        */
         
         // 일정에 항목 추가
         mDailySchedule.Add(_item);
@@ -391,11 +395,8 @@ public class AgentScheduler : MonoBehaviour
     // 초기 일정 로드 (테스트용)
     private void LoadInitialSchedule()
     {
-        // 테스트용 더미 일정 생성
-        if (mDailySchedule.Count == 0)
-        {
-            CreateDummySchedule();
-        }
+        // 더 이상 더미 일정을 자동으로 생성하지 않음
+        // AIBridgeTest를 통해 실제 일정을 받아올 예정
     }
 
     // 테스트용 더미 일정 생성
