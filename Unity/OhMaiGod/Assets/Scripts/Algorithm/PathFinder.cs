@@ -93,7 +93,7 @@ public class PathFinder : MonoBehaviour
             {
                 finalPath = ReconstructPath(targetNode, startNode);
                 finalPath = SmoothPath(finalPath);
-                Debug.Log($"경로를 찾았습니다. 경로 길이: {finalPath.Count}");
+                // Debug.Log($"경로를 찾았습니다. 경로 길이: {finalPath.Count}");
                 return finalPath;
             }
 
@@ -146,7 +146,7 @@ public class PathFinder : MonoBehaviour
                 // 벽이나 장애물이 발견되면 true 반환
                 if (((1 << collider.gameObject.layer) & layerMask) != 0)
                 {
-                    Debug.Log($"벽/장애물 발견: 위치 ({_x}, {_y}), 오브젝트: {collider.gameObject.name}");
+                    // Debug.Log($"벽/장애물 발견: 위치 ({_x}, {_y}), 오브젝트: {collider.gameObject.name}");
                     return true;
                 }
             }
