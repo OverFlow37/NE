@@ -88,7 +88,10 @@ public class AgentScheduler : MonoBehaviour
             return false;
         }
         
-        // 충돌 확인 (우선순위가 낮은 경우만 충돌 거부)
+        // 기존 일정 모두 취소하고 새 일정만 추가
+        ClearSchedule();
+        
+        /* 충돌 확인 (우선순위가 낮은 경우만 충돌 거부)
         var conflictingItems = mDailySchedule.Where(item => 
             !item.IsCompleted && 
             item.ConflictsWith(_item) && 
@@ -106,6 +109,7 @@ public class AgentScheduler : MonoBehaviour
             }
             return false;
         }
+        */
         
         // 일정에 항목 추가
         mDailySchedule.Add(_item);

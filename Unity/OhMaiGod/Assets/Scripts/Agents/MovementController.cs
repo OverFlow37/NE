@@ -26,6 +26,10 @@ public class MovementController : MonoBehaviour
     private float mLastPathUpdateTime;                               // 마지막 경로 업데이트 시간
     private NavMeshAgent mNavMeshAgent;                              // NavMesh 에이전트 (사용하는 경우)
 
+    // 목적지 도착 이벤트
+    public event System.Action OnDestinationReached;
+    private bool mDestinationReachedEventFired = false;              // 이벤트 발생 여부 추적
+
     // 초기화
     private void Awake()
     {
@@ -75,6 +79,7 @@ public class MovementController : MonoBehaviour
         Debug.Log($"{gameObject.name}이(가) {_locationName}로 이동 시작");
         mTargetName = _locationName;
         mIsMoving = true;
+        mDestinationReachedEventFired = false;  // 새로운 이동 시작 시 플래그 초기화
         FindAndMoveToTarget();
     }
     
@@ -323,6 +328,13 @@ public class MovementController : MonoBehaviour
             mCurrentPath = null;
             mCurrentPathIndex = 0;
             mTargetPosition = Vector2.zero;
+            
+            // 최종 목적지 도착 시 이벤트를 한 번만 발생
+            if (!mDestinationReachedEventFired)
+            {
+                OnDestinationReached?.Invoke();
+                mDestinationReachedEventFired = true;
+            }
         }
     }
 }

@@ -59,18 +59,37 @@ public class AIBridgeTest : MonoBehaviour
     [System.Serializable]
     public class AgentRequest
     {
-        public Agent[] agents;
+        public Agent agent;
+    }
+
+    [System.Serializable]
+    public class ActionDetails
+    {
+        public string location;
+        public string message;
+        public string target;
+        public string using_item;  // JSON의 "using"에 매핑
+    }
+
+    [System.Serializable]
+    public class Action
+    {
+        public string action;
+        public string agent;
+        public ActionDetails details;
+    }
+
+    [System.Serializable]
+    public class DataWrapper
+    {
+        public Action action;
     }
 
     [System.Serializable]
     public class AgentResponse
     {
-        public string activity_name;
-        public string location_name;
-        public string start_time;
-        public string end_time;
-        public int priority;
-        public bool is_flexible;
+        public DataWrapper data;
+        public string status;
     }
 
     private void Awake()
@@ -96,6 +115,26 @@ public class AIBridgeTest : MonoBehaviour
     {
         // 게임 시작시 자동으로 첫 요청 보내기
         SendAgent();
+
+        // 목적지 도착 이벤트 구독
+        if (movementController != null)
+        {
+            movementController.OnDestinationReached += HandleDestinationReached;
+        }
+    }
+
+    private void OnDestroy()
+    {
+        // 이벤트 구독 해제
+        if (movementController != null)
+        {
+            movementController.OnDestinationReached -= HandleDestinationReached;
+        }
+    }
+
+    private void HandleDestinationReached()
+    {
+        SendAgent();
     }
 
     public void SendAgent()
@@ -114,30 +153,28 @@ public class AIBridgeTest : MonoBehaviour
         isRequesting = true;
         if (sendButton != null) sendButton.interactable = false;
 
-        // 현재 에이전트의 상태 정보 수집
+        // 현재 에이전트의 상태 정보 수집 (1~10 사이의 랜덤값)
+        System.Random random = new System.Random();
         AgentState currentState = new AgentState
         {
-            hunger = 5, // TODO: 실제 상태값 구현 필요
-            sleepiness = 3,
-            loneliness = 4,
-            stress = 2,
-            happiness = 6
+            hunger = random.Next(1, 11),
+            sleepiness = random.Next(1, 11),
+            loneliness = random.Next(1, 11),
+            stress = random.Next(1, 11),
+            happiness = random.Next(1, 11)
         };
 
         AgentRequest requestData = new AgentRequest
         {
-            agents = new Agent[]
+            agent = new Agent
             {
-                new Agent
-                {
-                    name = agentController.AgentName,
-                    state = currentState,
-                    location = movementController.CurrentDestination,
-                    personality = "friendly, helpful", // TODO: 에이전트별 성격 구현 필요
-                    visible_objects = visibleObjects.ToArray(),
-                    interactable_items = interactableItems.ToArray(),
-                    nearby_agents = new string[] { } // TODO: 주변 에이전트 감지 구현 필요
-                }
+                name = agentController.AgentName,
+                state = currentState,
+                location = string.IsNullOrEmpty(movementController.CurrentDestination) ? "Bedroom" : movementController.CurrentDestination,
+                personality = "friendly, helpful", // TODO: 에이전트별 성격 구현 필요
+                visible_objects = visibleObjects.ToArray(),
+                interactable_items = interactableItems.ToArray(),
+                nearby_agents = new string[] { } // TODO: 주변 에이전트 감지 구현 필요
             }
         };
 
@@ -181,38 +218,47 @@ public class AIBridgeTest : MonoBehaviour
         {
             AgentResponse agentResponse = JsonUtility.FromJson<AgentResponse>(response);
             
-            // 시간 문자열을 TimeSpan으로 변환
-            TimeSpan startTime = TimeSpan.Parse(agentResponse.start_time);
-            TimeSpan endTime = TimeSpan.Parse(agentResponse.end_time);
+            if (agentResponse.status != "OK" || agentResponse.data?.action == null)
+            {
+                Debug.LogError("Invalid response format or status is not OK");
+                return;
+            }
 
-            // 스케줄 아이템 생성
+            Action action = agentResponse.data.action;
+            
+            // Get current time and calculate duration
+            TimeSpan currentTime = agentScheduler.GetCurrentGameTime();
+            TimeSpan duration = TimeSpan.FromMinutes(30); // 기본 30분으로 설정
+            
+            // Create schedule item with improved parameters
             AgentScheduler.ScheduleItem newScheduleItem = new AgentScheduler.ScheduleItem
             {
                 Id = System.Guid.NewGuid().ToString(),
-                ActivityName = agentResponse.activity_name,
-                LocationName = agentResponse.location_name,
-                StartTime = startTime,
-                EndTime = endTime,
-                Priority = agentResponse.priority,
-                IsFlexible = agentResponse.is_flexible,
-                IsCompleted = false
+                ActivityName = action.action,
+                LocationName = action.details.target,
+                StartTime = currentTime,
+                EndTime = currentTime.Add(duration),
+                Priority = 1, // 최우선순위로 설정
+                IsFlexible = true,
+                IsCompleted = false,
+                ActivityDetails = JsonUtility.ToJson(action.details)
             };
 
-            // 스케줄에 추가
+            // 새 일정 추가 (기존 일정은 자동으로 취소됨)
             bool success = agentScheduler.AddScheduleItem(newScheduleItem);
             
-            if (success)
+            if (!success)
             {
-                Debug.Log($"새로운 스케줄 추가됨: {newScheduleItem.ActivityName} @ {newScheduleItem.LocationName}");
+                Debug.LogError($"Failed to add schedule item: {newScheduleItem.ActivityName} @ {newScheduleItem.LocationName}");
             }
             else
             {
-                Debug.LogWarning("스케줄 추가 실패");
+                Debug.Log($"Successfully added and started new activity: {newScheduleItem.ActivityName} @ {newScheduleItem.LocationName}");
             }
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
-            Debug.LogError($"응답 처리 중 오류 발생: {e.Message}");
+            Debug.LogError($"Error processing response: {ex.Message}\n{ex.StackTrace}");
         }
     }
 } 
