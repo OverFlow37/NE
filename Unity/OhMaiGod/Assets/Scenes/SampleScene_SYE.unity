@@ -198,6 +198,7 @@ MonoBehaviour:
     - LivingRoom
     - Bedroom
     - Desk
+    - food
   - location: Cafeteria
     objects:
     - Cafeteria
@@ -5965,7 +5966,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5857856110383237363, guid: 6b861d93a1bf71940b9855f2025edb6b, type: 3}
       propertyPath: locationEffects.Array.data[1].hungerEffect
-      value: -2
+      value: -10
       objectReference: {fileID: 0}
     - target: {fileID: 5857856110383237363, guid: 6b861d93a1bf71940b9855f2025edb6b, type: 3}
       propertyPath: locationEffects.Array.data[1].locationName
@@ -5981,7 +5982,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5857856110383237363, guid: 6b861d93a1bf71940b9855f2025edb6b, type: 3}
       propertyPath: locationEffects.Array.data[3].hungerEffect
-      value: -4
+      value: -1
       objectReference: {fileID: 0}
     - target: {fileID: 5857856110383237363, guid: 6b861d93a1bf71940b9855f2025edb6b, type: 3}
       propertyPath: locationEffects.Array.data[3].locationName
@@ -5993,7 +5994,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5857856110383237363, guid: 6b861d93a1bf71940b9855f2025edb6b, type: 3}
       propertyPath: locationEffects.Array.data[0].sleepinessEffect
-      value: -3
+      value: -10
       objectReference: {fileID: 0}
     - target: {fileID: 5857856110383237363, guid: 6b861d93a1bf71940b9855f2025edb6b, type: 3}
       propertyPath: locationEffects.Array.data[1].sleepinessEffect
@@ -6005,7 +6006,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5857856110383237363, guid: 6b861d93a1bf71940b9855f2025edb6b, type: 3}
       propertyPath: locationEffects.Array.data[3].lonelinessEffect
-      value: -4
+      value: -10
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
