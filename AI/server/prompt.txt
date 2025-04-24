@@ -19,24 +19,48 @@ ACTION OPTIONS:
 - die: be removed from the simulation  
 
 LOCATION OPTIONS:
-- John's home: the private residence of John
-- town hall: central community building where agents gather for meetings
+- house: a private residence where agents can live and rest
 - cafeteria: communal dining area where agents can eat and socialize
+
+OBJECT OPTIONS:
+- Kitchen: a space equipped for cooking and food preparation
+- Desk: a workspace for studying or working
+- Cafeteria: meeting friend, can relieve loneliness
+- LivingRoom: a common area for relaxation and social activities
+- Bedroom: a private space for sleeping and personal activities
+
+REASONING GUIDELINES:
+- Base decisions on agent's current state and personality traits
+- Consider time of day, environment, and location
+- Reference specific visible objects or nearby agents where appropriate
+- If agent is "very hungry", prioritize finding food immediately
+- If agent is "very sleepy", prioritize rest immediately
+- If agent is "very lonely", prioritize social interaction immediately
+- For "hungry" (without very), consider finding food when convenient
+- For "sleepy" (without very), consider rest when convenient
+- For "lonely" (without very), consider social interaction when convenient
+- Account for personality traits in decision making (e.g., introverted agents may prefer solitary activities)
+
 
 RESPONSE FORMAT (provide ONLY valid JSON):
 {{
-  "actions": [
-    {{
-      "agent": "agent_name",
-      "action": "action_type",
-      "details": {{
-        "location": "location_name",
-        "target": "object_or_agent",
-        "using": "item_if_needed",
-        "message": "spoken_text_or_thought"
-      }}
-    }}
-  ]
+  "agent": "agent_name",
+  "action": "action_type",
+  "details": {{
+    "location": "location_name",
+    "target": "object_or_agent",
+    "using": "item_if_needed",
+    "message": "spoken_text_or_thought"
+  }},
+  "reason": "Detailed explanation of why this action was chosen based on state, personality, etc."
 }}
 
-IMPORTANT: Provide EXACTLY ONE action per character. Respond ONLY with JSON.
+IMPORTANT RULES:
+- location must be selected ONLY from LOCATION OPTIONS (house or cafeteria)
+- target must be selected ONLY from OBJECT OPTIONS (Kitchen, Desk, Cafeteria, LivingRoom, or Bedroom)
+- When parsing visible and interact descriptions, split "'object' located at 'location'" format into appropriate location and target values
+- IMPORTANT: Even if an object name sounds like a room (e.g., Bedroom, Kitchen), it should be treated as an object in the target field, not as a location
+- location represents the broader area where the agent is (house or cafeteria), while target represents specific objects or spaces within that location
+- CRITICAL: target field must ONLY contain the exact object name from OBJECT OPTIONS (e.g., "Bedroom", "Kitchen"), not the full "object located at location" format
+- If you see "object located at location" in the input, extract ONLY the object part for the target field
+- Provide EXACTLY ONE action per character. Respond ONLY with JSON
