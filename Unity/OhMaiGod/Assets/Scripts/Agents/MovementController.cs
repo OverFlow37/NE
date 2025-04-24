@@ -72,6 +72,7 @@ public class MovementController : MonoBehaviour
     // 위치 이름으로 이동 시작
     public void MoveToLocation(string _locationName, System.Action _onReached = null)
     {
+        Debug.Log($"{gameObject.name}이(가) {_locationName}로 이동 시작");
         mTargetName = _locationName;
         mIsMoving = true;
         FindAndMoveToTarget();
@@ -126,7 +127,7 @@ public class MovementController : MonoBehaviour
                 mMapTopRight = new Vector2Int(50, 50);
             }
 
-            Debug.Log($"시작 위치: {startPos}, 목표 위치: {targetPos}");
+            // Debug.Log($"시작 위치: {startPos}, 목표 위치: {targetPos}");
 
             // A* 알고리즘으로 경로 찾기
             mCurrentPath = PathFinder.Instance.FindPath(startPos, targetPos, mMapBottomLeft, mMapTopRight);
@@ -148,8 +149,6 @@ public class MovementController : MonoBehaviour
                 return;
             }
         }
-
-        Debug.Log($"{gameObject.name}이(가) {_targetPosition}로 이동 시작");
     }
 
     // 목표물을 찾고 이동을 시작하는 메서드
@@ -167,7 +166,20 @@ public class MovementController : MonoBehaviour
         {
             if (target.name == mTargetName)
             {
-                float distance = Vector2.Distance(transform.position, target.transform.position);
+                // 현재 위치와 목표물 사이의 거리 계산 (맨해튼)
+                Vector2Int currentPos = new Vector2Int(
+                    Mathf.FloorToInt(transform.position.x),
+                    Mathf.FloorToInt(transform.position.y)
+                );
+                Vector2Int targetPos = new Vector2Int(
+                    Mathf.FloorToInt(target.transform.position.x),
+                    Mathf.FloorToInt(target.transform.position.y)
+                );
+
+                // 맨해튼 거리 계산
+                int distance = Mathf.Abs(currentPos.x - targetPos.x) + 
+                               Mathf.Abs(currentPos.y - targetPos.y);                
+
                 if (distance < closestDistance)
                 {
                     closestDistance = distance;
@@ -269,6 +281,7 @@ public class MovementController : MonoBehaviour
     // 기본 이동 로직 (NavMesh 미사용 시)
     private void MoveTowardTarget()
     {
+        if (mTargetPosition == null) return;
         // 현재 위치를 Vector2로 변환
         Vector2 currentPosition = new Vector2(transform.position.x, transform.position.y);
         
@@ -291,20 +304,11 @@ public class MovementController : MonoBehaviour
     private void OnReachedDestination()
     {
         mIsMoving = false;
-        
-        // 도착 로그 출력
-        if (mCurrentTarget != null)
-        {
-            Debug.Log($"{gameObject.name}이(가) 목적지({mCurrentTarget.name})에 도착함");
-        }
-        else
-        {
-            Debug.Log($"{gameObject.name}이(가) 목적지({mTargetPosition})에 도착함");
-        }
 
         // 현재 경로의 다음 지점으로 이동
         if (mCurrentPath != null && mCurrentPathIndex < mCurrentPath.Count - 1)
         {
+            Debug.Log($"{gameObject.name}이(가) 목적지({mCurrentTarget.name})로 이동 중");
             mCurrentPathIndex++;
             mTargetPosition = new Vector2(
                 mCurrentPath[mCurrentPathIndex].x + 0.5f,
@@ -312,24 +316,13 @@ public class MovementController : MonoBehaviour
             );
             mIsMoving = true;
         }
-    }
-
-    // 위치 이름으로 실제 좌표 가져오기
-    private Vector2 GetLocationPosition(string _locationName)
-    {
-        // TODO: EnvironmentManager 구현 후 연동
-        
-        // 임시 구현: 씬 내에서 해당 이름의 GameObject 찾기
-        GameObject locationObject = GameObject.Find(_locationName);
-        
-        if (locationObject != null)
+        else
         {
-            Vector3 pos = locationObject.transform.position;
-            return new Vector2(pos.x, pos.y);
+            Debug.Log($"{gameObject.name}이(가) 목적지({mCurrentTarget.name})에 도착함");
+            mCurrentTarget = null;
+            mCurrentPath = null;
+            mCurrentPathIndex = 0;
+            mTargetPosition = Vector2.zero;
         }
-        
-        Debug.LogWarning($"위치를 찾을 수 없음: {_locationName}, EnvironmentManager 연동 필요");
-        
-        return Vector2.zero;
     }
 }
