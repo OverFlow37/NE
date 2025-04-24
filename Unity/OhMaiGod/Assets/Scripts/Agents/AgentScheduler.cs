@@ -61,12 +61,6 @@ public class AgentScheduler : MonoBehaviour
         mCurrentGameTime = new TimeSpan(8, 0, 0);
     }
 
-    private void OnEnable()
-    {
-        // 초기 일정 로드 또는 생성
-        LoadInitialSchedule();
-    }
-
     private void Update()
     {
         if (mIsPaused) return;
@@ -262,7 +256,6 @@ public class AgentScheduler : MonoBehaviour
             
             // 새 날에 대한 일정 초기화
             ResetSchedule();
-            LoadInitialSchedule();
         }
     }
 
@@ -392,13 +385,6 @@ public class AgentScheduler : MonoBehaviour
         }
     }
 
-    // 초기 일정 로드 (테스트용)
-    private void LoadInitialSchedule()
-    {
-        // 더 이상 더미 일정을 자동으로 생성하지 않음
-        // AIBridgeTest를 통해 실제 일정을 받아올 예정
-    }
-
     // 테스트용 더미 일정 생성
     private void CreateDummySchedule()
     {
@@ -486,4 +472,5 @@ public class AgentScheduler : MonoBehaviour
             IsFlexible = false
         });
     }
+
 }

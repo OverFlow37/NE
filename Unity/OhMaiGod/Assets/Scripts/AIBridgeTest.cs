@@ -33,8 +33,8 @@ public class AIBridgeTest : MonoBehaviour
         public int hunger;
         public int sleepiness;
         public int loneliness;
-        public int stress;
-        public int happiness;
+        // public int stress;
+        // public int happiness;
     }
 
     [System.Serializable]
@@ -153,15 +153,14 @@ public class AIBridgeTest : MonoBehaviour
         isRequesting = true;
         if (sendButton != null) sendButton.interactable = false;
 
-        // 현재 에이전트의 상태 정보 수집 (1~10 사이의 랜덤값)
-        System.Random random = new System.Random();
+        // 현재 에이전트의 상태 정보 수집
         AgentState currentState = new AgentState
         {
-            hunger = random.Next(1, 11),
-            sleepiness = random.Next(1, 11),
-            loneliness = random.Next(1, 11),
-            stress = random.Next(1, 11),
-            happiness = random.Next(1, 11)
+            hunger = agentController.GetEmoteValue(AgentController.EmoteType.HUNGER),
+            sleepiness = agentController.GetEmoteValue(AgentController.EmoteType.SLEEPINESS),
+            loneliness = agentController.GetEmoteValue(AgentController.EmoteType.LONELINESS),
+            // stress = 5,      // TODO: 향후 구현
+            // happiness = 5    // TODO: 향후 구현
         };
 
         AgentRequest requestData = new AgentRequest

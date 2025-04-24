@@ -288,6 +288,9 @@ public class MovementController : MonoBehaviour
     // 현재 목적지 이름 반환
     public string CurrentDestination => mCurrentTarget != null ? mCurrentTarget.name : string.Empty;
 
+    // 현재 타겟 이름 반환
+    public string TargetName => mTargetName;
+
     // 기본 이동 로직 (NavMesh 미사용 시)
     private void MoveTowardTarget()
     {
