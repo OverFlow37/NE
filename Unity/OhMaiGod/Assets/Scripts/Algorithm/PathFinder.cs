@@ -6,6 +6,7 @@ using UnityEngine;
 /// </summary>
 public class PathFinder : MonoBehaviour
 {
+    [SerializeField] private bool mShowDebug = true;
     private static PathFinder mInstance;
     public static PathFinder Instance
     {
@@ -303,6 +304,7 @@ public class PathFinder : MonoBehaviour
     private void OnDrawGizmos()
     {
         if (mNodeArray == null) return;
+        if (!mShowDebug) return;
 
         // 모든 노드 표시
         for (int x = 0; x < mSizeX; x++)
