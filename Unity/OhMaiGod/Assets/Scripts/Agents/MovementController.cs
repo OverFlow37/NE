@@ -167,7 +167,20 @@ public class MovementController : MonoBehaviour
         {
             if (target.name == mTargetName)
             {
-                float distance = Vector2.Distance(transform.position, target.transform.position);
+                // 현재 위치와 목표물 사이의 거리 계산 (맨해튼)
+                Vector2Int currentPos = new Vector2Int(
+                    Mathf.FloorToInt(transform.position.x),
+                    Mathf.FloorToInt(transform.position.y)
+                );
+                Vector2Int targetPos = new Vector2Int(
+                    Mathf.FloorToInt(target.transform.position.x),
+                    Mathf.FloorToInt(target.transform.position.y)
+                );
+
+                // 맨해튼 거리 계산
+                int distance = Mathf.Abs(currentPos.x - targetPos.x) + 
+                               Mathf.Abs(currentPos.y - targetPos.y);                
+
                 if (distance < closestDistance)
                 {
                     closestDistance = distance;
@@ -312,24 +325,5 @@ public class MovementController : MonoBehaviour
             );
             mIsMoving = true;
         }
-    }
-
-    // 위치 이름으로 실제 좌표 가져오기
-    private Vector2 GetLocationPosition(string _locationName)
-    {
-        // TODO: EnvironmentManager 구현 후 연동
-        
-        // 임시 구현: 씬 내에서 해당 이름의 GameObject 찾기
-        GameObject locationObject = GameObject.Find(_locationName);
-        
-        if (locationObject != null)
-        {
-            Vector3 pos = locationObject.transform.position;
-            return new Vector2(pos.x, pos.y);
-        }
-        
-        Debug.LogWarning($"위치를 찾을 수 없음: {_locationName}, EnvironmentManager 연동 필요");
-        
-        return Vector2.zero;
     }
 }
