@@ -8,7 +8,7 @@
           "hunger": 8,
           "sleepiness": 3,
           "loneliness": 2,
-          "stress": 4,
+          "stress": 5,
           "happiness": 3
         },
         "visible_objects": [

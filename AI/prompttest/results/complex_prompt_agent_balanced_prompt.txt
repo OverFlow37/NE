@@ -1,46 +1,21 @@
 You are the AI controller for agents in a simulation game.
 
-CURRENT TIME: 2025.04.23.17:51
-ENVIRONMENT: Afternoon, bright day
+CURRENT TIME: 2025.04.24.11:27
+ENVIRONMENT: Morning, clear sky
 
 AGENT DATA:
 John
-- State: hungry, not sleepy, lonely, not stressed, happy
+- State: not hungry, not sleepy, lonely, not stressed, happy
 - Personality: introverted, practical, punctual
 - Location: cafeteria
 - Visible objects: [{"location": "cafeteria", "objects": ["coffee machine", "pastries", "tables", "chairs", "newspaper"]}]
 - Interactable items: [{"location": "cafeteria", "objects": ["coffee machine", "pastries", "tables", "chairs", "newspaper"]}]
 - Nearby agents: []
-- Memories: -Relaxed at John's home.
--Had a drink with Sarah at cafeteria.
--Had a drink with Alice at cafeteria.
--Auto-fixed action at John's home
--Auto-fixed action at John's home
--eating at town hall
--Auto-fixed action at John's home
+- Memories: -Auto-fixed action at John's home
 -Auto-fixed action at town hall
--Auto-fixed action at town hall
--Auto-fixed action at John's home
--Auto-fixed action at John's home
--eating pastries
--Auto-fixed action at John's home
--Auto-fixed action at town hall
--eating at town hall
--Auto-fixed action at John's home
--Auto-fixed action at John's home
+-internal_reflection
 -Auto-fixed action at cafeteria
--eating at town hall
--Auto-fixed action at John's home
--Auto-fixed action at town hall
--Auto-fixed action at town hall
--Auto-fixed action at John's home
--Auto-fixed action at John's home
 -Auto-fixed action at cafeteria
--eating at town hall
--working at the desk
--working at the desk
--Auto-fixed action at John's home
--Auto-fixed action at John's home
 
 TASK: Determine the next action for this agent based on their current state, personality, and environment.
 
@@ -94,7 +69,7 @@ RESPONSE FORMAT (provide ONLY valid JSON):
       },
       "memory_update": {
         "action": "with_whom_and_where_action_took_place",
-        "time": "2025.04.23.17:51", 
+        "time": "2025.04.24.11:27", 
         "importance": importance_rating
       },
       "reason": "Detailed explanation of why this action was chosen based on state, personality, etc."
@@ -103,4 +78,4 @@ RESPONSE FORMAT (provide ONLY valid JSON):
 }
 ```
 
-IMPORTANT: Provide EXACTLY ONE action. Respond ONLY with JSON. The "reason" field and "memory_update" field are for internal processing and will not be sent to Unity. The "memory_update" will be saved to the memory database for future decision making.
+IMPORTANT: Provide EXACTLY ONE action. Respond ONLY with JSON. The "reason" field and "memory_update" field are for internal processing and will not be sent to Unity. The "memory_update" will be saved to the memory database for future decision making. If the agent has nothing to do at the current location or something else to do at another location, he or she can go there. For example, if the agent has nothing to eat at the current location, he or she can go to his or her home with the intention of eating or going to the cafeteria.

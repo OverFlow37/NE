@@ -5,11 +5,11 @@
       "location": "cafeteria",
       "personality": "introverted, practical, punctual",
       "state": {
-        "hunger": 4,
+        "hunger": 2,
         "sleepiness": 3,
         "loneliness": 4,
         "stress": 3,
-        "happiness": 6
+        "happiness": 5
       },
       "visible_objects": [
         {

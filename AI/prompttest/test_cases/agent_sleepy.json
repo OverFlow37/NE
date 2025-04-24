@@ -5,7 +5,7 @@
       "location": "town hall",
       "personality": "introverted, practical, punctual",
       "state": {
-        "hunger": 3,
+        "hunger": 2,
         "sleepiness": 9,
         "loneliness": 2,
         "stress": 5,

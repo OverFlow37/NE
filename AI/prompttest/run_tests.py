@@ -157,7 +157,7 @@ def format_template(template, data):
     
     return formatted
 
-def get_agent_memories(agent_name, max_memories=30):
+def get_agent_memories(agent_name, max_memories=5):
     """에이전트 메모리 로드"""
     memory_path = Path("./memories/agents_memories.json")
     

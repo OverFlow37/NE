@@ -5,10 +5,10 @@
       "location": "John's home",
       "personality": "introverted, practical, punctual",
       "state": {
-        "hunger": 4,
-        "sleepiness": 2,
+        "hunger": 1,
+        "sleepiness": 3,
         "loneliness": 7,
-        "stress": 3,
+        "stress": 4,
         "happiness": 3
       },
       "visible_objects": [

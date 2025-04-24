@@ -74,4 +74,4 @@ RESPONSE FORMAT (provide ONLY valid JSON):
 }
 ```
 
-IMPORTANT: Provide EXACTLY ONE action. Respond ONLY with JSON. The "reason" field and "memory_update" field are for internal processing and will not be sent to Unity. The "memory_update" will be saved to the memory database for future decision making.
+IMPORTANT: Provide EXACTLY ONE action. Respond ONLY with JSON. The "reason" field and "memory_update" field are for internal processing and will not be sent to Unity. The "memory_update" will be saved to the memory database for future decision making. If the agent has nothing to do at the current location or something else to do at another location, he or she can go there. For example, if the agent has nothing to eat at the current location, he or she can go to his or her home with the intention of eating or going to the cafeteria.
