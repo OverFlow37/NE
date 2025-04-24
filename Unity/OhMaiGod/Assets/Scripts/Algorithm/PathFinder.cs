@@ -6,6 +6,7 @@ using UnityEngine;
 /// </summary>
 public class PathFinder : MonoBehaviour
 {
+    [SerializeField] private bool mShowDebug = true;
     private static PathFinder mInstance;
     public static PathFinder Instance
     {
@@ -92,7 +93,7 @@ public class PathFinder : MonoBehaviour
             {
                 finalPath = ReconstructPath(targetNode, startNode);
                 finalPath = SmoothPath(finalPath);
-                Debug.Log($"경로를 찾았습니다. 경로 길이: {finalPath.Count}");
+                // Debug.Log($"경로를 찾았습니다. 경로 길이: {finalPath.Count}");
                 return finalPath;
             }
 
@@ -145,7 +146,7 @@ public class PathFinder : MonoBehaviour
                 // 벽이나 장애물이 발견되면 true 반환
                 if (((1 << collider.gameObject.layer) & layerMask) != 0)
                 {
-                    Debug.Log($"벽/장애물 발견: 위치 ({_x}, {_y}), 오브젝트: {collider.gameObject.name}");
+                    // Debug.Log($"벽/장애물 발견: 위치 ({_x}, {_y}), 오브젝트: {collider.gameObject.name}");
                     return true;
                 }
             }
@@ -191,8 +192,29 @@ public class PathFinder : MonoBehaviour
             if (mClosedList.Contains(neighborNode) || neighborNode.isWall)
                 continue;
 
-            // 이동 비용 계산
+            // 기본 이동 비용
             int moveCost = _currentNode.G + 10;
+
+            // 방향 전환 패널티 계산
+            if (_currentNode.ParentNode != null)
+            {
+                Vector2Int currentDirection = dir;
+                Vector2Int previousDirection = _currentNode.Direction;
+
+                // 이전 방향과 다른 경우 패널티 적용
+                if (currentDirection != previousDirection)
+                {
+                    // 180도 회전(반대 방향)인 경우 더 큰 패널티
+                    if (currentDirection == -previousDirection)
+                    {
+                        moveCost += 30; // U턴 패널티
+                    }
+                    else
+                    {
+                        moveCost += 15; // 90도 회전 패널티
+                    }
+                }
+            }
 
             // 맨해튼 거리를 사용한 휴리스틱
             int heuristic = Mathf.Abs(neighborNode.x - _targetNode.x) + 
@@ -204,6 +226,7 @@ public class PathFinder : MonoBehaviour
                 neighborNode.G = moveCost;
                 neighborNode.H = heuristic * 10;
                 neighborNode.ParentNode = _currentNode;
+                neighborNode.Direction = dir; // 현재 이동 방향 저장
 
                 if (!mOpenList.Contains(neighborNode))
                 {
@@ -281,6 +304,7 @@ public class PathFinder : MonoBehaviour
     private void OnDrawGizmos()
     {
         if (mNodeArray == null) return;
+        if (!mShowDebug) return;
 
         // 모든 노드 표시
         for (int x = 0; x < mSizeX; x++)

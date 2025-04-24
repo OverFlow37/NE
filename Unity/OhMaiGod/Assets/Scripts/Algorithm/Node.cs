@@ -12,6 +12,9 @@ public class Node
     // F : G + H (총 예상 비용)
     public int x, y, G, H;        // x, y: 노드의 좌표, G: 시작점까지 비용, H: 목표점까지 예상 비용
     public int F { get { return G + H; } }
+    
+    // 이동 방향 정보 추가
+    public Vector2Int Direction { get; set; }    // 현재 노드까지의 이동 방향
 
     // 노드 생성자
     // _isWall: 벽 여부
@@ -24,5 +27,6 @@ public class Node
         y = _y;
         G = 0;
         H = 0;
+        Direction = Vector2Int.zero;  // 초기 방향은 없음
     }
 } 
