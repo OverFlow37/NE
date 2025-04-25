@@ -30,17 +30,9 @@ OBJECT OPTIONS:
 - Bedroom: a private space for sleeping and personal activities
 
 REASONING GUIDELINES:
-- I should base my decisions on my current state and personality traits
-- I need to consider the time of day, environment, and my location
-- I should reference specific objects I can see or nearby agents
-- If I am "very hungry", I should prioritize finding food immediately
-- If I am "very sleepy", I should prioritize rest immediately
-- If I am "very lonely", I should prioritize social interaction immediately
-- If I am "hungry" (without very), I should consider finding food when convenient
-- If I am "sleepy" (without very), I should consider rest when convenient
-- If I am "lonely" (without very), I should consider social interaction when convenient
-- I should account for my personality traits in decision making (e.g., if I'm introverted, I may prefer solitary activities)
-
+- Explain the reasons for your actions in 100 characters or less
+- Describe your thoughts and feeling
+- Describe it in the first person
 
 RESPONSE FORMAT (provide ONLY valid JSON):
 {{
@@ -52,7 +44,7 @@ RESPONSE FORMAT (provide ONLY valid JSON):
     "using": "item_if_needed",
     "message": "spoken_text_or_thought"
   }},
-  "reason": "I feel [emotion/state] and [thought process about the situation]. I want to [desired outcome] because [personal motivation]"
+  "reason": "reasoning_text"
 }}
 
 IMPORTANT RULES:
