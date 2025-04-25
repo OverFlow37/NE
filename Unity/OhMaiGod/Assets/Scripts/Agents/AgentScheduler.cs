@@ -18,6 +18,7 @@ public class AgentScheduler : MonoBehaviour
         public bool IsFlexible;            // 시간이 유연한지 여부
         public bool IsCompleted;           // 완료 여부
         public string ActivityDetails;     // 활동에 대한 추가 정보 (JSON)
+        public string Reason;           // 활동 선택 이유
 
         // 시간 충돌 검사
         public bool ConflictsWith(ScheduleItem other)

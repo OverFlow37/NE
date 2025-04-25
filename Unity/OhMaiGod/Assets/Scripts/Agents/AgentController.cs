@@ -5,6 +5,9 @@ using UnityEngine;
 
 public class AgentController : MonoBehaviour
 {
+    [SerializeField]
+    private AgentUI agentUI;
+
     // GET, SET 함수로 접근 가능해야함
     public enum AgentActionState
     {
@@ -147,6 +150,8 @@ public class AgentController : MonoBehaviour
     public string AgentName => mName;
     public int AgentID => mID;
 
+    private Animator animator;// 애니메이터
+
     private void Awake()
     {
         // 참조 가져오기
@@ -166,6 +171,9 @@ public class AgentController : MonoBehaviour
         emoteState.SetValue(EmoteType.HUNGER, 1);
         emoteState.SetValue(EmoteType.SLEEPINESS, 1);
         emoteState.SetValue(EmoteType.LONELINESS, 1);
+
+        // 애니메이션 참조
+        animator = GetComponent<Animator>();
     }
 
     private void OnDestroy()
@@ -184,6 +192,9 @@ public class AgentController : MonoBehaviour
         {
             Debug.Log($"{mName}: 목적지 도착 - {mMovement.TargetName}");
         }
+
+        // 이동 애니메이션 정지
+        animator.SetBool("isMoving", false);
 
         // 도착한 위치에 따라 감정 상태 업데이트
         UpdateEmoteStateByLocation(mMovement.TargetName);
@@ -253,6 +264,8 @@ public class AgentController : MonoBehaviour
         //     StartActivity();
         // }
         StartMovingToActivity();
+        // 활동 시작 시 말풍선 표시
+        agentUI.StartSpeech(mCurrentActivity.Reason);
     }
 
     // 위치에 따른 감정 상태 업데이트
@@ -379,6 +392,9 @@ public class AgentController : MonoBehaviour
         
         // 이동 시작
         mMovement.MoveToLocation(mCurrentActivity.LocationName);
+
+        // 이동 애니메이션 시작
+        animator.SetBool("isMoving", true);
     }
 
     private void StartActivity()

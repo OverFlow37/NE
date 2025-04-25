@@ -77,6 +77,7 @@ public class AIBridgeTest : MonoBehaviour
         public string action;
         public string agent;
         public ActionDetails details;
+        public string reason;
     }
 
     [System.Serializable]
@@ -240,7 +241,8 @@ public class AIBridgeTest : MonoBehaviour
                 Priority = 1, // 최우선순위로 설정
                 IsFlexible = true,
                 IsCompleted = false,
-                ActivityDetails = JsonUtility.ToJson(action.details)
+                ActivityDetails = JsonUtility.ToJson(action.details),
+                Reason = action.reason
             };
 
             // 새 일정 추가 (기존 일정은 자동으로 취소됨)
