@@ -100,7 +100,7 @@ if __name__ == "__main__":
     API_URL = f"http://{HOST}:{PORT}/api/generate"
 
     # prompt.txt 와 state.json 경로를 지정
-    prompt = load_prompt('prompt.txt', 'state.json')
+    prompt = load_prompt('./prompts/prompt.txt', 'state.json')
 
     # 프롬프트 찍어보기
     print("===== SEND PROMPT =====")

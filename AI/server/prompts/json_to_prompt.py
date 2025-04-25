@@ -121,7 +121,7 @@ def load_prompt_template() -> str:
     prompt.txt 파일에서 프롬프트 템플릿을 읽어옵니다.
     """
     try:
-        with open('prompt.txt', 'r', encoding='utf-8') as f:
+        with open('./prompts/prompt.txt', 'r', encoding='utf-8') as f:
             return f.read().strip()
     except FileNotFoundError:
         raise FileNotFoundError("prompt.txt 파일을 찾을 수 없습니다.")

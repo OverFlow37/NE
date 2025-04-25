@@ -1,7 +1,7 @@
 # server.py
 from flask import Flask, request, jsonify
 import json
-import json_to_prompt as jp
+import prompts.json_to_prompt as jp
 import re
 
 app = Flask(__name__)
