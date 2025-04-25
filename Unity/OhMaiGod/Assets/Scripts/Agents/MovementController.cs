@@ -13,7 +13,6 @@ public class MovementController : MonoBehaviour
     [SerializeField] private Vector2Int mMapTopRight;                 // 맵의 오른쪽 상단 좌표
     [SerializeField] private string mTargetName;                      // 찾아갈 목표물의 이름
     [SerializeField] private float mTargetSearchInterval = 2f;        // 목표물 탐색 간격
-    [SerializeField] private float mPathUpdateInterval = 2f;          // 경로 업데이트 간격
     [SerializeField] private bool mDrawPath = true;                   // 경로 그리기 여부
 
     // 이동 관련 변수들
@@ -22,8 +21,8 @@ public class MovementController : MonoBehaviour
     private Vector2 mTargetPosition;                                  // 현재 목표 위치
     private bool mIsMoving;                                          // 이동 중 여부
     private Transform mCurrentTarget;                                 // 현재 목표물
+    private Vector2 mCurrentPoint;                                  // 현재 목표 위치
     private float mLastTargetSearchTime;                             // 마지막 목표물 탐색 시간
-    private float mLastPathUpdateTime;                               // 마지막 경로 업데이트 시간
     private SpriteRenderer mSpriteRenderer;                          // 스프라이트 렌더러
     private NPCLog mNPCLog;
     // 목적지 도착 이벤트
@@ -34,7 +33,6 @@ public class MovementController : MonoBehaviour
     private void Awake()
     {
         mLastTargetSearchTime = Time.time;
-        mLastPathUpdateTime = Time.time;
         mNPCLog = GameObject.Find("NPCLog").GetComponent<NPCLog>();
         mSpriteRenderer = GetComponent<SpriteRenderer>();
         FindAndMoveToTarget();
@@ -43,19 +41,21 @@ public class MovementController : MonoBehaviour
     // 매 프레임 업데이트
     private void Update()
     {
-        if (mCurrentTarget == null) return;
+        if (mCurrentPoint == null) return;
         // 일정 간격으로 목표물 탐색
         if (Time.time - mLastTargetSearchTime >= mTargetSearchInterval)
         {
+            // 현재 목표물 저장
+            Vector2 previousPoint = mCurrentPoint;
             FindAndMoveToTarget();
             mLastTargetSearchTime = Time.time;
-        }
 
-        // 현재 목표물이 있고, 일정 간격으로 경로 업데이트
-        if (mCurrentTarget != null && Time.time - mLastPathUpdateTime >= mPathUpdateInterval)
-        {
-            UpdatePath();
-            mLastPathUpdateTime = Time.time;
+            // 목표 지점이 변경된 경우에만 경로 업데이트
+            if (previousPoint != mCurrentPoint)
+            {
+                Debug.Log($"{gameObject.name}의 목표물이 변경되어 경로를 업데이트합니다. 이전: {previousPoint}, 현재: {mCurrentPoint}");
+                UpdatePath();
+            }
         }
 
         if (!mIsMoving) return;
@@ -164,27 +164,47 @@ public class MovementController : MonoBehaviour
         // 가장 가까운 목표물이 있으면 목표물의 가장 가까운 StandingPoint 위치로 이동
         if (closestTarget != null)
         {
-            TargetController targetController = closestTarget.GetComponent<TargetController>();
+            if (mCurrentTarget == closestTarget) return;
+            mCurrentTarget = closestTarget;
+            TargetController targetController = mCurrentTarget.GetComponent<TargetController>();
             if (targetController != null)
             {
                 List<Vector2> standingPoints = targetController.GetStandingPositions();
                 if (standingPoints.Count > 0)
                 {
+                    // 현재 위치
+                    Vector2Int currentPos = new Vector2Int(
+                        Mathf.FloorToInt(transform.position.x),
+                        Mathf.FloorToInt(transform.position.y)
+                    );
+
                     // 가장 가까운 StandingPoint 찾기
                     Vector2 closestStandingPoint = standingPoints[0];
-                    float minDistance = float.MaxValue;
+                    float minPathCost = float.MaxValue;
+
                     foreach (Vector2 point in standingPoints)
                     {
-                        float distance = Vector2.Distance(transform.position, point);
-                        if (distance < minDistance)
+                        // 실제 경로 거리 계산
+                        Vector2Int targetPos = new Vector2Int(
+                            Mathf.FloorToInt(point.x),
+                            Mathf.FloorToInt(point.y)
+                        );
+
+                        float pathCost = PathFinder.Instance.CalculatePathCost(
+                            currentPos, 
+                            targetPos,
+                            mMapBottomLeft,
+                            mMapTopRight
+                        );
+
+                        if (pathCost < minPathCost)
                         {
-                            minDistance = distance;
+                            minPathCost = pathCost;
                             closestStandingPoint = point;
                         }
                     }
-
-                    mCurrentTarget = closestTarget;
-                    MoveTo(closestStandingPoint);
+                    mCurrentPoint = closestStandingPoint;
+                    MoveTo(mCurrentPoint);
                 }
             }
         }
