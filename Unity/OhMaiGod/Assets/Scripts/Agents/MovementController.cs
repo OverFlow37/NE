@@ -13,8 +13,6 @@ public class MovementController : MonoBehaviour
     [SerializeField] private Vector2Int mMapTopRight;                 // 맵의 오른쪽 상단 좌표
     [SerializeField] private string mTargetName;                      // 찾아갈 목표물의 이름
     [SerializeField] private float mTargetSearchInterval = 2f;        // 목표물 탐색 간격
-    [SerializeField] private float mPathUpdateInterval = 2f;          // 경로 업데이트 간격
-    [SerializeField] private bool mUseNavMesh = false;               // NavMesh 사용 여부
     [SerializeField] private bool mDrawPath = true;                   // 경로 그리기 여부
 
     // 이동 관련 변수들
@@ -23,12 +21,10 @@ public class MovementController : MonoBehaviour
     private Vector2 mTargetPosition;                                  // 현재 목표 위치
     private bool mIsMoving;                                          // 이동 중 여부
     private Transform mCurrentTarget;                                 // 현재 목표물
+    private Vector2 mCurrentPoint;                                  // 현재 목표 위치
     private float mLastTargetSearchTime;                             // 마지막 목표물 탐색 시간
-    private float mLastPathUpdateTime;                               // 마지막 경로 업데이트 시간
-    private NavMeshAgent mNavMeshAgent;                              // NavMesh 에이전트 (사용하는 경우)
     private SpriteRenderer mSpriteRenderer;                          // 스프라이트 렌더러
     private NPCLog mNPCLog;
-
     // 목적지 도착 이벤트
     public event System.Action OnDestinationReached;
     private bool mDestinationReachedEventFired = false;              // 이벤트 발생 여부 추적
@@ -37,7 +33,6 @@ public class MovementController : MonoBehaviour
     private void Awake()
     {
         mLastTargetSearchTime = Time.time;
-        mLastPathUpdateTime = Time.time;
         mNPCLog = GameObject.Find("NPCLog").GetComponent<NPCLog>();
         mSpriteRenderer = GetComponent<SpriteRenderer>();
         FindAndMoveToTarget();
@@ -46,37 +41,26 @@ public class MovementController : MonoBehaviour
     // 매 프레임 업데이트
     private void Update()
     {
-        if (mCurrentTarget == null) return;
+        if (mCurrentPoint == null) return;
         // 일정 간격으로 목표물 탐색
         if (Time.time - mLastTargetSearchTime >= mTargetSearchInterval)
         {
+            // 현재 목표물 저장
+            Vector2 previousPoint = mCurrentPoint;
             FindAndMoveToTarget();
             mLastTargetSearchTime = Time.time;
-        }
 
-        // 현재 목표물이 있고, 일정 간격으로 경로 업데이트
-        if (mCurrentTarget != null && Time.time - mLastPathUpdateTime >= mPathUpdateInterval)
-        {
-            UpdatePath();
-            mLastPathUpdateTime = Time.time;
+            // 목표 지점이 변경된 경우에만 경로 업데이트
+            if (previousPoint != mCurrentPoint)
+            {
+                Debug.Log($"{gameObject.name}의 목표물이 변경되어 경로를 업데이트합니다. 이전: {previousPoint}, 현재: {mCurrentPoint}");
+                UpdatePath();
+            }
         }
 
         if (!mIsMoving) return;
 
-        // 이동 방식에 따른 처리
-        if (mUseNavMesh)
-        {
-            // NavMesh를 사용하는 경우, 도착 여부 확인
-            if (!mNavMeshAgent.pathPending && mNavMeshAgent.remainingDistance <= mReachedDistance)
-            {
-                OnReachedDestination();
-            }
-        }
-        else
-        {
-            // 기본 이동 로직
-            MoveTowardTarget();
-        }
+        MoveTowardTarget();
     }
 
     // 위치 이름으로 이동 시작
@@ -97,68 +81,46 @@ public class MovementController : MonoBehaviour
         mTargetPosition = _targetPosition;
         mIsMoving = true;
 
-        // 이동 방식에 따라 분기
-        if (mUseNavMesh)
-        {
-            // NavMesh 컴포넌트 확인 및 설정
-            if (mNavMeshAgent == null)
-            {
-                mNavMeshAgent = GetComponent<NavMeshAgent>();
-                if (mNavMeshAgent == null)
-                {
-                    Debug.LogError($"{gameObject.name}에 NavMeshAgent가 없습니다.");
-                    return;
-                }
-            }
+        // NPC의 현재 위치를 타일 중심으로 조정
+        Vector2Int startPos = new Vector2Int(
+            Mathf.FloorToInt(transform.position.x),
+            Mathf.FloorToInt(transform.position.y)
+        );
 
-            // NavMesh 경로 설정 (Vector2를 Vector3로 변환)
-            Vector3 targetPos3D = new Vector3(_targetPosition.x, 0, _targetPosition.y);
-            mNavMeshAgent.SetDestination(targetPos3D);
-            mNavMeshAgent.isStopped = false;
+        // 목표 위치를 타일 중심으로 조정
+        Vector2Int targetPos = new Vector2Int(
+            Mathf.FloorToInt(_targetPosition.x),
+            Mathf.FloorToInt(_targetPosition.y)
+        );
+
+        // 맵 범위 확인 및 기본값 설정
+        if (mMapBottomLeft == Vector2Int.zero && mMapTopRight == Vector2Int.zero)
+        {
+            Debug.LogWarning($"{gameObject.name}의 맵 범위가 설정되지 않았습니다. 기본값으로 설정합니다.");
+            mMapBottomLeft = new Vector2Int(-50, -50);
+            mMapTopRight = new Vector2Int(50, 50);
+        }
+
+        // Debug.Log($"시작 위치: {startPos}, 목표 위치: {targetPos}");
+
+        // A* 알고리즘으로 경로 찾기
+        mCurrentPath = PathFinder.Instance.FindPath(startPos, targetPos, mMapBottomLeft, mMapTopRight);
+        
+        if (mCurrentPath != null && mCurrentPath.Count > 0)
+        {
+            mCurrentPathIndex = 0;
+            // 첫 번째 경로 노드의 타일 중심으로 이동
+            mTargetPosition = new Vector2(
+                mCurrentPath[0].x + 0.5f,
+                mCurrentPath[0].y + 0.5f
+            );
+            mIsMoving = true;
         }
         else
         {
-            // NPC의 현재 위치를 타일 중심으로 조정
-            Vector2Int startPos = new Vector2Int(
-                Mathf.FloorToInt(transform.position.x),
-                Mathf.FloorToInt(transform.position.y)
-            );
-
-            // 목표 위치를 타일 중심으로 조정
-            Vector2Int targetPos = new Vector2Int(
-                Mathf.FloorToInt(_targetPosition.x),
-                Mathf.FloorToInt(_targetPosition.y)
-            );
-
-            // 맵 범위 확인 및 기본값 설정
-            if (mMapBottomLeft == Vector2Int.zero && mMapTopRight == Vector2Int.zero)
-            {
-                Debug.LogWarning($"{gameObject.name}의 맵 범위가 설정되지 않았습니다. 기본값으로 설정합니다.");
-                mMapBottomLeft = new Vector2Int(-50, -50);
-                mMapTopRight = new Vector2Int(50, 50);
-            }
-
-            // Debug.Log($"시작 위치: {startPos}, 목표 위치: {targetPos}");
-
-            // A* 알고리즘으로 경로 찾기
-            mCurrentPath = PathFinder.Instance.FindPath(startPos, targetPos, mMapBottomLeft, mMapTopRight);
-            
-            if (mCurrentPath != null && mCurrentPath.Count > 0)
-            {
-                mCurrentPathIndex = 0;
-                // 첫 번째 경로 노드의 타일 중심으로 이동
-                mTargetPosition = new Vector2(
-                    mCurrentPath[0].x + 0.5f,
-                    mCurrentPath[0].y + 0.5f
-                );
-                mIsMoving = true;
-            }
-            else
-            {
-                Debug.LogWarning($"{gameObject.name}이(가) {_targetPosition}까지의 경로를 찾을 수 없습니다.");
-                mIsMoving = false;
-                return;
-            }
+            Debug.LogWarning($"{gameObject.name}이(가) {_targetPosition}까지의 경로를 찾을 수 없습니다.");
+            mIsMoving = false;
+            return;
         }
     }
 
@@ -202,27 +164,47 @@ public class MovementController : MonoBehaviour
         // 가장 가까운 목표물이 있으면 목표물의 가장 가까운 StandingPoint 위치로 이동
         if (closestTarget != null)
         {
-            TargetController targetController = closestTarget.GetComponent<TargetController>();
+            if (mCurrentTarget == closestTarget) return;
+            mCurrentTarget = closestTarget;
+            TargetController targetController = mCurrentTarget.GetComponent<TargetController>();
             if (targetController != null)
             {
                 List<Vector2> standingPoints = targetController.GetStandingPositions();
                 if (standingPoints.Count > 0)
                 {
+                    // 현재 위치
+                    Vector2Int currentPos = new Vector2Int(
+                        Mathf.FloorToInt(transform.position.x),
+                        Mathf.FloorToInt(transform.position.y)
+                    );
+
                     // 가장 가까운 StandingPoint 찾기
                     Vector2 closestStandingPoint = standingPoints[0];
-                    float minDistance = float.MaxValue;
+                    float minPathCost = float.MaxValue;
+
                     foreach (Vector2 point in standingPoints)
                     {
-                        float distance = Vector2.Distance(transform.position, point);
-                        if (distance < minDistance)
+                        // 실제 경로 거리 계산
+                        Vector2Int targetPos = new Vector2Int(
+                            Mathf.FloorToInt(point.x),
+                            Mathf.FloorToInt(point.y)
+                        );
+
+                        float pathCost = PathFinder.Instance.CalculatePathCost(
+                            currentPos, 
+                            targetPos,
+                            mMapBottomLeft,
+                            mMapTopRight
+                        );
+
+                        if (pathCost < minPathCost)
                         {
-                            minDistance = distance;
+                            minPathCost = pathCost;
                             closestStandingPoint = point;
                         }
                     }
-
-                    mCurrentTarget = closestTarget;
-                    MoveTo(closestStandingPoint);
+                    mCurrentPoint = closestStandingPoint;
+                    MoveTo(mCurrentPoint);
                 }
             }
         }
@@ -262,7 +244,6 @@ public class MovementController : MonoBehaviour
                         closestStandingPoint = point;
                     }
                 }
-
                 MoveTo(closestStandingPoint);
             }
         }
@@ -274,11 +255,6 @@ public class MovementController : MonoBehaviour
         if (!mIsMoving) return;
 
         mIsMoving = false;
-        
-        if (mUseNavMesh)
-        {
-            mNavMeshAgent.isStopped = true;
-        }
 
         Debug.Log($"{gameObject.name}의 이동이 중지됨");
     }
