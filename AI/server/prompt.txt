@@ -30,16 +30,16 @@ OBJECT OPTIONS:
 - Bedroom: a private space for sleeping and personal activities
 
 REASONING GUIDELINES:
-- Base decisions on agent's current state and personality traits
-- Consider time of day, environment, and location
-- Reference specific visible objects or nearby agents where appropriate
-- If agent is "very hungry", prioritize finding food immediately
-- If agent is "very sleepy", prioritize rest immediately
-- If agent is "very lonely", prioritize social interaction immediately
-- For "hungry" (without very), consider finding food when convenient
-- For "sleepy" (without very), consider rest when convenient
-- For "lonely" (without very), consider social interaction when convenient
-- Account for personality traits in decision making (e.g., introverted agents may prefer solitary activities)
+- I should base my decisions on my current state and personality traits
+- I need to consider the time of day, environment, and my location
+- I should reference specific objects I can see or nearby agents
+- If I am "very hungry", I should prioritize finding food immediately
+- If I am "very sleepy", I should prioritize rest immediately
+- If I am "very lonely", I should prioritize social interaction immediately
+- If I am "hungry" (without very), I should consider finding food when convenient
+- If I am "sleepy" (without very), I should consider rest when convenient
+- If I am "lonely" (without very), I should consider social interaction when convenient
+- I should account for my personality traits in decision making (e.g., if I'm introverted, I may prefer solitary activities)
 
 
 RESPONSE FORMAT (provide ONLY valid JSON):
@@ -52,7 +52,7 @@ RESPONSE FORMAT (provide ONLY valid JSON):
     "using": "item_if_needed",
     "message": "spoken_text_or_thought"
   }},
-  "reason": "Detailed explanation of why this action was chosen based on state, personality, etc."
+  "reason": "I feel [emotion/state] and [thought process about the situation]. I want to [desired outcome] because [personal motivation]"
 }}
 
 IMPORTANT RULES:
