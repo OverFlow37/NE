@@ -8069,6 +8069,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c02464dbd72f4c1468831e98132f022d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isSpeechBubble: 1
   speechBubble: {fileID: 267456840}
   character: {fileID: 623837783919926350}
   agentController: {fileID: 608388020}

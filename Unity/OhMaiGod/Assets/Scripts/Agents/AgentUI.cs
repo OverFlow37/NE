@@ -7,6 +7,8 @@ using System.Collections;
 public class AgentUI : MonoBehaviour
 {
     [Header("UI")]
+    [SerializeField]
+    private bool isSpeechBubble = true;
     [SerializeField] 
     private GameObject speechBubble;
     private TextMeshProUGUI speechText;
@@ -78,17 +80,20 @@ public class AgentUI : MonoBehaviour
     private IEnumerator ShowSpeechBubble(string speech)
     {
         speechText.text = speech;
-        speechBubble.SetActive(true);
-        
-        yield return new WaitForSeconds(speechDuration);
-        
-        speechBubble.SetActive(false);
+        if(isSpeechBubble)
+        {
+            speechBubble.SetActive(true);
+            
+            yield return new WaitForSeconds(speechDuration);
+            
+            speechBubble.SetActive(false);
+        }
     }
 
     public void UpdateEmote()
     {
-        emoteUI.hungerText.text = "HUNGER    : " + string.Format("{0:F1}", agentController.GetEmoteValue(AgentController.EmoteType.HUNGER));
-        emoteUI.sleepinessText.text = "SLEEPINESS: " + string.Format("{0:F1}", agentController.GetEmoteValue(AgentController.EmoteType.SLEEPINESS));
-        emoteUI.lonelinessText.text = "LONELINESS: " + string.Format("{0:F1}", agentController.GetEmoteValue(AgentController.EmoteType.LONELINESS));
+        emoteUI.hungerText.text = "HUNGER    : " + string.Format("{0}", (int)agentController.GetEmoteValue(AgentController.EmoteType.HUNGER));
+        emoteUI.sleepinessText.text = "SLEEPINESS: " + string.Format("{0}", (int)agentController.GetEmoteValue(AgentController.EmoteType.SLEEPINESS));
+        emoteUI.lonelinessText.text = "LONELINESS: " + string.Format("{0}", (int)agentController.GetEmoteValue(AgentController.EmoteType.LONELINESS));
     }
 }
