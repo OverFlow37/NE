@@ -8,6 +8,7 @@ public class PathFinder : MonoBehaviour
 {
     [SerializeField] private bool mShowDebug = true;
     private static PathFinder mInstance;
+    // 싱글톤 인스턴스를 반환하는 프로퍼티
     public static PathFinder Instance
     {
         get
@@ -104,12 +105,14 @@ public class PathFinder : MonoBehaviour
         return null;
     }
 
+    // 주어진 위치가 맵 범위 내에 있는지 확인하는 메서드
     private bool IsPositionInMap(Vector2Int _pos, Vector2Int _bottomLeft, Vector2Int _topRight)
     {
         return _pos.x >= _bottomLeft.x && _pos.x <= _topRight.x &&
                _pos.y >= _bottomLeft.y && _pos.y <= _topRight.y;
     }
 
+    // 노드 배열을 초기화하는 메서드
     private void InitializeNodeArray(Vector2Int _bottomLeft, Vector2Int _topRight)
     {
         mSizeX = _topRight.x - _bottomLeft.x + 1;
@@ -126,11 +129,12 @@ public class PathFinder : MonoBehaviour
         }
     }
 
+    // 해당 위치에 벽이 있는지 확인하는 메서드
     private bool CheckForWall(int _x, int _y)
     {
         // 타일의 중심 좌표 계산
         Vector2 checkPos = new Vector2(_x + 0.5f, _y + 0.5f);
-        
+
         // 벽과 장애물 체크
         int wallLayer = LayerMask.GetMask("Wall");
         int obstacleLayer = LayerMask.GetMask("Obstacles");
@@ -138,7 +142,7 @@ public class PathFinder : MonoBehaviour
 
         // 더 정확한 충돌 체크를 위해 원 크기를 0.4f로 설정
         Collider2D[] colliders = Physics2D.OverlapCircleAll(checkPos, 0.4f, layerMask);
-        
+
         if (colliders.Length > 0)
         {
             foreach (Collider2D collider in colliders)
@@ -154,6 +158,7 @@ public class PathFinder : MonoBehaviour
         return false;
     }
 
+    // 열린 목록에서 F값이 가장 낮은 노드를 반환하는 메서드
     private Node GetLowestFNode()
     {
         Node lowestNode = mOpenList[0];
@@ -165,6 +170,7 @@ public class PathFinder : MonoBehaviour
         return lowestNode;
     }
 
+    // 현재 노드의 이웃 노드들을 탐색하는 메서드
     private void ExploreNeighbors(Node _currentNode, Node _targetNode, Vector2Int _bottomLeft, Vector2Int _topRight)
     {
         // 상하좌우 4방향만 확인
@@ -217,7 +223,7 @@ public class PathFinder : MonoBehaviour
             }
 
             // 맨해튼 거리를 사용한 휴리스틱
-            int heuristic = Mathf.Abs(neighborNode.x - _targetNode.x) + 
+            int heuristic = Mathf.Abs(neighborNode.x - _targetNode.x) +
                            Mathf.Abs(neighborNode.y - _targetNode.y);
 
             // 더 나은 경로를 찾았거나 아직 열린 목록에 없는 경우
@@ -236,6 +242,7 @@ public class PathFinder : MonoBehaviour
         }
     }
 
+    // 목표 노드에서 시작 노드까지의 경로를 재구성하는 메서드
     private List<Node> ReconstructPath(Node _targetNode, Node _startNode)
     {
         List<Node> path = new List<Node>();
@@ -252,9 +259,7 @@ public class PathFinder : MonoBehaviour
         return path;
     }
 
-    /// <summary>
-    /// 경로를 부드럽게 만드는 메서드
-    /// </summary>
+    // 경로를 부드럽게 만드는 메서드
     private List<Node> SmoothPath(List<Node> _path)
     {
         if (_path == null || _path.Count <= 2) return _path;
@@ -269,7 +274,7 @@ public class PathFinder : MonoBehaviour
             while (nextIndex < _path.Count - 1)
             {
                 // 두 노드가 같은 행이나 열에 있는 경우에만 직선 경로로 간주
-                if ((_path[currentIndex].x == _path[nextIndex + 1].x || 
+                if ((_path[currentIndex].x == _path[nextIndex + 1].x ||
                      _path[currentIndex].y == _path[nextIndex + 1].y) &&
                     HasDirectPath(_path[currentIndex], _path[nextIndex + 1]))
                 {
@@ -287,9 +292,7 @@ public class PathFinder : MonoBehaviour
         return smoothedPath;
     }
 
-    /// <summary>
-    /// 두 노드 사이에 직선 경로가 있는지 확인하는 메서드
-    /// </summary>
+    // 두 노드 사이에 직선 경로가 있는지 확인하는 메서드
     private bool HasDirectPath(Node _start, Node _end)
     {
         Vector2 startPos = new Vector2(_start.x + 0.5f, _start.y + 0.5f);
@@ -297,13 +300,16 @@ public class PathFinder : MonoBehaviour
         Vector2 direction = (endPos - startPos).normalized;
         float distance = Vector2.Distance(startPos, endPos);
 
-        RaycastHit2D hit = Physics2D.Raycast(startPos, direction, distance, LayerMask.GetMask("Wall"));
+        // 벽과 장애물 레이어 모두 확인
+        int wallLayer = LayerMask.GetMask("Wall");
+        int obstacleLayer = LayerMask.GetMask("Obstacles");
+        int layerMask = wallLayer | obstacleLayer;  // 두 레이어를 모두 포함
+
+        RaycastHit2D hit = Physics2D.Raycast(startPos, direction, distance, layerMask);
         return hit.collider == null;
     }
 
-    /// <summary>
-    /// 두 지점 사이의 실제 경로 거리를 계산하는 메서드
-    /// </summary>
+    // 두 지점 사이의 실제 경로 거리를 계산하는 메서드
     public float CalculatePathCost(Vector2Int _startPos, Vector2Int _targetPos, Vector2Int _bottomLeft, Vector2Int _topRight)
     {
         List<Node> path = FindPath(_startPos, _targetPos, _bottomLeft, _topRight);
@@ -313,7 +319,7 @@ public class PathFinder : MonoBehaviour
         }
 
         float totalCost = 0f;
-        
+
         // 실제 이동 거리 계산
         for (int i = 0; i < path.Count - 1; i++)
         {
@@ -328,14 +334,14 @@ public class PathFinder : MonoBehaviour
             if (i > 0)
             {
                 Vector2Int prevDir = new Vector2Int(
-                    path[i].x - path[i-1].x,
-                    path[i].y - path[i-1].y
+                    path[i].x - path[i - 1].x,
+                    path[i].y - path[i - 1].y
                 );
                 Vector2Int nextDir = new Vector2Int(
-                    path[i+1].x - path[i].x,
-                    path[i+1].y - path[i].y
+                    path[i + 1].x - path[i].x,
+                    path[i + 1].y - path[i].y
                 );
-                
+
                 if (prevDir != nextDir)
                 {
                     // 180도 회전(반대 방향)인 경우
@@ -357,7 +363,7 @@ public class PathFinder : MonoBehaviour
             new Vector2(_startPos.x, _startPos.y),
             new Vector2(_targetPos.x, _targetPos.y)
         );
-        
+
         // 경로가 직선 거리의 1.5배를 넘어가면 패널티 부여
         if (totalCost > directDistance * 150f)
         {
@@ -368,6 +374,7 @@ public class PathFinder : MonoBehaviour
         return totalCost;
     }
 
+    // 디버그용 기즈모를 그리는 메서드
     private void OnDrawGizmos()
     {
         if (mNodeArray == null) return;
@@ -413,4 +420,4 @@ public class PathFinder : MonoBehaviour
             }
         }
     }
-} 
+}

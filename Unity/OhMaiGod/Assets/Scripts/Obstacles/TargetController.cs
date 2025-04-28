@@ -7,20 +7,26 @@ public class TargetController : MonoBehaviour
 {
     [SerializeField] private GameObject mStandingPointPrefab;    // 서있는 지점 프리팹
     [SerializeField] private float mCheckRadius = 0.4f;          // 주변 충돌 확인 반경 (타일 크기에 맞게 조정)
-    [SerializeField] private LayerMask mWallLayer;              // 벽 레이어
-    [SerializeField] private LayerMask mTargetLayer;            // 타겟 레이어
-    [SerializeField] private Tilemap mGroundTilemap;           // 바닥 타일맵 참조
-    [SerializeField] private bool mShowDebug = true;            // 디버그 정보 표시 여부
+    [SerializeField] private Tilemap mGroundTilemap;             // 바닥 타일맵 참조
+    [SerializeField] private bool mShowDebug = false;            // 디버그 정보 표시 여부
 
     private List<GameObject> mStandingPoints;                   // 생성된 서있는 지점들
     private List<Vector2> mAvailablePositions;                  // 사용 가능한 위치 목록
     private Collider2D mTargetCollider;                         // 타겟의 콜라이더
     private HashSet<Vector3Int> mOccupiedCells;                 // 타겟이 차지하는 셀 목록
+    private LayerMask mWallLayer;                               // 벽 레이어
+    private LayerMask mTargetLayer;                             // 타겟 레이어
 
     // 초기화
     private void Awake() // Start 대신 Awake 사용 고려 (Collider 참조 등)
     {
         mTargetCollider = GetComponent<Collider2D>();
+        if (mStandingPointPrefab == null)
+        {
+            Debug.LogError("StandingPointPrefab이 할당되지 않았습니다!", this);
+            enabled = false;
+            return;
+        }
         if (mTargetCollider == null)
         {
             Debug.LogError("TargetController에 Collider2D가 없습니다!", this);
@@ -37,6 +43,8 @@ public class TargetController : MonoBehaviour
         mStandingPoints = new List<GameObject>();
         mAvailablePositions = new List<Vector2>();
         mOccupiedCells = new HashSet<Vector3Int>();
+        mWallLayer = LayerMask.GetMask("Wall");
+        mTargetLayer = LayerMask.GetMask("Obstacles");
     }
 
     private void Start()
@@ -210,29 +218,5 @@ public class TargetController : MonoBehaviour
                 Gizmos.DrawWireSphere(pos, 0.25f); // 조금 더 잘 보이게
             }
         }
-
-        // (옵션) 검사한 모든 인접 셀 표시
-        // HashSet<Vector3Int> neighborCells = new HashSet<Vector3Int>();
-        // if (mOccupiedCells != null)
-        // {
-        //     Vector3Int[] directions = { Vector3Int.up, Vector3Int.down, Vector3Int.left, Vector3Int.right };
-        //     foreach (Vector3Int occupiedCell in mOccupiedCells)
-        //     {
-        //         foreach (Vector3Int dir in directions)
-        //         {
-        //             Vector3Int neighbor = occupiedCell + dir;
-        //             if (!mOccupiedCells.Contains(neighbor))
-        //             {
-        //                 neighborCells.Add(neighbor);
-        //             }
-        //         }
-        //     }
-        //     Gizmos.color = Color.gray;
-        //     foreach(var cell in neighborCells)
-        //     {
-        //         if (!mAvailablePositions.Contains(mGroundTilemap.GetCellCenterWorld(cell)))
-        //             Gizmos.DrawWireCube(mGroundTilemap.GetCellCenterWorld(cell), mGroundTilemap.cellSize * 0.7f);
-        //     }
-        // }
     }
 }

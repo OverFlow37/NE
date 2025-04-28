@@ -35,7 +35,6 @@ public class MovementController : MonoBehaviour
         mLastTargetSearchTime = Time.time;
         mNPCLog = GameObject.Find("NPCLog").GetComponent<NPCLog>();
         mSpriteRenderer = GetComponent<SpriteRenderer>();
-        FindAndMoveToTarget();
     }
 
     // 매 프레임 업데이트
@@ -47,7 +46,7 @@ public class MovementController : MonoBehaviour
         {
             // 현재 목표물 저장
             Vector2 previousPoint = mCurrentPoint;
-            FindAndMoveToTarget();
+            FindTargetPosition();
             mLastTargetSearchTime = Time.time;
 
             // 목표 지점이 변경된 경우에만 경로 업데이트
@@ -70,13 +69,13 @@ public class MovementController : MonoBehaviour
         mTargetName = _locationName;
         mIsMoving = true;
         mDestinationReachedEventFired = false;  // 새로운 이동 시작 시 플래그 초기화
-        FindAndMoveToTarget();
+        FindTargetPosition();
     }
-    
+
     // 지정된 위치로 이동
     // _targetPosition: 목표 위치
     // _onReached: 도착 시 콜백
-    public void MoveTo(Vector2 _targetPosition, System.Action _onReached = null)
+    public void MoveToPosition(Vector2 _targetPosition, System.Action _onReached = null)
     {
         mTargetPosition = _targetPosition;
         mIsMoving = true;
@@ -105,7 +104,7 @@ public class MovementController : MonoBehaviour
 
         // A* 알고리즘으로 경로 찾기
         mCurrentPath = PathFinder.Instance.FindPath(startPos, targetPos, mMapBottomLeft, mMapTopRight);
-        
+
         if (mCurrentPath != null && mCurrentPath.Count > 0)
         {
             mCurrentPathIndex = 0;
@@ -125,7 +124,7 @@ public class MovementController : MonoBehaviour
     }
 
     // 목표물을 찾고 이동을 시작하는 메서드
-    private void FindAndMoveToTarget()
+    private void FindTargetPosition()
     {
         if (string.IsNullOrEmpty(mTargetName)) return;
 
@@ -150,8 +149,8 @@ public class MovementController : MonoBehaviour
                 );
 
                 // 맨해튼 거리 계산
-                int distance = Mathf.Abs(currentPos.x - targetPos.x) + 
-                               Mathf.Abs(currentPos.y - targetPos.y);                
+                int distance = Mathf.Abs(currentPos.x - targetPos.x) +
+                               Mathf.Abs(currentPos.y - targetPos.y);
 
                 if (distance < closestDistance)
                 {
@@ -191,7 +190,7 @@ public class MovementController : MonoBehaviour
                         );
 
                         float pathCost = PathFinder.Instance.CalculatePathCost(
-                            currentPos, 
+                            currentPos,
                             targetPos,
                             mMapBottomLeft,
                             mMapTopRight
@@ -204,7 +203,7 @@ public class MovementController : MonoBehaviour
                         }
                     }
                     mCurrentPoint = closestStandingPoint;
-                    MoveTo(mCurrentPoint);
+                    MoveToPosition(mCurrentPoint);
                 }
             }
         }
@@ -244,7 +243,7 @@ public class MovementController : MonoBehaviour
                         closestStandingPoint = point;
                     }
                 }
-                MoveTo(closestStandingPoint);
+                MoveToPosition(closestStandingPoint);
             }
         }
     }
@@ -259,6 +258,16 @@ public class MovementController : MonoBehaviour
         Debug.Log($"{gameObject.name}의 이동이 중지됨");
     }
 
+    // 이동을 재개
+    public void ResumeMovement()
+    {
+        if (mIsMoving) return;
+
+        mIsMoving = true;
+
+        Debug.Log($"{gameObject.name}의 이동이 재개됨");
+    }
+
     // 이동 중인지 여부 반환
     public bool IsMoving => mIsMoving;
 
@@ -268,13 +277,13 @@ public class MovementController : MonoBehaviour
     // 현재 타겟 이름 반환
     public string TargetName => mTargetName;
 
-    // 기본 이동 로직 (NavMesh 미사용 시)
+    // 기본 이동 로직
     private void MoveTowardTarget()
     {
         if (mTargetPosition == null) return;
         // 현재 위치를 Vector2로 변환
         Vector2 currentPosition = new Vector2(transform.position.x, transform.position.y);
-        
+
         // 목표 방향 계산
         Vector2 direction = (mTargetPosition - currentPosition).normalized;
         // 이동 (2D)
@@ -322,7 +331,7 @@ public class MovementController : MonoBehaviour
             mCurrentPath = null;
             mCurrentPathIndex = 0;
             mTargetPosition = Vector2.zero;
-            
+
             // 최종 목적지 도착 시 이벤트를 한 번만 발생
             if (!mDestinationReachedEventFired)
             {
@@ -338,7 +347,7 @@ public class MovementController : MonoBehaviour
         if (mCurrentPath != null && mCurrentPath.Count > 0 && mDrawPath)
         {
             Gizmos.color = Color.red;
-            
+
             // 시작점부터 끝점까지 선으로 연결
             for (int i = 0; i < mCurrentPath.Count - 1; i++)
             {
