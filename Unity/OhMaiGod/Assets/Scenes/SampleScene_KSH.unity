@@ -5863,6 +5863,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Desk
       objectReference: {fileID: 0}
+    - target: {fileID: 8663613268944117034, guid: f18a840692084c145b574bf9d30f315c, type: 3}
+      propertyPath: mGroundTilemap
+      value: 
+      objectReference: {fileID: 597632758}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -6291,6 +6295,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Cafeteria
       objectReference: {fileID: 0}
+    - target: {fileID: 8663613268944117034, guid: f18a840692084c145b574bf9d30f315c, type: 3}
+      propertyPath: mGroundTilemap
+      value: 
+      objectReference: {fileID: 597632758}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -6929,6 +6937,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: LivingRoom
       objectReference: {fileID: 0}
+    - target: {fileID: 8663613268944117034, guid: f18a840692084c145b574bf9d30f315c, type: 3}
+      propertyPath: mGroundTilemap
+      value: 
+      objectReference: {fileID: 597632758}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -7866,6 +7878,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Bedroom
       objectReference: {fileID: 0}
+    - target: {fileID: 8663613268944117034, guid: f18a840692084c145b574bf9d30f315c, type: 3}
+      propertyPath: mGroundTilemap
+      value: 
+      objectReference: {fileID: 597632758}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -8383,6 +8399,10 @@ PrefabInstance:
       propertyPath: mTableSize.y
       value: 2
       objectReference: {fileID: 0}
+    - target: {fileID: 8663613268944117034, guid: f18a840692084c145b574bf9d30f315c, type: 3}
+      propertyPath: mGroundTilemap
+      value: 
+      objectReference: {fileID: 597632758}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
