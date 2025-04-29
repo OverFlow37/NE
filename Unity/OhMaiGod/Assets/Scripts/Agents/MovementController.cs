@@ -11,15 +11,15 @@ public class MovementController : MonoBehaviour
     [SerializeField] private string mTargetName;                      // 찾아갈 목표물의 이름
     [SerializeField] private float mTargetSearchInterval = 2f;        // 목표물 탐색 간격
     [SerializeField] private bool mDrawPath = true;                   // 경로 그리기 여부
-    [SerializeField] private Tilemap mGroundTilemap;                  // 바닥 타일맵 참조 [추후에 MapController 등에서 참조, 지금은 인스펙터에서 지정]
 
     // 이동 관련 변수들
+    private TileManager mTileManager;
     private List<Node> mCurrentPath;                                  // 현재 경로
     private int mCurrentPathIndex;                                    // 현재 경로 인덱스
     private Vector2 mTargetPosition;                                  // 현재 목표 위치
-    private bool mIsMoving;                                          // 이동 중 여부
+    private bool mIsMoving;                                           // 이동 중 여부
     private Transform mCurrentTarget;                                 // 현재 목표물
-    private Vector2 mCurrentPoint;                                  // 현재 목표 위치
+    private Vector2 mCurrentPoint;                                   // 현재 목표 위치
     private float mLastTargetSearchTime;                             // 마지막 목표물 탐색 시간
     private SpriteRenderer mSpriteRenderer;                          // 스프라이트 렌더러
     private NPCLog mNPCLog;
@@ -33,6 +33,7 @@ public class MovementController : MonoBehaviour
         mLastTargetSearchTime = Time.time;
         mNPCLog = GameObject.Find("NPCLog").GetComponent<NPCLog>();
         mSpriteRenderer = GetComponent<SpriteRenderer>();
+        mTileManager = TileManager.Instance;
     }
 
     // 매 프레임 업데이트
@@ -83,7 +84,7 @@ public class MovementController : MonoBehaviour
         {
             mCurrentPathIndex = 0;
             // 첫 번째 경로 노드의 타일 중심으로 이동
-            mTargetPosition = mGroundTilemap.GetCellCenterWorld(new Vector3Int(mCurrentPath[0].x, mCurrentPath[0].y, 0));
+            mTargetPosition = mTileManager.GroundTilemap.GetCellCenterWorld(new Vector3Int(mCurrentPath[0].x, mCurrentPath[0].y, 0));
             mIsMoving = true;
         }
         else
@@ -238,7 +239,7 @@ public class MovementController : MonoBehaviour
             mNPCLog.SetNPCLog($"{gameObject.name}이(가) 목적지({mCurrentTarget?.name})로 이동 중");
             Debug.Log($"{gameObject.name}이(가) 목적지({mCurrentTarget?.name})로 이동 중");
             mCurrentPathIndex++;
-            mTargetPosition = mGroundTilemap.GetCellCenterWorld(new Vector3Int(mCurrentPath[mCurrentPathIndex].x, mCurrentPath[mCurrentPathIndex].y, 0));
+            mTargetPosition = mTileManager.GroundTilemap.GetCellCenterWorld(new Vector3Int(mCurrentPath[mCurrentPathIndex].x, mCurrentPath[mCurrentPathIndex].y, 0));
             mIsMoving = true;
         }
         else

@@ -159,7 +159,7 @@ RectTransform:
   m_AnchoredPosition: {x: -357, y: 104}
   m_SizeDelta: {x: 200, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!1 &85287551
+--- !u!1 &185414073
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -167,80 +167,51 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 85287553}
-  - component: {fileID: 85287552}
+  - component: {fileID: 185414075}
+  - component: {fileID: 185414074}
   m_Layer: 0
-  m_Name: GF_temp
+  m_Name: TileManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!212 &85287552
-SpriteRenderer:
+--- !u!114 &185414074
+MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 85287551}
+  m_GameObject: {fileID: 185414073}
   m_Enabled: 1
-  m_CastShadows: 0
-  m_ReceiveShadows: 0
-  m_DynamicOccludee: 1
-  m_StaticShadowCaster: 0
-  m_MotionVectors: 1
-  m_LightProbeUsage: 1
-  m_ReflectionProbeUsage: 1
-  m_RayTracingMode: 0
-  m_RayTraceProcedural: 0
-  m_RayTracingAccelStructBuildFlagsOverride: 0
-  m_RayTracingAccelStructBuildFlags: 1
-  m_SmallMeshCulling: 1
-  m_RenderingLayerMask: 1
-  m_RendererPriority: 0
-  m_Materials:
-  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
-  m_StaticBatchInfo:
-    firstSubMesh: 0
-    subMeshCount: 0
-  m_StaticBatchRoot: {fileID: 0}
-  m_ProbeAnchor: {fileID: 0}
-  m_LightProbeVolumeOverride: {fileID: 0}
-  m_ScaleInLightmap: 1
-  m_ReceiveGI: 1
-  m_PreserveUVs: 0
-  m_IgnoreNormalsForChartDetection: 0
-  m_ImportantGI: 0
-  m_StitchLightmapSeams: 1
-  m_SelectedEditorRenderState: 0
-  m_MinimumChartSize: 4
-  m_AutoUVMaxDistance: 0.5
-  m_AutoUVMaxAngle: 89
-  m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
-  m_SortingOrder: 5
-  m_Sprite: {fileID: -150523396, guid: 0c187a32c5bde4747be8d00770b07403, type: 3}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_FlipX: 0
-  m_FlipY: 0
-  m_DrawMode: 0
-  m_Size: {x: 1, y: 1}
-  m_AdaptiveModeThreshold: 0.5
-  m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 1
-  m_MaskInteraction: 0
-  m_SpriteSortPoint: 0
---- !u!4 &85287553
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9eae30c728ac7804b98a5c006652e72a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mGroundTilemap: {fileID: 597632758}
+  mWallTilemap: {fileID: 990865614}
+  mSectionTilemaps:
+  - {fileID: 1499274277}
+  - {fileID: 1112643836}
+  mWallLayerMask:
+    serializedVersion: 2
+    m_Bits: 128
+  mObjectLayerMask:
+    serializedVersion: 2
+    m_Bits: 256
+  mNPCLayerMask:
+    serializedVersion: 2
+    m_Bits: 512
+--- !u!4 &185414075
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 85287551}
+  m_GameObject: {fileID: 185414073}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -8.5, y: 0.6, z: 0}
+  m_LocalPosition: {x: -0.9336714, y: -0.0029840171, z: 0.90518034}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -409,6 +380,174 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1001 &218908449
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 3049116197355406548, guid: 6b861d93a1bf71940b9855f2025edb6b, type: 3}
+      propertyPath: mMoveSpeed
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 3049116197355406548, guid: 6b861d93a1bf71940b9855f2025edb6b, type: 3}
+      propertyPath: mUseNavMesh
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3049116197355406548, guid: 6b861d93a1bf71940b9855f2025edb6b, type: 3}
+      propertyPath: mGroundTilemap
+      value: 
+      objectReference: {fileID: 597632758}
+    - target: {fileID: 3049116197355406548, guid: 6b861d93a1bf71940b9855f2025edb6b, type: 3}
+      propertyPath: mPathUpdateInterval
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3049116197355406548, guid: 6b861d93a1bf71940b9855f2025edb6b, type: 3}
+      propertyPath: mTargetSearchInterval
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 3410451549725341278, guid: 6b861d93a1bf71940b9855f2025edb6b, type: 3}
+      propertyPath: m_Name
+      value: GF_temp
+      objectReference: {fileID: 0}
+    - target: {fileID: 3703094993806506679, guid: 6b861d93a1bf71940b9855f2025edb6b, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -8.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 3703094993806506679, guid: 6b861d93a1bf71940b9855f2025edb6b, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 3703094993806506679, guid: 6b861d93a1bf71940b9855f2025edb6b, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3703094993806506679, guid: 6b861d93a1bf71940b9855f2025edb6b, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3703094993806506679, guid: 6b861d93a1bf71940b9855f2025edb6b, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3703094993806506679, guid: 6b861d93a1bf71940b9855f2025edb6b, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3703094993806506679, guid: 6b861d93a1bf71940b9855f2025edb6b, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3703094993806506679, guid: 6b861d93a1bf71940b9855f2025edb6b, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3703094993806506679, guid: 6b861d93a1bf71940b9855f2025edb6b, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3703094993806506679, guid: 6b861d93a1bf71940b9855f2025edb6b, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5029068935263893207, guid: 6b861d93a1bf71940b9855f2025edb6b, type: 3}
+      propertyPath: mShowDebugInfo
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5029068935263893207, guid: 6b861d93a1bf71940b9855f2025edb6b, type: 3}
+      propertyPath: mGameToRealTimeRatio
+      value: 300
+      objectReference: {fileID: 0}
+    - target: {fileID: 5857856110383237363, guid: 6b861d93a1bf71940b9855f2025edb6b, type: 3}
+      propertyPath: agentUI
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 5857856110383237363, guid: 6b861d93a1bf71940b9855f2025edb6b, type: 3}
+      propertyPath: emoteState.hunger
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5857856110383237363, guid: 6b861d93a1bf71940b9855f2025edb6b, type: 3}
+      propertyPath: emoteState.loneliness
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5857856110383237363, guid: 6b861d93a1bf71940b9855f2025edb6b, type: 3}
+      propertyPath: emoteState.sleepiness
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5857856110383237363, guid: 6b861d93a1bf71940b9855f2025edb6b, type: 3}
+      propertyPath: locationEffects.Array.size
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 5857856110383237363, guid: 6b861d93a1bf71940b9855f2025edb6b, type: 3}
+      propertyPath: locationEffects.Array.data[0].hungerEffect
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5857856110383237363, guid: 6b861d93a1bf71940b9855f2025edb6b, type: 3}
+      propertyPath: locationEffects.Array.data[0].locationName
+      value: BedRoom
+      objectReference: {fileID: 0}
+    - target: {fileID: 5857856110383237363, guid: 6b861d93a1bf71940b9855f2025edb6b, type: 3}
+      propertyPath: locationEffects.Array.data[1].hungerEffect
+      value: -10
+      objectReference: {fileID: 0}
+    - target: {fileID: 5857856110383237363, guid: 6b861d93a1bf71940b9855f2025edb6b, type: 3}
+      propertyPath: locationEffects.Array.data[1].locationName
+      value: Kitchen
+      objectReference: {fileID: 0}
+    - target: {fileID: 5857856110383237363, guid: 6b861d93a1bf71940b9855f2025edb6b, type: 3}
+      propertyPath: locationEffects.Array.data[2].hungerEffect
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5857856110383237363, guid: 6b861d93a1bf71940b9855f2025edb6b, type: 3}
+      propertyPath: locationEffects.Array.data[2].locationName
+      value: Livingroom
+      objectReference: {fileID: 0}
+    - target: {fileID: 5857856110383237363, guid: 6b861d93a1bf71940b9855f2025edb6b, type: 3}
+      propertyPath: locationEffects.Array.data[3].hungerEffect
+      value: -1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5857856110383237363, guid: 6b861d93a1bf71940b9855f2025edb6b, type: 3}
+      propertyPath: locationEffects.Array.data[3].locationName
+      value: Cafeteria
+      objectReference: {fileID: 0}
+    - target: {fileID: 5857856110383237363, guid: 6b861d93a1bf71940b9855f2025edb6b, type: 3}
+      propertyPath: locationEffects.Array.data[0].lonelinessEffect
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5857856110383237363, guid: 6b861d93a1bf71940b9855f2025edb6b, type: 3}
+      propertyPath: locationEffects.Array.data[0].sleepinessEffect
+      value: -10
+      objectReference: {fileID: 0}
+    - target: {fileID: 5857856110383237363, guid: 6b861d93a1bf71940b9855f2025edb6b, type: 3}
+      propertyPath: locationEffects.Array.data[1].sleepinessEffect
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5857856110383237363, guid: 6b861d93a1bf71940b9855f2025edb6b, type: 3}
+      propertyPath: locationEffects.Array.data[2].lonelinessEffect
+      value: -3
+      objectReference: {fileID: 0}
+    - target: {fileID: 5857856110383237363, guid: 6b861d93a1bf71940b9855f2025edb6b, type: 3}
+      propertyPath: locationEffects.Array.data[3].lonelinessEffect
+      value: -10
+      objectReference: {fileID: 0}
+    - target: {fileID: 7374676217253161889, guid: 6b861d93a1bf71940b9855f2025edb6b, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: -150523396, guid: 0c187a32c5bde4747be8d00770b07403, type: 3}
+    - target: {fileID: 8491660253301208204, guid: 6b861d93a1bf71940b9855f2025edb6b, type: 3}
+      propertyPath: m_IsTrigger
+      value: 1
+      objectReference: {fileID: 0}
+    m_RemovedComponents:
+    - {fileID: 5857856110383237363, guid: 6b861d93a1bf71940b9855f2025edb6b, type: 3}
+    - {fileID: 3049116197355406548, guid: 6b861d93a1bf71940b9855f2025edb6b, type: 3}
+    - {fileID: 5029068935263893207, guid: 6b861d93a1bf71940b9855f2025edb6b, type: 3}
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 6b861d93a1bf71940b9855f2025edb6b, type: 3}
 --- !u!1 &267456840 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3589852989733176586, guid: c627fdfce4d8947409a431ac8ce340bf, type: 3}
@@ -6322,6 +6461,11 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 8672883095682678184, guid: 5a00806bee21eba4e8ab1e40309ec8fa, type: 3}
   m_PrefabInstance: {fileID: 8580400563167085614}
   m_PrefabAsset: {fileID: 0}
+--- !u!1839735485 &990865614 stripped
+Tilemap:
+  m_CorrespondingSourceObject: {fileID: 4374057070908430735, guid: 5a00806bee21eba4e8ab1e40309ec8fa, type: 3}
+  m_PrefabInstance: {fileID: 8580400563167085614}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1112643833
 GameObject:
   m_ObjectHideFlags: 0
@@ -8099,6 +8243,10 @@ PrefabInstance:
       propertyPath: locationEffects.Array.data[3].lonelinessEffect
       value: -10
       objectReference: {fileID: 0}
+    - target: {fileID: 8491660253301208204, guid: 6b861d93a1bf71940b9855f2025edb6b, type: 3}
+      propertyPath: m_IsTrigger
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -8548,10 +8696,11 @@ SceneRoots:
   - {fileID: 519420032}
   - {fileID: 619394802}
   - {fileID: 1271567192}
+  - {fileID: 185414075}
   - {fileID: 1091932114237813179}
   - {fileID: 403329729}
   - {fileID: 623837783919926345}
-  - {fileID: 85287553}
+  - {fileID: 218908449}
   - {fileID: 1455878374}
   - {fileID: 7037353773129976796}
   - {fileID: 668021672}

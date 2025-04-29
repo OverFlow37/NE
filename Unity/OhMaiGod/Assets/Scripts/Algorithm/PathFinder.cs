@@ -8,7 +8,6 @@ using UnityEngine.Tilemaps;
 public class PathFinder : MonoBehaviour
 {
     [SerializeField] private bool mShowDebug = true;
-    [SerializeField] private Tilemap mGroundTilemap; // 바닥 타일맵 참조 [추후에 MapController 등에서 참조, 지금은 인스펙터에서 지정]
     private static PathFinder mInstance;
     // 싱글톤 인스턴스를 반환하는 프로퍼티
     public static PathFinder Instance
@@ -28,6 +27,7 @@ public class PathFinder : MonoBehaviour
         }
     }
 
+    private TileManager mTileManager;
     private int mSizeX, mSizeY;                              // 맵 크기
     private Node[,] mNodeArray;                              // 노드 배열
     private NodePriorityQueue mOpenList; // 열린 목록(우선순위 큐)
@@ -45,15 +45,9 @@ public class PathFinder : MonoBehaviour
         mInstance = this;
         DontDestroyOnLoad(gameObject);
         // 타일맵 범위 계산
-        if (mGroundTilemap != null)
-        {
-            mMapMinCell = mGroundTilemap.cellBounds.min;
-            mMapMaxCell = mGroundTilemap.cellBounds.max - Vector3Int.one; // max는 exclusive
-        }
-        else
-        {
-            Debug.LogError("PathFinder에 타일맵이 할당되지 않았습니다!", this);
-        }
+        mTileManager = TileManager.Instance;
+        mMapMinCell = mTileManager.GroundTilemap.cellBounds.min;
+        mMapMaxCell = mTileManager.GroundTilemap.cellBounds.max - Vector3Int.one; // max는 exclusive
     }
 
     /// <summary>
@@ -64,14 +58,14 @@ public class PathFinder : MonoBehaviour
     /// <returns>찾은 경로의 노드 리스트</returns>
     public List<Node> FindPath(Vector2 _startPos, Vector2 _targetPos)
     {
-        if (mGroundTilemap == null)
+        if (mTileManager == null)
         {
-            Debug.LogError("PathFinder에 타일맵이 할당되지 않았습니다!", this);
+            Debug.LogError("TileManager에 바닥 타일맵이 할당되지 않았습니다!", this);
             return null;
         }
         // 월드좌표를 셀좌표로 변환
-        Vector3Int startCell = mGroundTilemap.WorldToCell(_startPos);
-        Vector3Int targetCell = mGroundTilemap.WorldToCell(_targetPos);
+        Vector3Int startCell = mTileManager.GroundTilemap.WorldToCell(_startPos);
+        Vector3Int targetCell = mTileManager.GroundTilemap.WorldToCell(_targetPos);
         // 맵 범위 체크
         if (!IsPositionInMap(startCell) || !IsPositionInMap(targetCell))
         {
@@ -122,7 +116,7 @@ public class PathFinder : MonoBehaviour
     {
         return cell.x >= mMapMinCell.x && cell.x <= mMapMaxCell.x &&
                cell.y >= mMapMinCell.y && cell.y <= mMapMaxCell.y &&
-               mGroundTilemap.HasTile(cell);
+               mTileManager.GroundTilemap.HasTile(cell);
     }
 
     // 노드 배열을 타일맵 기준으로 초기화
@@ -145,17 +139,14 @@ public class PathFinder : MonoBehaviour
     // 해당 셀에 벽이 있는지 확인 (타일맵 기준)
     private bool CheckForWall(Vector3Int cell)
     {
-        if (!mGroundTilemap.HasTile(cell)) return true; // 타일이 없으면 벽으로 간주
-        Vector2 checkPos = mGroundTilemap.GetCellCenterWorld(cell);
-        int wallLayer = LayerMask.GetMask("Wall");
-        int obstacleLayer = LayerMask.GetMask("Obstacles");
-        int layerMask = wallLayer | obstacleLayer;
-        Collider2D[] colliders = Physics2D.OverlapCircleAll(checkPos, 0.4f, layerMask);
+        if (!mTileManager.GroundTilemap.HasTile(cell)) return true; // 타일이 없으면 벽으로 간주
+        Vector2 checkPos = mTileManager.GroundTilemap.GetCellCenterWorld(cell);
+        Collider2D[] colliders = Physics2D.OverlapCircleAll(checkPos, 0.4f, mTileManager.ObstacleLayerMask);
         if (colliders.Length > 0)
         {
             foreach (Collider2D collider in colliders)
             {
-                if (((1 << collider.gameObject.layer) & layerMask) != 0)
+                if (((1 << collider.gameObject.layer) & mTileManager.ObstacleLayerMask) != 0)
                 {
                     return true;
                 }
@@ -292,12 +283,7 @@ public class PathFinder : MonoBehaviour
         Vector2 direction = (endPos - startPos).normalized;
         float distance = Vector2.Distance(startPos, endPos);
 
-        // 벽과 장애물 레이어 모두 확인
-        int wallLayer = LayerMask.GetMask("Wall");
-        int obstacleLayer = LayerMask.GetMask("Obstacles");
-        int layerMask = wallLayer | obstacleLayer;  // 두 레이어를 모두 포함
-
-        RaycastHit2D hit = Physics2D.Raycast(startPos, direction, distance, layerMask);
+        RaycastHit2D hit = Physics2D.Raycast(startPos, direction, distance, mTileManager.ObstacleLayerMask);
         return hit.collider == null;
     }
 
