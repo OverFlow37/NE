@@ -28,7 +28,7 @@ public class TileManager : MonoBehaviour
     public LayerMask WallLayerMask { get { return mWallLayerMask; } }
     public LayerMask ObjectLayerMask { get { return mObjectLayerMask; } }
     public LayerMask NPCLayerMask { get { return mNPCLayerMask; } }
-    public LayerMask ObstacleLayerMask { get { return mWallLayerMask | mObjectLayerMask; } }
+    public LayerMask ObstacleLayerMask { get { return mWallLayerMask | mObjectLayerMask | mNPCLayerMask; } }
 
     public void AddSectionTilemap(Tilemap _tilemap)
     {

@@ -27,7 +27,7 @@ public class PathFinder : MonoBehaviour
         }
     }
 
-    private TileManager mTileManager;
+    private GameObject mGameObject;
     private int mSizeX, mSizeY;                              // 맵 크기
     private Node[,] mNodeArray;                              // 노드 배열
     private NodePriorityQueue mOpenList; // 열린 목록(우선순위 큐)
@@ -45,9 +45,8 @@ public class PathFinder : MonoBehaviour
         mInstance = this;
         DontDestroyOnLoad(gameObject);
         // 타일맵 범위 계산
-        mTileManager = TileManager.Instance;
-        mMapMinCell = mTileManager.GroundTilemap.cellBounds.min;
-        mMapMaxCell = mTileManager.GroundTilemap.cellBounds.max - Vector3Int.one; // max는 exclusive
+        mMapMinCell = TileManager.Instance.GroundTilemap.cellBounds.min;
+        mMapMaxCell = TileManager.Instance.GroundTilemap.cellBounds.max - Vector3Int.one; // max는 exclusive
     }
 
     /// <summary>
@@ -55,17 +54,19 @@ public class PathFinder : MonoBehaviour
     /// </summary>
     /// <param name="_startPos">시작 위치(월드좌표)</param>
     /// <param name="_targetPos">목표 위치(월드좌표)</param>
+    /// <param name="_gameObject">경로를 찾을 게임 오브젝트</param>
     /// <returns>찾은 경로의 노드 리스트</returns>
-    public List<Node> FindPath(Vector2 _startPos, Vector2 _targetPos)
+    public List<Node> FindPath(Vector2 _startPos, Vector2 _targetPos, GameObject _gameObject)
     {
-        if (mTileManager == null)
+        mGameObject = _gameObject;
+        if (TileManager.Instance == null)
         {
             Debug.LogError("TileManager에 바닥 타일맵이 할당되지 않았습니다!", this);
             return null;
         }
         // 월드좌표를 셀좌표로 변환
-        Vector3Int startCell = mTileManager.GroundTilemap.WorldToCell(_startPos);
-        Vector3Int targetCell = mTileManager.GroundTilemap.WorldToCell(_targetPos);
+        Vector3Int startCell = TileManager.Instance.GroundTilemap.WorldToCell(_startPos);
+        Vector3Int targetCell = TileManager.Instance.GroundTilemap.WorldToCell(_targetPos);
         // 맵 범위 체크
         if (!IsPositionInMap(startCell) || !IsPositionInMap(targetCell))
         {
@@ -84,7 +85,7 @@ public class PathFinder : MonoBehaviour
         }
         if (targetNode.isWall)
         {
-            Debug.LogError($"목표점이 벽입니다. 위치: {targetCell}");
+            Debug.Log($"목표점이 벽입니다. 위치: {targetCell}");
             return null;
         }
 
@@ -116,7 +117,7 @@ public class PathFinder : MonoBehaviour
     {
         return cell.x >= mMapMinCell.x && cell.x <= mMapMaxCell.x &&
                cell.y >= mMapMinCell.y && cell.y <= mMapMaxCell.y &&
-               mTileManager.GroundTilemap.HasTile(cell);
+               TileManager.Instance.GroundTilemap.HasTile(cell);
     }
 
     // 노드 배열을 타일맵 기준으로 초기화
@@ -139,14 +140,15 @@ public class PathFinder : MonoBehaviour
     // 해당 셀에 벽이 있는지 확인 (타일맵 기준)
     private bool CheckForWall(Vector3Int cell)
     {
-        if (!mTileManager.GroundTilemap.HasTile(cell)) return true; // 타일이 없으면 벽으로 간주
-        Vector2 checkPos = mTileManager.GroundTilemap.GetCellCenterWorld(cell);
-        Collider2D[] colliders = Physics2D.OverlapCircleAll(checkPos, 0.4f, mTileManager.ObstacleLayerMask);
+        if (!TileManager.Instance.GroundTilemap.HasTile(cell)) return true; // 타일이 없으면 벽으로 간주
+        Vector2 checkPos = TileManager.Instance.GroundTilemap.GetCellCenterWorld(cell);
+        Collider2D[] colliders = Physics2D.OverlapCircleAll(checkPos, 0.4f, TileManager.Instance.ObstacleLayerMask);
         if (colliders.Length > 0)
         {
             foreach (Collider2D collider in colliders)
             {
-                if (((1 << collider.gameObject.layer) & mTileManager.ObstacleLayerMask) != 0)
+                if (collider.gameObject == mGameObject) continue;
+                if (((1 << collider.gameObject.layer) & TileManager.Instance.ObstacleLayerMask) != 0)
                 {
                     return true;
                 }
@@ -283,15 +285,15 @@ public class PathFinder : MonoBehaviour
         Vector2 direction = (endPos - startPos).normalized;
         float distance = Vector2.Distance(startPos, endPos);
 
-        RaycastHit2D hit = Physics2D.Raycast(startPos, direction, distance, mTileManager.ObstacleLayerMask);
+        RaycastHit2D hit = Physics2D.Raycast(startPos, direction, distance, TileManager.Instance.ObstacleLayerMask);
         return hit.collider == null;
     }
 
     // 두 지점 사이의 경로 비용을 계산하는 메서드
-    public float CalculatePathCost(Vector2 startWorldPos, Vector2 targetWorldPos)
+    public float CalculatePathCost(Vector2 startWorldPos, Vector2 targetWorldPos, GameObject _gameObject)
     {
         // FindPath로 경로를 구함
-        List<Node> path = FindPath(startWorldPos, targetWorldPos);
+        List<Node> path = FindPath(startWorldPos, targetWorldPos, _gameObject);
         if (path == null || path.Count == 0)
             return float.MaxValue; // 경로가 없으면 최대값 반환
 

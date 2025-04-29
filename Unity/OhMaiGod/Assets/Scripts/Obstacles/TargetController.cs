@@ -13,8 +13,6 @@ public class TargetController : MonoBehaviour
     private List<Vector2> mAvailablePositions;                  // 사용 가능한 위치 목록
     private Collider2D mTargetCollider;                         // 타겟의 콜라이더
     private HashSet<Vector3Int> mOccupiedCells;                 // 타겟이 차지하는 셀 목록
-    private TileManager mTileManager;
-
     // 초기화
     private void Awake() // Start 대신 Awake 사용 고려 (Collider 참조 등)
     {
@@ -31,7 +29,6 @@ public class TargetController : MonoBehaviour
             enabled = false;
             return;
         }
-        mTileManager = TileManager.Instance;
         mStandingPoints = new List<GameObject>();
         mAvailablePositions = new List<Vector2>();
         mOccupiedCells = new HashSet<Vector3Int>();
@@ -76,17 +73,17 @@ public class TargetController : MonoBehaviour
     private void FindOccupiedCells()
     {
         Bounds bounds = mTargetCollider.bounds;
-        Vector3Int minCell = mTileManager.GroundTilemap.WorldToCell(bounds.min);
-        Vector3Int maxCell = mTileManager.GroundTilemap.WorldToCell(bounds.max);
+        Vector3Int minCell = TileManager.Instance.GroundTilemap.WorldToCell(bounds.min);
+        Vector3Int maxCell = TileManager.Instance.GroundTilemap.WorldToCell(bounds.max);
 
         for (int x = minCell.x; x <= maxCell.x; x++)
         {
             for (int y = minCell.y; y <= maxCell.y; y++)
             {
                 Vector3Int cellPos = new Vector3Int(x, y, 0);
-                Vector2 cellCenter = mTileManager.GroundTilemap.GetCellCenterWorld(cellPos);
+                Vector2 cellCenter = TileManager.Instance.GroundTilemap.GetCellCenterWorld(cellPos);
                 // 콜라이더가 실제로 해당 셀 중심을 포함하는지 확인 (더 정확한 방법)
-                if (mTargetCollider.OverlapPoint(cellCenter) && mTileManager.GroundTilemap.HasTile(cellPos))
+                if (mTargetCollider.OverlapPoint(cellCenter) && TileManager.Instance.GroundTilemap.HasTile(cellPos))
                 {
                     mOccupiedCells.Add(cellPos);
                 }
@@ -123,11 +120,11 @@ public class TargetController : MonoBehaviour
         // 2. 인접 셀들의 유효성 검사
         foreach (Vector3Int cell in neighborCells)
         {
-            if (mTileManager.GroundTilemap.HasTile(cell))
+            if (TileManager.Instance.GroundTilemap.HasTile(cell))
             {
-                Vector2 worldPos = mTileManager.GroundTilemap.GetCellCenterWorld(cell);
-                bool hasWall = Physics2D.OverlapCircle(worldPos, mCheckRadius, mTileManager.WallLayerMask);
-                Collider2D[] targets = Physics2D.OverlapCircleAll(worldPos, mCheckRadius, mTileManager.ObstacleLayerMask);
+                Vector2 worldPos = TileManager.Instance.GroundTilemap.GetCellCenterWorld(cell);
+                bool hasWall = Physics2D.OverlapCircle(worldPos, mCheckRadius, TileManager.Instance.WallLayerMask);
+                Collider2D[] targets = Physics2D.OverlapCircleAll(worldPos, mCheckRadius, TileManager.Instance.ObstacleLayerMask);
                 bool hasOtherTarget = false;
                 foreach (var targetCollider in targets)
                 {
@@ -174,7 +171,7 @@ public class TargetController : MonoBehaviour
     // 서있는 지점들 업데이트
     public void UpdateStandingPoints()
     {
-        if (mTileManager == null || mTargetCollider == null) return;
+        if (TileManager.Instance == null || mTargetCollider == null) return;
         InitializeStandingPoints();
     }
 
@@ -187,7 +184,7 @@ public class TargetController : MonoBehaviour
     // 디버그 정보 표시
     private void OnDrawGizmos()
     {
-        if (!mShowDebug || mTileManager == null || !Application.isPlaying) return; // Awake/Start 이후 실행 보장
+        if (!mShowDebug || TileManager.Instance == null || !Application.isPlaying) return; // Awake/Start 이후 실행 보장
 
         // 차지하는 셀 표시
         if (mOccupiedCells != null)
@@ -195,7 +192,7 @@ public class TargetController : MonoBehaviour
             Gizmos.color = new Color(1f, 0.5f, 0f, 0.5f); // 주황색 반투명
             foreach (Vector3Int cell in mOccupiedCells)
             {
-                Gizmos.DrawCube(mTileManager.GroundTilemap.GetCellCenterWorld(cell), mTileManager.GroundTilemap.cellSize * 0.9f);
+                Gizmos.DrawCube(TileManager.Instance.GroundTilemap.GetCellCenterWorld(cell), TileManager.Instance.GroundTilemap.cellSize * 0.9f);
             }
         }
 
