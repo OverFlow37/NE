@@ -30,7 +30,7 @@ public class PathFinder : MonoBehaviour
 
     private int mSizeX, mSizeY;                              // 맵 크기
     private Node[,] mNodeArray;                              // 노드 배열
-    private List<Node> mOpenList;                            // 열린 목록
+    private NodePriorityQueue mOpenList; // 열린 목록(우선순위 큐)
     private List<Node> mClosedList;                          // 닫힌 목록
     private Vector3Int mMapMinCell;                          // 타일맵 최소 셀
     private Vector3Int mMapMaxCell;                          // 타일맵 최대 셀
@@ -94,14 +94,14 @@ public class PathFinder : MonoBehaviour
             return null;
         }
 
-        mOpenList = new List<Node>() { startNode };
+        mOpenList = new NodePriorityQueue();
+        mOpenList.Enqueue(startNode);
         mClosedList = new List<Node>();
         List<Node> finalPath = new List<Node>();
 
         while (mOpenList.Count > 0)
         {
-            Node currentNode = GetLowestFNode();
-            mOpenList.Remove(currentNode);
+            Node currentNode = mOpenList.Dequeue(); // F값이 가장 낮은 노드 pop
             mClosedList.Add(currentNode);
 
             if (currentNode == targetNode)
@@ -164,18 +164,6 @@ public class PathFinder : MonoBehaviour
         return false;
     }
 
-    // 열린 목록에서 F값이 가장 낮은 노드를 반환하는 메서드
-    private Node GetLowestFNode()
-    {
-        Node lowestNode = mOpenList[0];
-        for (int i = 1; i < mOpenList.Count; i++)
-        {
-            if (mOpenList[i].F <= lowestNode.F && mOpenList[i].H < lowestNode.H)
-                lowestNode = mOpenList[i];
-        }
-        return lowestNode;
-    }
-
     // 현재 노드의 이웃 노드들을 탐색하는 메서드
     private void ExploreNeighbors(Node _currentNode, Node _targetNode)
     {
@@ -236,7 +224,11 @@ public class PathFinder : MonoBehaviour
                 // 열린 목록에 추가
                 if (!mOpenList.Contains(neighborNode))
                 {
-                    mOpenList.Add(neighborNode);
+                    mOpenList.Enqueue(neighborNode);
+                }
+                else
+                {
+                    mOpenList.UpdatePriority(neighborNode);
                 }
             }
         }
@@ -366,5 +358,74 @@ public class PathFinder : MonoBehaviour
                 Gizmos.DrawSphere(pos, 0.05f);
             }
         }
+    }
+}
+
+// 최소 힙 기반 우선순위 큐 (F값 기준)
+public class NodePriorityQueue
+{
+    private List<Node> heap = new List<Node>();
+    public int Count => heap.Count;
+    public void Enqueue(Node node)
+    {
+        heap.Add(node);
+        int i = heap.Count - 1;
+        while (i > 0)
+        {
+            int parent = (i - 1) / 2;
+            if (Compare(heap[i], heap[parent]) >= 0) break;
+            Swap(i, parent);
+            i = parent;
+        }
+    }
+    public Node Dequeue()
+    {
+        if (heap.Count == 0) return null;
+        Node root = heap[0];
+        heap[0] = heap[heap.Count - 1];
+        heap.RemoveAt(heap.Count - 1);
+        Heapify(0);
+        return root;
+    }
+    public bool Contains(Node node) => heap.Contains(node);
+    public void UpdatePriority(Node node)
+    {
+        int i = heap.IndexOf(node);
+        if (i >= 0)
+        {
+            // 위로 올리기
+            while (i > 0)
+            {
+                int parent = (i - 1) / 2;
+                if (Compare(heap[i], heap[parent]) >= 0) break;
+                Swap(i, parent);
+                i = parent;
+            }
+            // 아래로 내리기
+            Heapify(i);
+        }
+    }
+    private void Heapify(int i)
+    {
+        int left = 2 * i + 1, right = 2 * i + 2, smallest = i;
+        if (left < heap.Count && Compare(heap[left], heap[smallest]) < 0) smallest = left;
+        if (right < heap.Count && Compare(heap[right], heap[smallest]) < 0) smallest = right;
+        if (smallest != i)
+        {
+            Swap(i, smallest);
+            Heapify(smallest);
+        }
+    }
+    private int Compare(Node a, Node b)
+    {
+        // F값이 낮은 게 우선, F가 같으면 H가 낮은 게 우선
+        if (a.F != b.F) return a.F.CompareTo(b.F);
+        return a.H.CompareTo(b.H);
+    }
+    private void Swap(int i, int j)
+    {
+        Node tmp = heap[i];
+        heap[i] = heap[j];
+        heap[j] = tmp;
     }
 }
