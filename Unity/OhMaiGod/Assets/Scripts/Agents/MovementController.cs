@@ -127,7 +127,8 @@ public class MovementController : MonoBehaviour
                     float minPathCost = float.MaxValue;
                     foreach (Vector2 point in standingPoints)
                     {
-                        float pathCost = PathFinder.Instance.FindPath(transform.position, point)?.Count ?? float.MaxValue;
+                        float pathCost = PathFinder.Instance.CalculatePathCost(transform.position, point);
+                        Debug.Log($"{gameObject.name}이(가) {point}로 이동하는 비용: {pathCost}");
                         if (pathCost < minPathCost)
                         {
                             minPathCost = pathCost;

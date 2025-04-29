@@ -309,69 +309,16 @@ public class PathFinder : MonoBehaviour
         return hit.collider == null;
     }
 
-    // 두 지점 사이의 실제 경로 거리를 계산하는 메서드
-    public float CalculatePathCost(Vector2Int _startPos, Vector2Int _targetPos, Vector2Int _bottomLeft, Vector2Int _topRight)
+    // 두 지점 사이의 경로 비용을 계산하는 메서드
+    public float CalculatePathCost(Vector2 startWorldPos, Vector2 targetWorldPos)
     {
-        List<Node> path = FindPath(_startPos, _targetPos);
+        // FindPath로 경로를 구함
+        List<Node> path = FindPath(startWorldPos, targetWorldPos);
         if (path == null || path.Count == 0)
-        {
-            return float.MaxValue; // 경로를 찾을 수 없는 경우 최대값 반환
-        }
+            return float.MaxValue; // 경로가 없으면 최대값 반환
 
-        float totalCost = 0f;
-
-        // 실제 이동 거리 계산
-        for (int i = 0; i < path.Count - 1; i++)
-        {
-            // 실제 이동 거리를 유클리드 거리로 계산하고 가중치 적용
-            float moveDist = Vector2.Distance(
-                new Vector2(path[i].x, path[i].y),
-                new Vector2(path[i + 1].x, path[i + 1].y)
-            );
-            totalCost += moveDist * 100f; // 거리에 대한 가중치 증가
-
-            // 방향 전환 비용 추가
-            if (i > 0)
-            {
-                Vector2Int prevDir = new Vector2Int(
-                    path[i].x - path[i - 1].x,
-                    path[i].y - path[i - 1].y
-                );
-                Vector2Int nextDir = new Vector2Int(
-                    path[i + 1].x - path[i].x,
-                    path[i + 1].y - path[i].y
-                );
-
-                if (prevDir != nextDir)
-                {
-                    // 180도 회전(반대 방향)인 경우
-                    if (prevDir.x == -nextDir.x && prevDir.y == -nextDir.y)
-                    {
-                        totalCost += 50f; // U턴 패널티
-                    }
-                    // 90도 회전인 경우
-                    else if (prevDir.x != nextDir.x || prevDir.y != nextDir.y)
-                    {
-                        totalCost += 25f; // 일반 회전 패널티
-                    }
-                }
-            }
-        }
-
-        // 시작점에서의 직선 거리를 고려한 추가 가중치
-        float directDistance = Vector2.Distance(
-            new Vector2(_startPos.x, _startPos.y),
-            new Vector2(_targetPos.x, _targetPos.y)
-        );
-
-        // 경로가 직선 거리의 1.5배를 넘어가면 패널티 부여
-        if (totalCost > directDistance * 150f)
-        {
-            float detourPenalty = (totalCost - directDistance * 150f) * 2f;
-            totalCost += detourPenalty;
-        }
-
-        return totalCost;
+        // 마지막 노드의 G값(누적 실제 비용)을 반환
+        return path[path.Count - 1].G;
     }
 
     // 디버그용 기즈모를 그리는 메서드
