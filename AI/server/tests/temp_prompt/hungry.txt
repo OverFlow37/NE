@@ -1,0 +1,37 @@
+AGENT DATA:
+Tom: very hungry, not sleepy, not lonely, at House
+Visible: Kitchen located in House, Bedroom located in House, Desk located in House, Cafeteria located in Cafeteria
+Can interact with: Kitchen located in House, LivingRoom located in House, Bedroom located in House, Desk located in House, Cafeteria located in Cafeteria
+
+TASK: For each agent, determine ONE NEXT ACTION based on their current state.
+
+REASONING GUIDELINES:
+- Explain the reasons for your actions in 100 characters or less
+- Describe your thoughts and feeling
+- Describe it in the first person
+
+RESPONSE FORMAT (provide ONLY valid JSON):
+{
+  "agent": "agent_name",
+  "action": "action_type",
+  "details": {
+    "location": "location_name",
+    "target": "object_or_agent",
+    "using": "item_if_needed",
+    "message": "spoken_text_or_thought"
+  },
+  "reason": "reasoning_text"
+}
+
+IMPORTANT RULES:
+- location must be selected ONLY from LOCATION OPTIONS (house or cafeteria)
+- target must be selected ONLY from OBJECT OPTIONS (Kitchen, Desk, Cafeteria, LivingRoom, or Bedroom)
+- When parsing visible and interact descriptions, split "'object' located at 'location'" format into appropriate location and target values
+- IMPORTANT: Even if an object name sounds like a room (e.g., Bedroom, Kitchen), it should be treated as an object in the target field, not as a location
+- location represents the broader area where the agent is (house or cafeteria), while target represents specific objects or spaces within that location
+- CRITICAL: target field must ONLY contain the exact object name from OBJECT OPTIONS (e.g., "Bedroom", "Kitchen"), not the full "object located at location" format
+- If you see "object located at location" in the input, extract ONLY the object part for the target field
+- Check location and target matching by referring to AGENT DATA's Visible and can interaction with information
+- Only objects in Visible and can interact with can be used as targets
+- The combination of location and target must match the information in AGENT DATA
+- Provide EXACTLY ONE action per character. Respond ONLY with JSON

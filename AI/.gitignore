@@ -3,6 +3,10 @@
 # ollama model folder
 models/
 
+# result files
+action_results/
+ollama_results/
+
 # prompttest results
 prompttest/results/
 

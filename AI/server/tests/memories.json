@@ -1,0 +1,319 @@
+{
+  "John": {
+    "memories": [
+      {
+        "event": "A tree suddenly grew at the city hall",
+        "action": "inspect tree cityhall"
+      },
+      { "event": "Food suddenly appeared at home", "action": "eat meal home" },
+      {
+        "event": "Alice requested a conversation at the city hall",
+        "action": "talk Alice cityhall"
+      },
+      {
+        "event": "Tom requested a conversation at the cafe",
+        "action": "talk Tom cafe"
+      },
+      {
+        "event": "Saw an apple in the forest",
+        "action": "collect apple forest"
+      },
+      {
+        "event": "Saw a computer at the city hall",
+        "action": "approach computer cityhall"
+      },
+      { "event": "Found a forest", "action": "explore forest" },
+      { "event": "Found a desert", "action": "explore desert" },
+      {
+        "event": "Saw my favorite apple in the forest",
+        "action": "pick apple forest"
+      },
+      {
+        "event": "Saw my favorite Sarah at the city hall",
+        "action": "observe Sarah cityhall"
+      },
+      { "event": "Saw Alice in the field", "action": "talk Alice field" },
+      {
+        "event": "Books suddenly piled up in the library",
+        "action": "organize books library"
+      },
+      {
+        "event": "A bicycle appeared on the ground at the school",
+        "action": "ride bike school"
+      },
+      {
+        "event": "A racing machine was added to the arcade",
+        "action": "play racing arcade"
+      },
+      {
+        "event": "Saw a new robot at the city hall",
+        "action": "inspect robot cityhall"
+      },
+      {
+        "event": "Received a conversation request from Mary at the cafe",
+        "action": "talk Mary cafe"
+      },
+      {
+        "event": "A stage was suddenly installed in the restaurant",
+        "action": "perform onstage restaurant"
+      },
+      {
+        "event": "Saw a new statue in the park",
+        "action": "examine statue park"
+      },
+      {
+        "event": "An AI desktop appeared in the library",
+        "action": "use desktop library"
+      },
+      {
+        "event": "A student requested a conversation at the school",
+        "action": "talk student school"
+      },
+      { "event": "Found a field", "action": "explore field" },
+      {
+        "event": "Saw my favorite racing machine in the arcade",
+        "action": "play racing arcade"
+      },
+      {
+        "event": "Saw my favorite pasta in the restaurant",
+        "action": "eat pasta restaurant"
+      },
+      { "event": "Saw John in the park", "action": "observe John park" },
+      {
+        "event": "Saw a cactus in the desert",
+        "action": "collect cactus desert"
+      },
+      {
+        "event": "Discovered a rare mushroom in the forest",
+        "action": "harvest mushroom forest"
+      },
+      {
+        "event": "A vending machine appeared at the city hall",
+        "action": "buy drink cityhall"
+      },
+      {
+        "event": "Saw a new drone at the school",
+        "action": "pilot drone school"
+      },
+      {
+        "event": "A wooden bookshelf grew in the library",
+        "action": "arrange shelf library"
+      },
+      { "event": "Tomatoes grew in the field", "action": "pick tomato field" },
+      {
+        "event": "A friend requested a conversation in the arcade",
+        "action": "talk friend arcade"
+      },
+      {
+        "event": "An AI chef appeared in the restaurant",
+        "action": "order dish restaurant"
+      },
+      {
+        "event": "Saw a new fountain in the park",
+        "action": "photograph fountain park"
+      },
+      {
+        "event": "A QR code appeared at the city hall",
+        "action": "scan code cityhall"
+      },
+      {
+        "event": "Found an oasis in the desert",
+        "action": "drink water desert"
+      },
+      {
+        "event": "Saw a strange rock in the forest",
+        "action": "collect rock forest"
+      },
+      {
+        "event": "A teacher requested a conversation at the school",
+        "action": "talk teacher school"
+      },
+      {
+        "event": "A digital board was installed in the library",
+        "action": "use board library"
+      },
+      { "event": "Saw a bee in the field", "action": "observe bee field" },
+      {
+        "event": "Saw a new VR machine in the arcade",
+        "action": "try VR arcade"
+      },
+      {
+        "event": "A cooking robot requested a conversation in the restaurant",
+        "action": "talk robot restaurant"
+      },
+      {
+        "event": "An old tree suddenly grew in the park",
+        "action": "climb tree park"
+      },
+      {
+        "event": "A hologram appeared at the city hall",
+        "action": "watch hologram cityhall"
+      },
+      { "event": "Saw a UFO in the desert", "action": "record UFO desert" },
+      {
+        "event": "Saw a butterfly in the forest",
+        "action": "catch butterfly forest"
+      },
+      {
+        "event": "A new locker appeared at the school",
+        "action": "store bag school"
+      },
+      {
+        "event": "A tree suddenly grew at the city hall",
+        "action": "inspect tree cityhall"
+      },
+      { "event": "Food suddenly appeared at home", "action": "eat meal home" },
+      {
+        "event": "Alice requested a conversation at the city hall",
+        "action": "talk Alice cityhall"
+      },
+      {
+        "event": "Tom requested a conversation at the cafe",
+        "action": "talk Tom cafe"
+      },
+      {
+        "event": "Saw an apple in the forest",
+        "action": "collect apple forest"
+      },
+      { "event": "Found a desert", "action": "explore desert" },
+      {
+        "event": "Saw my favorite apple in the forest",
+        "action": "pick apple forest"
+      },
+      {
+        "event": "Saw my favorite Sarah at the city hall",
+        "action": "observe Sarah cityhall"
+      },
+      { "event": "Saw Alice in the field", "action": "watch Alice field" },
+      {
+        "event": "Books suddenly piled up in the library",
+        "action": "organize books library"
+      },
+      {
+        "event": "A racing machine was added to the arcade",
+        "action": "play racing arcade"
+      },
+      {
+        "event": "Saw a new robot at the city hall",
+        "action": "inspect robot cityhall"
+      },
+      {
+        "event": "A stage was suddenly installed in the restaurant",
+        "action": "perform onstage restaurant"
+      },
+      {
+        "event": "Saw a new fountain in the park",
+        "action": "photograph fountain park"
+      },
+      {
+        "event": "Saw a butterfly in the forest",
+        "action": "catch butterfly forest"
+      },
+
+      {
+        "event": "A bird suddenly landed in the park",
+        "action": "observe bird park"
+      },
+      {
+        "event": "Michael requested a conversation at the school",
+        "action": "talk Michael school"
+      },
+      { "event": "Discovered a mountain", "action": "explore mountain" },
+      { "event": "Found a lake", "action": "explore lake" },
+      {
+        "event": "Saw a laptop in the library",
+        "action": "use laptop library"
+      },
+      {
+        "event": "Saw my favorite book in the library",
+        "action": "read book library"
+      },
+      {
+        "event": "Saw Emma in the restaurant",
+        "action": "observe Emma restaurant"
+      },
+      {
+        "event": "Saw a robot in the arcade",
+        "action": "inspect robot arcade"
+      },
+      {
+        "event": "Food suddenly appeared at the school",
+        "action": "eat snack school"
+      },
+      {
+        "event": "A tree suddenly grew at home",
+        "action": "inspect tree home"
+      },
+      { "event": "Saw a drone in the park", "action": "pilot drone park" },
+      { "event": "Found a cave", "action": "explore cave" },
+      {
+        "event": "Saw my favorite cake in the cafe",
+        "action": "eat cake cafe"
+      },
+      { "event": "Saw John in the school", "action": "observe John school" },
+      { "event": "Discovered an island", "action": "explore island" },
+      {
+        "event": "Saw a painting in the museum",
+        "action": "examine painting museum"
+      },
+      {
+        "event": "A robot requested a conversation in the library",
+        "action": "talk robot library"
+      },
+      {
+        "event": "Saw a telescope at the city hall",
+        "action": "observe telescope cityhall"
+      },
+      { "event": "Found a volcano", "action": "explore volcano" },
+      {
+        "event": "Saw my favorite coffee in the cafe",
+        "action": "drink coffee cafe"
+      },
+      { "event": "Saw Linda in the desert", "action": "observe Linda desert" },
+      { "event": "Saw a bicycle in the forest", "action": "ride bike forest" },
+      {
+        "event": "A fountain suddenly appeared in the school",
+        "action": "photograph fountain school"
+      },
+      { "event": "Discovered a waterfall", "action": "explore waterfall" },
+      {
+        "event": "Saw my favorite game machine in the arcade",
+        "action": "play game arcade"
+      },
+      {
+        "event": "Saw a squirrel in the park",
+        "action": "observe squirrel park"
+      },
+      {
+        "event": "Saw a drone in the city hall",
+        "action": "inspect drone cityhall"
+      },
+      {
+        "event": "Saw painting in the library",
+        "action": "examine painting library"
+      },
+      { "event": "Discovered a glacier", "action": "explore glacier" },
+      {
+        "event": "A car suddenly appeared in the field",
+        "action": "drive car field"
+      },
+      {
+        "event": "Saw flower in the field",
+        "action": "pick flower field"
+      },
+      { "event": "Saw a comet in the desert", "action": "record comet desert" },
+      {
+        "event": "Saw a smartphone at the city hall",
+        "action": "use smartphone cityhall"
+      },
+      {
+        "event": "Saw pizza in the restaurant",
+        "action": "eat pizza restaurant"
+      },
+      {
+        "event": "I'm Hungry",
+        "action": "eat chicken park"
+      }
+    ]
+  }
+}
