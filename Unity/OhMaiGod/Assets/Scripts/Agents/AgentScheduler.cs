@@ -3,29 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-
-[Serializable]
-public class ScheduleItem
-{
-    public string ID;                   // 활동 고유 식별자
-    public string ActionName;           // 활동 이름
-    public string LocationName;         // 목적지 위치 이름
-    public TimeSpan StartTime;          // 시작 시간 (하루 중)
-    public TimeSpan EndTime;            // 종료 시간 (하루 중)
-    public int Priority;                // 우선순위 (높을수록 중요)
-    public bool IsFlexible;             // 시간이 유연한지 여부
-    public bool IsCompleted;            // 완료 여부
-    public string ActionDetails;        // 활동에 대한 추가 정보 (JSON)
-    public string Reason;               // 활동 선택 이유
-
-    // 다른 일정과의 시간 충돌 여부를 검사하는 함수
-    public bool ConflictsWith(ScheduleItem other)
-    {
-        return (StartTime >= other.StartTime && StartTime < other.EndTime) ||
-               (EndTime > other.StartTime && EndTime <= other.EndTime) ||
-               (StartTime <= other.StartTime && EndTime >= other.EndTime);
-    }
-}
+using OhMAIGod.Agent;
 
 public class AgentScheduler : MonoBehaviour
 {

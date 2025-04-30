@@ -3,68 +3,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+using OhMAIGod.Agent;
+
 public class AgentController : MonoBehaviour
 {
     [SerializeField] private AgentUI agentUI;
-
-    // Agent의 행동 상태
-    public enum AgentState
-    {
-        IDLE = 0,
-        WAITING,
-        MOVING,
-        INTERACTING,   // 오브젝트와 상호작용
-        MovingToLocation,
-        PerformingAction
-    }
-
-    // Agent의 욕구 종류
-    public enum NeedType
-    {
-        HUNGER = 0,
-        SLEEPINESS,
-        LONELINESS,
-        // HAPPINESS,
-        // STRESS,
-    }
-
-    [System.Serializable]
-    public struct AgentNeeds
-    {
-        [SerializeField] private int hunger;      // 1-10 범위의 배고픔 수치
-        [SerializeField] private int sleepiness;  // 1-10 범위의 졸림 수치
-        [SerializeField] private int loneliness;  // 1-10 범위의 외로움 수치
-
-        public int Hunger 
-        { 
-            get => hunger;
-            set => hunger = Mathf.Clamp(value, 1, 10);
-        }
-
-        public int Sleepiness
-        {
-            get => sleepiness;
-            set => sleepiness = Mathf.Clamp(value, 1, 10);
-        }
-
-        public int Loneliness
-        {
-            get => loneliness;
-            set => loneliness = Mathf.Clamp(value, 1, 10);
-        }
-    }
-
-    [System.Serializable]
-    public struct LocationEmoteEffect
-    {
-        public string locationName;        // 장소 이름
-        [Range(-10, 0)]
-        public int hungerEffect;          // 배고픔 변화량
-        [Range(-10, 0)]
-        public int sleepinessEffect;      // 졸림 변화량
-        [Range(-10, 0)]
-        public int lonelinessEffect;      // 외로움 변화량
-    }
 
     [Header("Agent States")]
     [SerializeField] private AgentNeeds mAgentNeeds;                // 현재 Agent의 욕구 수치
