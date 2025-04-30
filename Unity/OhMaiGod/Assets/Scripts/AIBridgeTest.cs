@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using System;
+using OhMAIGod.Agent;
 
 // ========== AI에게 전송하는 데이터 구조체들 ==========
 // 에이전트가 인식할 수 있는 오브젝트 그룹 정의
@@ -20,7 +21,7 @@ public struct ObjectGroup
 public struct Agent
 {
     public string name;                         // 에이전트 이름
-    public AgentController.AgentNeeds state;   // 에이전트의 감정 상태
+    public AgentNeeds state;   // 에이전트의 감정 상태
     public string location;                     // 현재 위치
     public string personality;                  // 성격 특성
     public ObjectGroup[] visible_objects;       // 볼 수 있는 오브젝트들
@@ -150,7 +151,7 @@ public class AIBridgeTest : MonoBehaviour
         mIsRequesting = true;
 
         // 현재 에이전트의 상태 정보 가져오기
-        AgentController.AgentNeeds currentState = mAgentController.GetAgentNeeds();
+        AgentNeeds currentState = mAgentController.GetAgentNeeds();
 
         // AI 서버에 보낼 요청 데이터 생성
         AgentRequest requestData = new AgentRequest
