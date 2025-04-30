@@ -7759,6 +7759,10 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3049116197355406548, guid: 6b861d93a1bf71940b9855f2025edb6b, type: 3}
+      propertyPath: mGroundTilemap
+      value: 
+      objectReference: {fileID: 597632758}
+    - target: {fileID: 3049116197355406548, guid: 6b861d93a1bf71940b9855f2025edb6b, type: 3}
       propertyPath: mPathUpdateInterval
       value: 1
       objectReference: {fileID: 0}
@@ -7992,6 +7996,10 @@ PrefabInstance:
       propertyPath: mShowDebug
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5465980533100705227, guid: d80bb227c084d9b46b156c2c1a226b53, type: 3}
+      propertyPath: mGroundTilemap
+      value: 
+      objectReference: {fileID: 597632758}
     - target: {fileID: 8626390168911138499, guid: d80bb227c084d9b46b156c2c1a226b53, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0

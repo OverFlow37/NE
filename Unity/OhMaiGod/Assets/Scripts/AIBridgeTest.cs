@@ -150,7 +150,7 @@ public class AIBridgeTest : MonoBehaviour
         mIsRequesting = true;
 
         // 현재 에이전트의 상태 정보 가져오기
-        AgentController.AgentNeeds currentState = mAgentController.GetEmoteState();
+        AgentController.AgentNeeds currentState = mAgentController.GetAgentNeeds();
 
         // AI 서버에 보낼 요청 데이터 생성
         AgentRequest requestData = new AgentRequest
