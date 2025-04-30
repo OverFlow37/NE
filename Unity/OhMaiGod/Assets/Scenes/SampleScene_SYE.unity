@@ -367,33 +367,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8cd73f6cba2d18f49a3d7aa3d9cf9800, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  agentController: {fileID: 608388020}
-  agentScheduler: {fileID: 623837783919926347}
-  movementController: {fileID: 623837783919926346}
-  visibleObjects:
+  mAgentController: {fileID: 608388020}
+  mAgentScheduler: {fileID: 623837783919926347}
+  mMovementController: {fileID: 623837783919926346}
+  mVisibleObjects:
   - location: House
     objects:
     - Kitchen
     - LivingRoom
-    - Bedroom
-    - Desk
-    - food
+    - BedRoom
   - location: Cafeteria
     objects:
     - Cafeteria
+  mInteractableItems:
   - location: 
     objects: []
-  interactableItems:
-  - location: House
-    objects:
-    - Kitchen
-    - LivingRoom
-    - Bedroom
-    - Desk
-  - location: Cafeteria
-    objects:
-    - Cafeteria
-  sendButton: {fileID: 0}
 --- !u!4 &218890805
 Transform:
   m_ObjectHideFlags: 0
@@ -5863,6 +5851,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Desk
       objectReference: {fileID: 0}
+    - target: {fileID: 8663613268944117034, guid: f18a840692084c145b574bf9d30f315c, type: 3}
+      propertyPath: mGroundTilemap
+      value: 
+      objectReference: {fileID: 597632758}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -6291,6 +6283,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Cafeteria
       objectReference: {fileID: 0}
+    - target: {fileID: 8663613268944117034, guid: f18a840692084c145b574bf9d30f315c, type: 3}
+      propertyPath: mGroundTilemap
+      value: 
+      objectReference: {fileID: 597632758}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -6929,6 +6925,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: LivingRoom
       objectReference: {fileID: 0}
+    - target: {fileID: 8663613268944117034, guid: f18a840692084c145b574bf9d30f315c, type: 3}
+      propertyPath: mGroundTilemap
+      value: 
+      objectReference: {fileID: 597632758}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -7026,56 +7026,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1453046192}
   m_CullTransparentMesh: 1
---- !u!1 &1455878373
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1455878374}
-  - component: {fileID: 1455878375}
-  m_Layer: 0
-  m_Name: AIBridge
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 0
---- !u!4 &1455878374
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1455878373}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1455878375
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1455878373}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e4cbec0648745a341bc42c613de5afb0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  mApiUrl: http://localhost:5000/api/agent
-  mRequestInterval: 5
-  mMaxQueueSize: 10
-  mApiKey: 
-  mUseLocalFallback: 1
-  mShowDebugInfo: 1
 --- !u!1 &1486338051
 GameObject:
   m_ObjectHideFlags: 0
@@ -7731,89 +7681,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1687166613}
   m_CullTransparentMesh: 1
---- !u!1 &1731682519
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1731682521}
-  - component: {fileID: 1731682520}
-  - component: {fileID: 1731682522}
-  m_Layer: 0
-  m_Name: ScheduleTester
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 0
---- !u!114 &1731682520
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1731682519}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2ac606e9e7289d54e9d8625bc8317e74, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  mTargetAgent: {fileID: 608388020}
-  mTimeScale: 60
-  mCurrentTime: 00:00
-  mCurrentActivity: "\uC5C6\uC74C"
-  mActivityName: "\uC544\uCE68 \uC2DD\uC0AC"
-  mLocationName: Cafeteria
-  mStartTime: 09:00
-  mEndTime: 09:30
-  mPriority: 10
-  mIsFlexible: 0
-  mAddActivity: 0
-  mCompleteCurrentActivity: 0
-  mClearAllSchedule: 0
-  mApplyTimeScale: 1
---- !u!4 &1731682521
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1731682519}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1.3795995, y: -0.6094049, z: 0.01935961}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1731682522
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1731682519}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7e4b79f7be5858f4ebcbb82e48efbb7e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  mTargetAgent: {fileID: 608388020}
-  mTimeScale: 3000
-  mCurrentTime: 00:00
-  mCurrentActivity: "\uC5C6\uC74C"
-  mJsonInput: "{\r\n  \"who\": \"Tom\",\r\n  \"where\": \"Kitchen\",\r\n  \"what\":
-    \"Fridge\",\r\n  \"action\": \"Open fridge and get food\",\r\n  \"startTime\":
-    \"08:00\",\r\n  \"endTime\": \"08:15\",\r\n  \"priority\": 10,\r\n  \"isFlexible\":
-    false\r\n}"
-  mProcessJson: 0
-  mCompleteCurrentActivity: 0
-  mClearAllSchedule: 0
-  mApplyTimeScale: 0
 --- !u!1001 &1855011629
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -7866,6 +7733,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Bedroom
       objectReference: {fileID: 0}
+    - target: {fileID: 8663613268944117034, guid: f18a840692084c145b574bf9d30f315c, type: 3}
+      propertyPath: mGroundTilemap
+      value: 
+      objectReference: {fileID: 597632758}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -7887,6 +7758,10 @@ PrefabInstance:
       propertyPath: mUseNavMesh
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3049116197355406548, guid: 6b861d93a1bf71940b9855f2025edb6b, type: 3}
+      propertyPath: mGroundTilemap
+      value: 
+      objectReference: {fileID: 597632758}
     - target: {fileID: 3049116197355406548, guid: 6b861d93a1bf71940b9855f2025edb6b, type: 3}
       propertyPath: mPathUpdateInterval
       value: 1
@@ -8069,6 +7944,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c02464dbd72f4c1468831e98132f022d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isSpeechBubble: 1
   speechBubble: {fileID: 267456840}
   character: {fileID: 623837783919926350}
   agentController: {fileID: 608388020}
@@ -8120,6 +7996,10 @@ PrefabInstance:
       propertyPath: mShowDebug
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5465980533100705227, guid: d80bb227c084d9b46b156c2c1a226b53, type: 3}
+      propertyPath: mGroundTilemap
+      value: 
+      objectReference: {fileID: 597632758}
     - target: {fileID: 8626390168911138499, guid: d80bb227c084d9b46b156c2c1a226b53, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -8382,6 +8262,10 @@ PrefabInstance:
       propertyPath: mTableSize.y
       value: 2
       objectReference: {fileID: 0}
+    - target: {fileID: 8663613268944117034, guid: f18a840692084c145b574bf9d30f315c, type: 3}
+      propertyPath: mGroundTilemap
+      value: 
+      objectReference: {fileID: 597632758}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -8458,12 +8342,10 @@ SceneRoots:
   - {fileID: 403329729}
   - {fileID: 623837783919926345}
   - {fileID: 85287553}
-  - {fileID: 1455878374}
   - {fileID: 7037353773129976796}
   - {fileID: 668021672}
   - {fileID: 837581392}
   - {fileID: 1331650219}
   - {fileID: 1855011629}
-  - {fileID: 1731682521}
   - {fileID: 218890805}
   - {fileID: 799278574}

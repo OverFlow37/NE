@@ -92,8 +92,8 @@ public class AgentUI : MonoBehaviour
 
     public void UpdateEmote()
     {
-        emoteUI.hungerText.text = "HUNGER    : " + string.Format("{0}", (int)agentController.GetEmoteValue(AgentController.EmoteType.HUNGER));
-        emoteUI.sleepinessText.text = "SLEEPINESS: " + string.Format("{0}", (int)agentController.GetEmoteValue(AgentController.EmoteType.SLEEPINESS));
-        emoteUI.lonelinessText.text = "LONELINESS: " + string.Format("{0}", (int)agentController.GetEmoteValue(AgentController.EmoteType.LONELINESS));
+        emoteUI.hungerText.text = "HUNGER    : " + string.Format("{0}", (int)agentController.AgnetNeeds.Hunger);
+        emoteUI.sleepinessText.text = "SLEEPINESS: " + string.Format("{0}", (int)agentController.AgnetNeeds.Sleepiness);
+        emoteUI.lonelinessText.text = "LONELINESS: " + string.Format("{0}", (int)agentController.AgnetNeeds.Loneliness);
     }
 }
