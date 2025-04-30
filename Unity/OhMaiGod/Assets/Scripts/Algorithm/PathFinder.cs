@@ -44,6 +44,10 @@ public class PathFinder : MonoBehaviour
         }
         mInstance = this;
         DontDestroyOnLoad(gameObject);
+    }
+
+    private void Start()
+    {
         // 타일맵 범위 계산
         mMapMinCell = TileManager.Instance.GroundTilemap.cellBounds.min;
         mMapMaxCell = TileManager.Instance.GroundTilemap.cellBounds.max - Vector3Int.one; // max는 exclusive
