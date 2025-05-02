@@ -225,7 +225,7 @@ public class AIBridgeTest : MonoBehaviour
             Action action = agentResponse.data.action;
             
             // 현재 시간 가져오기 및 활동 지속 시간 설정
-            TimeSpan currentTime = mAgentScheduler.GetCurrentGameTime();
+            TimeSpan currentTime = TimeManager.Instance.GetCurrentGameTime();
             TimeSpan duration = TimeSpan.FromMinutes(30); // 기본 30분으로 설정
             
             // 새로운 일정 아이템 생성

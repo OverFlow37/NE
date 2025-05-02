@@ -363,13 +363,13 @@ public class AgentController : MonoBehaviour
     // 감정 상태 자동 증가 코루틴
     private IEnumerator AutoIncreaseAgentNeeds()
     {
-        TimeSpan lastIncreaseTime = mScheduler.GetCurrentGameTime();
+        TimeSpan lastIncreaseTime = TimeManager.Instance.GetCurrentGameTime();
 
         while (true)
         {
             yield return new WaitForSeconds(1f); // 1초마다 체크
 
-            TimeSpan currentTime = mScheduler.GetCurrentGameTime();
+            TimeSpan currentTime = TimeManager.Instance.GetCurrentGameTime();
             TimeSpan timeDifference = currentTime - lastIncreaseTime;
 
             // 게임 시간으로 30분이 지났는지 확인

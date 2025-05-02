@@ -7,21 +7,13 @@ using OhMAIGod.Agent;
 
 public class AgentScheduler : MonoBehaviour
 {
-    [Header("시간 설정")]
-    [SerializeField] private float mGameToRealTimeRatio = 60.0f; // 게임 시간 흐름 비율 (기본: 1초당 1분)
-    
     [Header("디버깅")]
     [SerializeField] private bool mShowDebugInfo = true; // 디버그 로그 출력 여부
 
-    // 스케줄 관리 변수들
+    // ==== 스케줄 관리 변수들 ====
     private List<ScheduleItem> mDailySchedule = new List<ScheduleItem>();   // 하루 전체 일정 목록
     private ScheduleItem mCurrentAction = null;                             // 현재 수행 중인 활동
     private ScheduleItem mNextAction = null;                                // 다음 예정된 활동
-    
-    // 시간 관리 변수들
-    private TimeSpan mCurrentGameTime;  // 현재 게임 내 시간
-    private DateTime mGameDate;         // 현재 게임 날짜
-    private bool mIsPaused = false;     // 시간 흐름 일시정지 상태
 
     private AgentController mAgentController;  // 에이전트 동작 제어를 위한 컨트롤러 참조
 
@@ -32,18 +24,11 @@ public class AgentScheduler : MonoBehaviour
         
         // 기본 일정 생성 (빈 일정으로 초기화)
         ResetSchedule();
-        
-        // 게임 날짜 및 시간 초기화 (오전 8시 시작)
-        mGameDate = DateTime.Today;
-        mCurrentGameTime = new TimeSpan(8, 0, 0);
     }
 
     private void Update()
     {
-        if (mIsPaused) return;
-        
-        // 게임 시간 업데이트
-        UpdateGameTime();
+        if (TimeManager.Instance.isPaused) return;
         
         // 현재 활동 업데이트
         UpdateAction();
@@ -193,42 +178,7 @@ public class AgentScheduler : MonoBehaviour
     {
         if (mNextAction == null) return TimeSpan.MaxValue;
         
-        return mNextAction.StartTime - mCurrentGameTime;
-    }
-
-    // 현재 게임 내 시간 반환하는 함수
-    public TimeSpan GetCurrentGameTime()
-    {
-        return mCurrentGameTime;
-    }
-
-    // 현재 게임 날짜 반환하는 함수
-    public DateTime GetCurrentGameDate()
-    {
-        return mGameDate;
-    }
-
-    // 시간 흐름 일시정지/재개
-    public void SetPaused(bool _paused)
-    {
-        mIsPaused = _paused;
-    }
-
-    // 게임 시간 업데이트
-    private void UpdateGameTime()
-    {
-        // 실제 시간의 흐름이 인게임 시간의 흐름과 어느 비율로 흐르는지에 따라 인게임 시간 계산
-        mCurrentGameTime = mCurrentGameTime.Add(TimeSpan.FromSeconds(Time.deltaTime * mGameToRealTimeRatio));
-        
-        // 날짜 변경 확인
-        if (mCurrentGameTime.Days > 0)
-        {
-            mGameDate = mGameDate.AddDays(1);
-            mCurrentGameTime = new TimeSpan(mCurrentGameTime.Hours, mCurrentGameTime.Minutes, mCurrentGameTime.Seconds);
-            
-            // 새 날에 대한 일정 초기화
-            ResetSchedule();
-        }
+        return mNextAction.StartTime - TimeManager.Instance.GetCurrentGameTime();
     }
 
     // 현재 시간에 맞는 활동 시작하게 업데이트 하는 함수
@@ -238,7 +188,7 @@ public class AgentScheduler : MonoBehaviour
         if (mCurrentAction != null)
         {
             // 활동 종료 시간이 지났는지 확인
-            if (mCurrentGameTime > mCurrentAction.EndTime)
+            if (TimeManager.Instance.GetCurrentGameTime() > mCurrentAction.EndTime)
             {
                 if (!mCurrentAction.IsCompleted)
                 {
@@ -268,8 +218,8 @@ public class AgentScheduler : MonoBehaviour
         // 미완료 활동 중 현재 시간에 해당하는 것 찾기
         var currentTimeActivities = mDailySchedule
             .Where(item => !item.IsCompleted && 
-                   mCurrentGameTime >= item.StartTime && 
-                   mCurrentGameTime < item.EndTime)
+                   TimeManager.Instance.GetCurrentGameTime() >= item.StartTime && 
+                   TimeManager.Instance.GetCurrentGameTime() < item.EndTime)
             .OrderByDescending(item => item.Priority)
             .ToList();
         
@@ -293,7 +243,7 @@ public class AgentScheduler : MonoBehaviour
         {
             // 다음으로 예정된 활동 찾기
             var futureActivities = mDailySchedule
-                .Where(item => !item.IsCompleted && mCurrentGameTime < item.StartTime)
+                .Where(item => !item.IsCompleted && TimeManager.Instance.GetCurrentGameTime() < item.StartTime)
                 .OrderBy(item => item.StartTime)
                 .ToList();
             
@@ -303,7 +253,7 @@ public class AgentScheduler : MonoBehaviour
                 
                 if (mShowDebugInfo)
                 {
-                    TimeSpan timeUntilNext = mNextAction.StartTime - mCurrentGameTime;
+                    TimeSpan timeUntilNext = mNextAction.StartTime - TimeManager.Instance.GetCurrentGameTime();
                     Debug.Log($"다음 활동: {mNextAction.ActionName} (남은 시간: {timeUntilNext.Hours}시간 {timeUntilNext.Minutes}분)");
                 }
             }
@@ -325,17 +275,6 @@ public class AgentScheduler : MonoBehaviour
         mDailySchedule.Clear();
         mCurrentAction = null;
         mNextAction = null;
-    }
-
-    // 게임 시간 흐름 속도 설정하는 함수
-    public void SetTimeScale(float _minutesPerSecond)
-    {
-        mGameToRealTimeRatio = _minutesPerSecond;
-
-        if (mShowDebugInfo)
-        {
-            Debug.Log($"시간 속도 변경: {_minutesPerSecond}분/초");
-        }
     }
 
     // 현재 진행 중인 활동을 제외한 모든 일정 삭제하는 함수

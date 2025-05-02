@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System.Collections;
+using OhMAIGod.Agent;
 
 public class AgentUI : MonoBehaviour
 {
