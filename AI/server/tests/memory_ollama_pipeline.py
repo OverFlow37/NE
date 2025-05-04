@@ -11,6 +11,11 @@ import os
 import json
 import time
 import numpy as np
+
+import numpy as _np
+import scipy.linalg as _linalg
+_linalg.triu = _np.triu
+
 import gensim.downloader as api
 from numpy import dot
 from numpy.linalg import norm
@@ -547,17 +552,20 @@ def main():
     """
     메인 함수
     """
+    # 현재 스크립트 파일의 디렉토리 경로 가져오기
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    
     # 메모리 파일 경로
-    memory_file_path = "memories.json"
+    memory_file_path = os.path.join(current_dir, "memories.json")
     
     # 이벤트 폴더 경로
-    event_folder = "event_list"
+    event_folder = os.path.join(current_dir, "event_list")
     
     # 프롬프트 폴더 경로
-    prompt_folder = "temp_prompt"
+    prompt_folder = os.path.join(current_dir, "temp_prompt")
     
     # 결과 저장 폴더
-    results_folder = "ollama_results"
+    results_folder = os.path.join(current_dir, "ollama_results")
     
     # 메모리 임베딩 시스템 초기화
     pipeline = MemoryOllamaPipeline(memory_file_path, event_folder, prompt_folder, results_folder)
