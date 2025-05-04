@@ -2,317 +2,634 @@
   "John": {
     "memories": [
       {
-        "event": "A tree suddenly grew at the city hall",
-        "action": "inspect tree cityhall"
+        "event": "witness meeting_table Village town_hall",
+        "action": "interact with meeting_table at town_hall",
+        "time": "2025.05.01.18:25",
+        "importance": 1
       },
-      { "event": "Food suddenly appeared at home", "action": "eat meal home" },
       {
-        "event": "Alice requested a conversation at the city hall",
-        "action": "talk Alice cityhall"
+        "event": "witness squirrel Forest forest_entrance",
+        "action": "interact with squirrel at forest_entrance",
+        "time": "2025.05.01.20:01",
+        "importance": 3
       },
       {
-        "event": "Tom requested a conversation at the cafe",
-        "action": "talk Tom cafe"
+        "event": "witness cactus Desert sand_dunes",
+        "action": "interact with cactus at sand_dunes",
+        "time": "2025.05.03.13:07",
+        "importance": 3
       },
       {
-        "event": "Saw an apple in the forest",
-        "action": "collect apple forest"
+        "event": "witness bench Village park",
+        "action": "interact with bench at park",
+        "time": "2025.04.26.17:08",
+        "importance": 2
       },
       {
-        "event": "Saw a computer at the city hall",
-        "action": "approach computer cityhall"
+        "event": "witness seagull Beach cliffside",
+        "action": "interact with seagull at cliffside",
+        "time": "2025.04.25.08:41",
+        "importance": 3
       },
-      { "event": "Found a forest", "action": "explore forest" },
-      { "event": "Found a desert", "action": "explore desert" },
       {
-        "event": "Saw my favorite apple in the forest",
-        "action": "pick apple forest"
+        "event": "witness sandstorm Desert sand_dunes",
+        "action": "think",
+        "time": "2025.04.27.06:11",
+        "importance": 2
       },
       {
-        "event": "Saw my favorite Sarah at the city hall",
-        "action": "observe Sarah cityhall"
+        "event": "witness wild_boar Forest deep_forest",
+        "action": "interact with wild_boar at deep_forest",
+        "time": "2025.05.02.03:42",
+        "importance": 1
       },
-      { "event": "Saw Alice in the field", "action": "talk Alice field" },
       {
-        "event": "Books suddenly piled up in the library",
-        "action": "organize books library"
+        "event": "witness fountain Village park",
+        "action": "interact with fountain at park",
+        "time": "2025.05.04.13:09",
+        "importance": 3
       },
       {
-        "event": "A bicycle appeared on the ground at the school",
-        "action": "ride bike school"
+        "event": "witness seagull Beach cliffside",
+        "action": "interact with seagull at cliffside",
+        "time": "2025.04.26.00:03",
+        "importance": 1
       },
       {
-        "event": "A racing machine was added to the arcade",
-        "action": "play racing arcade"
+        "event": "witness bench Village park",
+        "action": "interact with bench at park",
+        "time": "2025.05.03.04:04",
+        "importance": 2
       },
       {
-        "event": "Saw a new robot at the city hall",
-        "action": "inspect robot cityhall"
+        "event": "witness seaweed Beach tidal_pool",
+        "action": "eat seaweed at tidal_pool",
+        "time": "2025.05.01.17:01",
+        "importance": 4
       },
       {
-        "event": "Received a conversation request from Mary at the cafe",
-        "action": "talk Mary cafe"
+        "event": "witness snail Beach tidal_pool",
+        "action": "eat snail at tidal_pool",
+        "time": "2025.04.25.00:26",
+        "importance": 5
       },
       {
-        "event": "A stage was suddenly installed in the restaurant",
-        "action": "perform onstage restaurant"
+        "event": "receive seashell Beach shoreline",
+        "action": "talk to Sarah at shoreline",
+        "time": "2025.05.02.13:29",
+        "importance": 5
       },
       {
-        "event": "Saw a new statue in the park",
-        "action": "examine statue park"
+        "event": "receive pastry_display Village cafe",
+        "action": "talk to Sarah at cafe",
+        "time": "2025.04.30.03:04",
+        "importance": 4
       },
       {
-        "event": "An AI desktop appeared in the library",
-        "action": "use desktop library"
+        "event": "receive acorn Forest deep_forest",
+        "action": "talk to Sarah at deep_forest",
+        "time": "2025.05.02.08:25",
+        "importance": 6
       },
       {
-        "event": "A student requested a conversation at the school",
-        "action": "talk student school"
+        "event": "receive coffee_machine Village cafe",
+        "action": "talk to Sarah at cafe",
+        "time": "2025.05.02.20:55",
+        "importance": 5
       },
-      { "event": "Found a field", "action": "explore field" },
       {
-        "event": "Saw my favorite racing machine in the arcade",
-        "action": "play racing arcade"
+        "event": "receive oak_tree Forest forest_entrance",
+        "action": "talk to Sarah at forest_entrance",
+        "time": "2025.05.04.09:57",
+        "importance": 6
       },
       {
-        "event": "Saw my favorite pasta in the restaurant",
-        "action": "eat pasta restaurant"
+        "event": "feel calm Village town_hall",
+        "action": "think",
+        "time": "2025.05.04.10:51",
+        "importance": 3
       },
-      { "event": "Saw John in the park", "action": "observe John park" },
       {
-        "event": "Saw a cactus in the desert",
-        "action": "collect cactus desert"
+        "event": "feel sad Forest stream_bank",
+        "action": "think",
+        "time": "2025.04.26.00:37",
+        "importance": 2
       },
       {
-        "event": "Discovered a rare mushroom in the forest",
-        "action": "harvest mushroom forest"
+        "event": "feel tired Village cafe",
+        "action": "think",
+        "time": "2025.05.03.11:20",
+        "importance": 2
       },
       {
-        "event": "A vending machine appeared at the city hall",
-        "action": "buy drink cityhall"
+        "event": "feel calm Village town_hall",
+        "action": "idle",
+        "time": "2025.05.03.18:45",
+        "importance": 1
       },
       {
-        "event": "Saw a new drone at the school",
-        "action": "pilot drone school"
+        "event": "feel hungry Village park",
+        "action": "move to cafe",
+        "time": "2025.04.28.23:49",
+        "importance": 2
       },
       {
-        "event": "A wooden bookshelf grew in the library",
-        "action": "arrange shelf library"
+        "event": "feel hungry Beach cliffside",
+        "action": "move to house",
+        "time": "2025.04.27.23:24",
+        "importance": 2
       },
-      { "event": "Tomatoes grew in the field", "action": "pick tomato field" },
       {
-        "event": "A friend requested a conversation in the arcade",
-        "action": "talk friend arcade"
+        "event": "feel hungry Village cafe",
+        "action": "eat pastry at cafe",
+        "time": "2025.04.26.16:56",
+        "importance": 2
       },
       {
-        "event": "An AI chef appeared in the restaurant",
-        "action": "order dish restaurant"
+        "event": "feel hungry Desert oasis",
+        "action": "move to cafe",
+        "time": "2025.04.30.01:31",
+        "importance": 1
       },
       {
-        "event": "Saw a new fountain in the park",
-        "action": "photograph fountain park"
+        "event": "feel happy Beach cliffside",
+        "action": "idle",
+        "time": "2025.04.25.14:55",
+        "importance": 2
       },
       {
-        "event": "A QR code appeared at the city hall",
-        "action": "scan code cityhall"
+        "event": "feel bored Forest forest_entrance",
+        "action": "idle",
+        "time": "2025.04.25.01:50",
+        "importance": 3
       },
       {
-        "event": "Found an oasis in the desert",
-        "action": "drink water desert"
+        "event": "feel calm Village cafe",
+        "action": "idle",
+        "time": "2025.04.28.19:28",
+        "importance": 1
       },
       {
-        "event": "Saw a strange rock in the forest",
-        "action": "collect rock forest"
+        "event": "feel happy Desert oasis",
+        "action": "think",
+        "time": "2025.04.25.01:17",
+        "importance": 2
       },
       {
-        "event": "A teacher requested a conversation at the school",
-        "action": "talk teacher school"
+        "event": "discover squirrel Forest forest_entrance",
+        "action": "interact with squirrel at forest_entrance",
+        "time": "2025.05.02.07:24",
+        "importance": 2
       },
       {
-        "event": "A digital board was installed in the library",
-        "action": "use board library"
+        "event": "discover meeting_table Village town_hall",
+        "action": "move to town_hall",
+        "time": "2025.05.01.03:21",
+        "importance": 2
       },
-      { "event": "Saw a bee in the field", "action": "observe bee field" },
       {
-        "event": "Saw a new VR machine in the arcade",
-        "action": "try VR arcade"
+        "event": "discover oak_tree Forest forest_entrance",
+        "action": "move to forest_entrance",
+        "time": "2025.05.02.06:50",
+        "importance": 2
       },
       {
-        "event": "A cooking robot requested a conversation in the restaurant",
-        "action": "talk robot restaurant"
+        "event": "discover seashell Beach shoreline",
+        "action": "interact with seashell at shoreline",
+        "time": "2025.05.01.01:52",
+        "importance": 2
       },
       {
-        "event": "An old tree suddenly grew in the park",
-        "action": "climb tree park"
+        "event": "discover clock Village town_hall",
+        "action": "interact with clock at town_hall",
+        "time": "2025.04.29.05:30",
+        "importance": 2
       },
       {
-        "event": "A hologram appeared at the city hall",
-        "action": "watch hologram cityhall"
+        "event": "discover seashell Beach shoreline",
+        "action": "move to shoreline",
+        "time": "2025.04.30.11:16",
+        "importance": 3
       },
-      { "event": "Saw a UFO in the desert", "action": "record UFO desert" },
       {
-        "event": "Saw a butterfly in the forest",
-        "action": "catch butterfly forest"
+        "event": "discover wild_boar Forest deep_forest",
+        "action": "move to deep_forest",
+        "time": "2025.04.30.19:17",
+        "importance": 1
       },
       {
-        "event": "A new locker appeared at the school",
-        "action": "store bag school"
+        "event": "discover palm_tree Desert oasis",
+        "action": "interact with palm_tree at oasis",
+        "time": "2025.05.04.02:53",
+        "importance": 1
       },
       {
-        "event": "A tree suddenly grew at the city hall",
-        "action": "inspect tree cityhall"
+        "event": "discover coffee_machine Village cafe",
+        "action": "move to cafe",
+        "time": "2025.05.03.02:20",
+        "importance": 1
       },
-      { "event": "Food suddenly appeared at home", "action": "eat meal home" },
       {
-        "event": "Alice requested a conversation at the city hall",
-        "action": "talk Alice cityhall"
+        "event": "discover meeting_table Village town_hall",
+        "action": "interact with meeting_table at town_hall",
+        "time": "2025.04.29.01:55",
+        "importance": 3
       },
       {
-        "event": "Tom requested a conversation at the cafe",
-        "action": "talk Tom cafe"
+        "event": "discover wild_boar Forest deep_forest",
+        "action": "move to deep_forest",
+        "time": "2025.05.02.09:48",
+        "importance": 3
       },
       {
-        "event": "Saw an apple in the forest",
-        "action": "collect apple forest"
+        "event": "discover cozy_sofa Village cafe",
+        "action": "interact with cozy_sofa at cafe",
+        "time": "2025.04.25.01:24",
+        "importance": 1
       },
-      { "event": "Found a desert", "action": "explore desert" },
       {
-        "event": "Saw my favorite apple in the forest",
-        "action": "pick apple forest"
+        "event": "discover seagull Beach cliffside",
+        "action": "move to cliffside",
+        "time": "2025.04.30.17:25",
+        "importance": 1
       },
       {
-        "event": "Saw my favorite Sarah at the city hall",
-        "action": "observe Sarah cityhall"
+        "event": "discover seagull Beach cliffside",
+        "action": "move to cliffside",
+        "time": "2025.04.29.02:14",
+        "importance": 3
       },
-      { "event": "Saw Alice in the field", "action": "watch Alice field" },
       {
-        "event": "Books suddenly piled up in the library",
-        "action": "organize books library"
+        "event": "discover stream_water Forest stream_bank",
+        "action": "move to stream_bank",
+        "time": "2025.05.04.02:05",
+        "importance": 1
       },
       {
-        "event": "A racing machine was added to the arcade",
-        "action": "play racing arcade"
+        "event": "discover raspberry Forest stream_bank",
+        "action": "move to stream_bank",
+        "time": "2025.05.02.06:40",
+        "importance": 1
       },
       {
-        "event": "Saw a new robot at the city hall",
-        "action": "inspect robot cityhall"
+        "event": "discover clock Village town_hall",
+        "action": "move to town_hall",
+        "time": "2025.04.28.13:42",
+        "importance": 1
       },
       {
-        "event": "A stage was suddenly installed in the restaurant",
-        "action": "perform onstage restaurant"
+        "event": "discover sandstorm Desert sand_dunes",
+        "action": "move to sand_dunes",
+        "time": "2025.04.28.19:10",
+        "importance": 2
       },
       {
-        "event": "Saw a new fountain in the park",
-        "action": "photograph fountain park"
+        "event": "discover coffee_machine Village cafe",
+        "action": "move to cafe",
+        "time": "2025.05.01.04:17",
+        "importance": 1
       },
       {
-        "event": "Saw a butterfly in the forest",
-        "action": "catch butterfly forest"
+        "event": "discover cactus Desert sand_dunes",
+        "action": "move to sand_dunes",
+        "time": "2025.05.03.10:04",
+        "importance": 3
       },
-
       {
-        "event": "A bird suddenly landed in the park",
-        "action": "observe bird park"
+        "event": "discover scorpion Desert rocky_outcrop",
+        "action": "move to rocky_outcrop",
+        "time": "2025.04.26.00:00",
+        "importance": 1
       },
       {
-        "event": "Michael requested a conversation at the school",
-        "action": "talk Michael school"
+        "event": "discover bench Village park",
+        "action": "move to park",
+        "time": "2025.05.02.14:29",
+        "importance": 1
       },
-      { "event": "Discovered a mountain", "action": "explore mountain" },
-      { "event": "Found a lake", "action": "explore lake" },
       {
-        "event": "Saw a laptop in the library",
-        "action": "use laptop library"
+        "event": "discover pastry_display Village cafe",
+        "action": "move to cafe",
+        "time": "2025.04.25.05:11",
+        "importance": 2
       },
       {
-        "event": "Saw my favorite book in the library",
-        "action": "read book library"
+        "event": "discover squirrel Forest forest_entrance",
+        "action": "move to forest_entrance",
+        "time": "2025.05.01.01:32",
+        "importance": 3
       },
       {
-        "event": "Saw Emma in the restaurant",
-        "action": "observe Emma restaurant"
+        "event": "observe driftwood Beach shoreline",
+        "action": "interact with driftwood at shoreline",
+        "time": "2025.04.25.04:04",
+        "importance": 1
       },
       {
-        "event": "Saw a robot in the arcade",
-        "action": "inspect robot arcade"
+        "event": "observe dining_table Village house",
+        "action": "interact with dining_table at house",
+        "time": "2025.04.30.22:19",
+        "importance": 2
       },
       {
-        "event": "Food suddenly appeared at the school",
-        "action": "eat snack school"
+        "event": "observe lizard Desert sand_dunes",
+        "action": "interact with lizard at sand_dunes",
+        "time": "2025.04.28.18:28",
+        "importance": 1
       },
       {
-        "event": "A tree suddenly grew at home",
-        "action": "inspect tree home"
+        "event": "observe mushroom Forest deep_forest",
+        "action": "idle",
+        "time": "2025.04.26.12:57",
+        "importance": 2
       },
-      { "event": "Saw a drone in the park", "action": "pilot drone park" },
-      { "event": "Found a cave", "action": "explore cave" },
       {
-        "event": "Saw my favorite cake in the cafe",
-        "action": "eat cake cafe"
+        "event": "observe camel Desert oasis",
+        "action": "interact with camel at oasis",
+        "time": "2025.05.03.03:48",
+        "importance": 3
       },
-      { "event": "Saw John in the school", "action": "observe John school" },
-      { "event": "Discovered an island", "action": "explore island" },
       {
-        "event": "Saw a painting in the museum",
-        "action": "examine painting museum"
+        "event": "observe sandstorm Desert sand_dunes",
+        "action": "interact with sandstorm at sand_dunes",
+        "time": "2025.05.01.20:01",
+        "importance": 2
       },
       {
-        "event": "A robot requested a conversation in the library",
-        "action": "talk robot library"
+        "event": "observe acorn Forest deep_forest",
+        "action": "interact with acorn at deep_forest",
+        "time": "2025.05.04.01:41",
+        "importance": 3
       },
       {
-        "event": "Saw a telescope at the city hall",
-        "action": "observe telescope cityhall"
+        "event": "observe seagull Beach cliffside",
+        "action": "interact with seagull at cliffside",
+        "time": "2025.05.04.08:38",
+        "importance": 2
       },
-      { "event": "Found a volcano", "action": "explore volcano" },
       {
-        "event": "Saw my favorite coffee in the cafe",
-        "action": "drink coffee cafe"
+        "event": "observe camel Desert oasis",
+        "action": "interact with camel at oasis",
+        "time": "2025.05.02.13:07",
+        "importance": 2
       },
-      { "event": "Saw Linda in the desert", "action": "observe Linda desert" },
-      { "event": "Saw a bicycle in the forest", "action": "ride bike forest" },
       {
-        "event": "A fountain suddenly appeared in the school",
-        "action": "photograph fountain school"
+        "event": "observe coffee_machine Village cafe",
+        "action": "interact with coffee_machine at cafe",
+        "time": "2025.05.04.14:23",
+        "importance": 3
       },
-      { "event": "Discovered a waterfall", "action": "explore waterfall" },
       {
-        "event": "Saw my favorite game machine in the arcade",
-        "action": "play game arcade"
+        "event": "observe rock Beach cliffside",
+        "action": "interact with rock at cliffside",
+        "time": "2025.05.02.09:03",
+        "importance": 1
       },
       {
-        "event": "Saw a squirrel in the park",
-        "action": "observe squirrel park"
+        "event": "observe stream_water Forest stream_bank",
+        "action": "interact with stream_water at stream_bank",
+        "time": "2025.04.27.05:36",
+        "importance": 3
       },
       {
-        "event": "Saw a drone in the city hall",
-        "action": "inspect drone cityhall"
+        "event": "observe sandstone Desert rocky_outcrop",
+        "action": "idle",
+        "time": "2025.04.29.17:42",
+        "importance": 3
       },
       {
-        "event": "Saw painting in the library",
-        "action": "examine painting library"
+        "event": "observe stone Forest stream_bank",
+        "action": "talk to Sarah at stream_bank",
+        "time": "2025.05.04.00:24",
+        "importance": 7
       },
-      { "event": "Discovered a glacier", "action": "explore glacier" },
       {
-        "event": "A car suddenly appeared in the field",
-        "action": "drive car field"
+        "event": "observe meeting_table Village town_hall",
+        "action": "idle",
+        "time": "2025.04.25.16:32",
+        "importance": 3
       },
       {
-        "event": "Saw flower in the field",
-        "action": "pick flower field"
+        "event": "observe wild_boar Forest deep_forest",
+        "action": "idle",
+        "time": "2025.05.03.09:26",
+        "importance": 3
       },
-      { "event": "Saw a comet in the desert", "action": "record comet desert" },
       {
-        "event": "Saw a smartphone at the city hall",
-        "action": "use smartphone cityhall"
+        "event": "observe sandstone Desert rocky_outcrop",
+        "action": "talk to Sarah at rocky_outcrop",
+        "time": "2025.04.30.12:55",
+        "importance": 5
       },
       {
-        "event": "Saw pizza in the restaurant",
-        "action": "eat pizza restaurant"
+        "event": "observe sandstone Desert rocky_outcrop",
+        "action": "idle",
+        "time": "2025.05.04.02:03",
+        "importance": 2
       },
       {
-        "event": "I'm Hungry",
-        "action": "eat chicken park"
+        "event": "observe driftwood Beach shoreline",
+        "action": "talk to Sarah at shoreline",
+        "time": "2025.05.04.17:29",
+        "importance": 4
+      },
+      {
+        "event": "observe raspberry Forest stream_bank",
+        "action": "idle",
+        "time": "2025.04.28.11:17",
+        "importance": 1
+      },
+      {
+        "event": "observe squirrel Forest forest_entrance",
+        "action": "idle",
+        "time": "2025.05.04.05:14",
+        "importance": 3
+      },
+      {
+        "event": "observe water_pool Desert oasis",
+        "action": "idle",
+        "time": "2025.04.25.08:15",
+        "importance": 3
+      },
+      {
+        "event": "discover mushroom Forest deep_forest",
+        "action": "move to deep_forest",
+        "time": "2025.05.01.05:11",
+        "importance": 3
+      },
+      {
+        "event": "discover raspberry Forest stream_bank",
+        "action": "move to stream_bank",
+        "time": "2025.04.25.10:54",
+        "importance": 1
+      },
+      {
+        "event": "discover binocular_spot Beach cliffside",
+        "action": "move to cliffside",
+        "time": "2025.05.01.15:29",
+        "importance": 1
+      },
+      {
+        "event": "discover coffee_machine Village cafe",
+        "action": "interact with coffee_machine at cafe",
+        "time": "2025.04.26.05:47",
+        "importance": 2
+      },
+      {
+        "event": "discover binocular_spot Beach cliffside",
+        "action": "interact with binocular_spot at cliffside",
+        "time": "2025.04.27.09:43",
+        "importance": 1
+      },
+      {
+        "event": "discover cozy_sofa Village cafe",
+        "action": "move to cafe",
+        "time": "2025.04.26.05:29",
+        "importance": 3
+      },
+      {
+        "event": "discover stone Forest stream_bank",
+        "action": "interact with stone at stream_bank",
+        "time": "2025.04.27.15:14",
+        "importance": 3
+      },
+      {
+        "event": "discover scorpion Desert rocky_outcrop",
+        "action": "move to rocky_outcrop",
+        "time": "2025.05.03.23:09",
+        "importance": 1
+      },
+      {
+        "event": "discover seashell Beach shoreline",
+        "action": "move to shoreline",
+        "time": "2025.05.04.11:54",
+        "importance": 2
+      },
+      {
+        "event": "discover crab Beach shoreline",
+        "action": "interact with crab at shoreline",
+        "time": "2025.05.03.16:05",
+        "importance": 2
+      },
+      {
+        "event": "discover crab Beach shoreline",
+        "action": "move to shoreline",
+        "time": "2025.05.02.18:42",
+        "importance": 2
+      },
+      {
+        "event": "discover sandstone Desert rocky_outcrop",
+        "action": "interact with sandstone at rocky_outcrop",
+        "time": "2025.04.27.14:39",
+        "importance": 2
+      },
+      {
+        "event": "discover coffee_machine Village cafe",
+        "action": "move to cafe",
+        "time": "2025.04.30.03:22",
+        "importance": 1
+      },
+      {
+        "event": "discover seashell Beach shoreline",
+        "action": "move to shoreline",
+        "time": "2025.04.30.13:27",
+        "importance": 2
+      },
+      {
+        "event": "discover pastry_display Village cafe",
+        "action": "move to cafe",
+        "time": "2025.04.29.20:36",
+        "importance": 3
+      },
+      {
+        "event": "discover binocular_spot Beach cliffside",
+        "action": "move to cliffside",
+        "time": "2025.05.03.12:32",
+        "importance": 2
+      },
+      {
+        "event": "discover meeting_table Village town_hall",
+        "action": "move to town_hall",
+        "time": "2025.05.01.10:06",
+        "importance": 3
+      },
+      {
+        "event": "discover mushroom Forest deep_forest",
+        "action": "move to deep_forest",
+        "time": "2025.04.26.14:48",
+        "importance": 1
+      },
+      {
+        "event": "discover palm_tree Desert oasis",
+        "action": "move to oasis",
+        "time": "2025.04.25.12:58",
+        "importance": 1
+      },
+      {
+        "event": "discover acorn Forest deep_forest",
+        "action": "move to deep_forest",
+        "time": "2025.04.28.01:22",
+        "importance": 1
+      },
+      {
+        "event": "discover stone Forest stream_bank",
+        "action": "interact with stone at stream_bank",
+        "time": "2025.04.28.00:35",
+        "importance": 3
+      },
+      {
+        "event": "discover rock Beach cliffside",
+        "action": "interact with rock at cliffside",
+        "time": "2025.05.04.09:31",
+        "importance": 2
+      },
+      {
+        "event": "discover starfish Beach tidal_pool",
+        "action": "interact with starfish at tidal_pool",
+        "time": "2025.05.03.09:35",
+        "importance": 1
+      },
+      {
+        "event": "discover coffee_machine Village cafe",
+        "action": "interact with coffee_machine at cafe",
+        "time": "2025.04.26.22:37",
+        "importance": 1
+      },
+      {
+        "event": "observe Sarah Village town_hall",
+        "action": "talk to Sarah at town_hall",
+        "time": "2025.04.25.09:15",
+        "importance": 5
+      },
+      {
+        "event": "observe Sarah Forest deep_forest",
+        "action": "talk to Sarah at deep_forest",
+        "time": "2025.04.26.14:30",
+        "importance": 6
+      },
+      {
+        "event": "observe Sarah Desert oasis",
+        "action": "talk to Sarah at oasis",
+        "time": "2025.04.28.11:45",
+        "importance": 4
+      },
+      {
+        "event": "observe Sarah Beach cliffside",
+        "action": "talk to Sarah at cliffside",
+        "time": "2025.04.29.16:20",
+        "importance": 7
+      },
+      {
+        "event": "observe Sarah Village park",
+        "action": "talk to Sarah at park",
+        "time": "2025.05.01.08:50",
+        "importance": 5
+      },
+      {
+        "event": "observe Sarah Forest stream_bank",
+        "action": "talk to Sarah at stream_bank",
+        "time": "2025.05.03.19:05",
+        "importance": 6
       }
     ]
   }
