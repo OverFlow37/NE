@@ -12,9 +12,34 @@ public class AgentController : MonoBehaviour
     [Header("Agent States")]
     [SerializeField] private AgentNeeds mAgentNeeds;                // 현재 Agent의 욕구 수치
     public AgentNeeds GetAgentNeeds() { return mAgentNeeds; }
-
-    [Header("Location Effects")]
-    [SerializeField] private LocationEmoteEffect[] locationEffects; // 장소별 감정 상태 효과
+    
+    // Needs 수정을 위한 메서드들
+    public void ModifyHunger(int amount) 
+    { 
+        mAgentNeeds.Hunger = Mathf.Clamp(mAgentNeeds.Hunger + amount, 0, 10);
+        if (mShowDebugInfo)
+        {
+            Debug.Log($"{mName}의 배고픔 변화: {amount} (현재: {mAgentNeeds.Hunger})");
+        }
+    }
+    
+    public void ModifySleepiness(int amount) 
+    { 
+        mAgentNeeds.Sleepiness = Mathf.Clamp(mAgentNeeds.Sleepiness + amount, 0, 10);
+        if (mShowDebugInfo)
+        {
+            Debug.Log($"{mName}의 졸림 변화: {amount} (현재: {mAgentNeeds.Sleepiness})");
+        }
+    }
+    
+    public void ModifyLoneliness(int amount) 
+    { 
+        mAgentNeeds.Loneliness = Mathf.Clamp(mAgentNeeds.Loneliness + amount, 0, 10);
+        if (mShowDebugInfo)
+        {
+            Debug.Log($"{mName}의 외로움 변화: {amount} (현재: {mAgentNeeds.Loneliness})");
+        }
+    }
 
     [Header("Base Profile")]
     [SerializeField] private int mID;                               // 에이전트 고유 식별자
@@ -39,6 +64,8 @@ public class AgentController : MonoBehaviour
     private Animator animator;  // 애니메이터
     [SerializeField] private AgentScheduler mScheduler;
     [SerializeField] private MovementController mMovement;
+
+    private string mCurrentInteractable;
 
     private void Awake()
     {
@@ -85,8 +112,8 @@ public class AgentController : MonoBehaviour
         // 이동 애니메이션 정지
         animator.SetBool("isMoving", false);
 
-        // 도착한 위치에 따라 감정 상태 업데이트
-        UpdateAgentNeedsByLocation(mMovement.TargetName);
+        // 도착한 위치에 따라 감정 상태 업데이트 -> 타겟 오브젝트에 따라 감정 상태 업데이트
+        //UpdateAgentNeedsByLocation(mMovement.TargetName);
 
         // 활동 시작
         StartAction();
@@ -160,68 +187,7 @@ public class AgentController : MonoBehaviour
         agentUI.StartSpeech(mCurrentAction.Reason);
     }
 
-    // 위치에 따른 욕망 수치 업데이트
-    private void UpdateAgentNeedsByLocation(string _locationName)
-    {
-        if (string.IsNullOrEmpty(_locationName)) return;
 
-        // 해당 장소의 효과 찾기
-        var locationEffect = System.Array.Find(locationEffects, 
-            effect => effect.locationName.ToLower() == _locationName.ToLower());
-
-        if (locationEffect.locationName != null)
-        {
-            // 각 감정 상태에 효과 적용
-            mAgentNeeds.Hunger += locationEffect.hungerEffect;
-            mAgentNeeds.Sleepiness += locationEffect.sleepinessEffect;
-            mAgentNeeds.Loneliness += locationEffect.lonelinessEffect;
-
-            if (mShowDebugInfo)
-            {
-                Debug.Log($"{mName}의 현재 상태 - 배고픔: {mAgentNeeds.Hunger}, " +
-                         $"졸림: {mAgentNeeds.Sleepiness}, " +
-                         $"외로움: {mAgentNeeds.Loneliness}");
-            }
-        }
-    }
-
-    // 상태 평가 코루틴 (지속적으로 상태 확인)
-    // TODO: 코루틴 사용안하고 Update에 넣어서 매 프레임 확인하게 하는것 고려해보기
-    private IEnumerator EvaluateStateRoutine()
-    {
-        while (true)
-        {
-            // 이미 활동 중이거나 이동 중이면 건너뛰기
-            if (mCurrentState != AgentState.IDLE && mCurrentState != AgentState.WAITING)
-            {
-                yield return new WaitForSeconds(1.0f);
-                continue;
-            }
-            
-            // 현재 활동 확인
-            string destination = mScheduler.GetCurrentDestinationTarget();
-
-            if (!string.IsNullOrEmpty(destination))
-            {
-                // 활동 있음 => 위치로 이동 시작
-                mCurrentAction = null; // AgentScheduler에서 정보를 다시 가져오기 위해 초기화
-                StartMovingToAction();
-            }
-            else
-            {
-                // 활동 없음 => 다음 활동까지 대기
-                TimeSpan timeUntilNext = mScheduler.GetTimeUntilNextAction();
-                
-                // 1시간 이상 남았으면 대기 상태로 전환
-                if (timeUntilNext.TotalMinutes > 60)
-                {
-                    EnterWaitingState((float)timeUntilNext.TotalMinutes);
-                }
-            }
-            
-            yield return new WaitForSeconds(3.0f);
-        }
-    }
 
     // 활동 위치로 이동 시작
     private void StartMovingToAction()
@@ -290,15 +256,73 @@ public class AgentController : MonoBehaviour
             };
         }
         
-        // 상태 변경
-        mCurrentState = AgentState.PerformingAction;
-        mCurrentActionTime = 0f;
-        
-        if (mShowDebugInfo)
+        // 현재 위치에서 상호작용 가능한 오브젝트 찾기
+        GameObject interactableObject = FindInteractableInCurrentLocation();
+        if (interactableObject != null)
         {
-            Debug.Log($"{mName}: 활동 시작 - {mCurrentAction.ActionName} @ {mCurrentAction.LocationName}");
+            Debug.Log($"상호작용 가능한 오브젝트 찾음: {interactableObject}");
+            // 상호작용 가능한 오브젝트가 있으면 상호작용 시작
+            StartInteraction(interactableObject);
+        }
+        else
+        {
+            // 상호작용 가능한 오브젝트가 없으면 일반 활동 수행
+            mCurrentState = AgentState.PerformingAction;
+            mCurrentActionTime = 0f;
+        }
+    }
+
+    // 현재 위치에서 상호작용 가능한 오브젝트 찾기
+    private GameObject FindInteractableInCurrentLocation()
+    {
+        Debug.Log("오브젝트 찾기");
+        // 현재 위치에 있는 모든 Interactable 컴포넌트를 가진 오브젝트 찾기
+        // 현재 콜라이더 기반으로 찾음, 추후에는 지역에 등록된 오브젝트 가져오는 것으로 변경필요
+        Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, 2f); // 2f는 상호작용 범위
+        
+        foreach (Collider2D collider in colliders)
+        {
+            Interactable interactable = collider.GetComponent<Interactable>();
+            if (interactable != null)
+            {
+                Debug.Log($"발견된 Interactable 오브젝트: {collider.gameObject.name}");
+                Debug.Log($"Interactable 컴포넌트: {interactable}");
+                Debug.Log($"InteractableData: {interactable.mInteractableData}");
+                
+                if (interactable.mInteractableData != null)
+                {
+                    Debug.Log($"InteractableData 이름: {interactable.mInteractableData.mName}");
+                }
+                
+                if (interactable.mInteractableData != null)
+                {
+                    return collider.gameObject;
+                }
+            }
         }
         
+        return null;
+    }
+
+    // 오브젝트와 상호작용 시작
+    private void StartInteraction(GameObject interactableObject)
+    {
+        if (mShowDebugInfo)
+        {
+            Debug.Log($"{mName}: {interactableObject.name}와(과) 상호작용 시작");
+        }
+        Debug.Log("상호작용 시작");
+        mCurrentState = AgentState.INTERACTING;
+        
+        // Interactable 컴포넌트의 Interact 메서드 호출
+        var interactable = interactableObject.GetComponent<Interactable>();
+        if (interactable != null)
+        {
+            interactable.Interact(gameObject);
+        }
+        
+        // 상호작용 완료 후 활동 완료 처리
+        CompleteAction();
     }
 
     // 현재 활동 완료 처리하는 함수
@@ -363,6 +387,44 @@ public class AgentController : MonoBehaviour
         }
     }
 
+    // 상태 평가 코루틴 (지속적으로 상태 확인)
+    // TODO: 코루틴 사용안하고 Update에 넣어서 매 프레임 확인하게 하는것 고려해보기
+    private IEnumerator EvaluateStateRoutine()
+    {
+        while (true)
+        {
+            // 이미 활동 중이거나 이동 중이면 건너뛰기
+            if (mCurrentState != AgentState.IDLE && mCurrentState != AgentState.WAITING)
+            {
+                yield return new WaitForSeconds(1.0f);
+                continue;
+            }
+            
+            // 현재 활동 확인
+            string destination = mScheduler.GetCurrentDestination();
+
+            if (!string.IsNullOrEmpty(destination))
+            {
+                // 활동 있음 => 위치로 이동 시작
+                mCurrentAction = null; // AgentScheduler에서 정보를 다시 가져오기 위해 초기화
+                StartMovingToAction();
+            }
+            else
+            {
+                // 활동 없음 => 다음 활동까지 대기
+                TimeSpan timeUntilNext = mScheduler.GetTimeUntilNextAction();
+                
+                // 1시간 이상 남았으면 대기 상태로 전환
+                if (timeUntilNext.TotalMinutes > 60)
+                {
+                    EnterWaitingState((float)timeUntilNext.TotalMinutes);
+                }
+            }
+            
+            yield return new WaitForSeconds(3.0f);
+        }
+    }
+
     // 감정 상태 자동 증가 코루틴
     private IEnumerator AutoIncreaseAgentNeeds()
     {
@@ -379,16 +441,13 @@ public class AgentController : MonoBehaviour
             if (timeDifference.TotalMinutes >= 30)
             {
                 // 각 감정 상태 증가
-                mAgentNeeds.Hunger++;
-                mAgentNeeds.Sleepiness++;
-                mAgentNeeds.Loneliness++;
+                ModifyHunger(1);
+                ModifySleepiness(1);
+                ModifyLoneliness(1);
 
                 if (mShowDebugInfo)
                 {
-                    Debug.Log($"[게임시간 {currentTime:hh\\:mm}] {mName}의 감정 상태 자동 증가 - " +
-                            $"배고픔: {mAgentNeeds.Hunger}, " +
-                            $"졸림: {mAgentNeeds.Sleepiness}, " +
-                            $"외로움: {mAgentNeeds.Loneliness}");
+                    Debug.Log($"[게임시간 {currentTime:hh\\:mm}] {mName}의 감정 상태 자동 증가");
                 }
 
                 // 마지막 증가 시간 업데이트
