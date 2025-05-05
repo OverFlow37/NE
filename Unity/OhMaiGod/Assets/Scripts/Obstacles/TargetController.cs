@@ -39,11 +39,6 @@ public class TargetController : MonoBehaviour
         mOccupiedCells = new HashSet<Vector3Int>();
     }
 
-    private void Start()
-    {
-        InitializeStandingPoints();
-    }
-
     private void Update()
     {
         if (!TileManager.Instance.mIsInitialized || TileManager.Instance.TileTree.Count == 0) return;
@@ -53,6 +48,7 @@ public class TargetController : MonoBehaviour
             mParentLocation = TileManager.Instance.GetTileController(cellPos);
             mParentLocation.AddChildInteractable(this);
             mIsInitialized = true;
+            InitializeStandingPoints();
         }
     }
 
@@ -162,7 +158,7 @@ public class TargetController : MonoBehaviour
                 }
                 else if (mShowDebug)
                 {
-                    Debug.LogWarning($"[{gameObject.name}] 위치 {worldPos} (셀: {cell}) 사용 불가 - 벽: {hasWall}, 타겟: {hasOtherTarget}", this);
+                    Debug.Log($"[{gameObject.name}] 위치 {worldPos} (셀: {cell}) 사용 불가 - 벽: {hasWall}, 타겟: {hasOtherTarget}", this);
                 }
             }
             else if (mShowDebug)
