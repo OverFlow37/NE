@@ -1,0 +1,256 @@
+{
+  "John": {
+    "reflections": [
+      {
+        "created": "2025.04.25.22:00",
+        "event": "observe Sarah Village town_hall",
+        "action": "talk to Sarah at town_hall",
+        "thought": "Today's meeting at the town hall with Sarah was our first meaningful interaction. The formal setting helped establish a professional yet friendly atmosphere for our conversation.",
+        "importance": 10,
+        "embeddings": []
+      },
+      {
+        "created": "2025.04.26.22:00",
+        "event": "observe Sarah Forest deep_forest",
+        "action": "talk to Sarah at deep_forest",
+        "thought": "Our conversation in the deep forest was unexpectedly profound. The secluded environment allowed for more personal and meaningful discussion.",
+        "importance": 12,
+        "embeddings": []
+      },
+      {
+        "created": "2025.04.27.22:00",
+        "event": "witness sandstorm Desert sand_dunes",
+        "action": "think",
+        "thought": "The sandstorm experience was both challenging and enlightening. It taught me about resilience and adaptation in difficult situations.",
+        "importance": 10,
+        "embeddings": []
+      },
+      {
+        "created": "2025.04.28.22:00",
+        "event": "observe Sarah Desert oasis",
+        "action": "talk to Sarah at oasis",
+        "thought": "The oasis meeting with Sarah was particularly meaningful. The contrast between the harsh desert and the peaceful oasis mirrored our discussion about finding balance in life.",
+        "importance": 12,
+        "embeddings": []
+      },
+      {
+        "created": "2025.04.29.22:00",
+        "event": "observe Sarah Beach cliffside",
+        "action": "talk to Sarah at cliffside",
+        "thought": "Our cliffside conversation was deeply meaningful. The ocean view provided a perfect backdrop for discussing life's bigger questions.",
+        "importance": 14,
+        "embeddings": []
+      },
+      {
+        "created": "2025.04.29.22:00",
+        "event": "observe sandstone Desert rocky_outcrop",
+        "action": "talk to Sarah at rocky_outcrop",
+        "thought": "The rocky outcrop conversation with Sarah revealed new aspects of our friendship. The desert landscape brought a unique perspective to our discussion.",
+        "importance": 10,
+        "embeddings": []
+      },
+      {
+        "created": "2025.04.30.22:00",
+        "event": "discover acorn Forest deep_forest",
+        "action": "talk to Sarah at deep_forest",
+        "thought": "The acorn exchange in the deep forest symbolized growth and potential. Our friendship, like the acorn, holds promise for future development.",
+        "importance": 12,
+        "embeddings": []
+      },
+      {
+        "created": "2025.05.02.22:00",
+        "event": "receive seashell Beach shoreline",
+        "action": "talk to Sarah at shoreline",
+        "thought": "The seashell gift from Sarah at the shoreline was a meaningful gesture. These small tokens of friendship help strengthen our bond.",
+        "importance": 10,
+        "embeddings": []
+      },
+      {
+        "created": "2025.05.02.22:00",
+        "event": "receive acorn Forest deep_forest",
+        "action": "talk to Sarah at deep_forest",
+        "thought": "The acorn exchange in the deep forest was particularly meaningful. It symbolizes the growth and potential of our friendship.",
+        "importance": 12,
+        "embeddings": []
+      },
+      {
+        "created": "2025.05.03.22:00",
+        "event": "observe Sarah Forest stream_bank",
+        "action": "talk to Sarah at stream_bank",
+        "thought": "Our conversation by the stream was peaceful and reflective. The natural setting seems to encourage more open and honest communication.",
+        "importance": 12,
+        "embeddings": []
+      },
+      {
+        "created": "2025.05.04.22:00",
+        "event": "observe driftwood Beach shoreline",
+        "action": "talk to Sarah at shoreline",
+        "thought": "The driftwood conversation with Sarah was particularly meaningful. The natural setting seems to bring out deeper thoughts and feelings in our interactions.",
+        "importance": 8,
+        "embeddings": []
+      },
+      {
+        "created": "2025.05.04.22:00",
+        "event": "observe seagull Beach cliffside",
+        "action": "interact with seagull at cliffside",
+        "thought": "Watching the seagull's freedom in flight made me reflect on the importance of maintaining a sense of freedom and independence in relationships.",
+        "importance": 4,
+        "embeddings": []
+      }
+    ],
+    "plans": {
+      "2025.05.04": {
+        "wake_up_time": "06:00",
+        "daily_plan": [
+          "wake up and have breakfast",
+          "work on painting project",
+          "have lunch",
+          "continue painting project",
+          "have dinner and relax",
+          "go to bed"
+        ],
+        "time_slots": [
+          [
+            "sleeping",
+            360
+          ],
+          [
+            "waking up and morning routine",
+            60
+          ],
+          [
+            "eating breakfast",
+            30
+          ],
+          [
+            "working on painting",
+            240
+          ],
+          [
+            "having lunch",
+            60
+          ],
+          [
+            "working on painting",
+            240
+          ],
+          [
+            "having dinner",
+            60
+          ],
+          [
+            "relaxing and watching TV",
+            120
+          ],
+          [
+            "going to bed",
+            60
+          ],
+          [
+            "sleeping",
+            120
+          ]
+        ]
+      }
+    }
+  }
+}You are a game assistant who helps generate a character’s daily plan.
+Refer to the **REFLECTIONS AND PLAN**, the **MAP INFORMATION**, and the **AVAILABLE ACTIONS** to create a plan for the character named "John."
+
+Use the information from:
+
+* **05.04 reflections** (highest priority)
+* **05.04 plan** (second priority)
+* **other reflections** (lower priority)
+  to create a meaningful, well-balanced daily schedule.
+
+---
+
+**🗺 MAP INFORMATION:**
+
+1. **Village**
+
+* `house`: \["dining\_table", "bookshelf", "bed"]
+* `town_hall`: \["bulletin\_board", "meeting\_table", "clock"]
+* `cafe`: \["coffee\_machine", "pastry\_display", "cozy\_sofa"]
+* `park`: \["swing\_set", "fountain", "bench"]
+
+2. **Forest**
+
+* `forest_entrance`: \["oak\_tree", "fallen\_leaves", "squirrel"]
+* `deep_forest`: \["mushroom", "acorn", "wild\_boar"]
+* `stream_bank`: \["raspberry", "stream\_water", "stone"]
+
+3. **Desert**
+
+* `sand_dunes`: \["cactus", "lizard", "sandstorm"]
+* `oasis`: \["palm\_tree", "water\_pool", "camel"]
+* `rocky_outcrop`: \["scorpion", "sandstone", "hawk"]
+
+4. **Beach**
+
+* `shoreline`: \["seashell", "crab", "driftwood"]
+* `cliffside`: \["seagull", "rock", "binocular\_spot"]
+* `tidal_pool`: \["starfish", "seaweed", "snail"]
+
+---
+
+**🧠 AVAILABLE ACTIONS:**
+
+* `move`: go to a new location
+* `interact`: use/manipulate an object
+* `eat`: consume food
+* `talk`: speak to another agent
+* `wait`: remain inactive briefly
+* `think`: internal thought process
+* `idle`: remain idle without taking any action
+* `sleep`: sleep to recover energy
+
+---
+
+**🕓 PLANNING RULES:**
+
+* Wake-up time is fixed at **06:00**
+* Bedtime is fixed at **22:00**
+* Total minutes in `time_slots` must sum to **1440 minutes (24 hours)**
+* Include two blocks of `"sleeping"`:
+
+  * 360 minutes (night sleep)
+  * 120 minutes (optional daytime nap or rest)
+* `time_slots` entries must directly correspond to `"daily_plan"` actions, with the two `"sleeping"` entries added.
+* You must create a new plan for the next day following the most recent date found in the existing "plans" data.
+    For example, if the last plan is for "2025.05.04", then you should generate a new plan for "2025.05.05".
+
+* Make sure:
+
+    The new date key in "plans" reflects the correct next chronological day.
+
+    The reflections and previous plans can still be referenced, especially "2025.05.04", to inform continuity and meaningful transitions.
+    
+---
+
+**📝 OUTPUT FORMAT (strictly JSON):**
+
+```json
+{
+  "John": {
+    "plans": {
+      "2025.05.04": {
+        "wake_up_time": "06:00",
+        "daily_plan": [
+          "action1",
+          "action2",
+          ...
+        ],
+        "time_slots": [
+          ["action1", duration_in_minutes],
+          ["action2", duration_in_minutes],
+          ...
+        ]
+      }
+    },
+    "reason": "Explain the reason for the plan based on the 05.04 reflection, the existing 05.04 plan, and other meaningful reflections. Justify the priorities and chosen activities."
+  }
+}
+```
+
