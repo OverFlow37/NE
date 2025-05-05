@@ -177,9 +177,15 @@ public class AgentScheduler : MonoBehaviour
     }
 
     // 현재 활동의 목적지 반환하는 함수 (없으면 빈 문자열 반환)
-    public string GetCurrentDestination()
+    public string GetCurrentDestinationLocation()
     {
         return mCurrentAction?.LocationName ?? string.Empty;
+    }
+
+    // 현재 활동의 목적지 이름 반환하는 함수 (없으면 빈 문자열 반환)
+    public string GetCurrentDestinationTarget()
+    {
+        return mCurrentAction?.TargetName ?? string.Empty;
     }
 
     // 현재 활동 이름 반환하는 함수 (없으면 "대기 중" 반환)

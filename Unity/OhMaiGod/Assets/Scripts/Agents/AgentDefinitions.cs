@@ -58,6 +58,7 @@ namespace OhMAIGod.Agent
         public string ID;                   // 활동 고유 식별자
         public string ActionName;           // 활동 이름
         public string LocationName;         // 목적지 위치 이름
+        public string TargetName;           // 목적지 대상 이름
         public TimeSpan StartTime;          // 시작 시간 (하루 중)
         public TimeSpan EndTime;            // 종료 시간 (하루 중)
         public int Priority;                // 우선순위 (높을수록 중요)

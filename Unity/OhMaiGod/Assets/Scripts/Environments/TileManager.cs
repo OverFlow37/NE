@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 public class TileManager : MonoBehaviour
@@ -87,6 +88,11 @@ public class TileManager : MonoBehaviour
             }
         }
         return null;
+    }
+
+    public List<string> GetLocationNames()
+    {
+        return mTileTree.Select(location => location.LocationName).ToList();
     }
 
     public void AddLocationTilemap(TileController tileController)

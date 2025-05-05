@@ -8,6 +8,7 @@ public class MovementController : MonoBehaviour
     [Header("Movement Settings")]
     [SerializeField] private float mMoveSpeed = 2f;                   // 이동 속도
     [SerializeField] private float mReachedDistance = 0.01f;          // 목표 지점 도달 판정 거리
+    [SerializeField] private string mTargetLocationName;               // 현재 찾아갈 로케이션의 이름
     [SerializeField] private string mTargetName;                      // 찾아갈 목표물의 이름
     [SerializeField] private float mTargetSearchInterval = 2f;        // 목표물 탐색 간격
     [SerializeField] private bool mDrawPath = true;                   // 경로 그리기 여부
@@ -75,10 +76,11 @@ public class MovementController : MonoBehaviour
     }
 
     // 위치 이름으로 이동 시작
-    public void MoveToLocation(string _locationName, System.Action _onReached = null)
+    public void MoveToLocation(string _targetName, string _targetLocationName, System.Action _onReached = null)
     {
-        Debug.Log($"{gameObject.name}이(가) {_locationName}로 이동 시작");
-        mTargetName = _locationName;
+        Debug.Log($"{gameObject.name}이(가) {_targetLocationName}로 이동 시작");
+        mTargetName = _targetName;
+        mTargetLocationName = _targetLocationName;
         mIsMoving = true;
         mDestinationReachedEventFired = false;  // 새로운 이동 시작 시 플래그 초기화
         FindTargetPosition();
@@ -112,10 +114,20 @@ public class MovementController : MonoBehaviour
     private void FindTargetPosition()
     {
         if (string.IsNullOrEmpty(mTargetName)) return;
-        GameObject[] targets = GameObject.FindGameObjectsWithTag("Target");
+        
+        // Location 참조
+        TileController targetLocation = TileManager.Instance.GetTileController(mTargetLocationName);
+        if (targetLocation == null)
+        {
+            Debug.LogWarning($"{gameObject.name}이(가) {mTargetLocationName} 위치를 찾을 수 없습니다.");
+            mIsMoving = false;
+            OnDestinationReached?.Invoke();
+            return;
+        }
+
         Transform closestTarget = null;
         float closestDistance = float.MaxValue;
-        foreach (GameObject target in targets)
+        foreach (TargetController target in targetLocation.ChildInteractables)
         {
             if (target.name == mTargetName)
             {
@@ -156,6 +168,8 @@ public class MovementController : MonoBehaviour
         else
         {
             Debug.LogWarning($"이름이 {mTargetName}인 목표물을 찾을 수 없습니다.");
+            mIsMoving = false;
+            OnDestinationReached?.Invoke();
         }
     }
 
