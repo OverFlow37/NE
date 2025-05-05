@@ -196,10 +196,10 @@ public class AgentController : MonoBehaviour
         if (mCurrentAction == null)
         {
             string actionName = mScheduler.GetCurrentActionName();
-            string destination = mScheduler.GetCurrentDestination();
-            mCurrentInteractable = mScheduler.GetCurrentDestination(); //임시로 상호작용할 오브젝트 이름 넣어줌
+            string destinationLocation = mScheduler.GetCurrentDestinationLocation();
+            string destinationTarget = mScheduler.GetCurrentDestinationTarget();
             
-            if (string.IsNullOrEmpty(destination))
+            if (string.IsNullOrEmpty(destinationTarget))
             {
                 if (mShowDebugInfo)
                 {
@@ -212,7 +212,8 @@ public class AgentController : MonoBehaviour
             mCurrentAction = new ScheduleItem
             {
                 ActionName = actionName,
-                LocationName = destination
+                LocationName = destinationLocation,
+                TargetName = destinationTarget
             };
         }
         
@@ -225,7 +226,7 @@ public class AgentController : MonoBehaviour
         }
         
         // 이동 시작
-        mMovement.MoveToLocation(mCurrentAction.LocationName);
+        mMovement.MoveToLocation(mCurrentAction.TargetName, mCurrentAction.LocationName);
 
         // 이동 애니메이션 시작
         animator.SetBool("isMoving", true);
@@ -250,7 +251,8 @@ public class AgentController : MonoBehaviour
             mCurrentAction = new ScheduleItem
             {
                 ActionName = actionName,
-                LocationName = mScheduler.GetCurrentDestination()
+                LocationName = mScheduler.GetCurrentDestinationLocation(),
+                TargetName = mScheduler.GetCurrentDestinationTarget()
             };
         }
         

@@ -189,10 +189,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mGroundTilemap: {fileID: 597632758}
-  mWallTilemap: {fileID: 990865614}
-  mSectionTilemaps:
-  - {fileID: 1499274277}
-  - {fileID: 1112643836}
   mWallLayerMask:
     serializedVersion: 2
     m_Bits: 128
@@ -202,6 +198,8 @@ MonoBehaviour:
   mNPCLayerMask:
     serializedVersion: 2
     m_Bits: 512
+  mShowDebug: 1
+  mIsInitialized: 0
 --- !u!4 &185414075
 Transform:
   m_ObjectHideFlags: 0
@@ -338,33 +336,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8cd73f6cba2d18f49a3d7aa3d9cf9800, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  agentController: {fileID: 608388020}
-  agentScheduler: {fileID: 623837783919926347}
-  movementController: {fileID: 623837783919926346}
-  visibleObjects:
-  - location: House
-    objects:
-    - Kitchen
-    - LivingRoom
-    - Bedroom
-    - Desk
-    - food
-  - location: Cafeteria
-    objects:
-    - Cafeteria
-  - location: 
-    objects: []
-  interactableItems:
-  - location: House
-    objects:
-    - Kitchen
-    - LivingRoom
-    - Bedroom
-    - Desk
-  - location: Cafeteria
-    objects:
-    - Cafeteria
-  sendButton: {fileID: 0}
+  mAgentController: {fileID: 608388020}
+  mAgentScheduler: {fileID: 623837783919926347}
+  mMovementController: {fileID: 623837783919926346}
+  mVisibleObjects: []
+  mInteractableItems: []
 --- !u!4 &218890805
 Transform:
   m_ObjectHideFlags: 0
@@ -6010,6 +5986,10 @@ PrefabInstance:
       propertyPath: mGroundTilemap
       value: 
       objectReference: {fileID: 597632758}
+    - target: {fileID: 8663613268944117034, guid: f18a840692084c145b574bf9d30f315c, type: 3}
+      propertyPath: mLocationTilemap
+      value: 
+      objectReference: {fileID: 1112643836}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -6446,6 +6426,10 @@ PrefabInstance:
       propertyPath: mGroundTilemap
       value: 
       objectReference: {fileID: 597632758}
+    - target: {fileID: 8663613268944117034, guid: f18a840692084c145b574bf9d30f315c, type: 3}
+      propertyPath: mLocationTilemap
+      value: 
+      objectReference: {fileID: 1499274277}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -6461,11 +6445,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 8672883095682678184, guid: 5a00806bee21eba4e8ab1e40309ec8fa, type: 3}
   m_PrefabInstance: {fileID: 8580400563167085614}
   m_PrefabAsset: {fileID: 0}
---- !u!1839735485 &990865614 stripped
-Tilemap:
-  m_CorrespondingSourceObject: {fileID: 4374057070908430735, guid: 5a00806bee21eba4e8ab1e40309ec8fa, type: 3}
-  m_PrefabInstance: {fileID: 8580400563167085614}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1112643833
 GameObject:
   m_ObjectHideFlags: 0
@@ -6477,8 +6456,9 @@ GameObject:
   - component: {fileID: 1112643834}
   - component: {fileID: 1112643836}
   - component: {fileID: 1112643835}
+  - component: {fileID: 1112643837}
   m_Layer: 0
-  m_Name: House
+  m_Name: house
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -7037,6 +7017,18 @@ Tilemap:
     e31: 0
     e32: 0
     e33: 1
+--- !u!114 &1112643837
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1112643833}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1aefa19ce97253a4aae98e719c12234f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1271567190
 GameObject:
   m_ObjectHideFlags: 0
@@ -7141,6 +7133,10 @@ PrefabInstance:
       propertyPath: mGroundTilemap
       value: 
       objectReference: {fileID: 597632758}
+    - target: {fileID: 8663613268944117034, guid: f18a840692084c145b574bf9d30f315c, type: 3}
+      propertyPath: mLocationTilemap
+      value: 
+      objectReference: {fileID: 1112643836}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -7238,56 +7234,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1453046192}
   m_CullTransparentMesh: 1
---- !u!1 &1455878373
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1455878374}
-  - component: {fileID: 1455878375}
-  m_Layer: 0
-  m_Name: AIBridge
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 0
---- !u!4 &1455878374
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1455878373}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1455878375
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1455878373}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e4cbec0648745a341bc42c613de5afb0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  mApiUrl: http://localhost:5000/api/agent
-  mRequestInterval: 5
-  mMaxQueueSize: 10
-  mApiKey: 
-  mUseLocalFallback: 1
-  mShowDebugInfo: 1
 --- !u!1 &1486338051
 GameObject:
   m_ObjectHideFlags: 0
@@ -7378,8 +7324,9 @@ GameObject:
   - component: {fileID: 1499274275}
   - component: {fileID: 1499274277}
   - component: {fileID: 1499274276}
+  - component: {fileID: 1499274278}
   m_Layer: 0
-  m_Name: Cafe
+  m_Name: cafeteria
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -7864,6 +7811,18 @@ Tilemap:
     e31: 0
     e32: 0
     e33: 1
+--- !u!114 &1499274278
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1499274274}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1aefa19ce97253a4aae98e719c12234f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1687166613
 GameObject:
   m_ObjectHideFlags: 0
@@ -7943,89 +7902,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1687166613}
   m_CullTransparentMesh: 1
---- !u!1 &1731682519
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1731682521}
-  - component: {fileID: 1731682520}
-  - component: {fileID: 1731682522}
-  m_Layer: 0
-  m_Name: ScheduleTester
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 0
---- !u!114 &1731682520
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1731682519}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2ac606e9e7289d54e9d8625bc8317e74, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  mTargetAgent: {fileID: 608388020}
-  mTimeScale: 60
-  mCurrentTime: 00:00
-  mCurrentActivity: "\uC5C6\uC74C"
-  mActivityName: "\uC544\uCE68 \uC2DD\uC0AC"
-  mLocationName: Cafeteria
-  mStartTime: 09:00
-  mEndTime: 09:30
-  mPriority: 10
-  mIsFlexible: 0
-  mAddActivity: 0
-  mCompleteCurrentActivity: 0
-  mClearAllSchedule: 0
-  mApplyTimeScale: 1
---- !u!4 &1731682521
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1731682519}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1.3795995, y: -0.6094049, z: 0.01935961}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1731682522
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1731682519}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7e4b79f7be5858f4ebcbb82e48efbb7e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  mTargetAgent: {fileID: 608388020}
-  mTimeScale: 3000
-  mCurrentTime: 00:00
-  mCurrentActivity: "\uC5C6\uC74C"
-  mJsonInput: "{\r\n  \"who\": \"Tom\",\r\n  \"where\": \"Kitchen\",\r\n  \"what\":
-    \"Fridge\",\r\n  \"action\": \"Open fridge and get food\",\r\n  \"startTime\":
-    \"08:00\",\r\n  \"endTime\": \"08:15\",\r\n  \"priority\": 10,\r\n  \"isFlexible\":
-    false\r\n}"
-  mProcessJson: 0
-  mCompleteCurrentActivity: 0
-  mClearAllSchedule: 0
-  mApplyTimeScale: 0
 --- !u!1001 &1855011629
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -8086,6 +7962,10 @@ PrefabInstance:
       propertyPath: mGroundTilemap
       value: 
       objectReference: {fileID: 597632758}
+    - target: {fileID: 8663613268944117034, guid: f18a840692084c145b574bf9d30f315c, type: 3}
+      propertyPath: mLocationTilemap
+      value: 
+      objectReference: {fileID: 1112643836}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -8623,6 +8503,10 @@ PrefabInstance:
       propertyPath: mGroundTilemap
       value: 
       objectReference: {fileID: 597632758}
+    - target: {fileID: 8663613268944117034, guid: f18a840692084c145b574bf9d30f315c, type: 3}
+      propertyPath: mLocationTilemap
+      value: 
+      objectReference: {fileID: 1112643836}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -8961,12 +8845,10 @@ SceneRoots:
   - {fileID: 403329729}
   - {fileID: 623837783919926345}
   - {fileID: 218908449}
+  - {fileID: 837581392}
+  - {fileID: 1855011629}
   - {fileID: 7037353773129976796}
   - {fileID: 668021672}
-  - {fileID: 837581392}
   - {fileID: 1331650219}
-  - {fileID: 1855011629}
-  - {fileID: 1455878374}
-  - {fileID: 1731682521}
   - {fileID: 218890805}
   - {fileID: 799278574}

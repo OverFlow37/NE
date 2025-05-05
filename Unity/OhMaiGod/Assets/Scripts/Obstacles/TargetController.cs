@@ -1,10 +1,13 @@
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Tilemaps;
 
 // 타겟의 서있는 지점을 관리하는 컨트롤러
 public class TargetController : MonoBehaviour
 {
+    private string mInteractableName;
+    private TileController mParentLocation;
+    private bool mIsInitialized = false;
+    
     [SerializeField] private GameObject mStandingPointPrefab;    // 서있는 지점 프리팹
     [SerializeField] private float mCheckRadius = 0.4f;          // 주변 충돌 확인 반경 (타일 크기에 맞게 조정)
     [SerializeField] private bool mShowDebug = false;            // 디버그 정보 표시 여부
@@ -13,6 +16,7 @@ public class TargetController : MonoBehaviour
     private List<Vector2> mAvailablePositions;                  // 사용 가능한 위치 목록
     private Collider2D mTargetCollider;                         // 타겟의 콜라이더
     private HashSet<Vector3Int> mOccupiedCells;                 // 타겟이 차지하는 셀 목록
+
     // 초기화
     private void Awake() // Start 대신 Awake 사용 고려 (Collider 참조 등)
     {
@@ -29,6 +33,7 @@ public class TargetController : MonoBehaviour
             enabled = false;
             return;
         }
+        mInteractableName = gameObject.name;
         mStandingPoints = new List<GameObject>();
         mAvailablePositions = new List<Vector2>();
         mOccupiedCells = new HashSet<Vector3Int>();
@@ -38,6 +43,21 @@ public class TargetController : MonoBehaviour
     {
         InitializeStandingPoints();
     }
+
+    private void Update()
+    {
+        if (!TileManager.Instance.mIsInitialized || TileManager.Instance.TileTree.Count == 0) return;
+        if (!mIsInitialized)
+        {
+            Vector3Int cellPos = TileManager.Instance.GroundTilemap.WorldToCell(transform.position);
+            mParentLocation = TileManager.Instance.GetTileController(cellPos);
+            mParentLocation.AddChildInteractable(this);
+            mIsInitialized = true;
+        }
+    }
+
+    public string InteractableName { get { return mInteractableName; } }
+    public TileController ParentLocation { get { return mParentLocation; } }
 
     // 서있는 지점들 초기화
     private void InitializeStandingPoints()

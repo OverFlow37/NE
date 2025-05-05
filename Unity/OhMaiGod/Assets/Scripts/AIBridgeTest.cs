@@ -227,13 +227,21 @@ public class AIBridgeTest : MonoBehaviour
             // 현재 시간 가져오기 및 활동 지속 시간 설정
             TimeSpan currentTime = mAgentScheduler.GetCurrentGameTime();
             TimeSpan duration = TimeSpan.FromMinutes(30); // 기본 30분으로 설정
+
+            string location = action.details.location;
+            if (!TileManager.Instance.GetLocationNames().Contains(location))
+            {
+                SendAgent();
+                return;
+            }
             
             // 새로운 일정 아이템 생성
             ScheduleItem newScheduleItem = new ScheduleItem
             {
                 ID = System.Guid.NewGuid().ToString(),
                 ActionName = action.action,
-                LocationName = action.details.target,
+                LocationName = location,
+                TargetName = action.details.target,
                 StartTime = currentTime,
                 EndTime = currentTime.Add(duration),
                 Priority = 1, // 최우선순위로 설정
