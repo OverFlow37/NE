@@ -24,15 +24,15 @@ public class TimeManager : MonoBehaviour
 
     [Header("시간 설정")]
     [Tooltip("현실 시간 1초당 게임 내 시간이 몇 분 흐를지 설정")]
-    [SerializeField] private float mGameToRealTimeRatio = 60.0f; // 기본: 1초당 1분(60초)
+    [SerializeField] private float mGameToRealTimeRatio = 60.0f;    // 기본: 1초당 1분(60초)
     
     [Header("디버깅")]
-    [SerializeField] private bool mShowDebugInfo = true; // 디버그 로그 출력 여부
+    [SerializeField] private bool mShowDebugInfo = true;            // 디버그 로그 출력 여부
 
     // 시간 관리 변수들
-    [SerializeField]private DateTime mGameDate;         // 현재 게임 날짜
-    [SerializeField]private TimeSpan mCurrentGameTime;  // 현재 게임 내 시간
-    private bool mIsPaused = false;     // 시간 흐름 일시정지 상태
+    [SerializeField]private DateTime mGameDate;             // 현재 게임 날짜
+    [SerializeField]private TimeSpan mCurrentGameTime;      // 현재 게임 내 시간
+    private bool mIsPaused = false;     // 시간 흐름 일시정지 상태 여부
 
     public DateTime GameDate {get => mGameDate;}
     public TimeSpan GameTime {get => mCurrentGameTime;}

@@ -110,7 +110,7 @@ public class AgentController : MonoBehaviour
         // 상태별 현재 상태 유지 시간 업데이트 처리
         switch (mCurrentState)
         {
-            case AgentState.PerformingAction:
+            case AgentState.INTERACTION:
                 UpdateActionTime();
                 break;
                 
@@ -135,7 +135,7 @@ public class AgentController : MonoBehaviour
         }
 
         // 이전 활동 정리
-        if (mCurrentAction != null && mCurrentState == AgentState.PerformingAction)
+        if (mCurrentAction != null && mCurrentState == AgentState.INTERACTION)
         {
             CompleteAction();
         }
@@ -288,7 +288,7 @@ public class AgentController : MonoBehaviour
         }
         
         // 상태 변경
-        mCurrentState = AgentState.PerformingAction;
+        mCurrentState = AgentState.INTERACTION;
         mCurrentActionTime = 0f;
         
         if (mShowDebugInfo)
