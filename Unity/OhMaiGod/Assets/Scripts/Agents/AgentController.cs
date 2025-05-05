@@ -11,7 +11,6 @@ public class AgentController : MonoBehaviour
 
     [Header("Agent States")]
     [SerializeField] private AgentNeeds mAgentNeeds;                // 현재 Agent의 욕구 수치
-    public AgentNeeds GetAgentNeeds() { return mAgentNeeds; }
     
     // Needs 수정을 위한 메서드들
     public void ModifyHunger(int amount) 
@@ -313,7 +312,8 @@ public class AgentController : MonoBehaviour
             Debug.Log($"{mName}: {interactableObject.name}와(과) 상호작용 시작");
         }
         Debug.Log("상호작용 시작");
-        mCurrentState = AgentState.INTERACTING;
+
+        mCurrentState = AgentState.INTERACTION;
         
         // Interactable 컴포넌트의 Interact 메서드 호출
         var interactable = interactableObject.GetComponent<Interactable>();
@@ -402,7 +402,7 @@ public class AgentController : MonoBehaviour
             }
             
             // 현재 활동 확인
-            string destination = mScheduler.GetCurrentDestination();
+            string destination = mScheduler.GetCurrentDestinationTarget();
 
             if (!string.IsNullOrEmpty(destination))
             {
