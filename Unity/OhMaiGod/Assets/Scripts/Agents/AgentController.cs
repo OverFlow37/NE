@@ -11,7 +11,6 @@ public class AgentController : MonoBehaviour
 
     [Header("Agent States")]
     [SerializeField] private AgentNeeds mAgentNeeds;                // 현재 Agent의 욕구 수치
-    public AgentNeeds GetAgentNeeds() { return mAgentNeeds; }
     
     // Needs 수정을 위한 메서드들
     public void ModifyHunger(int amount) 
@@ -137,7 +136,7 @@ public class AgentController : MonoBehaviour
         // 상태별 현재 상태 유지 시간 업데이트 처리
         switch (mCurrentState)
         {
-            case AgentState.PerformingAction:
+            case AgentState.INTERACTION:
                 UpdateActionTime();
                 break;
                 
@@ -162,7 +161,7 @@ public class AgentController : MonoBehaviour
         }
 
         // 이전 활동 정리
-        if (mCurrentAction != null && mCurrentState == AgentState.PerformingAction)
+        if (mCurrentAction != null && mCurrentState == AgentState.INTERACTION)
         {
             CompleteAction();
         }
@@ -255,9 +254,10 @@ public class AgentController : MonoBehaviour
                 TargetName = mScheduler.GetCurrentDestinationTarget()
             };
         }
-        
+
         // 현재 위치에서 상호작용 가능한 오브젝트 찾기
         GameObject interactableObject = FindInteractableInCurrentLocation();
+
         if (interactableObject != null)
         {
             Debug.Log($"상호작용 가능한 오브젝트 찾음: {interactableObject}");
@@ -267,7 +267,7 @@ public class AgentController : MonoBehaviour
         else
         {
             // 상호작용 가능한 오브젝트가 없으면 일반 활동 수행
-            mCurrentState = AgentState.PerformingAction;
+            mCurrentState = AgentState.INTERACTION;
             mCurrentActionTime = 0f;
         }
     }
@@ -312,7 +312,8 @@ public class AgentController : MonoBehaviour
             Debug.Log($"{mName}: {interactableObject.name}와(과) 상호작용 시작");
         }
         Debug.Log("상호작용 시작");
-        mCurrentState = AgentState.INTERACTING;
+
+        mCurrentState = AgentState.INTERACTION;
         
         // Interactable 컴포넌트의 Interact 메서드 호출
         var interactable = interactableObject.GetComponent<Interactable>();
@@ -401,7 +402,7 @@ public class AgentController : MonoBehaviour
             }
             
             // 현재 활동 확인
-            string destination = mScheduler.GetCurrentDestination();
+            string destination = mScheduler.GetCurrentDestinationTarget();
 
             if (!string.IsNullOrEmpty(destination))
             {
@@ -428,13 +429,13 @@ public class AgentController : MonoBehaviour
     // 감정 상태 자동 증가 코루틴
     private IEnumerator AutoIncreaseAgentNeeds()
     {
-        TimeSpan lastIncreaseTime = mScheduler.GetCurrentGameTime();
+        TimeSpan lastIncreaseTime = TimeManager.Instance.GetCurrentGameTime();
 
         while (true)
         {
             yield return new WaitForSeconds(1f); // 1초마다 체크
 
-            TimeSpan currentTime = mScheduler.GetCurrentGameTime();
+            TimeSpan currentTime = TimeManager.Instance.GetCurrentGameTime();
             TimeSpan timeDifference = currentTime - lastIncreaseTime;
 
             // 게임 시간으로 30분이 지났는지 확인

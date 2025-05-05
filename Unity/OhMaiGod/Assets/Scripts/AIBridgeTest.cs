@@ -151,7 +151,7 @@ public class AIBridgeTest : MonoBehaviour
         mIsRequesting = true;
 
         // 현재 에이전트의 상태 정보 가져오기
-        AgentNeeds currentState = mAgentController.GetAgentNeeds();
+        AgentNeeds currentState = mAgentController.AgnetNeeds;
 
         // AI 서버에 보낼 요청 데이터 생성
         AgentRequest requestData = new AgentRequest
@@ -225,7 +225,7 @@ public class AIBridgeTest : MonoBehaviour
             Action action = agentResponse.data.action;
             
             // 현재 시간 가져오기 및 활동 지속 시간 설정
-            TimeSpan currentTime = mAgentScheduler.GetCurrentGameTime();
+            TimeSpan currentTime = TimeManager.Instance.GetCurrentGameTime();
             TimeSpan duration = TimeSpan.FromMinutes(30); // 기본 30분으로 설정
 
             string location = action.details.location;

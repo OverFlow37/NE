@@ -9,9 +9,8 @@ namespace OhMAIGod.Agent
         IDLE = 0,
         WAITING,
         MOVING,
-        INTERACTING,   // 오브젝트와 상호작용
+        INTERACTION,        // 모든 행동
         MovingToLocation,
-        PerformingAction
     }
 
     [System.Serializable]
