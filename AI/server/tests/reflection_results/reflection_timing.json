@@ -1,0 +1,79 @@
+{
+  "batch_reflections": [
+    {
+      "date": "2025.05.04",
+      "agent_name": "John",
+      "total_time": 185.37940335273743,
+      "api_time": 185.3644003868103,
+      "memory_count": 3,
+      "memory_details": [
+        {
+          "event": "harvest first_vegetables Village garden",
+          "importance": 7
+        },
+        {
+          "event": "observe stone Forest stream_bank",
+          "importance": 6
+        },
+        {
+          "event": "receive oak_tree Forest forest_entrance",
+          "importance": 6
+        }
+      ],
+      "status": "success",
+      "timestamp": "2025-05-06 15:04:20"
+    },
+    {
+      "date": "2025.05.04",
+      "agent_name": "John",
+      "total_time": 198.66230821609497,
+      "api_time": 198.64577269554138,
+      "memory_count": 3,
+      "memory_details": [
+        {
+          "event": "harvest first_vegetables Village garden",
+          "importance": 7
+        },
+        {
+          "event": "observe stone Forest stream_bank",
+          "importance": 6
+        },
+        {
+          "event": "receive oak_tree Forest forest_entrance",
+          "importance": 6
+        }
+      ],
+      "status": "success",
+      "timestamp": "2025-05-06 15:17:21"
+    }
+  ],
+  "single_reflections": [
+    {
+      "date": "2025.05.04",
+      "agent_name": "John",
+      "total_time": 274.93506717681885,
+      "memory_count": 3,
+      "individual_times": [
+        {
+          "event": "harvest first_vegetables Village garden",
+          "importance": 7,
+          "elapsed_time": 90.38420915603638,
+          "status": "success"
+        },
+        {
+          "event": "observe stone Forest stream_bank",
+          "importance": 6,
+          "elapsed_time": 87.1259081363678,
+          "status": "success"
+        },
+        {
+          "event": "receive oak_tree Forest forest_entrance",
+          "importance": 6,
+          "elapsed_time": 97.40921258926392,
+          "status": "success"
+        }
+      ],
+      "timestamp": "2025-05-06 15:14:03"
+    }
+  ]
+}

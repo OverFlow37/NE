@@ -240,7 +240,103 @@
         "thought": "Watching the seagull's freedom in flight made me reflect on the importance of maintaining a sense of freedom and independence in relationships.",
         "importance": 4,
         "embeddings": []
+      },
+      {
+        "created": "2025.05.06.14:15",
+        "event": "harvest first_vegetables Village garden",
+        "action": "cook dinner at house",
+        "thought": "The simple act of gathering those first vegetables felt profoundly rewarding. Sharing that meal with them was a connection I hadn't anticipated. It reinforced the value of quiet, shared moments.",
+        "importance": 8,
+        "embeddings": []
+      },
+      {
+        "created": "2025.05.06.14:16",
+        "event": "observe stone Forest stream_bank",
+        "action": "talk to Sarah at stream_bank",
+        "thought": "Sarah's calm presence offered a grounding contrast to the environment. It highlighted the value of human connection, even in observation. Perhaps understanding others is key to truly understanding the world.",
+        "importance": 6,
+        "embeddings": []
+      },
+      {
+        "created": "2025.05.06.14:19",
+        "event": "receive oak_tree Forest forest_entrance",
+        "action": "talk to Sarah at forest_entrance",
+        "thought": "Sarah's concern about the forest felt…genuine. It highlighted the value of observation and understanding human motivations. Perhaps connection is more complex than data suggests.",
+        "importance": 6,
+        "embeddings": []
+      },
+      {
+        "created": "2025.05.06.15:04",
+        "event": "harvest first_vegetables Village garden",
+        "action": "cook dinner at house",
+        "thought": "The vegetables were fresh and flavorful after gathering them. It felt good to prepare a simple meal.",
+        "importance": 7,
+        "embeddings": []
+      },
+      {
+        "created": "2025.05.06.15:04",
+        "event": "observe stone Forest stream_bank",
+        "action": "talk to Sarah at stream_bank",
+        "thought": "Sarah’s observations about the stream were insightful and calming. Our conversation was a pleasant break.",
+        "importance": 6,
+        "embeddings": []
+      },
+      {
+        "created": "2025.05.06.15:04",
+        "event": "receive oak_tree Forest forest_entrance",
+        "action": "talk to Sarah at forest_entrance",
+        "thought": "Sarah explained the forest’s history with a gentle tone. It was a valuable piece of information.",
+        "importance": 6,
+        "embeddings": []
+      },
+      {
+        "created": "2025.05.06.15:10",
+        "event": "harvest first_vegetables Village garden",
+        "action": "cook dinner at house",
+        "thought": "The taste of those fresh vegetables felt…real. It was a simple reward for honest work. I realized connection isn't just about directives, but about shared experiences.",
+        "importance": 8,
+        "embeddings": []
+      },
+      {
+        "created": "2025.05.06.15:12",
+        "event": "observe stone Forest stream_bank",
+        "action": "talk to Sarah at stream_bank",
+        "thought": "Sarah's observations about the water’s flow felt… relevant. It highlighted the subtle patterns I often miss. Perhaps observation isn't just about what's seen, but what's understood.",
+        "importance": 6,
+        "embeddings": []
+      },
+      {
+        "created": "2025.05.06.15:14",
+        "event": "receive oak_tree Forest forest_entrance",
+        "action": "talk to Sarah at forest_entrance",
+        "thought": "Sarah's calm demeanor at the forest entrance felt… grounding. It highlighted the value of observation and connection. Perhaps understanding others is key to navigating these situations.",
+        "importance": 6,
+        "embeddings": []
+      },
+      {
+        "created": "2025.05.06.15:17",
+        "event": "harvest first_vegetables Village garden",
+        "action": "cook dinner at house",
+        "thought": "The vegetables were fresh, and the meal was satisfying. It was good to provide for myself.",
+        "importance": 7,
+        "embeddings": []
+      },
+      {
+        "created": "2025.05.06.15:17",
+        "event": "observe stone Forest stream_bank",
+        "action": "talk to Sarah at stream_bank",
+        "thought": "Sarah’s observations about the stream were insightful.  Our conversation felt peaceful.",
+        "importance": 6,
+        "embeddings": []
+      },
+      {
+        "created": "2025.05.06.15:17",
+        "event": "receive oak_tree Forest forest_entrance",
+        "action": "talk to Sarah at forest_entrance",
+        "thought": "The oak tree felt ancient and significant. Sarah's words resonated deeply.",
+        "importance": 6,
+        "embeddings": []
       }
     ]
   }
-} 
+}
