@@ -20,24 +20,24 @@ namespace OhMAIGod.Agent
 
     public abstract class AgentStateHandler
     {
-        public virtual void Enter(AgentController controller)
+        // 상태 진입 시 호출
+        public virtual void OnStateEnter(AgentController _controller)
         {
-            Debug.Log($"{controller.AgentName}: {GetStateName()} 상태 진입");
+            Debug.Log($"{_controller.AgentName}: {GetStateName()} 상태 진입");
         }
 
         // 매 프레임 호출되는 메서드 (자식 클래스에서 반드시 구현)
-        public abstract void Update(AgentController controller);
+        public abstract void OnStateExecute(AgentController _controller);
 
-        // 상태 종료 시 호출되는 메서드
-        public virtual void Exit(AgentController controller)
+        // 상태 종료 시 호출
+        public virtual void OnStateExit(AgentController _controller)
         {
-            Debug.Log($"{controller.AgentName}: {GetStateName()} 상태 종료");
+            Debug.Log($"{_controller.AgentName}: {GetStateName()} 상태 종료");
         }
 
+        // 상태 이름 변환 함수 (디버깅용)
         protected abstract string GetStateName();
     }
-
-
 
     [System.Serializable]
     public struct AgentNeeds

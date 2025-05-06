@@ -47,7 +47,7 @@ public class AgentController : MonoBehaviour
     [SerializeField] private Transform mVisualRange;                // 시야 범위
     [SerializeField] private float mActionMinDuration = 1.0f;       // 활동 최소 지속 시간 (분)
     [SerializeField] private bool mAutoStart = true;                // 자동 시작 여부
-    private AgentState mCurrentState = AgentState.IDLE;             // 에이전트의 현재 State
+    private AgentStateMachine mStateMachine;
 
     [Header("디버깅")]
     [SerializeField] private bool mShowDebugInfo = true;            // 디버그 정보 표시 여부
@@ -55,9 +55,10 @@ public class AgentController : MonoBehaviour
     private float mCurrentActionTime = 0f;                          // 현재 활동 진행 시간
     private ScheduleItem mCurrentAction = null;                     // 현재 활동 정보
     private float mWaitTime = 0f;                                   // 대기 시간 (다음 활동까지)
-    public AgentState CurrentState => mCurrentState;                // 에이전트 현재 상태
-    public string AgentName => mName;                               // 에이전트 이름
-    public int AgentID => mID;                                      // 에이전트 ID
+
+    public AgentState CurrentState => mStateMachine.CurrentStateType;       // 에이전트 현재 상태
+    public string AgentName => mName;                                       // 에이전트 이름
+    public int AgentID => mID;                                              // 에이전트 ID
     public AgentNeeds AgnetNeeds => mAgentNeeds;
 
     private Animator animator;  // 애니메이터
@@ -88,6 +89,9 @@ public class AgentController : MonoBehaviour
 
         // 애니메이션 참조
         animator = GetComponent<Animator>();
+
+        // FSM 초기화
+        mStateMachine = new AgentStateMachine(this);
     }
 
     private void OnDestroy()
@@ -114,8 +118,30 @@ public class AgentController : MonoBehaviour
         // 도착한 위치에 따라 감정 상태 업데이트 -> 타겟 오브젝트에 따라 감정 상태 업데이트
         //UpdateAgentNeedsByLocation(mMovement.TargetName);
 
+        // 현재 상태에 따른 처리
+        // switch (CurrentState)
+        // {
+        //     case AgentState.MOVE_TO_LOCATION:
+
+        //         // 위치 도착 후 상호작용 가능 여부 확인
+        //         if (CheckInteractableAvailable())
+        //         {
+        //             ChangeState(AgentState.MOVE_TO_INTERACTABLE);
+        //         }
+        //         else
+        //         {
+        //             ChangeState(AgentState.WAIT);
+        //         }
+        //         break;
+                
+        //     case AgentState.MOVE_TO_INTERACTABLE:
+        //         // 상호작용 가능 시 상호작용 시작
+        //         ChangeState(AgentState.INTERACTION);
+        //         break;
+        // }
+
         // 활동 시작
-        StartAction();
+        // StartAction();
     }
 
     private void Start()
@@ -124,7 +150,11 @@ public class AgentController : MonoBehaviour
         {
             // 현재 상태 평가 시작
             // 수정필요
-            StartCoroutine(EvaluateStateRoutine());
+            // StartCoroutine(EvaluateStateRoutine());
+
+            // 상태 머신 초기화 (현재 상태 지정) 
+            // (AI 서버에서 호출먼저 받는 테스트하느라 주석처리)
+            // mStateMachine.Initialize(AgentState.WAIT);
 
             // 감정 상태 자동 증가 시작
             StartCoroutine(AutoIncreaseAgentNeeds());
@@ -133,17 +163,14 @@ public class AgentController : MonoBehaviour
 
     private void Update()
     {
-        // 상태별 현재 상태 유지 시간 업데이트 처리
-        switch (mCurrentState)
-        {
-            case AgentState.INTERACTION:
-                UpdateActionTime();
-                break;
-                
-            case AgentState.WAITING:
-                UpdateWaitTime();
-                break;
-        }
+        // 상태 머신 업데이트 호출
+        mStateMachine.ProcessStateUpdate();
+    }
+
+    // 상태 전환 메서드
+    public void ChangeState(AgentState _newState)
+    {
+        mStateMachine.ChangeState(_newState);
     }
 
     // 새 활동 시작 (AgentScheduler에서 호출)
@@ -161,7 +188,7 @@ public class AgentController : MonoBehaviour
         }
 
         // 이전 활동 정리
-        if (mCurrentAction != null && mCurrentState == AgentState.INTERACTION)
+        if (mCurrentAction != null && mStateMachine.CurrentStateType == AgentState.INTERACTION)
         {
             CompleteAction();
         }
@@ -169,27 +196,15 @@ public class AgentController : MonoBehaviour
         // 새 활동 설정
         mCurrentAction = _action;
         
-        // 현재 위치가 활동 위치와 다른 경우 이동 시작
-        // if (NeedsToMoveForAction(_Action))
-        // {
-        //     // 활동 위치로 이동 시작
-        //     StartMovingToAction();
-        // }
-        // else
-        // {
-        //     // 이미 올바른 위치에 있으면 활동 시작
-        //     StartAction();
-        // }
-        StartMovingToAction();
+        // MOVE_TO_LOCATION 상태로 전환
+        ChangeState(AgentState.MOVE_TO_LOCATION);
 
         // 활동 시작 시 말풍선 표시
         agentUI.StartSpeech(mCurrentAction.Reason);
     }
 
-
-
     // 활동 위치로 이동 시작
-    private void StartMovingToAction()
+    public void StartMovingToAction()
     {
         // 현재 활동 정보 가져오기 (없으면 스케줄러에서 가져오기)
         if (mCurrentAction == null)
@@ -216,9 +231,6 @@ public class AgentController : MonoBehaviour
             };
         }
         
-        // 상태 변경
-        mCurrentState = AgentState.MovingToLocation;
-        
         if (mShowDebugInfo)
         {
             Debug.Log($"{mName}: {mCurrentAction.LocationName}(으)로 이동 시작. ({mCurrentAction.ActionName} 위해)");
@@ -232,7 +244,7 @@ public class AgentController : MonoBehaviour
     }
 
     // 활동 시작하는 함수
-    private void StartAction()
+    public void StartAction()
     {
         // 활동 정보 없으면 스케줄러에서 가져오기
         if (mCurrentAction == null)
@@ -242,7 +254,8 @@ public class AgentController : MonoBehaviour
             if (actionName == "대기 중")
             {
                 // 활동 없음 - 대기 상태로
-                mCurrentState = AgentState.IDLE;
+                // mCurrentState = AgentState.IDLE;
+                mStateMachine.ChangeState(AgentState.IDLE);
                 return;
             }
             
@@ -262,12 +275,15 @@ public class AgentController : MonoBehaviour
         {
             Debug.Log($"상호작용 가능한 오브젝트 찾음: {interactableObject}");
             // 상호작용 가능한 오브젝트가 있으면 상호작용 시작
+            // mStateMachine.ChangeState(AgentState.INTERACTION);
             StartInteraction(interactableObject);
         }
         else
         {
             // 상호작용 가능한 오브젝트가 없으면 일반 활동 수행
-            mCurrentState = AgentState.INTERACTION;
+            // mCurrentState = AgentState.INTERACTION;
+            // mStateMachine.ChangeState(AgentState.INTERACTION);
+
             mCurrentActionTime = 0f;
         }
     }
@@ -313,7 +329,8 @@ public class AgentController : MonoBehaviour
         }
         Debug.Log("상호작용 시작");
 
-        mCurrentState = AgentState.INTERACTION;
+        // INTERACTION 상태로 전환
+        mStateMachine.ChangeState(AgentState.INTERACTION);
         
         // Interactable 컴포넌트의 Interact 메서드 호출
         var interactable = interactableObject.GetComponent<Interactable>();
@@ -341,12 +358,13 @@ public class AgentController : MonoBehaviour
             
             // 상태 초기화
             mCurrentAction = null;
-            mCurrentState = AgentState.IDLE;
+            // mCurrentState = AgentState.IDLE;
+            mStateMachine.ChangeState(AgentState.IDLE);
         }
     }
 
     // 활동 시간 증가 함수
-    private void UpdateActionTime()
+    public void UpdateActionTime()
     {
         // 활동 시간 증가
         mCurrentActionTime += Time.deltaTime;
@@ -361,7 +379,8 @@ public class AgentController : MonoBehaviour
     // 대기 상태로 전환하는 함수
     private void EnterWaitingState(float _waitTimeMinutes)
     {
-        mCurrentState = AgentState.WAITING;
+        // mCurrentState = AgentState.WAITING;
+        mStateMachine.ChangeState(AgentState.WAIT);
         mWaitTime = Mathf.Min(_waitTimeMinutes * 60f, 300f); // 최대 5분 (300초)
         
         if (mShowDebugInfo)
@@ -371,7 +390,7 @@ public class AgentController : MonoBehaviour
     }
 
     // 대기 상태 업데이트
-    private void UpdateWaitTime()
+    public void UpdateWaitTime()
     {
         // 대기 시간 감소
         mWaitTime -= Time.deltaTime;
@@ -379,7 +398,8 @@ public class AgentController : MonoBehaviour
         // 대기 시간 종료 시 상태 변경
         if (mWaitTime <= 0f)
         {
-            mCurrentState = AgentState.IDLE;
+            // mCurrentState = AgentState.IDLE;
+            mStateMachine.ChangeState(AgentState.WAIT);
             
             if (mShowDebugInfo)
             {
@@ -395,7 +415,7 @@ public class AgentController : MonoBehaviour
         while (true)
         {
             // 이미 활동 중이거나 이동 중이면 건너뛰기
-            if (mCurrentState != AgentState.IDLE && mCurrentState != AgentState.WAITING)
+            if (mStateMachine.CurrentStateType != AgentState.IDLE && mStateMachine.CurrentStateType != AgentState.WAITING)
             {
                 yield return new WaitForSeconds(1.0f);
                 continue;

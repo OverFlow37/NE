@@ -21,7 +21,7 @@ public struct ObjectGroup
 public struct Agent
 {
     public string name;                         // 에이전트 이름
-    public AgentNeeds state;   // 에이전트의 감정 상태
+    public AgentNeeds state;                    // 에이전트의 감정 상태
     public string location;                     // 현재 위치
     public string personality;                  // 성격 특성
     public ObjectGroup[] visible_objects;       // 볼 수 있는 오브젝트들
@@ -141,6 +141,9 @@ public class AIBridgeTest : MonoBehaviour
             Debug.LogWarning("요청 진행 중입니다. 기다려주세요.");
             return;
         }
+
+        // Agent를 WAIT_FOR_AI_RESPONSE 상태로 전환
+        mAgentController.ChangeState(AgentState.WAIT_FOR_AI_RESPONSE);
 
         StartCoroutine(SendAgentData());
     }

@@ -1,5 +1,7 @@
+// AgentStateMachine.cs - 상태 관리 클래스 (개선된 메서드명)
 using System.Collections.Generic;
 using UnityEngine;
+using OhMAIGod.Agent;
 
 namespace OhMAIGod.Agent
 {
@@ -12,12 +14,13 @@ namespace OhMAIGod.Agent
         private AgentState mCurrentStateType;
         private AgentState mPreviousStateType;
 
-        public AgentState CurrentStateType {get { return mCurrentStateType; }}
-        public AgentState PreviousStateType {get { return mPreviousStateType; }}
+        public AgentState CurrentStateType {get {return mCurrentStateType;} }
+        public AgentState PreviousStateType { get {return mPreviousStateType;} }
 
         public AgentStateMachine(AgentController _controller)
         {
             mController = _controller;
+            mCurrentStateType = AgentState.WAIT;
             mStates = new Dictionary<AgentState, AgentStateHandler>();
             InitializeStates();
         }
@@ -25,30 +28,29 @@ namespace OhMAIGod.Agent
         private void InitializeStates()
         {
             // 모든 상태 등록
-            // RegisterState(AgentState.WAIT_FOR_AI_RESPONSE, new WaitingForAIResponseState());
-            // RegisterState(AgentState.WAIT, new WaitingForScheduleState());
-            // RegisterState(AgentState.WAIT, new WaitingForConditionState());
-            // RegisterState(AgentState.MOVE_TO_LOCATION, new MovingToLocationState());
-            // RegisterState(AgentState.MOVE_TO_INTERACTABLE, new MovingToInteractableState());
-            // RegisterState(AgentState.INTERACTION, new InteractionState());
+            RegisterState(AgentState.WAIT_FOR_AI_RESPONSE, new WaitForAIResponseStateHandler());
+            RegisterState(AgentState.WAIT, new WaitStateHandler());
+            RegisterState(AgentState.MOVE_TO_LOCATION, new MoveToLocationStateHandler());
+            RegisterState(AgentState.MOVE_TO_INTERACTABLE, new MoveToInteractableStateHandler());
+            RegisterState(AgentState.INTERACTION, new InteractionStateHandler());
         }
 
-        private void RegisterState(AgentState _stateType, AgentStateHandler _stateClass)
+        private void RegisterState(AgentState _stateType, AgentStateHandler _state)
         {
-            mStates[_stateType] = _stateClass;
+            mStates[_stateType] = _state;
         }
 
         public void ChangeState(AgentState _newStateType)
         {
-            if (mCurrentStateType == _newStateType)     return;
+            if (mCurrentStateType == _newStateType)  return;
 
-            // 디버깅
+            // 디버깅용
             Debug.Log($"{mController.AgentName}: 상태 변경 {mCurrentStateType} -> {_newStateType}");
 
             // 이전 상태 종료
             if (mCurrentState != null)
             {
-                mCurrentState.Exit(mController);
+                mCurrentState.OnStateExit(mController);
             }
 
             // 상태 변경
@@ -60,15 +62,15 @@ namespace OhMAIGod.Agent
             // 새 상태 진입
             if (mCurrentState != null)
             {
-                mCurrentState.Enter(mController);
+                mCurrentState.OnStateEnter(mController);
             }
         }
 
-        public void Update()
+        public void ProcessStateUpdate()
         {
             if (mCurrentState != null)
             {
-                mCurrentState.Update(mController);
+                mCurrentState.OnStateExecute(mController);
             }
         }
 
@@ -76,9 +78,16 @@ namespace OhMAIGod.Agent
         {
             mCurrentStateType = _initialState;
             mCurrentState = mStates[_initialState];
-            mCurrentState.Enter(mController);
+            mCurrentState.OnStateEnter(mController);
         }
-    }  
+        
+        // AI 응답 완료 후 이전 상태로 돌아가기
+        public void ReturnToPreviousState()
+        {
+            if (mPreviousState != null)
+            {
+                ChangeState(mPreviousStateType);
+            }
+        }
+    }
 }
-
-
