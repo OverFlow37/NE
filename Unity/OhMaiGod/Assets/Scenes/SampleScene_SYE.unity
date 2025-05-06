@@ -6383,11 +6383,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 8672883095682678184, guid: 5a00806bee21eba4e8ab1e40309ec8fa, type: 3}
   m_PrefabInstance: {fileID: 8580400563167085614}
   m_PrefabAsset: {fileID: 0}
---- !u!1839735485 &990865614 stripped
-Tilemap:
-  m_CorrespondingSourceObject: {fileID: 4374057070908430735, guid: 5a00806bee21eba4e8ab1e40309ec8fa, type: 3}
-  m_PrefabInstance: {fileID: 8580400563167085614}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1112643833
 GameObject:
   m_ObjectHideFlags: 0
@@ -6399,8 +6394,9 @@ GameObject:
   - component: {fileID: 1112643834}
   - component: {fileID: 1112643836}
   - component: {fileID: 1112643835}
+  - component: {fileID: 1112643837}
   m_Layer: 0
-  m_Name: House
+  m_Name: house
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6959,6 +6955,18 @@ Tilemap:
     e31: 0
     e32: 0
     e33: 1
+--- !u!114 &1112643837
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1112643833}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1aefa19ce97253a4aae98e719c12234f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &1331650219
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -7142,10 +7150,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mGroundTilemap: {fileID: 597632758}
-  mWallTilemap: {fileID: 990865614}
-  mSectionTilemaps:
-  - {fileID: 1499274277}
-  - {fileID: 1112643836}
   mWallLayerMask:
     serializedVersion: 2
     m_Bits: 128
@@ -7155,6 +7159,8 @@ MonoBehaviour:
   mNPCLayerMask:
     serializedVersion: 2
     m_Bits: 512
+  mShowDebug: 1
+  mIsInitialized: 0
 --- !u!4 &1463949135
 Transform:
   m_ObjectHideFlags: 0
@@ -7260,8 +7266,9 @@ GameObject:
   - component: {fileID: 1499274275}
   - component: {fileID: 1499274277}
   - component: {fileID: 1499274276}
+  - component: {fileID: 1499274278}
   m_Layer: 0
-  m_Name: Cafe
+  m_Name: cafeteria
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -7746,6 +7753,18 @@ Tilemap:
     e31: 0
     e32: 0
     e33: 1
+--- !u!114 &1499274278
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1499274274}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1aefa19ce97253a4aae98e719c12234f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1655920282
 GameObject:
   m_ObjectHideFlags: 0

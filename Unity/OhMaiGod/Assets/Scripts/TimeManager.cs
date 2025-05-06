@@ -23,7 +23,7 @@ public class TimeManager : MonoBehaviour
     }
 
     [Header("시간 설정")]
-    [Tooltip("현실 시간 1초당 게임 내 시간이 몇 분 흐를지 설정")]
+    [Tooltip("현실 시간 1초당 게임 내 시간이 몇 초 흐를지 설정")]
     [SerializeField] private float mGameToRealTimeRatio = 60.0f;    // 기본: 1초당 1분(60초)
     
     [Header("디버깅")]

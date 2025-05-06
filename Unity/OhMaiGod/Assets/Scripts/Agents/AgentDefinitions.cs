@@ -11,7 +11,33 @@ namespace OhMAIGod.Agent
         MOVING,
         INTERACTION,        // 모든 행동
         MovingToLocation,
+
+        WAIT_FOR_AI_RESPONSE,
+        WAIT,
+        MOVE_TO_LOCATION,
+        MOVE_TO_INTERACTABLE,
     }
+
+    public abstract class AgentStateHandler
+    {
+        public virtual void Enter(AgentController controller)
+        {
+            Debug.Log($"{controller.AgentName}: {GetStateName()} 상태 진입");
+        }
+
+        // 매 프레임 호출되는 메서드 (자식 클래스에서 반드시 구현)
+        public abstract void Update(AgentController controller);
+
+        // 상태 종료 시 호출되는 메서드
+        public virtual void Exit(AgentController controller)
+        {
+            Debug.Log($"{controller.AgentName}: {GetStateName()} 상태 종료");
+        }
+
+        protected abstract string GetStateName();
+    }
+
+
 
     [System.Serializable]
     public struct AgentNeeds
