@@ -3,8 +3,8 @@ Refer to the **REFLECTIONS AND PLAN**, the **MAP INFORMATION**, and the **AVAILA
 
 Use the information from:
 
-* **05.04 reflections** (highest priority)
-* **05.04 plan** (second priority)
+* **05.03 reflections** (highest priority)
+* **05.03 plan** (second priority)
 * **other reflections** (lower priority)
   to create a meaningful, well-balanced daily schedule.
 
@@ -61,16 +61,13 @@ Use the information from:
 
   * 360 minutes (night sleep)
   * 120 minutes (optional daytime nap or rest)
-* `time_slots` entries must directly correspond to `"daily_plan"` actions, with the two `"sleeping"` entries added.
+* `time_slots` entriecs must directly correspond to `"daily_plan"` actions, with the two `"sleeping"` entries added.
 * You must create a new plan for the next day following the most recent date found in the existing "plans" data.
     For example, if the last plan is for "2025.05.04", then you should generate a new plan for "2025.05.05".
 
-* Make sure:
+❗ You must NOT repeat the previous day's plan. Instead, generate a **new plan** for "2025.05.04" based on the reflections from "2025.05.03" and previous days. Introduce variation in activities and balance based on context.
+🔸 Do not repeat low-importance objects or events unless they play a central role in multiple reflections or are explicitly emphasized.
 
-    The new date key in "plans" reflects the correct next chronological day.
-
-    The reflections and previous plans can still be referenced, especially "2025.05.04", to inform continuity and meaningful transitions.
-    
 ---
 
 **📝 OUTPUT FORMAT (strictly JSON):**

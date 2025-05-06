@@ -48,8 +48,8 @@ def save_combined_memory():
     base_prompt_path = os.path.join(base_dir, "baseprompt.txt")
     output_path = os.path.join(base_dir, "planprompt.txt")
 
-    target_date = "2025.05.04"
-    target_datetime = "2025.05.04.22:00"
+    target_date = "2025.05.03"
+    target_datetime = "2025.05.03.22:00"
 
     result = {"John": {}}
 
@@ -58,7 +58,7 @@ def save_combined_memory():
         reflect_data = json.load(f)
     all_reflections = reflect_data["John"]["reflections"]
 
-    high_importance = [r for r in all_reflections if r.get("importance", 0) >= 10]
+    high_importance = [r for r in all_reflections if r.get("importance", 0) >= 12]
     specific_date = [r for r in all_reflections if r.get("created") == target_datetime]
 
     seen_keys = set()

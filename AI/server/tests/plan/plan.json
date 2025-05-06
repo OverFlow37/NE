@@ -3,15 +3,7 @@
     "plans": {
       "2025.04.25": {
         "wake_up_time": "06:00",
-        "daily_plan": [
-          "wake up and have breakfast",
-          "work on painting project",
-          "meet Sarah at town hall",
-          "have lunch",
-          "continue painting project",
-          "have dinner and relax",
-          "go to bed"
-        ],
+        "daily_plan": ["wake up and have breakfast", "work on painting project", "meet Sarah at town hall", "have lunch", "continue painting project", "have dinner and relax", "go to bed"],
         "time_slots": [
           ["sleeping", 360],
           ["waking up and morning routine", 60],
@@ -28,15 +20,7 @@
       },
       "2025.04.26": {
         "wake_up_time": "06:00",
-        "daily_plan": [
-          "wake up and have breakfast",
-          "work on painting project",
-          "meet Sarah at deep forest",
-          "have lunch",
-          "continue painting project",
-          "have dinner and relax",
-          "go to bed"
-        ],
+        "daily_plan": ["wake up and have breakfast", "work on painting project", "meet Sarah at deep forest", "have lunch", "continue painting project", "have dinner and relax", "go to bed"],
         "time_slots": [
           ["sleeping", 360],
           ["waking up and morning routine", 60],
@@ -53,14 +37,7 @@
       },
       "2025.04.27": {
         "wake_up_time": "06:00",
-        "daily_plan": [
-          "wake up and have breakfast",
-          "work on painting project",
-          "have lunch",
-          "continue painting project",
-          "have dinner and relax",
-          "go to bed"
-        ],
+        "daily_plan": ["wake up and have breakfast", "work on painting project", "have lunch", "continue painting project", "have dinner and relax", "go to bed"],
         "time_slots": [
           ["sleeping", 360],
           ["waking up and morning routine", 60],
@@ -76,15 +53,7 @@
       },
       "2025.04.28": {
         "wake_up_time": "06:00",
-        "daily_plan": [
-          "wake up and have breakfast",
-          "work on painting project",
-          "meet Sarah at desert oasis",
-          "have lunch",
-          "continue painting project",
-          "have dinner and relax",
-          "go to bed"
-        ],
+        "daily_plan": ["wake up and have breakfast", "work on painting project", "meet Sarah at desert oasis", "have lunch", "continue painting project", "have dinner and relax", "go to bed"],
         "time_slots": [
           ["sleeping", 360],
           ["waking up and morning routine", 60],
@@ -101,15 +70,7 @@
       },
       "2025.04.29": {
         "wake_up_time": "06:00",
-        "daily_plan": [
-          "wake up and have breakfast",
-          "work on painting project",
-          "meet Sarah at beach cliffside",
-          "have lunch",
-          "continue painting project",
-          "have dinner and relax",
-          "go to bed"
-        ],
+        "daily_plan": ["wake up and have breakfast", "work on painting project", "meet Sarah at beach cliffside", "have lunch", "continue painting project", "have dinner and relax", "go to bed"],
         "time_slots": [
           ["sleeping", 360],
           ["waking up and morning routine", 60],
@@ -126,14 +87,7 @@
       },
       "2025.04.30": {
         "wake_up_time": "06:00",
-        "daily_plan": [
-          "wake up and have breakfast",
-          "work on painting project",
-          "have lunch",
-          "continue painting project",
-          "have dinner and relax",
-          "go to bed"
-        ],
+        "daily_plan": ["wake up and have breakfast", "work on painting project", "have lunch", "continue painting project", "have dinner and relax", "go to bed"],
         "time_slots": [
           ["sleeping", 360],
           ["waking up and morning routine", 60],
@@ -149,15 +103,7 @@
       },
       "2025.05.01": {
         "wake_up_time": "06:00",
-        "daily_plan": [
-          "wake up and have breakfast",
-          "work on painting project",
-          "meet Sarah at village park",
-          "have lunch",
-          "continue painting project",
-          "have dinner and relax",
-          "go to bed"
-        ],
+        "daily_plan": ["wake up and have breakfast", "work on painting project", "meet Sarah at village park", "have lunch", "continue painting project", "have dinner and relax", "go to bed"],
         "time_slots": [
           ["sleeping", 360],
           ["waking up and morning routine", 60],
@@ -174,14 +120,7 @@
       },
       "2025.05.02": {
         "wake_up_time": "06:00",
-        "daily_plan": [
-          "wake up and have breakfast",
-          "work on painting project",
-          "have lunch",
-          "continue painting project",
-          "have dinner and relax",
-          "go to bed"
-        ],
+        "daily_plan": ["wake up and have breakfast", "work on painting project", "have lunch", "continue painting project", "have dinner and relax", "go to bed"],
         "time_slots": [
           ["sleeping", 360],
           ["waking up and morning routine", 60],
@@ -197,39 +136,24 @@
       },
       "2025.05.03": {
         "wake_up_time": "06:00",
-        "daily_plan": [
-          "wake up and have breakfast",
-          "work on painting project",
-          "meet Sarah at forest stream bank",
-          "have lunch",
-          "continue painting project",
-          "have dinner and relax",
-          "go to bed"
-        ],
+        "daily_plan": ["wake up and have breakfast", "travel to shoreline", "interact with crab at shoreline", "explore beach area", "eat lunch by the sea", "return to house and rest", "go to bed"],
         "time_slots": [
           ["sleeping", 360],
           ["waking up and morning routine", 60],
           ["eating breakfast", 30],
-          ["working on painting", 180],
-          ["meeting Sarah at forest stream bank", 60],
-          ["having lunch", 60],
-          ["working on painting", 180],
-          ["having dinner", 60],
-          ["relaxing and watching TV", 120],
+          ["traveling to shoreline", 90],
+          ["interacting with crab at shoreline", 60],
+          ["exploring beach area", 120],
+          ["eating lunch by the sea", 60],
+          ["returning to house and resting", 120],
+          ["relaxing and reflecting", 60],
           ["going to bed", 60],
           ["sleeping", 120]
         ]
       },
       "2025.05.04": {
         "wake_up_time": "06:00",
-        "daily_plan": [
-          "wake up and have breakfast",
-          "work on painting project",
-          "have lunch",
-          "continue painting project",
-          "have dinner and relax",
-          "go to bed"
-        ],
+        "daily_plan": ["wake up and have breakfast", "work on painting project", "have lunch", "continue painting project", "have dinner and relax", "go to bed"],
         "time_slots": [
           ["sleeping", 360],
           ["waking up and morning routine", 60],
@@ -245,4 +169,4 @@
       }
     }
   }
-} 
+}

@@ -2,27 +2,11 @@
   "John": {
     "reflections": [
       {
-        "created": "2025.04.25.22:00",
-        "event": "observe Sarah Village town_hall",
-        "action": "talk to Sarah at town_hall",
-        "thought": "Today's meeting at the town hall with Sarah was our first meaningful interaction. The formal setting helped establish a professional yet friendly atmosphere for our conversation.",
-        "importance": 10,
-        "embeddings": []
-      },
-      {
         "created": "2025.04.26.22:00",
         "event": "observe Sarah Forest deep_forest",
         "action": "talk to Sarah at deep_forest",
         "thought": "Our conversation in the deep forest was unexpectedly profound. The secluded environment allowed for more personal and meaningful discussion.",
         "importance": 12,
-        "embeddings": []
-      },
-      {
-        "created": "2025.04.27.22:00",
-        "event": "witness sandstorm Desert sand_dunes",
-        "action": "think",
-        "thought": "The sandstorm experience was both challenging and enlightening. It taught me about resilience and adaptation in difficult situations.",
-        "importance": 10,
         "embeddings": []
       },
       {
@@ -42,27 +26,11 @@
         "embeddings": []
       },
       {
-        "created": "2025.04.29.22:00",
-        "event": "observe sandstone Desert rocky_outcrop",
-        "action": "talk to Sarah at rocky_outcrop",
-        "thought": "The rocky outcrop conversation with Sarah revealed new aspects of our friendship. The desert landscape brought a unique perspective to our discussion.",
-        "importance": 10,
-        "embeddings": []
-      },
-      {
         "created": "2025.04.30.22:00",
         "event": "discover acorn Forest deep_forest",
         "action": "talk to Sarah at deep_forest",
         "thought": "The acorn exchange in the deep forest symbolized growth and potential. Our friendship, like the acorn, holds promise for future development.",
         "importance": 12,
-        "embeddings": []
-      },
-      {
-        "created": "2025.05.02.22:00",
-        "event": "receive seashell Beach shoreline",
-        "action": "talk to Sarah at shoreline",
-        "thought": "The seashell gift from Sarah at the shoreline was a meaningful gesture. These small tokens of friendship help strengthen our bond.",
-        "importance": 10,
         "embeddings": []
       },
       {
@@ -82,31 +50,40 @@
         "embeddings": []
       },
       {
-        "created": "2025.05.04.22:00",
-        "event": "observe driftwood Beach shoreline",
-        "action": "talk to Sarah at shoreline",
-        "thought": "The driftwood conversation with Sarah was particularly meaningful. The natural setting seems to bring out deeper thoughts and feelings in our interactions.",
-        "importance": 8,
+        "created": "2025.05.03.22:00",
+        "event": "discover crab Beach shoreline",
+        "action": "interact with crab at shoreline",
+        "thought": "The crab encounter was a reminder of the diverse life forms around us. These small discoveries add richness to our daily experiences.",
+        "importance": 10,
         "embeddings": []
       },
       {
-        "created": "2025.05.04.22:00",
-        "event": "observe seagull Beach cliffside",
-        "action": "interact with seagull at cliffside",
-        "thought": "Watching the seagull's freedom in flight made me reflect on the importance of maintaining a sense of freedom and independence in relationships.",
-        "importance": 4,
+        "created": "2025.05.03.22:00",
+        "event": "observe seashell Beach shoreline",
+        "action": "interact with seashell at shoreline",
+        "thought": "Noticing the delicate patterns on the seashell sparked thoughts about nature’s quiet beauty and detail.",
+        "importance": 9,
+        "embeddings": []
+      },
+      {
+        "created": "2025.05.03.22:00",
+        "event": "explore Beach tidal_pool",
+        "action": "interact with starfish at tidal_pool",
+        "thought": "The starfish in the tidal pool reminded me how even the smallest corners of the world are full of life waiting to be explored.",
+        "importance": 8,
         "embeddings": []
       }
     ],
     "plans": {
-      "2025.05.04": {
+      "2025.05.03": {
         "wake_up_time": "06:00",
         "daily_plan": [
           "wake up and have breakfast",
-          "work on painting project",
-          "have lunch",
-          "continue painting project",
-          "have dinner and relax",
+          "travel to shoreline",
+          "interact with crab at shoreline",
+          "explore beach area",
+          "eat lunch by the sea",
+          "return to house and rest",
           "go to bed"
         ],
         "time_slots": [
@@ -123,24 +100,28 @@
             30
           ],
           [
-            "working on painting",
-            240
+            "traveling to shoreline",
+            90
           ],
           [
-            "having lunch",
+            "interacting with crab at shoreline",
             60
           ],
           [
-            "working on painting",
-            240
-          ],
-          [
-            "having dinner",
-            60
-          ],
-          [
-            "relaxing and watching TV",
+            "exploring beach area",
             120
+          ],
+          [
+            "eating lunch by the sea",
+            60
+          ],
+          [
+            "returning to house and resting",
+            120
+          ],
+          [
+            "relaxing and reflecting",
+            60
           ],
           [
             "going to bed",
@@ -159,8 +140,8 @@ Refer to the **REFLECTIONS AND PLAN**, the **MAP INFORMATION**, and the **AVAILA
 
 Use the information from:
 
-* **05.04 reflections** (highest priority)
-* **05.04 plan** (second priority)
+* **05.03 reflections** (highest priority)
+* **05.03 plan** (second priority)
 * **other reflections** (lower priority)
   to create a meaningful, well-balanced daily schedule.
 
@@ -221,12 +202,9 @@ Use the information from:
 * You must create a new plan for the next day following the most recent date found in the existing "plans" data.
     For example, if the last plan is for "2025.05.04", then you should generate a new plan for "2025.05.05".
 
-* Make sure:
+❗ You must NOT repeat the previous day's plan. Instead, generate a **new plan** for "2025.05.04" based on the reflections from "2025.05.03" and previous days. Introduce variation in activities and balance based on context.
+🔸 Do not repeat low-importance objects or events unless they play a central role in multiple reflections or are explicitly emphasized.
 
-    The new date key in "plans" reflects the correct next chronological day.
-
-    The reflections and previous plans can still be referenced, especially "2025.05.04", to inform continuity and meaningful transitions.
-    
 ---
 
 **📝 OUTPUT FORMAT (strictly JSON):**
