@@ -61,8 +61,9 @@ public class AgentController : MonoBehaviour
     public AgentNeeds AgnetNeeds => mAgentNeeds;
 
     private Animator animator;  // 애니메이터
-    [SerializeField] private AgentScheduler mScheduler;
-    [SerializeField] private MovementController mMovement;
+    // AIBridge에서 Agent만 가져오면 나머지도 가져올 수 있게 public으로 변경
+    [SerializeField] public AgentScheduler mScheduler;
+    [SerializeField] public MovementController mMovement;
 
     private string mCurrentInteractable;
 

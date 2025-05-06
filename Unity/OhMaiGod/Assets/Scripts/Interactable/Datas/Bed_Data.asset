@@ -10,16 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1e12e118ca0cb8a4cb384edbbf9233dd, type: 3}
-  m_Name: Apple_Data
+  m_Name: Bed_Data
   m_EditorClassIdentifier: 
-  mDescription: "\uC0AC\uACFC\uC785\uB2C8\uB2E4."
-  mName: Apple
-  mDescriptionPrompt: It is sweet and delicious, and you can get a little (3) fullness
-    when you eat it.
-  mType: 1
+  mDescription: "\uC7A0\uC744 \uC798 \uC218 \uC788\uB294 \uCE68\uB300"
+  mName: 
+  mDescriptionPrompt: Can sleep comfortably.
+  mType: 4
   mState: 0
   mActions:
-  - {fileID: 11400000, guid: cbe91266aabd61348bd1864e9f7bac11, type: 2}
-  mHungerEffect: -3
-  mSleepinessEffect: 0
+  - {fileID: 11400000, guid: 8c8333f0289df39458a7a343f81ce4f3, type: 2}
+  mHungerEffect: 0
+  mSleepinessEffect: -10
   mLonelinessEffect: 0

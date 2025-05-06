@@ -8,6 +8,7 @@ TagManager:
   - NPC
   - Target
   - StandingPoint
+  - Location
   layers:
   - Default
   - TransparentFX
@@ -19,7 +20,7 @@ TagManager:
   - Wall
   - Obstacles
   - NPC
-  - 
+  - Location
   - 
   - 
   - 
