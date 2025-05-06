@@ -325,10 +325,15 @@ IMPORTANCE RATING GUIDELINES:
 7-8: Significant personal insights
 9-10: Major life-changing reflections
 
-CRITICAL:
+REFLECTION GUIDELINES:
 - Each reflection must be independent and only based on its corresponding memory
 - Do NOT mix details or themes between reflections
 - Each memory should have its own distinct reflection
+- Keep reflection to MAXIMUM 3 sentences
+- Focus only on the most meaningful insights or feelings
+- Write in first-person perspective as if the agent is reflecting
+- Be concise but impactful
+- Make sure the reflection is complete and coherent despite its brevity
 """
         
         return prompt

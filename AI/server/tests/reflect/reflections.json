@@ -336,6 +336,54 @@
         "thought": "The oak tree felt ancient and significant. Sarah's words resonated deeply.",
         "importance": 6,
         "embeddings": []
+      },
+      {
+        "created": "2025.05.06.16:22",
+        "event": "harvest first_vegetables Village garden",
+        "action": "cook dinner at house",
+        "thought": "The fresh vegetables tasted like a genuine reward. Sharing that meal felt...important. It reminded me of simple satisfaction.",
+        "importance": 7,
+        "embeddings": []
+      },
+      {
+        "created": "2025.05.06.16:23",
+        "event": "observe stone Forest stream_bank",
+        "action": "talk to Sarah at stream_bank",
+        "thought": "Sarah’s observations about the water’s flow offered a new way of seeing the landscape. It highlighted the subtle patterns often missed in my focused analysis. Perhaps understanding context is as important as data.",
+        "importance": 6,
+        "embeddings": []
+      },
+      {
+        "created": "2025.05.06.16:25",
+        "event": "receive oak_tree Forest forest_entrance",
+        "action": "talk to Sarah at forest_entrance",
+        "thought": "Talking to Sarah felt… important. The oak tree’s arrival seemed connected to her presence. I need to understand the link.",
+        "importance": 6,
+        "embeddings": []
+      },
+      {
+        "created": "2025.05.06.16:28",
+        "event": "harvest first_vegetables Village garden",
+        "action": "cook dinner at house",
+        "thought": "The vegetables were fresh and delicious, a satisfying reward for the work. Preparing the meal felt grounding and connected me to the land. It was a simple pleasure I greatly appreciated.",
+        "importance": 7,
+        "embeddings": []
+      },
+      {
+        "created": "2025.05.06.16:28",
+        "event": "observe stone Forest stream_bank",
+        "action": "talk to Sarah at stream_bank",
+        "thought": "Sarah’s presence by the stream was calming and familiar. Our conversation offered a brief respite from the routine. I valued her quiet companionship.",
+        "importance": 6,
+        "embeddings": []
+      },
+      {
+        "created": "2025.05.06.16:28",
+        "event": "receive oak_tree Forest forest_entrance",
+        "action": "talk to Sarah at forest_entrance",
+        "thought": "The oak tree felt ancient and significant, a landmark in this space.  Talking to Sarah at the forest entrance provided a sense of welcome. It was a peaceful exchange.",
+        "importance": 6,
+        "embeddings": []
       }
     ]
   }
