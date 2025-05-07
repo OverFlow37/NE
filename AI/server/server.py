@@ -3,8 +3,24 @@ from flask import Flask, request, jsonify
 import json
 import prompts.json_to_prompt as jp
 import re
+import atexit
 
 app = Flask(__name__)
+
+# 서버 시작 시 세션 초기화
+def init_app():
+    print("서버 시작: Ollama 세션 초기화")
+    # 첫 요청 시 모델 로딩을 위해 더미 요청 전송
+    try:
+        jp.get_response("test")
+    except Exception as e:
+        print(f"초기 모델 로딩 실패 (무시해도 됨): {e}")
+
+# 서버 종료 시 세션 정리
+@atexit.register
+def cleanup():
+    print("서버 종료: Ollama 세션 정리")
+    jp.session.close()
 
 # GET 테스트용 엔드포인트
 @app.route("/hello", methods=["GET"])
@@ -18,7 +34,7 @@ def receive_data():
     print("Unity로부터 받은 데이터:", payload)
 
     prompt = jp.format_prompt(payload)
-    answer = jp.get_response(prompt, 'http://localhost:11434/api/generate')
+    answer = jp.get_response(prompt)  # API_URL은 기본값 사용
 
     # 1) 펜스 제거
     cleaned = answer.replace("```json", "").replace("```", "").strip()
@@ -44,5 +60,7 @@ def receive_data():
     })
 
 if __name__ == "__main__":
+    # 서버 시작 전 초기화
+    init_app()
     # 0.0.0.0 으로 열면 같은 LAN 상 다른 기기에서도 접근 가능
     app.run(host="127.0.0.1", port=5000, debug=True)
