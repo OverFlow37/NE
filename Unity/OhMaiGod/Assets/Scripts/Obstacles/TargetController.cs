@@ -18,7 +18,7 @@ public class TargetController : MonoBehaviour
     private HashSet<Vector3Int> mOccupiedCells;                 // 타겟이 차지하는 셀 목록
 
     // 초기화
-    private void Awake() // Start 대신 Awake 사용 고려 (Collider 참조 등)
+    private void Awake()
     {
         mTargetCollider = GetComponent<Collider2D>();
         if (mStandingPointPrefab == null)
@@ -39,17 +39,17 @@ public class TargetController : MonoBehaviour
         mOccupiedCells = new HashSet<Vector3Int>();
     }
 
-    private void Update()
+    private void Start()
     {
-        if (!TileManager.Instance.mIsInitialized || TileManager.Instance.TileTree.Count == 0) return;
-        if (!mIsInitialized)
-        {
-            Vector3Int cellPos = TileManager.Instance.GroundTilemap.WorldToCell(transform.position);
-            mParentLocation = TileManager.Instance.GetTileController(cellPos);
-            mParentLocation.AddChildInteractable(this);
-            mIsInitialized = true;
-            InitializeStandingPoints();
-        }
+        // // TileManager가 있으면 등록 시도
+        // if (TileManager.Instance != null)
+        // {
+        //     TileManager.Instance.RegisterTarget(this);
+        // }
+        // else
+        // {
+        //     Debug.LogError($"[{gameObject.name}] TileManager를 찾을 수 없습니다.");
+        // }
     }
 
     public string InteractableName { get { return mInteractableName; } }

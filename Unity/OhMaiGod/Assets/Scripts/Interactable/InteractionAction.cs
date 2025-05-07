@@ -10,6 +10,9 @@ public abstract class InteractionAction : ScriptableObject
     // interactor: 상호작용을 시도한 게임 오브젝트 (예: 플레이어 캐릭터)
     // targetObject: 상호작용 대상인 Interactable 컴포넌트가 붙어있는 게임 오브젝트
     // 반환값: 행동 실행 성공 여부 (필요에 따라 다르게 사용 가능)
-    public abstract bool Execute(GameObject interactor, GameObject targetObject);
 
+    // 프롬프트에 전달할 액션의 이름
+    public abstract string mActionName {get; set;}
+    // 상호작용 효과 구현
+    public abstract bool Execute(GameObject interactor, GameObject targetObject);
 }

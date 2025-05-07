@@ -30,6 +30,7 @@ public class InteractableData : ScriptableObject
 
     // 오브젝트의 타입
     public enum Types{
+        Agent,
         Food,
         Tool,
         Resource,
