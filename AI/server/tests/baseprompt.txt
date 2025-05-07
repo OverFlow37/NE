@@ -60,12 +60,11 @@ Use the following information to create a meaningful and balanced plan for the c
 
 **🕓 PLANNING RULES:**
 
+
 * Wake-up time is fixed at **06:00**
 * Bedtime is fixed at **22:00**
-* `time_slots` must total **1440 minutes (24 hours)**
-* Include **two "sleeping" blocks**:
-  * 360 minutes for night sleep
-  * 120 minutes for an optional daytime nap or rest
+* ⛔️ Between **22:00 and 06:00**, the character **must** be marked with the action `"sleep"` in `time_slots`
+* Total duration of `time_slots` must sum to **1440 minutes (24 hours)**
 * Each entry in `time_slots` must match an entry in `daily_plan`
 * `time_slots` must follow this format:  
   `["action", "location", "target", "start time", "end time"]`
