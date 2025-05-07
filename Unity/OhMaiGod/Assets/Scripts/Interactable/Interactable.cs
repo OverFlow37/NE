@@ -11,6 +11,12 @@ public class Interactable : MonoBehaviour
     // 인스펙터에서 Project 창의 ObjectData 애셋을 여기에 드래그하여 할당합니다.
     public InteractableData mInteractableData;
 
+    // 오브젝트 이름 (InteractableData와 동기화)
+    public string InteractableName { get; private set; }
+
+    // 현재 위치 정보
+    public string CurrentLocation { get; private set; }
+
     // 오브젝트가 제거될 때 발생하는 이벤트
     public delegate void InteractableRemovedHandler(Interactable interactable);
     public event InteractableRemovedHandler OnInteractableRemoved;
@@ -24,6 +30,11 @@ public class Interactable : MonoBehaviour
         if (mInteractableData == null)
         {
             Debug.LogWarning("Interactable 컴포넌트에 mInteractableData 할당되지 않았습니다: " + gameObject.name);
+        }
+        else
+        {
+            // InteractableData와 이름 동기화
+            InteractableName = mInteractableData.mName;
         }
     }
 
@@ -143,8 +154,8 @@ public class Interactable : MonoBehaviour
         // 게임오브젝트가 비활성화 중이면 무시
         if (!gameObject.activeInHierarchy) return;
 
-        // Tilemap의 Collider2D인 경우에만 처리
-        if (other.GetComponent<Tilemap>() != null)
+        // Location 레이어인 경우에만 처리
+        if (other.gameObject.layer == LayerMask.NameToLayer("Location"))
         {
             Debug.Log($"[{gameObject.name}] {other.name} 영역에서 벗어남");
             StartCoroutine(UpdateEnvironmentRegistration());
@@ -153,8 +164,8 @@ public class Interactable : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        // Tilemap의 Collider2D인 경우에만 처리
-        if (other.GetComponent<Tilemap>() != null)
+        // Location 레이어인 경우에만 처리
+        if (other.gameObject.layer == LayerMask.NameToLayer("Location"))
         {
             Debug.Log($"[{gameObject.name}] {other.name} 영역으로 진입");
             StartCoroutine(UpdateEnvironmentRegistration());
@@ -185,6 +196,16 @@ public class Interactable : MonoBehaviour
             // 새로운 환경을 찾지 못한 경우 기존 환경에서만 제거
             TileManager.Instance.UnregisterTarget(this);
             Debug.Log($"[{gameObject.name}] 유효한 환경을 찾을 수 없음");
+        }
+    }
+
+    // 현재 위치 업데이트 메서드 (TileManager에서 호출)
+    public void UpdateCurrentLocation(string locationName)
+    {
+        if (CurrentLocation != locationName)
+        {
+            CurrentLocation = locationName;
+            // 위치 변경 시 필요한 추가 로직이 있다면 여기에 구현
         }
     }
 }

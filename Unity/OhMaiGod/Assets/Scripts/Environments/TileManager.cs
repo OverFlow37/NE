@@ -13,6 +13,9 @@ public class TileManager : MonoBehaviour
     private List<Tilemap> mLocationTilemaps;            // 구역 타일맵 (구역 나누기)
     private List<TileController> mTileTree;
 
+    // Interactable 위치 추적을 위한 Dictionary
+    private Dictionary<Interactable, string> mInteractableLocations = new Dictionary<Interactable, string>();
+
     [Header("Layer Masks")]
     [SerializeField] private LayerMask mWallLayerMask;        // 벽 레이어 마스크
     [SerializeField] private LayerMask mObjectLayerMask;      // 오브젝트 레이어 마스크
@@ -102,10 +105,16 @@ public class TileManager : MonoBehaviour
         
         if (tileController != null)
         {
+            string locationName = tileController.LocationName;
             tileController.AddChildInteractable(target);
+            
+            // 위치 정보 업데이트
+            mInteractableLocations[target] = locationName;
+            target.UpdateCurrentLocation(locationName);
+            
             if (mShowDebug)
             {
-                Debug.Log($"TileManager: {target.name}을(를) {tileController.LocationName}에 등록했습니다.");
+                Debug.Log($"TileManager: {target.name}을(를) {locationName}에 등록했습니다.");
             }
         }
         else
@@ -127,13 +136,17 @@ public class TileManager : MonoBehaviour
             return;
         }
 
-        // 모든 TileController에서 제거 시도 (이동 중일 수 있으므로)
+        // 위치 정보에서 제거
+        mInteractableLocations.Remove(target);
+
+        // 모든 TileController에서 제거 시도
         bool removed = false;
         foreach (TileController tileController in TileTree)
         {
             if (tileController.RemoveChildInteractable(target))
             {
                 removed = true;
+                target.UpdateCurrentLocation(null); // 위치 정보 초기화
                 if (mShowDebug)
                 {
                     Debug.Log($"TileManager: {target.name}을(를) {tileController.LocationName}에서 제거했습니다.");
@@ -145,6 +158,21 @@ public class TileManager : MonoBehaviour
         {
             Debug.Log($"TileManager: {target.name}이(가) 어떤 환경에도 등록되어 있지 않았습니다.");
         }
+    }
+
+    // Interactable의 현재 위치 반환
+    public string GetInteractableLocation(Interactable interactable)
+    {
+        return mInteractableLocations.TryGetValue(interactable, out string location) ? location : null;
+    }
+
+    // 특정 위치에 있는 모든 Interactable 반환
+    public List<Interactable> GetInteractablesInLocation(string locationName)
+    {
+        return mInteractableLocations
+            .Where(kvp => kvp.Value == locationName)
+            .Select(kvp => kvp.Key)
+            .ToList();
     }
 
     // 디버깅

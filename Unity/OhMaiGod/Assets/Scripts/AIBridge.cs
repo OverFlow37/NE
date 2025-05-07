@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using System;
+using System.Linq;
 using OhMAIGod.Agent;
 
 // ========== AI에게 전송하는 데이터 구조체들 ==========
@@ -68,39 +69,35 @@ public class AIBridge : MonoBehaviour
     [Header("에이전트 참조")]
     [SerializeField] private AgentController[] mAgentControllers;
 
-    [Header("오브젝트 그룹 (인식 가능)")]
-    [SerializeField] public List<ObjectGroup> mVisibleObjects = new List<ObjectGroup>();
-
-    [Header("오브젝트 그룹 (상호작용 가능)")]
-    [SerializeField] public List<ObjectGroup> mInteractableItems = new List<ObjectGroup>();
-
     private bool mIsRequesting = false;  // AI에게 응답 보내고 있는지 확인하는 변수
 
-    private void Awake()
+    // Interactable 목록을 ObjectGroup 배열로 변환
+    private ObjectGroup[] ConvertToObjectGroups(List<Interactable> interactables)
     {
+        // 위치별로 오브젝트들을 그룹화
+        Dictionary<string, List<string>> locationGroups = new Dictionary<string, List<string>>();
+
+        foreach (Interactable interactable in interactables)
+        {
+            if (interactable == null || interactable.mInteractableData == null) continue;
+
+            string location = interactable.CurrentLocation;
+            if (string.IsNullOrEmpty(location)) continue;
+
+            if (!locationGroups.ContainsKey(location))
+            {
+                locationGroups[location] = new List<string>();
+            }
+            locationGroups[location].Add(interactable.InteractableName);
+        }
+
+        // Dictionary를 ObjectGroup 배열로 변환
+        return locationGroups.Select(group => new ObjectGroup
+        {
+            location = group.Key,
+            objects = group.Value
+        }).ToArray();
     }
-
-    private void Start()
-    {
-    }
-
-    // private void OnDestroy()
-    // {
-    //     // 이벤트 구독 해제
-    //     foreach (var agent in mAgentControllers)
-    //     {
-    //         if (agent.mMovement != null)
-    //         {
-    //             agent.mMovement.OnDestinationReached -= () => HandleDestinationReached(agent);
-    //         }
-    //     }
-    // }
-
-    // // 목적지 도착 이벤트 발생 시, 해당 에이전트의 Agent Data 전송
-    // private void HandleDestinationReached(AgentController agent)
-    // {
-    //     SendAgent(agent);
-    // }
 
     // AI 서버에게 특정 에이전트의 Agent Data 보내는 함수
     public void SendAgent(AgentController agent)
@@ -113,22 +110,13 @@ public class AIBridge : MonoBehaviour
         StartCoroutine(SendAgentData(agent));
     }
 
-    // 모든 에이전트에 대해 요청 보내기 (원할 경우 사용)
-    public void SendAllAgents()
-    {
-        foreach (var agent in mAgentControllers)
-        {
-            SendAgent(agent);
-        }
-    }
-
     // AI 서버와 통신하는 코루틴 (에이전트별)
     IEnumerator SendAgentData(AgentController agent)
     {
         mIsRequesting = true;
 
         // 현재 에이전트의 상태 정보 가져오기
-        AgentNeeds currentState = agent.AgnetNeeds;
+        AgentNeeds currentNeeds = agent.AgnetNeeds;
         var movement = agent.mMovement;
         var scheduler = agent.mScheduler;
 
@@ -138,10 +126,10 @@ public class AIBridge : MonoBehaviour
             agent = new Agent
             {
                 name = agent.AgentName,
-                state = currentState,
+                state = currentNeeds,
                 location = movement != null && !string.IsNullOrEmpty(movement.TargetName) ? movement.TargetName : "Bedroom",
                 personality = "friendly, helpful", // TODO: 에이전트별 성격 구현 필요
-                visible_objects = mVisibleObjects.ToArray(),
+                visible_objects = ConvertToObjectGroups(agent.mVisibleInteractables)
             }
         };
 
