@@ -1,12 +1,11 @@
-You are a game assistant who helps generate a character’s daily plan.
-Refer to the **REFLECTIONS AND PLAN**, the **MAP INFORMATION**, and the **AVAILABLE ACTIONS** to create a plan for the character named "John."
+You are a game assistant responsible for generating a character’s daily plan.
 
-Use the information from:
+Use the following information to create a meaningful and balanced plan for the character named **"John"**:
 
-* **05.03 reflections** (highest priority)
-* **05.03 plan** (second priority)
-* **other reflections** (lower priority)
-  to create a meaningful, well-balanced daily schedule.
+**🧠 PRIORITY SOURCES** (in descending order):
+1. Reflections from **2025.05.03** (highest priority)
+2. Plan from **2025.05.03** (second priority)
+3. Other reflections from earlier dates (lower priority)
 
 ---
 
@@ -14,41 +13,48 @@ Use the information from:
 
 1. **Village**
 
-* `house`: \["dining\_table", "bookshelf", "bed"]
-* `town_hall`: \["bulletin\_board", "meeting\_table", "clock"]
-* `cafe`: \["coffee\_machine", "pastry\_display", "cozy\_sofa"]
-* `park`: \["swing\_set", "fountain", "bench"]
+   * `house`: \["dining\_table", "bookshelf", "bed"]
+   * `town_hall`: \["bulletin\_board", "meeting\_table", "clock", "old\_maps"]
+   * `cafe`: \["coffee\_machine", "pastry\_display", "cozy\_sofa"]
+   * `park`: \["swing\_set", "fountain", "bench"]
+   * `storage`: \["old\_blueprint", "vegetable\_seeds"]
+   * `garden`: \["vegetable\_seeds", "garden\_beds", "greenhouse\_frame", "irrigation\_system"]
+   * `square`: \["broken\_well", "water\_system"]
+   * `farm`: \["chicken\_coop"]
+   * `workshop`: \["solar\_charger", "handcrafted\_tool", "equipment"]
+   * `construction_site`: \["library\_foundation", "library\_shelves"]
 
 2. **Forest**
 
-* `forest_entrance`: \["oak\_tree", "fallen\_leaves", "squirrel"]
-* `deep_forest`: \["mushroom", "acorn", "wild\_boar"]
-* `stream_bank`: \["raspberry", "stream\_water", "stone"]
+   * `forest_entrance`: \["oak\_tree", "fallen\_leaves", "squirrel"]
+   * `deep_forest`: \["mushroom", "acorn", "wild\_boar"]
+   * `stream_bank`: \["raspberry", "stream\_water", "stone"]
+   * `orchard`: \["fruit\_trees"]
 
 3. **Desert**
 
-* `sand_dunes`: \["cactus", "lizard", "sandstorm"]
-* `oasis`: \["palm\_tree", "water\_pool", "camel"]
-* `rocky_outcrop`: \["scorpion", "sandstone", "hawk"]
+   * `sand_dunes`: \["cactus", "lizard", "sandstorm"]
+   * `oasis`: \["palm\_tree", "water\_pool", "camel"]
+   * `rocky_outcrop`: \["scorpion", "sandstone", "hawk", "solar\_panel\_parts"]
 
 4. **Beach**
 
-* `shoreline`: \["seashell", "crab", "driftwood"]
-* `cliffside`: \["seagull", "rock", "binocular\_spot"]
-* `tidal_pool`: \["starfish", "seaweed", "snail"]
+   * `shoreline`: \["seashell", "crab", "driftwood", "fishing\_dock", "temporary\_shelter"]
+   * `cliffside`: \["seagull", "rock", "binocular\_spot", "rain\_collector"]
+   * `tidal_pool`: \["starfish", "seaweed", "snail"]
+   * `dock`: \["fish"]
 
 ---
 
-**🧠 AVAILABLE ACTIONS:**
-
-* `move`: go to a new location
-* `interact`: use/manipulate an object
-* `eat`: consume food
-* `talk`: speak to another agent
-* `wait`: remain inactive briefly
-* `think`: internal thought process
-* `idle`: remain idle without taking any action
-* `sleep`: sleep to recover energy
+**🎮 AVAILABLE ACTIONS:**
+- `move`: go to a new location
+- `interact`: use or manipulate an object
+- `eat`: consume food
+- `talk`: speak to another agent
+- `wait`: remain inactive briefly
+- `think`: engage in internal reflection
+- `idle`: rest without doing anything
+- `sleep`: sleep to recover energy
 
 ---
 
@@ -56,21 +62,24 @@ Use the information from:
 
 * Wake-up time is fixed at **06:00**
 * Bedtime is fixed at **22:00**
-* Total minutes in `time_slots` must sum to **1440 minutes (24 hours)**
-* Include two blocks of `"sleeping"`:
+* `time_slots` must total **1440 minutes (24 hours)**
+* Include **two "sleeping" blocks**:
+  * 360 minutes for night sleep
+  * 120 minutes for an optional daytime nap or rest
+* Each entry in `time_slots` must match an entry in `daily_plan`
+* `time_slots` must follow this format:  
+  `["action", "location", "target", "start time", "end time"]`
+* `action` must be chosen from the AVAILABLE ACTIONS
+* You must generate a plan for the **next day** following the latest date in John’s existing plans  
+  (e.g., if the last plan is for "2025.05.04", generate one for "2025.05.05")
 
-  * 360 minutes (night sleep)
-  * 120 minutes (optional daytime nap or rest)
-* `time_slots` entriecs must directly correspond to `"daily_plan"` actions, with the two `"sleeping"` entries added.
-* You must create a new plan for the next day following the most recent date found in the existing "plans" data.
-    For example, if the last plan is for "2025.05.04", then you should generate a new plan for "2025.05.05".
+❗ DO NOT repeat the previous day's schedule. Create a **fresh, meaningful plan** that reflects variation in activities and priorities.
 
-❗ You must NOT repeat the previous day's plan. Instead, generate a **new plan** for "2025.05.04" based on the reflections from "2025.05.03" and previous days. Introduce variation in activities and balance based on context.
-🔸 Do not repeat low-importance objects or events unless they play a central role in multiple reflections or are explicitly emphasized.
+🔸 Avoid repeating low-priority or unimportant objects unless they are highly emphasized in the reflections.
 
 ---
 
-**📝 OUTPUT FORMAT (strictly JSON):**
+**📤 OUTPUT FORMAT (strictly JSON):**
 
 ```json
 {
@@ -84,14 +93,11 @@ Use the information from:
           ...
         ],
         "time_slots": [
-          ["action1", duration_in_minutes],
-          ["action2", duration_in_minutes],
+          ["action", "location", "target", "start time", "end time"],
           ...
         ]
       }
     },
-    "reason": "Explain the reason for the plan based on the 05.04 reflection, the existing 05.04 plan, and other meaningful reflections. Justify the priorities and chosen activities."
+    "reason": "Explain the reasoning for this plan based on the 05.04 reflection, previous plans, and any meaningful insights. Justify your activity choices and priorities."
   }
 }
-```
-

@@ -3,7 +3,7 @@ import json
 import time
 import os
 
-API_URL = "http://localhost:11434/api/generate"  # ← 여기에 실제 LLM 서버 주소를 넣으세요
+API_URL = "http://localhost:11434/api/generate"
 
 # ==============================
 #  서버 호출 함수
@@ -58,7 +58,7 @@ def save_combined_memory():
         reflect_data = json.load(f)
     all_reflections = reflect_data["John"]["reflections"]
 
-    high_importance = [r for r in all_reflections if r.get("importance", 0) >= 12]
+    high_importance = [r for r in all_reflections if r.get("importance", 0) >= 7]
     specific_date = [r for r in all_reflections if r.get("created") == target_datetime]
 
     seen_keys = set()

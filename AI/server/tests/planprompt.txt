@@ -2,75 +2,59 @@
   "John": {
     "reflections": [
       {
-        "created": "2025.04.26.22:00",
-        "event": "observe Sarah Forest deep_forest",
-        "action": "talk to Sarah at deep_forest",
-        "thought": "Our conversation in the deep forest was unexpectedly profound. The secluded environment allowed for more personal and meaningful discussion.",
-        "importance": 12,
+        "created": "2025.04.25.22:00",
+        "event": "discover old_blueprint Village storage",
+        "action": "read old_blueprint at storage",
+        "thought": "The blueprint revealed a forgotten history of the village. I felt a connection to those who came before. It was a valuable piece of information.",
+        "importance": 7,
         "embeddings": []
       },
       {
-        "created": "2025.04.28.22:00",
-        "event": "observe Sarah Desert oasis",
-        "action": "talk to Sarah at oasis",
-        "thought": "The oasis meeting with Sarah was particularly meaningful. The contrast between the harsh desert and the peaceful oasis mirrored our discussion about finding balance in life.",
-        "importance": 12,
+        "created": "2025.05.01.22:00",
+        "event": "witness first_electric_light Village house",
+        "action": "celebrate with Sarah at house",
+        "thought": "The light was truly astonishing; Sarah and I shared a moment of wonder and joy. It felt like a small step into a brighter future. I'm glad we experienced that together.",
+        "importance": 8,
         "embeddings": []
       },
       {
-        "created": "2025.04.29.22:00",
-        "event": "observe Sarah Beach cliffside",
-        "action": "talk to Sarah at cliffside",
-        "thought": "Our cliffside conversation was deeply meaningful. The ocean view provided a perfect backdrop for discussing life's bigger questions.",
-        "importance": 14,
+        "created": "2025.05.01.22:00",
+        "event": "install solar_panels Village house",
+        "action": "collaborate with Sarah at house",
+        "thought": "Working with Sarah to install the solar panels was productive and satisfying. We built something practical and sustainable for the house. It was a good team effort.",
+        "importance": 7,
         "embeddings": []
       },
       {
-        "created": "2025.04.30.22:00",
-        "event": "discover acorn Forest deep_forest",
-        "action": "talk to Sarah at deep_forest",
-        "thought": "The acorn exchange in the deep forest symbolized growth and potential. Our friendship, like the acorn, holds promise for future development.",
-        "importance": 12,
+        "created": "2025.05.04.22:00",
+        "event": "harvest first_vegetables Village garden",
+        "action": "cook dinner at house",
+        "thought": "The vegetables tasted wonderful after gathering them myself. Preparing the meal felt like a small, satisfying accomplishment. It was good to provide sustenance for everyone.",
+        "importance": 7,
         "embeddings": []
       },
       {
-        "created": "2025.05.02.22:00",
-        "event": "receive acorn Forest deep_forest",
-        "action": "talk to Sarah at deep_forest",
-        "thought": "The acorn exchange in the deep forest was particularly meaningful. It symbolizes the growth and potential of our friendship.",
-        "importance": 12,
+        "created": "2025.05.03.22:00",
+        "event": "build chicken_coop Village farm",
+        "action": "collaborate with Sarah at farm",
+        "thought": "Working with Sarah on the chicken coop was productive. We made good progress and established a helpful workflow. I felt a sense of accomplishment.",
+        "importance": 6,
+        "embeddings": []
+      },
+      {
+        "created": "2025.05.03.22:00",
+        "event": "build irrigation_system Village garden",
+        "action": "test water_flow at garden",
+        "thought": "Testing the irrigation system was crucial for the garden's success. Ensuring proper water flow was a necessary step. I carefully monitored the results.",
+        "importance": 5,
         "embeddings": []
       },
       {
         "created": "2025.05.03.22:00",
         "event": "observe Sarah Forest stream_bank",
         "action": "talk to Sarah at stream_bank",
-        "thought": "Our conversation by the stream was peaceful and reflective. The natural setting seems to encourage more open and honest communication.",
-        "importance": 12,
-        "embeddings": []
-      },
-      {
-        "created": "2025.05.03.22:00",
-        "event": "discover crab Beach shoreline",
-        "action": "interact with crab at shoreline",
-        "thought": "The crab encounter was a reminder of the diverse life forms around us. These small discoveries add richness to our daily experiences.",
-        "importance": 10,
-        "embeddings": []
-      },
-      {
-        "created": "2025.05.03.22:00",
-        "event": "observe seashell Beach shoreline",
-        "action": "interact with seashell at shoreline",
-        "thought": "Noticing the delicate patterns on the seashell sparked thoughts about nature’s quiet beauty and detail.",
-        "importance": 9,
-        "embeddings": []
-      },
-      {
-        "created": "2025.05.03.22:00",
-        "event": "explore Beach tidal_pool",
-        "action": "interact with starfish at tidal_pool",
-        "thought": "The starfish in the tidal pool reminded me how even the smallest corners of the world are full of life waiting to be explored.",
-        "importance": 8,
+        "thought": "Talking with Sarah about the stream bank provided valuable context. Her observations about the ecosystem were insightful. I learned a lot about local hydrology.",
+        "importance": 5,
         "embeddings": []
       }
     ],
@@ -78,72 +62,146 @@
       "2025.05.03": {
         "wake_up_time": "06:00",
         "daily_plan": [
-          "wake up and have breakfast",
-          "travel to shoreline",
-          "interact with crab at shoreline",
-          "explore beach area",
-          "eat lunch by the sea",
-          "return to house and rest",
-          "go to bed"
+          "eat breakfast at house",
+          "move to garden",
+          "interact with irrigation system at garden",
+          "think at garden to observe water flow",
+          "move to forest stream_bank",
+          "talk to Sarah at stream_bank",
+          "think at stream_bank about hydrology",
+          "move to cafe",
+          "eat lunch at cafe",
+          "idle on cozy_sofa at cafe",
+          "move to house",
+          "eat dinner at house",
+          "go to bed",
+          "sleep"
         ],
         "time_slots": [
           [
-            "sleeping",
-            360
+            "eat",
+            "house",
+            "dining_table",
+            "06:00",
+            "06:30"
           ],
           [
-            "waking up and morning routine",
-            60
+            "move",
+            "garden",
+            "",
+            "06:30",
+            "07:00"
           ],
           [
-            "eating breakfast",
-            30
+            "interact",
+            "garden",
+            "irrigation_system",
+            "07:00",
+            "08:00"
           ],
           [
-            "traveling to shoreline",
-            90
+            "think",
+            "garden",
+            "water_flow",
+            "08:00",
+            "09:30"
           ],
           [
-            "interacting with crab at shoreline",
-            60
+            "move",
+            "stream_bank",
+            "",
+            "09:30",
+            "10:30"
           ],
           [
-            "exploring beach area",
-            120
+            "talk",
+            "stream_bank",
+            "Sarah",
+            "10:30",
+            "11:30"
           ],
           [
-            "eating lunch by the sea",
-            60
+            "think",
+            "stream_bank",
+            "ecosystem",
+            "11:30",
+            "12:30"
           ],
           [
-            "returning to house and resting",
-            120
+            "move",
+            "cafe",
+            "",
+            "12:30",
+            "13:00"
           ],
           [
-            "relaxing and reflecting",
-            60
+            "eat",
+            "cafe",
+            "pastry_display",
+            "13:00",
+            "13:30"
           ],
           [
-            "going to bed",
-            60
+            "idle",
+            "cafe",
+            "cozy_sofa",
+            "13:30",
+            "14:30"
           ],
           [
-            "sleeping",
-            120
+            "move",
+            "house",
+            "",
+            "14:30",
+            "15:00"
+          ],
+          [
+            "sleep",
+            "house",
+            "bed",
+            "15:00",
+            "17:00"
+          ],
+          [
+            "eat",
+            "house",
+            "dining_table",
+            "18:00",
+            "19:00"
+          ],
+          [
+            "idle",
+            "house",
+            "bookshelf",
+            "19:00",
+            "20:00"
+          ],
+          [
+            "move",
+            "house",
+            "bed",
+            "21:00",
+            "21:30"
+          ],
+          [
+            "sleep",
+            "house",
+            "bed",
+            "22:00",
+            "06:00"
           ]
         ]
       }
     }
   }
-}You are a game assistant who helps generate a character’s daily plan.
-Refer to the **REFLECTIONS AND PLAN**, the **MAP INFORMATION**, and the **AVAILABLE ACTIONS** to create a plan for the character named "John."
+}You are a game assistant responsible for generating a character’s daily plan.
 
-Use the information from:
+Use the following information to create a meaningful and balanced plan for the character named **"John"**:
 
-* **05.03 reflections** (highest priority)
-* **05.03 plan** (second priority)
-* **other reflections** (lower priority)
-  to create a meaningful, well-balanced daily schedule.
+**🧠 PRIORITY SOURCES** (in descending order):
+1. Reflections from **2025.05.03** (highest priority)
+2. Plan from **2025.05.03** (second priority)
+3. Other reflections from earlier dates (lower priority)
 
 ---
 
@@ -151,41 +209,48 @@ Use the information from:
 
 1. **Village**
 
-* `house`: \["dining\_table", "bookshelf", "bed"]
-* `town_hall`: \["bulletin\_board", "meeting\_table", "clock"]
-* `cafe`: \["coffee\_machine", "pastry\_display", "cozy\_sofa"]
-* `park`: \["swing\_set", "fountain", "bench"]
+   * `house`: \["dining\_table", "bookshelf", "bed"]
+   * `town_hall`: \["bulletin\_board", "meeting\_table", "clock", "old\_maps"]
+   * `cafe`: \["coffee\_machine", "pastry\_display", "cozy\_sofa"]
+   * `park`: \["swing\_set", "fountain", "bench"]
+   * `storage`: \["old\_blueprint", "vegetable\_seeds"]
+   * `garden`: \["vegetable\_seeds", "garden\_beds", "greenhouse\_frame", "irrigation\_system"]
+   * `square`: \["broken\_well", "water\_system"]
+   * `farm`: \["chicken\_coop"]
+   * `workshop`: \["solar\_charger", "handcrafted\_tool", "equipment"]
+   * `construction_site`: \["library\_foundation", "library\_shelves"]
 
 2. **Forest**
 
-* `forest_entrance`: \["oak\_tree", "fallen\_leaves", "squirrel"]
-* `deep_forest`: \["mushroom", "acorn", "wild\_boar"]
-* `stream_bank`: \["raspberry", "stream\_water", "stone"]
+   * `forest_entrance`: \["oak\_tree", "fallen\_leaves", "squirrel"]
+   * `deep_forest`: \["mushroom", "acorn", "wild\_boar"]
+   * `stream_bank`: \["raspberry", "stream\_water", "stone"]
+   * `orchard`: \["fruit\_trees"]
 
 3. **Desert**
 
-* `sand_dunes`: \["cactus", "lizard", "sandstorm"]
-* `oasis`: \["palm\_tree", "water\_pool", "camel"]
-* `rocky_outcrop`: \["scorpion", "sandstone", "hawk"]
+   * `sand_dunes`: \["cactus", "lizard", "sandstorm"]
+   * `oasis`: \["palm\_tree", "water\_pool", "camel"]
+   * `rocky_outcrop`: \["scorpion", "sandstone", "hawk", "solar\_panel\_parts"]
 
 4. **Beach**
 
-* `shoreline`: \["seashell", "crab", "driftwood"]
-* `cliffside`: \["seagull", "rock", "binocular\_spot"]
-* `tidal_pool`: \["starfish", "seaweed", "snail"]
+   * `shoreline`: \["seashell", "crab", "driftwood", "fishing\_dock", "temporary\_shelter"]
+   * `cliffside`: \["seagull", "rock", "binocular\_spot", "rain\_collector"]
+   * `tidal_pool`: \["starfish", "seaweed", "snail"]
+   * `dock`: \["fish"]
 
 ---
 
-**🧠 AVAILABLE ACTIONS:**
-
-* `move`: go to a new location
-* `interact`: use/manipulate an object
-* `eat`: consume food
-* `talk`: speak to another agent
-* `wait`: remain inactive briefly
-* `think`: internal thought process
-* `idle`: remain idle without taking any action
-* `sleep`: sleep to recover energy
+**🎮 AVAILABLE ACTIONS:**
+- `move`: go to a new location
+- `interact`: use or manipulate an object
+- `eat`: consume food
+- `talk`: speak to another agent
+- `wait`: remain inactive briefly
+- `think`: engage in internal reflection
+- `idle`: rest without doing anything
+- `sleep`: sleep to recover energy
 
 ---
 
@@ -193,21 +258,24 @@ Use the information from:
 
 * Wake-up time is fixed at **06:00**
 * Bedtime is fixed at **22:00**
-* Total minutes in `time_slots` must sum to **1440 minutes (24 hours)**
-* Include two blocks of `"sleeping"`:
+* `time_slots` must total **1440 minutes (24 hours)**
+* Include **two "sleeping" blocks**:
+  * 360 minutes for night sleep
+  * 120 minutes for an optional daytime nap or rest
+* Each entry in `time_slots` must match an entry in `daily_plan`
+* `time_slots` must follow this format:  
+  `["action", "location", "target", "start time", "end time"]`
+* `action` must be chosen from the AVAILABLE ACTIONS
+* You must generate a plan for the **next day** following the latest date in John’s existing plans  
+  (e.g., if the last plan is for "2025.05.04", generate one for "2025.05.05")
 
-  * 360 minutes (night sleep)
-  * 120 minutes (optional daytime nap or rest)
-* `time_slots` entries must directly correspond to `"daily_plan"` actions, with the two `"sleeping"` entries added.
-* You must create a new plan for the next day following the most recent date found in the existing "plans" data.
-    For example, if the last plan is for "2025.05.04", then you should generate a new plan for "2025.05.05".
+❗ DO NOT repeat the previous day's schedule. Create a **fresh, meaningful plan** that reflects variation in activities and priorities.
 
-❗ You must NOT repeat the previous day's plan. Instead, generate a **new plan** for "2025.05.04" based on the reflections from "2025.05.03" and previous days. Introduce variation in activities and balance based on context.
-🔸 Do not repeat low-importance objects or events unless they play a central role in multiple reflections or are explicitly emphasized.
+🔸 Avoid repeating low-priority or unimportant objects unless they are highly emphasized in the reflections.
 
 ---
 
-**📝 OUTPUT FORMAT (strictly JSON):**
+**📤 OUTPUT FORMAT (strictly JSON):**
 
 ```json
 {
@@ -221,14 +289,12 @@ Use the information from:
           ...
         ],
         "time_slots": [
-          ["action1", duration_in_minutes],
-          ["action2", duration_in_minutes],
+          ["action", "location", "target", "start time", "end time"],
           ...
         ]
       }
     },
-    "reason": "Explain the reason for the plan based on the 05.04 reflection, the existing 05.04 plan, and other meaningful reflections. Justify the priorities and chosen activities."
+    "reason": "Explain the reasoning for this plan based on the 05.04 reflection, previous plans, and any meaningful insights. Justify your activity choices and priorities."
   }
 }
-```
 
