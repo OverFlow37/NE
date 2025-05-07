@@ -10,16 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1e12e118ca0cb8a4cb384edbbf9233dd, type: 3}
-  m_Name: Apple_Data
+  m_Name: Agent_Data
   m_EditorClassIdentifier: 
-  mDescription: "\uC0AC\uACFC\uC785\uB2C8\uB2E4."
-  mName: Apple
-  mDescriptionPrompt: It is sweet and delicious, and you can get a little (3) fullness
-    when you eat it.
-  mType: 1
+  mDescription: "\uC5D0\uC774\uC804\uD2B8\uC758 \uC0C1\uD638\uC791\uC6A9 \uB370\uC774\uD130"
+  mName: 
+  mDescriptionPrompt: game character
+  mType: 0
   mState: 0
-  mActions:
-  - {fileID: 11400000, guid: cbe91266aabd61348bd1864e9f7bac11, type: 2}
-  mHungerEffect: -3
+  mActions: []
+  mHungerEffect: 0
   mSleepinessEffect: 0
   mLonelinessEffect: 0

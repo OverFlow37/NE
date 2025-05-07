@@ -7978,7 +7978,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 88f715e72494ba3438ff796b0e70d8eb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mGameToRealTimeRatio: 60
+  mGameToRealTimeRatio: 180
   mShowDebugInfo: 1
 --- !u!4 &2027029945
 Transform:

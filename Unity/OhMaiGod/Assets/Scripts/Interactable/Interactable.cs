@@ -1,5 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic; // List를 사용하기 위해 필요
+using System.Collections;
+using UnityEngine.Tilemaps;
 
 // 씬의 상호작용 가능한 게임 오브젝트에 붙는 컴포넌트 (MonoBehaviour)
 public class Interactable : MonoBehaviour
@@ -9,9 +11,18 @@ public class Interactable : MonoBehaviour
     // 인스펙터에서 Project 창의 ObjectData 애셋을 여기에 드래그하여 할당합니다.
     public InteractableData mInteractableData;
 
+    // 오브젝트 이름 (InteractableData와 동기화)
+    public string InteractableName { get; private set; }
+
+    // 현재 위치 정보
+    public string CurrentLocation { get; private set; }
+
     // 오브젝트가 제거될 때 발생하는 이벤트
     public delegate void InteractableRemovedHandler(Interactable interactable);
     public event InteractableRemovedHandler OnInteractableRemoved;
+
+    // 타일매니저
+    TileManager mtileManager;
 
     void Awake()
     {
@@ -20,6 +31,64 @@ public class Interactable : MonoBehaviour
         {
             Debug.LogWarning("Interactable 컴포넌트에 mInteractableData 할당되지 않았습니다: " + gameObject.name);
         }
+        else
+        {
+            // InteractableData와 이름 동기화
+            InteractableName = mInteractableData.mName;
+        }
+    }
+
+    void Start()
+    {
+        RegisterToEnvironment();
+    }
+
+    void OnEnable()
+    {
+        // 오브젝트가 활성화될 때마다 환경 등록 시도
+        RegisterToEnvironment();
+    }
+
+    void OnDisable()
+    {
+        // 오브젝트가 비활성화될 때 환경에서 직접 제거
+        if (TileManager.Instance != null)
+        {
+            TileManager.Instance.UnregisterTarget(this);
+        }
+    }
+
+    // 환경에 자신을 등록
+    private void RegisterToEnvironment()
+    {
+        Debug.Log("RegisterToEnvironment: " + gameObject.name);
+        if (TileManager.Instance == null) return;
+        TileManager.Instance.RegisterTarget(this);
+
+        // // 현재 위치의 TileController 찾기
+        // Vector3Int cellPosition = TileManager.Instance.GroundTilemap.WorldToCell(transform.position);
+        // TileController tileController = TileManager.Instance.GetTileController(cellPosition);
+        
+        // if (tileController != null)
+        // {
+        //     TargetController targetController = GetComponent<TargetController>();
+        //     if (targetController != null)
+        //     {
+        //         tileController.AddChildInteractable(targetController);
+        //         Debug.Log($"{gameObject.name}이(가) {tileController.LocationName} 환경에 등록됨");
+        //     }
+        // }
+        // else
+        // {
+        //     Debug.LogWarning($"{gameObject.name}의 위치에 해당하는 TileController를 찾을 수 없습니다.");
+        // }
+    }
+
+    // 환경에서 자신을 제거
+    private void UnregisterFromEnvironment()
+    {
+        if (TileManager.Instance == null) return;
+        TileManager.Instance.UnregisterTarget(this);
     }
 
     // 상호작용 주체(Interactor)로부터 상호작용 요청을 받는 메서드
@@ -64,6 +133,9 @@ public class Interactable : MonoBehaviour
     // 오브젝트를 제거하는 공통 메서드
     public virtual void RemoveObject()
     {
+        // 환경에서 제거
+        UnregisterFromEnvironment();
+
         // 제거되기 전에 이벤트 발생
         OnInteractableRemoved?.Invoke(this);
 
@@ -75,5 +147,65 @@ public class Interactable : MonoBehaviour
 
         // 오브젝트 비활성화
         gameObject.SetActive(false);
+    }
+
+    private void OnTriggerExit2D(Collider2D other)
+    {
+        // 게임오브젝트가 비활성화 중이면 무시
+        if (!gameObject.activeInHierarchy) return;
+
+        // Location 레이어인 경우에만 처리
+        if (other.gameObject.layer == LayerMask.NameToLayer("Location"))
+        {
+            Debug.Log($"[{gameObject.name}] {other.name} 영역에서 벗어남");
+            StartCoroutine(UpdateEnvironmentRegistration());
+        }
+    }
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        // Location 레이어인 경우에만 처리
+        if (other.gameObject.layer == LayerMask.NameToLayer("Location"))
+        {
+            Debug.Log($"[{gameObject.name}] {other.name} 영역으로 진입");
+            StartCoroutine(UpdateEnvironmentRegistration());
+        }
+    }
+
+    private IEnumerator UpdateEnvironmentRegistration()
+    {
+        // TileManager 초기화 대기
+        while (TileManager.Instance == null || !TileManager.Instance.IsInitialized)
+        {
+            yield return new WaitForSeconds(0.1f);
+        }
+
+        // 현재 위치의 TileController 찾기
+        Vector3Int cellPosition = TileManager.Instance.GroundTilemap.WorldToCell(transform.position);
+        TileController newTileController = TileManager.Instance.GetTileController(cellPosition);
+
+        if (newTileController != null)
+        {
+            // 기존 환경에서 제거 후 새로운 환경에 등록
+            TileManager.Instance.UnregisterTarget(this);
+            TileManager.Instance.RegisterTarget(this);
+            Debug.Log($"[{gameObject.name}] 환경 업데이트 완료 - 새 위치: {newTileController.LocationName}");
+        }
+        else
+        {
+            // 새로운 환경을 찾지 못한 경우 기존 환경에서만 제거
+            TileManager.Instance.UnregisterTarget(this);
+            Debug.Log($"[{gameObject.name}] 유효한 환경을 찾을 수 없음");
+        }
+    }
+
+    // 현재 위치 업데이트 메서드 (TileManager에서 호출)
+    public void UpdateCurrentLocation(string locationName)
+    {
+        if (CurrentLocation != locationName)
+        {
+            CurrentLocation = locationName;
+            // 위치 변경 시 필요한 추가 로직이 있다면 여기에 구현
+        }
     }
 }

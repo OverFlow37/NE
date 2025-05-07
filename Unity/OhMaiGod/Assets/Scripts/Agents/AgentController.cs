@@ -8,6 +8,7 @@ using OhMAIGod.Agent;
 public class AgentController : MonoBehaviour
 {
     [SerializeField] private AgentUI agentUI;
+    [SerializeField] private AgentVision agentVision;  // AgentVision 컴포넌트 참조 추가
 
     [Header("Agent States")]
     [SerializeField] private AgentNeeds mAgentNeeds;                // 현재 Agent의 욕구 수치
@@ -44,7 +45,7 @@ public class AgentController : MonoBehaviour
     [SerializeField] private int mID;                               // 에이전트 고유 식별자
     [SerializeField] private string mName;                          // 이름
     [SerializeField] private string mDescription;                   // 초기 설명    
-    [SerializeField] private Transform mVisualRange;                // 시야 범위
+    [SerializeField] private float mVisualRange;                // 시야 범위
     [SerializeField] private float mActionMinDuration = 1.0f;       // 활동 최소 지속 시간 (분)
     [SerializeField] private bool mAutoStart = true;                // 자동 시작 여부
     private AgentState mCurrentState = AgentState.IDLE;             // 에이전트의 현재 State
@@ -61,10 +62,13 @@ public class AgentController : MonoBehaviour
     public AgentNeeds AgnetNeeds => mAgentNeeds;
 
     private Animator animator;  // 애니메이터
-    [SerializeField] private AgentScheduler mScheduler;
-    [SerializeField] private MovementController mMovement;
+    // AIBridge에서 Agent만 가져오면 나머지도 가져올 수 있게 public으로 변경
+    [SerializeField] public AgentScheduler mScheduler;
+    [SerializeField] public MovementController mMovement;
 
-    private string mCurrentInteractable;
+
+    // 시야 내의 오브젝트 목록
+    public List<Interactable> mVisibleInteractables = new List<Interactable>();
 
     private void Awake()
     {
@@ -75,10 +79,22 @@ public class AgentController : MonoBehaviour
         if (mMovement == null)
             mMovement = GetComponent<MovementController>();
 
+        if (agentVision == null)
+            agentVision = GetComponent<AgentVision>();
+
         // MovementController의 목적지 도착 이벤트 구독
         if (mMovement != null)
         {
             mMovement.OnDestinationReached += HandleDestinationReached;
+        }
+
+        // AgentVision의 이벤트 구독
+        if (agentVision != null)
+        {
+            agentVision.OnVisionChanged += HandleVisionChanged;
+            // 초기 시야 범위 내 오브젝트들 추가
+            var initialInteractables = agentVision.GetVisibleInteractables();
+            mVisibleInteractables.AddRange(initialInteractables);
         }
 
         // 감정 상태 초기화
@@ -96,6 +112,11 @@ public class AgentController : MonoBehaviour
         if (mMovement != null)
         {
             mMovement.OnDestinationReached -= HandleDestinationReached;
+        }
+
+        if (agentVision != null)
+        {
+            agentVision.OnVisionChanged -= HandleVisionChanged;
         }
     }
 
@@ -116,6 +137,30 @@ public class AgentController : MonoBehaviour
 
         // 활동 시작
         StartAction();
+    }
+
+    // 시야 범위 변경 이벤트 처리
+    private void HandleVisionChanged(Interactable interactable, bool entered)
+    {
+        if (entered)
+        {
+            if (!mVisibleInteractables.Contains(interactable))
+            {
+                mVisibleInteractables.Add(interactable);
+                if (mShowDebugInfo)
+                {
+                    Debug.Log($"{mName}이(가) {interactable.name}을(를) 발견했습니다.");
+                }
+            }
+        }
+        else
+        {
+            mVisibleInteractables.Remove(interactable);
+            if (mShowDebugInfo)
+            {
+                Debug.Log($"{mName}이(가) {interactable.name}을(를) 시야에서 놓쳤습니다.");
+            }
+        }
     }
 
     private void Start()

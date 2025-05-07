@@ -127,8 +127,9 @@ public class MovementController : MonoBehaviour
 
         Transform closestTarget = null;
         float closestDistance = float.MaxValue;
-        foreach (TargetController target in targetLocation.ChildInteractables)
+        foreach (Interactable interactable in targetLocation.ChildInteractables)
         {
+            TargetController target = interactable.GetComponent<TargetController>();
             if (target.name == mTargetName)
             {
                 float distance = Vector2.Distance(transform.position, target.transform.position);
