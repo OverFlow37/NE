@@ -129,14 +129,19 @@ public class MovementController : MonoBehaviour
         float closestDistance = float.MaxValue;
         foreach (Interactable interactable in targetLocation.ChildInteractables)
         {
-            TargetController target = interactable.GetComponent<TargetController>();
-            if (target.name == mTargetName)
+            // TargetController target = interactable.GetComponent<TargetController>();
+            // if (target == null) {
+            //     Debug.LogWarning($"target이 null입니다. {interactable.name}");
+            //     continue;
+            // }
+            Debug.Log("interactable.InteractableName: "+interactable.InteractableName);
+            if (interactable.InteractableName == mTargetName)
             {
-                float distance = Vector2.Distance(transform.position, target.transform.position);
+                float distance = Vector2.Distance(transform.position, interactable.transform.position);
                 if (distance < closestDistance)
                 {
                     closestDistance = distance;
-                    closestTarget = target.transform;
+                    closestTarget = interactable.transform;
                 }
             }
         }

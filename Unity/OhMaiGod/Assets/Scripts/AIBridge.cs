@@ -10,6 +10,7 @@ using OhMAIGod.Agent;
 
 // ========== AI에게 전송하는 데이터 구조체들 ==========
 // 에이전트가 인식할 수 있는 오브젝트 그룹 정의
+[System.Serializable]
 public struct ObjectGroup
 {
     public string location;        // 오브젝트가 있는 위치
@@ -17,6 +18,7 @@ public struct ObjectGroup
 }
 
 // AI에게 전송할 에이전트 정보 구조체
+[System.Serializable]
 public struct Agent
 {
     public string name;                         // 에이전트 이름
@@ -28,12 +30,14 @@ public struct Agent
 }
 
 // AI 서버에 보낼 요청 데이터 구조체
+[System.Serializable]
 public struct AgentRequest
 {
     public Agent agent;  // 에이전트 정보
 }
 
 // AI가 결정한 행동의 세부 정보
+[System.Serializable]
 public struct ActionDetails
 {
     public string location;    // 행동을 수행할 위치
@@ -43,6 +47,7 @@ public struct ActionDetails
 }
 
 // AI가 결정한 행동 정보
+[System.Serializable]
 public struct Action
 {
     public string action;               // 수행할 행동
@@ -52,12 +57,14 @@ public struct Action
 }
 
 // AI 응답 데이터를 감싸는 래퍼 구조체
+[System.Serializable]
 public struct DataWrapper
 {
     public Action action;  // AI가 결정한 행동
 }
 
 // AI 서버로부터의 응답 구조체
+[System.Serializable]
 public struct AgentResponse
 {
     public DataWrapper data;    // 응답 데이터 (행동 정보)
@@ -70,6 +77,25 @@ public class AIBridge : MonoBehaviour
     [SerializeField] private AgentController[] mAgentControllers;
 
     private bool mIsRequesting = false;  // AI에게 응답 보내고 있는지 확인하는 변수
+
+    private void Update(){
+        if (Input.GetKeyDown(KeyCode.D))
+        {
+            send_test();
+        }
+    }
+    // 게임 시작시 자동으로 첫 요청 보내기(임시)
+    public void send_test()
+    {
+        // 게임 시작시 자동으로 첫 요청 보내기
+        SendAgent(mAgentControllers[0]);
+
+        // 목적지 도착 이벤트 구독
+        // if (mAgentControllers[0] != null)
+        // {
+        //     mAgentControllers[0].OnDestinationReached += HandleDestinationReached;
+        // }
+    }
 
     // Interactable 목록을 ObjectGroup 배열로 변환
     private ObjectGroup[] ConvertToObjectGroups(List<Interactable> interactables)
@@ -107,6 +133,7 @@ public class AIBridge : MonoBehaviour
             Debug.LogWarning($"요청 진행 중입니다. 기다려주세요. (에이전트: {agent.AgentName})");
             return;
         }
+        agent.ChangeState(AgentState.WAIT_FOR_AI_RESPONSE);
         StartCoroutine(SendAgentData(agent));
     }
 
@@ -121,17 +148,34 @@ public class AIBridge : MonoBehaviour
         var scheduler = agent.mScheduler;
 
         // AI 서버에 보낼 요청 데이터 생성
+        var visibleObjectGroups = ConvertToObjectGroups(agent.mVisibleInteractables);
+
+        // 각 파라미터별 값 로그
+        Debug.Log($"[AIBridge] AgentName: {agent.AgentName}");
+        Debug.Log($"[AIBridge] AgentNeeds: {JsonUtility.ToJson(currentNeeds)}");
+        string agentLocation = (movement != null && !string.IsNullOrEmpty(movement.TargetName) ? movement.TargetName : "Bedroom");
+        Debug.Log($"[AIBridge] Location: {agentLocation}");
+        Debug.Log($"[AIBridge] Personality: friendly, helpful");
+        Debug.Log($"[AIBridge] visibleObjectGroups.Count: {visibleObjectGroups.Length}");
+        for (int i = 0; i < visibleObjectGroups.Length; i++)
+        {
+            Debug.Log($"[AIBridge] ObjectGroup {i}: location={visibleObjectGroups[i].location}, objects=[{string.Join(",", visibleObjectGroups[i].objects)}]");
+        }
+
         AgentRequest requestData = new AgentRequest
         {
             agent = new Agent
             {
                 name = agent.AgentName,
                 state = currentNeeds,
-                location = movement != null && !string.IsNullOrEmpty(movement.TargetName) ? movement.TargetName : "Bedroom",
+                location = agentLocation,
                 personality = "friendly, helpful", // TODO: 에이전트별 성격 구현 필요
-                visible_objects = ConvertToObjectGroups(agent.mVisibleInteractables)
+                visible_objects = visibleObjectGroups
             }
         };
+
+        // requestData 전체 구조를 JSON으로 출력
+        Debug.Log($"[AIBridge] requestData 전체: {JsonUtility.ToJson(requestData, true)}");
 
         // 요청 데이터를 JSON으로 변환
         string jsonData = JsonUtility.ToJson(requestData, true);
@@ -179,6 +223,7 @@ public class AIBridge : MonoBehaviour
         {
             // JSON 응답을 객체로 변환
             AgentResponse agentResponse = JsonUtility.FromJson<AgentResponse>(response);
+            Debug.Log($"응답: {agentResponse}");
             // 응답 유효성 검사
             if (agentResponse.status != "OK" || string.IsNullOrEmpty(agentResponse.data.action.action))
             {

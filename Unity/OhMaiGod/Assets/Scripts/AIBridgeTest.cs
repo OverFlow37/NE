@@ -17,17 +17,17 @@
 // }
 
 // AI에게 전송할 에이전트 정보 구조체
-[System.Serializable]
-public struct Agent
-{
-    public string name;                         // 에이전트 이름
-    public AgentNeeds state;                    // 에이전트의 감정 상태
-    public string location;                     // 현재 위치
-    public string personality;                  // 성격 특성
-    public ObjectGroup[] visible_objects;       // 볼 수 있는 오브젝트들
-    public ObjectGroup[] interactable_items;    // 상호작용 가능한 아이템들
-    public string[] nearby_agents;              // 근처에 있는 다른 에이전트들
-}
+// [System.Serializable]
+// public struct Agent
+// {
+//     public string name;                         // 에이전트 이름
+//     public AgentNeeds state;                    // 에이전트의 감정 상태
+//     public string location;                     // 현재 위치
+//     public string personality;                  // 성격 특성
+//     public ObjectGroup[] visible_objects;       // 볼 수 있는 오브젝트들
+//     public ObjectGroup[] interactable_items;    // 상호작용 가능한 아이템들
+//     public string[] nearby_agents;              // 근처에 있는 다른 에이전트들
+// }
 
 // // AI 서버에 보낼 요청 데이터 구조체
 // [System.Serializable]
@@ -142,11 +142,11 @@ public struct Agent
 //             return;
 //         }
 
-        // Agent를 WAIT_FOR_AI_RESPONSE 상태로 전환
-        mAgentController.ChangeState(AgentState.WAIT_FOR_AI_RESPONSE);
+    //     // Agent를 WAIT_FOR_AI_RESPONSE 상태로 전환
+    //     mAgentController.ChangeState(AgentState.WAIT_FOR_AI_RESPONSE);
 
-        StartCoroutine(SendAgentData());
-    }
+    //     StartCoroutine(SendAgentData());
+    // }
 
 //     // AI 서버와 통신하는 코루틴
 //     IEnumerator SendAgentData()

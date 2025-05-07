@@ -23,11 +23,8 @@ LOCATION OPTIONS:
 - cafeteria: communal dining area where agents can eat and socialize
 
 OBJECT OPTIONS:
-- Kitchen: a space equipped for cooking and food preparation
-- Desk: a workspace for studying or working
-- Cafeteria: meeting friend, can relieve loneliness
-- LivingRoom: a common area for relaxation and social activities
-- Bedroom: a private space for sleeping and personal activities
+- Bed: a private space for sleeping and personal activities
+- Apple: it's delicious, relieve hunger
 
 REASONING GUIDELINES:
 - Explain the reasons for your actions in 100 characters or less
@@ -49,10 +46,10 @@ RESPONSE FORMAT (provide ONLY valid JSON):
 
 IMPORTANT RULES:
 - location must be selected ONLY from LOCATION OPTIONS (house or cafeteria)
-- target must be selected ONLY from OBJECT OPTIONS (Kitchen, Desk, Cafeteria, LivingRoom, or Bedroom)
+- target must be selected ONLY from OBJECT OPTIONS
 - When parsing visible and interact descriptions, split "'object' located at 'location'" format into appropriate location and target values
-- IMPORTANT: Even if an object name sounds like a room (e.g., Bedroom, Kitchen), it should be treated as an object in the target field, not as a location
-- location represents the broader area where the agent is (house or cafeteria), while target represents specific objects or spaces within that location
-- CRITICAL: target field must ONLY contain the exact object name from OBJECT OPTIONS (e.g., "Bedroom", "Kitchen"), not the full "object located at location" format
+- IMPORTANT: Even if an object name sounds like a room, it should be treated as an object in the target field, not as a location
+- location represents the broader area where the agent is , while target represents specific objects or spaces within that location
+- CRITICAL: target field must ONLY contain the exact object name from OBJECT OPTIONS, not the full "object located at location" format
 - If you see "object located at location" in the input, extract ONLY the object part for the target field
 - Provide EXACTLY ONE action per character. Respond ONLY with JSON

@@ -52,6 +52,7 @@ public class AgentController : MonoBehaviour
 
     [Header("디버깅")]
     [SerializeField] private bool mShowDebugInfo = true;            // 디버그 정보 표시 여부
+    [SerializeField, ReadOnly] private AgentState mDebugCurrentState; // 현재 상태 Inspector 디버그용
 
     private float mCurrentActionTime = 0f;                          // 현재 활동 진행 시간
     private ScheduleItem mCurrentAction = null;                     // 현재 활동 정보
@@ -108,6 +109,7 @@ public class AgentController : MonoBehaviour
 
         // FSM 초기화
         mStateMachine = new AgentStateMachine(this);
+        mDebugCurrentState = CurrentState;
     }
 
     private void OnDestroy()
@@ -216,6 +218,7 @@ public class AgentController : MonoBehaviour
     public void ChangeState(AgentState _newState)
     {
         mStateMachine.ChangeState(_newState);
+        mDebugCurrentState = CurrentState;
     }
 
     // 새 활동 시작 (AgentScheduler에서 호출)

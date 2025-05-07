@@ -162,6 +162,7 @@ public class AgentVision : MonoBehaviour
         if (!mShowVisibleObjects) return;
 
         mDebugVisibleList.Clear();
+        if (mVisibleInteractables == null) return;
         foreach (var interactable in mVisibleInteractables)
         {
             mDebugVisibleList.Add(interactable);
