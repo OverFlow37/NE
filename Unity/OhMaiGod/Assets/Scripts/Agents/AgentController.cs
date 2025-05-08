@@ -66,7 +66,7 @@ public class AgentController : MonoBehaviour
     public ScheduleItem CurrentAction => mCurrentAction;
     public string CurrentLocation => mCurrentLocation;
     public Interactable CurrentTargetInteractable => mCurrentTargetInteractable;
-    private Animator animator;  // 애니메이터
+    public Animator animator;  // 애니메이터
     // AIBridge에서 Agent만 가져오면 나머지도 가져올 수 있게 public으로 변경
     [SerializeField] public AgentScheduler mScheduler;
     [SerializeField] public MovementController mMovement;
