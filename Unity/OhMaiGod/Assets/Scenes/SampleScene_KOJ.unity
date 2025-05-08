@@ -203,7 +203,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9a209d61d97aecd4795bb7ac07758ebc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  logLevel: 2
+  logLevel: 3
   categories:
   - Agent
   - Scheduler
@@ -214,7 +214,7 @@ MonoBehaviour:
   - Interact
   - Time
   - Default
-  categoryEnabled: 000000000000000001
+  categoryEnabled: 000000000100000000
 --- !u!1 &200844204
 GameObject:
   m_ObjectHideFlags: 0

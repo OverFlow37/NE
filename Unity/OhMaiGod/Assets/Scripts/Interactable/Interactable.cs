@@ -73,24 +73,6 @@ public class Interactable : MonoBehaviour
         LogManager.Log("Interact", "RegisterToEnvironment: " + gameObject.name, 3);
         if (TileManager.Instance == null) return;
         TileManager.Instance.RegisterTarget(this);
-
-        // // 현재 위치의 TileController 찾기
-        // Vector3Int cellPosition = TileManager.Instance.GroundTilemap.WorldToCell(transform.position);
-        // TileController tileController = TileManager.Instance.GetTileController(cellPosition);
-        
-        // if (tileController != null)
-        // {
-        //     TargetController targetController = GetComponent<TargetController>();
-        //     if (targetController != null)
-        //     {
-        //         tileController.AddChildInteractable(targetController);
-        //         Debug.Log($"{gameObject.name}이(가) {tileController.LocationName} 환경에 등록됨");
-        //     }
-        // }
-        // else
-        // {
-        //     Debug.LogWarning($"{gameObject.name}의 위치에 해당하는 TileController를 찾을 수 없습니다.");
-        // }
     }
 
     // 환경에서 자신을 제거
@@ -118,11 +100,11 @@ public class Interactable : MonoBehaviour
 
         foreach (var action in mInteractableData.mActions)
         {
-            if (action != null)
+            if (action.mAction != null)
             {
                 // InteractionAction의 Execute 메서드 호출
                 // 이 메서드 안에서 실제 행동 로직이 실행됩니다.
-                if (action.Execute(interactor, this.gameObject)) // 상호작용 주체와 대상 오브젝트를 넘겨줌
+                if (action.mAction.Execute(interactor, this.gameObject)) // 상호작용 주체와 대상 오브젝트를 넘겨줌
                 {
                     anyActionSuccessful = true;
                 }

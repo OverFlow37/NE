@@ -151,6 +151,7 @@ public class AgentController : MonoBehaviour
 
     // 목적지(오브젝트만) 도착 이벤트 발생 시 호출되는 함수
     // 애니메이션 업데이트, Status 업데이트, 활동 시작
+    // movementController의 이벤트로 호출
     private void HandleDestinationReached()
     {
         if (mShowDebugInfo)
@@ -160,7 +161,7 @@ public class AgentController : MonoBehaviour
 
         // 이동 애니메이션 정지
         animator.SetBool("isMoving", false);
-
+        mStateMachine.ChangeState(AgentState.INTERACTION); // 상태 INTERACTION으로 전환
     }
 
     // 시야 범위 변경 이벤트 처리
@@ -344,19 +345,35 @@ public class AgentController : MonoBehaviour
     //     }
     // }
 
+    // // 상호작용 시작
+    // public void StartInteraction()
+    // {
+        
+    // }
+
+    // 상호작용 진행
+    public void ProcessInteraction()
+    {
+        //
+    }
+
+    // 상호작용 종료        
+    public void EndInteraction() 
+    {
+        //
+    }
+
 
     // 오브젝트와 상호작용 시작
     // 일단 대기
-    private void StartInteraction(GameObject _interactableObject)
+    public void StartInteraction()
     {
         if (mShowDebugInfo)
         {
-            LogManager.Log("Agent", $"{mName}: {_interactableObject.name}와(과) 상호작용 시작", 2);
+            LogManager.Log("Agent", $"{mName}: {CurrentTargetInteractable.name}와(과) 상호작용 시작", 2);
         }
         LogManager.Log("Agent", "상호작용 시작", 3);
-        mStateMachine.ChangeState(AgentState.INTERACTION);
-        var interactable = _interactableObject.GetComponent<Interactable>();
-        interactable?.Interact(gameObject);
+        CurrentTargetInteractable?.Interact(gameObject);
         CompleteAction();
     }
 
@@ -375,22 +392,22 @@ public class AgentController : MonoBehaviour
             
             // 상태 초기화
             mCurrentAction = null;
-            mStateMachine.ChangeState(AgentState.IDLE);
+            mStateMachine.ChangeState(AgentState.WAIT);
         }
     }
 
     // 활동 시간 증가 함수
-    public void UpdateActionTime()
-    {
-        // 활동 시간 증가
-        mCurrentActionTime += Time.deltaTime;
+    // public void UpdateActionTime()
+    // {
+    //     // 활동 시간 증가
+    //     mCurrentActionTime += Time.deltaTime;
         
-        // 최소 지속 시간 이후 활동 완료
-        if (mCurrentActionTime >= mActionMinDuration * 60f)
-        {
-            CompleteAction();
-        }
-    }
+    //     // 최소 지속 시간 이후 활동 완료
+    //     if (mCurrentActionTime >= mActionMinDuration * 60f)
+    //     {
+    //         CompleteAction();
+    //     }
+    // }
 
     // 대기 상태로 전환하는 함수
     private void EnterWaitingState(float _waitTimeMinutes)

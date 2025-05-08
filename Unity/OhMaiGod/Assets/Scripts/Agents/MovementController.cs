@@ -185,11 +185,7 @@ public class MovementController : MonoBehaviour
             mCurrentPoint = Vector2.zero;
             mTargetPosition = Vector2.zero;
             mTargetController = null;
-            if (!mDestinationReachedEventFired)
-            {
-                OnDestinationReached?.Invoke();
-                mDestinationReachedEventFired = true;
-            }
+            OnDestinationReached?.Invoke();
         }
     }
 
