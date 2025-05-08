@@ -54,33 +54,62 @@ public class TileController : MonoBehaviour
         mChildInteractables.Clear();
     }
 
-    public Vector2 CenterPosition
+    public Vector2 AvailablePosition
     {
         get
         {
-            // 실제 타일이 있는 셀들의 중심 계산
-            BoundsInt bounds = mTilemap.cellBounds;
-            Vector3 centerSum = Vector3.zero;
-            int count = 0;
-            for (int x = bounds.min.x; x < bounds.max.x; x++)
+            // 중심 셀 좌표 계산
+            Vector3Int centerCell = new Vector3Int(
+                Mathf.RoundToInt(mTilemap.cellBounds.center.x),
+                Mathf.RoundToInt(mTilemap.cellBounds.center.y),
+                0);
+
+            // BFS 탐색을 위한 큐와 방문 집합
+            Queue<Vector3Int> queue = new Queue<Vector3Int>();
+            HashSet<Vector3Int> visited = new HashSet<Vector3Int>();
+
+            queue.Enqueue(centerCell);
+            visited.Add(centerCell);
+
+            // 8방향 이동 벡터
+            Vector3Int[] directions = new Vector3Int[]
             {
-                for (int y = bounds.min.y; y < bounds.max.y; y++)
+                Vector3Int.up, Vector3Int.down, Vector3Int.left, Vector3Int.right,
+                Vector3Int.up + Vector3Int.left, Vector3Int.up + Vector3Int.right,
+                Vector3Int.down + Vector3Int.left, Vector3Int.down + Vector3Int.right
+            };
+
+            BoundsInt bounds = mTilemap.cellBounds;
+
+            while (queue.Count > 0)
+            {
+                Vector3Int cell = queue.Dequeue();
+
+                // 셀 범위 내, 타일 존재, 장애물 없음이면 반환
+                if (bounds.Contains(cell) && mTilemap.HasTile(cell))
                 {
-                    Vector3Int cell = new Vector3Int(x, y, 0);
-                    if (mTilemap.HasTile(cell))
+                    bool hasObstacle = Physics2D.OverlapCircle(
+                        mTilemap.GetCellCenterWorld(cell), 0.2f, TileManager.Instance.ObstacleLayerMask);
+                    if (!hasObstacle)
                     {
-                        centerSum += mTilemap.GetCellCenterWorld(cell);
-                        count++;
+                        return mTilemap.GetCellCenterWorld(cell);
+                    }
+                }
+
+                // 8방향 인접 셀 탐색
+                foreach (var dir in directions)
+                {
+                    Vector3Int next = cell + dir;
+                    if (!visited.Contains(next) && bounds.Contains(next))
+                    {
+                        queue.Enqueue(next);
+                        visited.Add(next);
                     }
                 }
             }
-            if (count == 0) return mTilemap.transform.position; // 타일이 없으면 자기 위치 반환
 
-            Vector3 avgWorld = centerSum / count;
-
-            // 그라운드 타일맵 기준 셀로 변환 후, 그 셀의 중심 반환
-            Vector3Int groundCell = TileManager.Instance.GroundTilemap.WorldToCell(avgWorld);
-            return TileManager.Instance.GroundTilemap.GetCellCenterWorld(groundCell);
+            // 이동 가능한 셀이 없으면 Vector2.zero 반환
+            return Vector2.zero;
         }
     }
 
