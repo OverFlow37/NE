@@ -2,17 +2,26 @@ import urllib.request
 import json
 import time
 import os
+import re
 
 API_URL = "http://localhost:11434/api/generate"
 
 # ==============================
 #  서버 호출 함수
 # ==============================
+import json
+import time
+import urllib.request
+
+def extract_json_block(text: str) -> str:
+    """텍스트 내에서 첫 번째 JSON 블록만 추출"""
+    match = re.search(r'```json\s*(\{.*?\})\s*```', text, re.DOTALL)
+    if match:
+        return match.group(1)
+    else:
+        raise ValueError("JSON 블록을 찾을 수 없습니다.")
+
 def get_response(prompt: str) -> str:
-    """
-    prompt 문자열을 LLM 서버에 보내고,
-    JSON 응답에서 'response' 필드를 꺼내 출력 후 반환합니다.
-    """
     payload = {
         "model": "gemma3",
         "prompt": prompt,
@@ -30,12 +39,37 @@ def get_response(prompt: str) -> str:
         raw = resp.read()
     elapsed = time.time() - start_time
 
-    result = json.loads(raw.decode('utf-8'))
-    answer = result.get("response", "")
+    raw_text = raw.decode('utf-8')
+    answer = json.loads(raw_text).get("response", "")
 
-    print("\n🧠 응답:")
+    try:
+        json_text = extract_json_block(answer)
+        plan_data = json.loads(json_text)
+
+        # sleep 존재 여부 확인
+        john = plan_data.get("John", {})
+        plans = john.get("plans", {})
+        for date, content in plans.items():
+            time_slots = content.get("time_slots", [])
+            has_sleep = any(slot[0] == "sleep" for slot in time_slots)
+            if not has_sleep:
+                last_slot = time_slots[-1]
+                last_location = last_slot[1]
+                last_target = last_slot[2] if len(last_slot) > 2 else ""
+
+                # sleep 추가
+                time_slots.append(["sleep", last_location, last_target, "22:00", "06:00"])
+                content["time_slots"] = time_slots
+                content.setdefault("daily_plan", []).append("Sleep from 22:00 to 06:00 to recover energy.")
+
+        answer = json.dumps(plan_data, indent=2)
+
+    except Exception as e:
+        print("⚠️ sleep 보정 중 오류 발생:", e)
+
+    print("\n 응답:")
     print(answer)
-    print(f"\n⏱ 응답시간: {elapsed:.3f}초\n")
+    print(f"\n 응답시간: {elapsed:.3f}초\n")
 
     return answer
 
@@ -93,7 +127,7 @@ def save_combined_memory():
         f.write(json_block)           
         f.write(base_prompt + "\n\n")  
 
-    print("✅ baseprompt + memory + plan 병합 완료 → planprompt.txt 저장됨.")
+    print("baseprompt + memory + plan 병합 완료 → planprompt.txt 저장됨.")
 
 def main():
     save_combined_memory()
@@ -103,9 +137,9 @@ def main():
         if prompt_text:
             get_response(prompt_text)
         else:
-            print("⚠️ planprompt.txt가 비어 있습니다.")
+            print("planprompt.txt가 비어 있습니다.")
     except FileNotFoundError:
-        print("❌ planprompt.txt 파일을 찾을 수 없습니다.")
+        print("planprompt.txt 파일을 찾을 수 없습니다.")
 
 if __name__ == "__main__":
     main()
