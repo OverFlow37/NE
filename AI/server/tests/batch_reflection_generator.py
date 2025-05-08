@@ -1,10 +1,11 @@
 """
-20250506 TUE 결과물
+20250508 THU 결과물
 배치 처리 기반 반성 생성과 관리
 - 메모리와 반성 데이터를 로드
 - 오늘의 메모리를 필터링하고 중요도 순으로 정렬
+- 이전 반성 데이터를 날짜 및 중요도 기준으로 필터링하여 현재 반성에 반영
 - 여러 메모리에 대한 반성 동시 생성 프롬프트 작성
-- 생성된 각 반성을 반성 메모리에 추가
+- 생성된 각 반성을 반성 메모리에 추가 (created 필드는 메모리 날짜의 22:00으로 설정)
 - 반성 생성 시간 측정 및 기록
 """
 
@@ -15,6 +16,7 @@ import datetime
 import re
 import requests
 from typing import List, Dict, Any
+import math
 
 class BatchMemoryReflectionSystem:
     def __init__(self, memory_file_path: str, reflection_file_path: str, results_folder: str):
@@ -55,6 +57,11 @@ class BatchMemoryReflectionSystem:
         self.OLLAMA_URL = "http://localhost:11434/api/generate"
         self.MODEL = "gemma3"
         self.DEFAULT_TIMEOUT = 600  # 기본 타임아웃 600초 (CPU에서도 동작할 수 있도록 600)
+        
+        # 이전 반성 반영을 위한 설정
+        self.MAX_PREV_REFLECTIONS = 5  # 최대 이전 반성 수
+        self.RECENCY_WEIGHT = 0.7  # 최근성 가중치 (값이 클수록 최근 반성이 더 중요)
+        self.IMPORTANCE_WEIGHT = 0.3  # 중요도 가중치 (값이 클수록 중요한 반성이 더 중요)
     
     def _load_json_file(self, file_path: str) -> Dict:
         """
@@ -184,13 +191,92 @@ class BatchMemoryReflectionSystem:
         # 상위 k개 반환
         return sorted_memories[:top_k]
     
-    def create_batch_memory_reflection_prompt(self, agent_name: str, memories: List[Dict]) -> str:
+    def get_relevant_previous_reflections(self, agent_name: str, current_date: str) -> List[Dict]:
         """
-        여러 메모리를 일괄 처리하기 위한 프롬프트 생성
+        현재 날짜에 가깝고 중요도가 높은 이전 반성 가져오기
+        
+        Parameters:
+        - agent_name: 에이전트 이름
+        - current_date: 현재 날짜 문자열 (YYYY.MM.DD 형식)
+        
+        Returns:
+        - 관련성 높은 이전 반성 리스트
+        """
+        if agent_name not in self.reflection_data or "reflections" not in self.reflection_data[agent_name]:
+            return []
+        
+        try:
+            # 현재 날짜를 datetime 객체로 변환
+            current_date_obj = datetime.datetime.strptime(current_date, "%Y.%m.%d")
+            
+            # 이전 반성 목록
+            previous_reflections = []
+            
+            for reflection in self.reflection_data[agent_name]["reflections"]:
+                created_time = reflection.get("created", "")
+                
+                # created 필드에서 날짜 추출
+                date_match = re.search(r'(\d{4}\.\d{2}\.\d{2})', created_time)
+                if date_match:
+                    reflection_date_str = date_match.group(1)
+                    try:
+                        # 반성 날짜를 datetime 객체로 변환
+                        reflection_date_obj = datetime.datetime.strptime(reflection_date_str, "%Y.%m.%d")
+                        
+                        # 현재 날짜보다 이전 날짜인 경우만 처리
+                        if reflection_date_obj < current_date_obj:
+                            # 날짜 차이 계산 (일 단위)
+                            days_diff = (current_date_obj - reflection_date_obj).days
+                            
+                            # 최근성 점수 계산 (0에 가까울수록 최근)
+                            recency_score = 1.0 / (1.0 + days_diff)
+                            
+                            # 중요도 점수 계산 (0-10 범위를 0-1 범위로 정규화)
+                            importance_score = reflection.get("importance", 0) / 10.0
+                            
+                            # 최종 관련성 점수 계산 (가중치 적용)
+                            relevance_score = (self.RECENCY_WEIGHT * recency_score) + (self.IMPORTANCE_WEIGHT * importance_score)
+                            
+                            # 반성에 관련성 점수 추가
+                            reflection_with_score = reflection.copy()
+                            reflection_with_score["relevance_score"] = relevance_score
+                            reflection_with_score["days_ago"] = days_diff
+                            
+                            previous_reflections.append(reflection_with_score)
+                    except:
+                        continue
+            
+            # 관련성 점수 기준 내림차순 정렬
+            sorted_reflections = sorted(previous_reflections, key=lambda x: x.get("relevance_score", 0), reverse=True)
+            
+            # 상위 N개 반환
+            return sorted_reflections[:self.MAX_PREV_REFLECTIONS]
+            
+        except Exception as e:
+            print(f"이전 반성 처리 중 오류 발생: {e}")
+            return []
+    
+    def create_date_with_evening_time(self, date_str: str) -> str:
+        """
+        날짜 문자열에 저녁 시간(22:00)을 추가
+        
+        Parameters:
+        - date_str: 날짜 문자열 (YYYY.MM.DD 형식)
+        
+        Returns:
+        - 시간이 추가된 날짜 문자열 (YYYY.MM.DD.22:00 형식)
+        """
+        return f"{date_str}.22:00"
+    
+    def create_batch_memory_reflection_prompt(self, agent_name: str, memories: List[Dict], 
+                                              previous_reflections: List[Dict] = None) -> str:
+        """
+        여러 메모리와 이전 반성을 일괄 처리하기 위한 프롬프트 생성
         
         Parameters:
         - agent_name: 에이전트 이름
         - memories: 반성할 메모리 목록
+        - previous_reflections: 관련 이전 반성 목록 (None인 경우 이전 반성 없음)
         
         Returns:
         - 일괄 반성 생성을 위한 프롬프트 텍스트
@@ -214,6 +300,32 @@ Importance: {importance}
         
         memories_text = "\n".join(memory_sections)
         
+        # 이전 반성 섹션 추가 (있는 경우)
+        previous_reflections_text = ""
+        if previous_reflections and len(previous_reflections) > 0:
+            previous_reflections_sections = []
+            
+            for i, reflection in enumerate(previous_reflections):
+                event = reflection.get("event", "")
+                thought = reflection.get("thought", "")
+                importance = reflection.get("importance", 0)
+                days_ago = reflection.get("days_ago", 0)
+                
+                section = f"""
+PREVIOUS REFLECTION #{i+1} (from {days_ago} days ago):
+Event: "{event}"
+Thought: "{thought}"
+Importance: {importance}
+"""
+                previous_reflections_sections.append(section)
+            
+            previous_reflections_text = "\n".join(previous_reflections_sections)
+            previous_reflections_text = f"""
+RECENT REFLECTIONS (Consider these for context when generating today's reflections):
+{previous_reflections_text}
+"""
+        
+        # 기본 프롬프트 생성
         prompt = f"""
 TASK:
 Create three separate, independent reflections for agent {agent_name} based on three distinct memories.
@@ -222,14 +334,23 @@ AGENT: {agent_name}
 DATE: {current_date}
 
 {memories_text}
+"""
 
+        # 이전 반성이 있으면 추가
+        if previous_reflections_text:
+            prompt += previous_reflections_text
+        
+        # 지시사항 및 출력 형식 추가
+        prompt += f"""
 INSTRUCTIONS:
 - Process each memory SEPARATELY and create an independent reflection for each
 - Each reflection should be 2-3 VERY SIMPLE sentences
-- Do NOT reference or include information from the other memories in each reflection
-- Each reflection should ONLY be based on its corresponding memory
+- If previous reflections are provided, use them for context and continuity
+- Each reflection should PRIMARILY be based on its corresponding memory
 - Use first-person perspective as if the agent is reflecting
 - Keep each reflection concise but impactful
+- Consider how current reflections might connect to previous ones
+- Respect the character's past thoughts and growth
 
 OUTPUT FORMAT (provide ONLY valid JSON):
 {{
@@ -265,8 +386,8 @@ IMPORTANCE RATING GUIDELINES:
 9-10: Major life-changing reflections
 
 REFLECTION GUIDELINES:
-- Each reflection must be independent and only based on its corresponding memory
-- Do NOT mix details or themes between reflections
+- Each reflection must be based primarily on its corresponding memory
+- Previous reflections provide context but shouldn't overshadow the current memory
 - Each memory should have its own distinct reflection
 - Keep reflection to MAXIMUM 3 sentences
 - Focus only on the most meaningful insights or feelings
@@ -383,9 +504,34 @@ REFLECTION GUIDELINES:
                 "original_response": response_text
             }
     
+    def extract_date_from_memory(self, memory: Dict) -> str:
+        """
+        메모리에서 날짜 추출
+        
+        Parameters:
+        - memory: 메모리 데이터
+        
+        Returns:
+        - 날짜 문자열 (YYYY.MM.DD 형식) 또는 빈 문자열
+        """
+        memory_time = memory.get("time", "")
+        
+        # YYYY.MM.DD 형식 추출
+        date_match = re.search(r'(\d{4}\.\d{2}\.\d{2})', memory_time)
+        if date_match:
+            return date_match.group(1)
+        
+        # YYYY-MM-DD 형식 추출 및 변환
+        date_match = re.search(r'(\d{4})-(\d{2})-(\d{2})', memory_time)
+        if date_match:
+            year, month, day = date_match.groups()
+            return f"{year}.{month}.{day}"
+        
+        return ""
+    
     def generate_batch_reflections(self, agent_name: str, date_str: str = None) -> Dict:
         """
-        에이전트의 메모리에 대한 반성을 일괄 생성
+        에이전트의 메모리에 대한 반성을 일괄 생성 (이전 반성 포함)
         
         Parameters:
         - agent_name: 에이전트 이름
@@ -396,11 +542,19 @@ REFLECTION GUIDELINES:
         """
         process_start_time = time.time()
         
+        # 현재 날짜 설정
+        if date_str is None:
+            current_date = datetime.datetime.now().strftime("%Y.%m.%d")
+        else:
+            current_date = date_str
+            
+        print(f"처리할 날짜: {current_date}")
+        
         # 1. 오늘의 메모리 가져오기
-        todays_memories = self.get_todays_memories(agent_name, date_str)
+        todays_memories = self.get_todays_memories(agent_name, current_date)
         
         if not todays_memories:
-            print(f"경고: 오늘({date_str}) 메모리가 없습니다.")
+            print(f"경고: 오늘({current_date}) 메모리가 없습니다.")
             return {"error": "No memories found for today"}
         
         # 2. 중요한 메모리 선택
@@ -410,10 +564,18 @@ REFLECTION GUIDELINES:
             print(f"경고: 중요한 메모리를 찾을 수 없습니다.")
             return {"error": "No important memories found"}
         
-        # 3. 일괄 반성 프롬프트 생성
-        prompt = self.create_batch_memory_reflection_prompt(agent_name, important_memories)
+        # 3. 관련 이전 반성 가져오기
+        previous_reflections = self.get_relevant_previous_reflections(agent_name, current_date)
         
-        # 4. Ollama API 호출
+        if previous_reflections:
+            print(f"관련 이전 반성 {len(previous_reflections)}개를 찾았습니다.")
+        else:
+            print("관련 이전 반성을 찾을 수 없습니다.")
+        
+        # 4. 일괄 반성 프롬프트 생성 (이전 반성 포함)
+        prompt = self.create_batch_memory_reflection_prompt(agent_name, important_memories, previous_reflections)
+        
+        # 5. Ollama API 호출
         print(f"일괄 모드에서 {len(important_memories)}개 메모리에 대한 반성 생성 중...")
         
         # API 호출 시간 측정
@@ -421,7 +583,7 @@ REFLECTION GUIDELINES:
         ollama_response = self.call_ollama(prompt)
         api_elapsed_time = time.time() - api_start_time
         
-        # 5. 결과 처리
+        # 6. 결과 처리
         reflections = []
         
         if ollama_response["status"] == "success":
@@ -430,15 +592,18 @@ REFLECTION GUIDELINES:
             json_data = self.extract_json_from_response(response_text)
             
             if "reflections" in json_data and isinstance(json_data["reflections"], list):
-                # 현재 시간 가져오기
-                current_time = datetime.datetime.now().strftime("%Y.%m.%d.%H:%M")
-                
                 # 각 반성 처리
                 for i, reflection_data in enumerate(json_data["reflections"]):
                     if i < len(important_memories):
-                        # 생성 시간 및 빈 임베딩 추가
+                        # 메모리에서 날짜 추출
+                        memory_date = self.extract_date_from_memory(important_memories[i])
+                        
+                        # 생성 시간 설정 (메모리 날짜의 22:00)
+                        created_time = self.create_date_with_evening_time(memory_date if memory_date else current_date)
+                        
+                        # 빈 임베딩 추가
                         reflection = {
-                            "created": current_time,
+                            "created": created_time,
                             "event": important_memories[i].get("event", ""),
                             "action": important_memories[i].get("action", ""),
                             "thought": reflection_data.get("thought", ""),
@@ -466,14 +631,27 @@ REFLECTION GUIDELINES:
             for m in important_memories
         ]
         
+        # 이전 반성 정보 기록
+        previous_reflection_details = [
+            {
+                "event": r.get("event", ""),
+                "importance": r.get("importance", 0),
+                "days_ago": r.get("days_ago", 0),
+                "relevance_score": r.get("relevance_score", 0)
+            }
+            for r in previous_reflections
+        ]
+        
         # 시간 측정 데이터 저장
         timing_entry = {
-            "date": date_str or datetime.datetime.now().strftime("%Y.%m.%d"),
+            "date": current_date,
             "agent_name": agent_name,
             "total_time": process_elapsed_time,
             "api_time": api_elapsed_time,
             "memory_count": len(important_memories),
             "memory_details": memory_details,
+            "previous_reflection_count": len(previous_reflections),
+            "previous_reflection_details": previous_reflection_details,
             "status": ollama_response["status"],
             "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
         }
@@ -481,14 +659,15 @@ REFLECTION GUIDELINES:
         self.timing_data["batch_reflections"].append(timing_entry)
         self._save_timing_data()
         
-        # 6. 결과 객체 구성
+        # 7. 결과 객체 구성
         result = {
             "reflections": reflections,
             "count": len(reflections),
             "status": "success" if reflections else "error",
             "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
             "total_time": process_elapsed_time,
-            "api_time": api_elapsed_time
+            "api_time": api_elapsed_time,
+            "previous_reflections_used": len(previous_reflections)
         }
         
         return result
@@ -535,7 +714,11 @@ def generate_daily_reflections(agent_name: str, memory_file_path: str, reflectio
     - 생성된 반성 데이터
     """
     # 반성 시스템 초기화
-    reflection_system = BatchMemoryReflectionSystem(memory_file_path, reflection_file_path, results_folder)
+    reflection_system = BatchMemoryReflectionSystem(
+        memory_file_path=memory_file_path,
+        reflection_file_path=reflection_file_path,
+        results_folder=results_folder
+    )
     
     print("배치 처리 모드에서 반성 생성 중...")
     result = reflection_system.generate_batch_reflections(agent_name, date_str)
@@ -549,6 +732,10 @@ def generate_daily_reflections(agent_name: str, memory_file_path: str, reflectio
             print(f"  행동: {reflection.get('action', '')}")
             print(f"  생각: {reflection.get('thought', '')}")
             print(f"  중요도: {reflection.get('importance', 0)}")
+            print(f"  생성 시간: {reflection.get('created', '')}")
+        
+        if result.get("previous_reflections_used", 0) > 0:
+            print(f"\n이전 반성 {result.get('previous_reflections_used', 0)}개가 참조되었습니다.")
     else:
         print(f"\n오류: {result.get('error', '알 수 없는 오류')}")
     
@@ -598,6 +785,7 @@ if __name__ == "__main__":
     # 성능 결과 요약 출력
     print("\n===== 성능 결과 요약 =====")
     print(f"생성된 반성 수: {result.get('count', 0)}")
+    print(f"참조된 이전 반성 수: {result.get('previous_reflections_used', 0)}")
     print(f"총 처리 시간: {result.get('total_time', 0):.2f}초")
     print(f"API 호출 시간: {result.get('api_time', 0):.2f}초")
     
