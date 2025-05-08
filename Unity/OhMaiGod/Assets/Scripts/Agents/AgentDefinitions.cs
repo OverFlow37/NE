@@ -4,6 +4,7 @@ using UnityEngine;
 namespace OhMAIGod.Agent
 {
     // Agent의 행동 상태
+    [System.Serializable]
     public enum AgentState
     {
         IDLE = 0,
@@ -84,13 +85,29 @@ namespace OhMAIGod.Agent
         public string ActionName;           // 활동 이름
         public string LocationName;         // 목적지 위치 이름
         public string TargetName;           // 목적지 대상 이름
-        public TimeSpan StartTime;          // 시작 시간 (하루 중)
-        public TimeSpan EndTime;            // 종료 시간 (하루 중)
+        [Range(0,23)] public int StartHour;
+        [Range(0,59)] public int StartMinute;
+        [Range(0,59)] public int StartSecond;
+        [Range(0,23)] public int EndHour;
+        [Range(0,59)] public int EndMinute;
+        [Range(0,59)] public int EndSecond;
         public int Priority;                // 우선순위 (높을수록 중요)
         public bool IsFlexible;             // 시간이 유연한지 여부
         public bool IsCompleted;            // 완료 여부
         public string ActionDetails;        // 활동에 대한 추가 정보 (JSON)
         public string Reason;               // 활동 선택 이유
+
+        // 런타임 변환용 프로퍼티
+        public TimeSpan StartTime
+        {
+            get => new TimeSpan(StartHour, StartMinute, StartSecond);
+            set { StartHour = value.Hours; StartMinute = value.Minutes; StartSecond = value.Seconds; }
+        }
+        public TimeSpan EndTime
+        {
+            get => new TimeSpan(EndHour, EndMinute, EndSecond);
+            set { EndHour = value.Hours; EndMinute = value.Minutes; EndSecond = value.Seconds; }
+        }
 
         // 다른 일정과의 시간 충돌 여부를 검사하는 함수
         public bool ConflictsWith(ScheduleItem other)

@@ -22,8 +22,11 @@ public class AgentScheduler : MonoBehaviour
         // 에이전트 컨트롤러 참조 가져오기
         mAgentController = GetComponent<AgentController>();
         
-        // 기본 일정 생성 (빈 일정으로 초기화)
+        // 빈 일정으로 초기화
         ResetSchedule();
+
+        // Test 용으로 더미 스케줄 등록
+        CreateDummySchedule();
     }
 
     private void Update()
@@ -44,10 +47,7 @@ public class AgentScheduler : MonoBehaviour
             return false;
         }
         
-        // 기존 일정 모두 취소하고 새 일정만 추가
-        ClearSchedule();
-        
-        /* 충돌 확인 (우선순위가 낮은 경우만 충돌 거부)
+        //충돌 확인 (우선순위가 낮은 경우만 충돌 거부)
         var conflictingItems = mDailySchedule.Where(item => 
             !item.IsCompleted && 
             item.ConflictsWith(_item) && 
@@ -55,17 +55,43 @@ public class AgentScheduler : MonoBehaviour
         
         if (conflictingItems.Count > 0)
         {
-            if (mShowDebugInfo)
+            // 우선순위가 같은 경우: 시작시간이 더 나중인 경우만 추가 허용
+            bool canAdd = true;
+            List<ScheduleItem> toRemove = new List<ScheduleItem>();
+            foreach (var conflict in conflictingItems)
             {
-                LogManager.Log("AgentScheduler", $"일정 충돌 발생: {_item.ActionName} @ {_item.StartTime}", 1);
-                foreach (var conflict in conflictingItems)
+                if (conflict.Priority == _item.Priority)
                 {
-                    LogManager.Log("AgentScheduler", $" - 충돌 항목: {conflict.ActionName} @ {conflict.StartTime}", 1);
+                    if (_item.StartTime > conflict.StartTime)
+                    {
+                        // 새 스케줄이 더 나중이면 기존 스케줄 삭제 대상에 추가
+                        toRemove.Add(conflict);
+                    }
+                    else if (_item.StartTime <= conflict.StartTime)
+                    {
+                        canAdd = false;
+                        break;
+                    }
                 }
             }
-            return false;
+            if (!canAdd)
+            {
+                if (mShowDebugInfo)
+                {
+                    Debug.Log($"일정 충돌 발생: {_item.ActionName} @ {_item.StartTime}");
+                    foreach (var conflict in conflictingItems)
+                    {
+                        Debug.Log($" - 충돌 항목: {conflict.ActionName} @ {conflict.StartTime}");
+                    }
+                }
+                return false;
+            }
+            // 충돌난 기존 스케줄 삭제
+            foreach (var removeItem in toRemove)
+            {
+                RemoveScheduleItem(removeItem.ID);
+            }
         }
-        */
         
         // 일정에 항목 추가
         mDailySchedule.Add(_item);
@@ -95,7 +121,7 @@ public class AgentScheduler : MonoBehaviour
             if (mCurrentAction != null && mCurrentAction.ID == _itemID)
             {
                 mCurrentAction = null;
-                UpdateAction();
+                // UpdateAction();
             }
             
             if (mShowDebugInfo)
@@ -135,7 +161,7 @@ public class AgentScheduler : MonoBehaviour
         }
         
         // 활동 재평가
-        UpdateAction();
+        // UpdateAction();
         
         if (mShowDebugInfo)
         {
@@ -157,7 +183,7 @@ public class AgentScheduler : MonoBehaviour
             
             // 다음 활동 평가
             mCurrentAction = null;
-            UpdateAction();
+            // UpdateAction();
         }
     }
 
@@ -193,7 +219,6 @@ public class AgentScheduler : MonoBehaviour
         // 현재 활동이 있고 아직 유효한 경우
         if (mCurrentAction != null)
         {
-            // 활동 종료 시간이 지났는지 확인
             if (TimeManager.Instance.GetCurrentGameTime() > mCurrentAction.EndTime)
             {
                 if (!mCurrentAction.IsCompleted)
@@ -313,8 +338,8 @@ public class AgentScheduler : MonoBehaviour
             ID = "breakfast",
             ActionName = "아침 식사",
             LocationName = "Kitchen",
-            StartTime = new TimeSpan(8, 0, 0),
-            EndTime = new TimeSpan(8, 30, 0),
+            StartHour = 8, StartMinute = 0, StartSecond = 0,
+            EndHour = 8, EndMinute = 30, EndSecond = 0,
             Priority = 5,
             IsFlexible = false
         });
@@ -325,8 +350,8 @@ public class AgentScheduler : MonoBehaviour
             ID = "morning_work",
             ActionName = "오전 업무",
             LocationName = "Desk",
-            StartTime = new TimeSpan(9, 0, 0),
-            EndTime = new TimeSpan(9, 30, 0),
+            StartHour = 9, StartMinute = 0, StartSecond = 0,
+            EndHour = 9, EndMinute = 30, EndSecond = 0,
             Priority = 8,
             IsFlexible = false
         });
@@ -337,8 +362,8 @@ public class AgentScheduler : MonoBehaviour
             ID = "lunch",
             ActionName = "점심 식사",
             LocationName = "Cafeteria",
-            StartTime = new TimeSpan(10, 0, 0),
-            EndTime = new TimeSpan(10, 30, 0),
+            StartHour = 10, StartMinute = 0, StartSecond = 0,
+            EndHour = 10, EndMinute = 30, EndSecond = 0,
             Priority = 5,
             IsFlexible = true
         });
@@ -349,8 +374,8 @@ public class AgentScheduler : MonoBehaviour
             ID = "afternoon_work",
             ActionName = "오후 업무",
             LocationName = "Desk",
-            StartTime = new TimeSpan(11, 0, 0),
-            EndTime = new TimeSpan(11, 30, 0),
+            StartHour = 11, StartMinute = 0, StartSecond = 0,
+            EndHour = 11, EndMinute = 30, EndSecond = 0,
             Priority = 8,
             IsFlexible = false
         });
@@ -361,8 +386,8 @@ public class AgentScheduler : MonoBehaviour
             ID = "dinner",
             ActionName = "저녁 식사",
             LocationName = "Kitchen",
-            StartTime = new TimeSpan(12, 0, 0),
-            EndTime = new TimeSpan(12, 30, 0),
+            StartHour = 12, StartMinute = 0, StartSecond = 0,
+            EndHour = 12, EndMinute = 30, EndSecond = 0,
             Priority = 5,
             IsFlexible = true
         });
@@ -373,8 +398,8 @@ public class AgentScheduler : MonoBehaviour
             ID = "leisure",
             ActionName = "여가 시간",
             LocationName = "LivingRoom",
-            StartTime = new TimeSpan(13, 0, 0),
-            EndTime = new TimeSpan(13, 30, 0),
+            StartHour = 13, StartMinute = 0, StartSecond = 0,
+            EndHour = 13, EndMinute = 30, EndSecond = 0,
             Priority = 3,
             IsFlexible = true
         });
@@ -385,10 +410,23 @@ public class AgentScheduler : MonoBehaviour
             ID = "sleep",
             ActionName = "취침",
             LocationName = "Bedroom",
-            StartTime = new TimeSpan(14, 0, 0),
-            EndTime = new TimeSpan(14, 30, 30),
+            StartHour = 14, StartMinute = 0, StartSecond = 0,
+            EndHour = 14, EndMinute = 30, EndSecond = 30,
             Priority = 7,
             IsFlexible = false
         });
+    }
+
+    // UI에서 스케줄을 표시할 수 있도록 문자열로 반환하는 메서드 추가
+    public string GetScheduleString()
+    {
+        if (mDailySchedule == null || mDailySchedule.Count == 0)
+            return "스케줄 없음";
+        System.Text.StringBuilder sb = new System.Text.StringBuilder();
+        foreach (var item in mDailySchedule)
+        {
+            sb.AppendLine($"{item.ActionName} ({item.LocationName}) : {item.StartHour:D2}:{item.StartMinute:D2} ~ {item.EndHour:D2}:{item.EndMinute:D2}");
+        }
+        return sb.ToString();
     }
 }
