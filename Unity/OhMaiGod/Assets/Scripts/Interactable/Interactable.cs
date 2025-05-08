@@ -73,24 +73,6 @@ public class Interactable : MonoBehaviour
         LogManager.Log("Interact", "RegisterToEnvironment: " + gameObject.name, 3);
         if (TileManager.Instance == null) return;
         TileManager.Instance.RegisterTarget(this);
-
-        // // 현재 위치의 TileController 찾기
-        // Vector3Int cellPosition = TileManager.Instance.GroundTilemap.WorldToCell(transform.position);
-        // TileController tileController = TileManager.Instance.GetTileController(cellPosition);
-        
-        // if (tileController != null)
-        // {
-        //     TargetController targetController = GetComponent<TargetController>();
-        //     if (targetController != null)
-        //     {
-        //         tileController.AddChildInteractable(targetController);
-        //         Debug.Log($"{gameObject.name}이(가) {tileController.LocationName} 환경에 등록됨");
-        //     }
-        // }
-        // else
-        // {
-        //     Debug.LogWarning($"{gameObject.name}의 위치에 해당하는 TileController를 찾을 수 없습니다.");
-        // }
     }
 
     // 환경에서 자신을 제거
@@ -101,7 +83,8 @@ public class Interactable : MonoBehaviour
     }
 
     // 상호작용 주체(Interactor)로부터 상호작용 요청을 받는 메서드
-    public void Interact(GameObject interactor)
+    // 모든 액션을 순회? 후에 바꿔야함
+    public void Interact(GameObject interactor, string actionName)
     {
         // InteractableData가 없거나 행동 목록이 없으면 상호작용 처리 불가
         if (mInteractableData == null || mInteractableData.mActions == null || mInteractableData.mActions.Length == 0)
@@ -113,29 +96,35 @@ public class Interactable : MonoBehaviour
         LogManager.Log("Interact", $"{interactor.name}가 {mInteractableData.mName}와 상호작용 시도.", 2);
 
         // === 상호작용 처리 로직 ===
-        // InteractableData에 연결된 모든 InteractionAction을 순회하며 실행
-        bool anyActionSuccessful = false; // 하나라도 성공했는지 여부 플래그
-
+        // actionName과 일치하는 mAction만 실행
+        bool actionFound = false;
+        bool actionSuccess = false;
         foreach (var action in mInteractableData.mActions)
         {
-            if (action != null)
+            LogManager.Log("Interact", "action: "+action.mAction.mActionName+ "actionName: "+actionName, 3);
+            if (action.mAction != null && action.mAction.mActionName == actionName)
             {
+                actionFound = true;
                 // InteractionAction의 Execute 메서드 호출
-                // 이 메서드 안에서 실제 행동 로직이 실행됩니다.
-                if (action.Execute(interactor, this.gameObject)) // 상호작용 주체와 대상 오브젝트를 넘겨줌
+                if (action.mAction.Execute(interactor, this.gameObject))
                 {
-                    anyActionSuccessful = true;
+                    actionSuccess = true;
                 }
+                break; // 일치하는 것만 실행하고 종료
             }
         }
 
-        if (anyActionSuccessful)
+        if (!actionFound)
+        {
+            LogManager.Log("Interact", $"{mInteractableData.mName}에 해당하는 행동({actionName})이 정의되어 있지 않음.", 1);
+        }
+        else if (actionSuccess)
         {
             LogManager.Log("Interact", $"{mInteractableData.mName} 상호작용 성공.", 2);
         }
         else
         {
-            LogManager.Log("Interact", $"{mInteractableData.mName} 상호작용 실패 또는 실행된 행동 없음.", 2);
+            LogManager.Log("Interact", $"{mInteractableData.mName} 상호작용 실패.", 2);
         }
     }
 

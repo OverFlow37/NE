@@ -339,8 +339,8 @@ public class AgentScheduler : MonoBehaviour
             ActionName = "아침 식사",
             LocationName = "house",
             TargetName = "Apple",
-            StartHour = 8, StartMinute = 0, StartSecond = 0,
-            EndHour = 8, EndMinute = 30, EndSecond = 0,
+            StartHour = 6, StartMinute = 30, StartSecond = 0,
+            EndHour = 7, EndMinute = 00, EndSecond = 0,
             Priority = 5,
             IsFlexible = false,
             Reason = "Dummy Schedule"
@@ -367,8 +367,8 @@ public class AgentScheduler : MonoBehaviour
             ActionName = "점심 식사",
             LocationName = "cafeteria",
             TargetName = "Apple",
-            StartHour = 10, StartMinute = 0, StartSecond = 0,
-            EndHour = 10, EndMinute = 30, EndSecond = 0,
+            StartHour = 7, StartMinute = 30, StartSecond = 0,
+            EndHour = 8, EndMinute = 30, EndSecond = 0,
             Priority = 5,
             IsFlexible = true,
             Reason = "Dummy Schedule"

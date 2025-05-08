@@ -10,13 +10,13 @@ namespace OhMAIGod.Agent
             base.OnStateEnter(_controller);
 
             // 상호작용 시작
-            // _controller.StartAction();
+            _controller.StartInteraction();
         }
 
         public override void OnStateExecute(AgentController _controller)
         {
             // 상호작용 시간 관리 및 완료 처리
-            _controller.UpdateActionTime();
+            //_controller.UpdateActionTime();
         }
 
         public override void OnStateExit(AgentController _controller)
