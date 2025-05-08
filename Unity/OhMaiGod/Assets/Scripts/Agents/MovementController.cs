@@ -77,7 +77,7 @@ public class MovementController : MonoBehaviour
         else
         {
             // TODO: 이동 불가능 이벤트 발생
-            Debug.LogWarning($"{gameObject.name}이(가) 목표 타겟의 유효한 위치가 없습니다.");
+            LogManager.Log("Movement", $"{gameObject.name}이(가) 목표 타겟의 유효한 위치가 없습니다.", 1);
         }
     }
 
@@ -179,7 +179,7 @@ public class MovementController : MonoBehaviour
             mIsMoving = false;
             transform.position = mTargetPosition;
             mNPCLog.SetNPCLog($"{gameObject.name}이(가) 목적지에 도착함");
-            Debug.Log($"{gameObject.name}이(가) 목적지({mCurrentPoint})에 도착함");
+            LogManager.Log("Movement", $"{gameObject.name}이(가) 목적지({mCurrentPoint})에 도착함", 2);
             mCurrentPath = null;
             mCurrentPathIndex = 0;
             mCurrentPoint = Vector2.zero;

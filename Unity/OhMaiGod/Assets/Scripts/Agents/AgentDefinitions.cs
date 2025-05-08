@@ -23,7 +23,7 @@ namespace OhMAIGod.Agent
         // 상태 진입 시 호출
         public virtual void OnStateEnter(AgentController _controller)
         {
-            Debug.Log($"{_controller.AgentName}: {GetStateName()} 상태 진입");
+            LogManager.Log("Agent", $"{_controller.AgentName}: {GetStateName()} 상태 진입", 2);
         }
 
         // 매 프레임 호출되는 메서드 (자식 클래스에서 반드시 구현)
@@ -32,7 +32,7 @@ namespace OhMAIGod.Agent
         // 상태 종료 시 호출
         public virtual void OnStateExit(AgentController _controller)
         {
-            Debug.Log($"{_controller.AgentName}: {GetStateName()} 상태 종료");
+            LogManager.Log("Agent", $"{_controller.AgentName}: {GetStateName()} 상태 종료", 2);
         }
 
         // 상태 이름 변환 함수 (디버깅용)

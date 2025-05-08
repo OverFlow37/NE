@@ -322,7 +322,7 @@ public class AgentController : MonoBehaviour
         TileController tileController = TileManager.Instance.GetTileController(mCurrentAction.LocationName);
         if (tileController == null)
         {
-            Debug.LogWarning($"{mName}: {mCurrentAction.LocationName} 타일 컨트롤러를 찾을 수 없습니다.");
+            LogManager.Log("Agent", $"{mName}: {mCurrentAction.LocationName} 타일 컨트롤러를 찾을 수 없습니다.", 1);
             return;
         }
 

@@ -147,10 +147,6 @@ public class AIBridge : MonoBehaviour
 
         // AI 서버에 보낼 요청 데이터 생성
         var visibleObjectGroups = ConvertToObjectGroups(agent.mVisibleInteractables);
-
-        // 각 파라미터별 값 로그
-        Debug.Log($"[AIBridge] AgentName: {agent.AgentName}");
-        Debug.Log($"[AIBridge] AgentNeeds: {JsonUtility.ToJson(currentNeeds)}");
         
         // 에이전트의 현재 위치 가져오기 (CurrentAction이 null일 경우 대비)
         string agentLocation = "Unknown"; // 기본값
@@ -165,9 +161,6 @@ public class AIBridge : MonoBehaviour
             agentLocation = agent.CurrentAction.LocationName;
         }
 
-        Debug.Log($"[AIBridge] Location: {agentLocation}");
-        Debug.Log($"[AIBridge] Personality: friendly, helpful");
-        Debug.Log($"[AIBridge] visibleObjectGroups.Count: {visibleObjectGroups.Length}");
         for (int i = 0; i < visibleObjectGroups.Length; i++)
         {
             LogManager.Log("AI", $"[AIBridge] ObjectGroup {i}: location={visibleObjectGroups[i].location}, objects=[{string.Join(",", visibleObjectGroups[i].objects)}]", 3);
@@ -271,16 +264,16 @@ public class AIBridge : MonoBehaviour
             // 일정 추가 결과 로깅
             if (!success)
             {
-                Debug.LogError($"Failed to add schedule item: {newScheduleItem.ActionName} @ {newScheduleItem.LocationName} (에이전트: {agent.AgentName})");
+                LogManager.Log("AI", $"Failed to add schedule item: {newScheduleItem.ActionName} @ {newScheduleItem.LocationName} (에이전트: {agent.AgentName})", 0);
             }
             else
             {
-                Debug.Log($"Successfully added and started new Action: {newScheduleItem.ActionName} @ {newScheduleItem.LocationName} (에이전트: {agent.AgentName})");
+                LogManager.Log("AI", $"Successfully added and started new Action: {newScheduleItem.ActionName} @ {newScheduleItem.LocationName} (에이전트: {agent.AgentName})", 2);
             }
         }
         catch (Exception ex)
         {
-            Debug.LogError($"Error processing response (에이전트: {agent.AgentName}): {ex.Message}\n{ex.StackTrace}");
+            LogManager.Log("AI", $"Error processing response (에이전트: {agent.AgentName}): {ex.Message}\n{ex.StackTrace}", 0);
         }
     }
 } 
