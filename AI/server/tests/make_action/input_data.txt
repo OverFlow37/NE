@@ -1,0 +1,23 @@
+{
+    "agent":
+      {
+        "name": "John",
+        "state": {
+          "hunger": 9,      
+          "sleepiness": 2,   
+          "loneliness": 3,  
+        },
+        "current_location": "John's home", 
+        "personality": "introverted, practical, punctual", 
+  
+        "visible_interactables": [ 
+          {
+            "location": "storage", 
+            "interactable": [
+              "old_blueprint", "vegetable_seeds", 
+            ]
+          }
+        ],
+        
+        "locations_in_section": [],      }
+  }
