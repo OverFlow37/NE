@@ -437,44 +437,6 @@ public class AgentController : MonoBehaviour
         }
     }
 
-    // 상태 평가 코루틴 (지속적으로 상태 확인)
-    // TODO: 코루틴 사용안하고 Update에 넣어서 매 프레임 확인하게 하는것 고려해보기
-    private IEnumerator EvaluateStateRoutine()
-    {
-        while (true)
-        {
-            // 이미 활동 중이거나 이동 중이면 건너뛰기
-            if (mStateMachine.CurrentStateType != AgentState.IDLE && mStateMachine.CurrentStateType != AgentState.WAITING)
-            {
-                yield return new WaitForSeconds(1.0f);
-                continue;
-            }
-            
-            // 현재 활동 확인
-            string destination = mScheduler.GetCurrentDestinationTarget();
-
-            if (!string.IsNullOrEmpty(destination))
-            {
-                // 활동 있음 => 위치로 이동 시작
-                mCurrentAction = null; // AgentScheduler에서 정보를 다시 가져오기 위해 초기화
-                StartMovingToAction();
-            }
-            else
-            {
-                // 활동 없음 => 다음 활동까지 대기
-                TimeSpan timeUntilNext = mScheduler.GetTimeUntilNextAction();
-                
-                // 1시간 이상 남았으면 대기 상태로 전환
-                if (timeUntilNext.TotalMinutes > 60)
-                {
-                    EnterWaitingState((float)timeUntilNext.TotalMinutes);
-                }
-            }
-            
-            yield return new WaitForSeconds(3.0f);
-        }
-    }
-
     // 감정 상태 자동 증가 코루틴
     private IEnumerator AutoIncreaseAgentNeeds()
     {
