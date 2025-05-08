@@ -8,7 +8,11 @@ class Retrieve:
         """
         Retrieve 모듈 초기화
         """
-        self.agent_path = Path("AI/agent/data/agent.json")
+        # 현재 파일의 절대 경로를 기준으로 상위 디렉토리 찾기
+        current_dir = Path(__file__).parent
+        root_dir = current_dir.parent.parent  # AI 디렉토리
+        self.agent_path = root_dir / "agent" / "data" / "agent.json"
+        print(f"📁 agent.json 경로: {self.agent_path}")
 
     def should_react(self, event_obj: Dict[str, Any]) -> bool:
         """
@@ -55,65 +59,76 @@ class Retrieve:
             List[Tuple[Dict, float]]: 유사도 순으로 정렬된 (메모리, 유사도) 튜플 리스트
         """
         try:
+            if not self.agent_path.exists():
+                print("❌ 메모리 파일이 존재하지 않습니다.")
+                return []
+                
             with open(self.agent_path, 'r', encoding='utf-8') as f:
-                agent_data = json.load(f)
+                memories_data = json.load(f)
             
             similarities = []
-            
-            # 특정 에이전트의 메모리에 대해서만 유사도 계산
-            if agent_name in agent_data:
-                for memory in agent_data[agent_name].get("memories", []):
-                    if "embeddings" in memory:
-                        similarity = self._calculate_cosine_similarity(
-                            event_embedding,
-                            memory["embeddings"]
-                        )
-                        similarities.append((memory, similarity))
+            # 모든 메모리에 대해 유사도 계산
+            for memory in memories_data[agent_name]["memories"]:
+                if "embeddings" in memory:
+                    similarity = self._calculate_cosine_similarity(
+                        event_embedding,
+                        memory["embeddings"]
+                    )
+                    similarities.append((memory, similarity))
             
             # 유사도 기준 내림차순 정렬
             sorted_similarities = sorted(similarities, key=lambda x: x[1], reverse=True)
             
+            print(f"🔍 유사 메모리 검색 결과: {len(sorted_similarities)}개 발견")
+            for memory, similarity in sorted_similarities[:top_k]:
+                print(f"  - 유사도: {similarity:.3f}, 이벤트: {memory.get('event', '')}")
+            
             return sorted_similarities[:top_k]
             
         except Exception as e:
-            print(f"유사 메모리 검색 중 오류 발생: {e}")
+            print(f"❌ 유사 메모리 검색 중 오류 발생: {e}")
             return []
 
-    def create_reaction_prompt(self, event_obj: Dict[str, Any], event_embedding: List[float], agent_name: str) -> Optional[str]:
+    def create_reaction_prompt(self, event_sentence: str, event_embedding: List[float], agent_name: str, prompt_template: str, similar_data_cnt: int = 3, similarity_threshold: float = 0.5) -> Optional[str]:
         """
         이벤트에 대한 반응을 결정하기 위한 프롬프트 생성
         
         Args:
-            event_obj: 이벤트 객체
+            event_sentence: 이벤트 문장
             event_embedding: 이벤트 임베딩 벡터
             agent_name: 검색할 에이전트 이름
+            prompt_template: 프롬프트 템플릿 문자열
+            similar_data_cnt: 포함할 유사 이벤트 개수 (기본값: 3)
+            similarity_threshold: 유사도 기준값 (0.0 ~ 1.0, 기본값: 0.5)
         
         Returns:
             Optional[str]: 생성된 프롬프트
         """
         # 반응 여부 결정
-        if not self.should_react(event_obj):
+        if not self.should_react({"event": event_sentence}):
             return None
         
         # 유사한 메모리 검색
-        similar_memories = self._find_similar_memories(event_embedding, agent_name)
+        similar_memories = self._find_similar_memories(event_embedding, agent_name, top_k=similar_data_cnt)
+        
+        # 유사한 이벤트 문자열 생성 (유사도 기준값 이상인 것만 포함)
+        similar_events = []
+        for memory, similarity in similar_memories:
+            if similarity >= similarity_threshold:
+                event = memory.get("event", "")
+                if event:
+                    similar_events.append(f"- {event}")
+        
+        similar_event_str = "\n".join(similar_events) if similar_events else "No similar past events found."
         
         # 프롬프트 생성
-        prompt = "Based on the following event and similar past memories, decide how to react:\n\n"
-        
-        # 현재 이벤트 정보 추가
-        prompt += "CURRENT EVENT:\n"
-        prompt += f"Event: {event_obj}\n\n"
-        
-        # 유사한 메모리 정보 추가 (이벤트 내용만)
-        if similar_memories:
-            prompt += "SIMILAR PAST MEMORIES:\n"
-            for i, (memory, _) in enumerate(similar_memories, 1):
-                prompt += f"{i}. {memory['event']}\n"
-            prompt += "\n"
-        
-        # 응답 형식 지정
-        prompt += "Please provide your response in the following JSON format:\n"
-        prompt += '{\n  "action": "string",\n  "reason": "string",\n  "emotion": "string"\n}'
-        
-        return prompt 
+        try:
+            prompt = prompt_template.format(
+                AGENT_NAME=agent_name,
+                EVENT_CONTENT=event_sentence,
+                SIMILAR_EVENT=similar_event_str
+            )
+            return prompt
+        except Exception as e:
+            print(f"프롬프트 생성 중 오류 발생: {e}")
+            return None 

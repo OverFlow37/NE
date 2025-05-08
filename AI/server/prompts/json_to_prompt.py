@@ -18,8 +18,16 @@ ROOT_DIR = CURRENT_DIR.parent.parent  # AI 디렉토리
 
 # paths.json에서 경로 로드
 def load_paths():
+    """
+    paths.json 파일에서 경로 정보를 로드
+    """
     try:
-        with open('../config/paths.json', 'r', encoding='utf-8') as f:
+        # 현재 파일의 절대 경로를 기준으로 상위 디렉토리 찾기
+        current_dir = Path(__file__).parent
+        root_dir = current_dir.parent.parent  # AI 디렉토리
+        config_path = root_dir / "agent" / "config" / "paths.json"
+        
+        with open(config_path, 'r', encoding='utf-8') as f:
             return json.load(f)
     except FileNotFoundError:
         raise FileNotFoundError("paths.json 파일을 찾을 수 없습니다.")

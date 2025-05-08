@@ -1,0 +1,19 @@
+{
+    "prompts": {
+        "retrieve": {
+            "prompt": "AI/agent/prompts/retrieve/retrieve_prompt.txt",
+            "system": "AI/agent/prompts/retrieve/retrieve_system.txt"
+        },
+        "base": {
+            "prompt": "AI/agent/prompts/prompt.txt"
+        }
+    },
+    "data": {
+        "agent": "AI/agent/data/agent.json",
+        "memories": "AI/agent/data/memories/agents_memories.json"
+    },
+    "modules": {
+        "memory_utils": "AI/agent/modules/memory_utils.py",
+        "retrieve": "AI/agent/modules/retrieve.py"
+    }
+} 

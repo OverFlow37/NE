@@ -1,0 +1,14 @@
+AGENT DATA: 
+{AGENT_NAME}
+
+EVENT:
+{EVENT_CONTENT}
+
+SIMILAR EVENT:
+{SIMILAR_EVENT}
+
+TASK: For each agent, determine ONE NEXT ACTION based on their current state.
+
+AVAILABLE ACTIONS:
+- use: interact other usable object
+- eat: consume food(object)
