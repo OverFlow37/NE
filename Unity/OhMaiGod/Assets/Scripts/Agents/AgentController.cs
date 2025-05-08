@@ -52,9 +52,9 @@ public class AgentController : MonoBehaviour
 
     [Header("디버깅")]
     [SerializeField] private bool mShowDebugInfo = true;            // 디버그 정보 표시 여부
-    [SerializeField, ReadOnly] private AgentState mDebugCurrentState; // 현재 상태 Inspector 디버그용
-    [SerializeField, ReadOnly] private string mDebugCurrentLocation;  // 현재 위치 Inspector 디버그용
-
+    [SerializeField, ReadOnly] private AgentState mCurrentState; // 현재 상태 Inspector 디버그용
+    [SerializeField, ReadOnly] private string mCurrentLocation;  // 현재 위치 Inspector 디버그용
+    [SerializeField, ReadOnly] private Interactable mCurrentTargetInteractable;    // 현재 타겟 Inspector 디버그용
     private float mCurrentActionTime = 0f;                          // 현재 활동 진행 시간
     private ScheduleItem mCurrentAction = null;                     // 현재 활동 정보
     private float mWaitTime = 0f;                                   // 대기 시간 (다음 활동까지)
@@ -64,9 +64,9 @@ public class AgentController : MonoBehaviour
     public int AgentID => mID;                                              // 에이전트 ID
     public AgentNeeds AgnetNeeds => mAgentNeeds;
     public ScheduleItem CurrentAction => mCurrentAction;
-    public string CurrentLocation => mDebugCurrentLocation;
-
-    public Animator animator;  // 애니메이터
+    public string CurrentLocation => mCurrentLocation;
+    public Interactable CurrentTargetInteractable => mCurrentTargetInteractable;
+    private Animator animator;  // 애니메이터
     // AIBridge에서 Agent만 가져오면 나머지도 가져올 수 있게 public으로 변경
     [SerializeField] public AgentScheduler mScheduler;
     [SerializeField] public MovementController mMovement;
@@ -117,7 +117,7 @@ public class AgentController : MonoBehaviour
 
         // FSM 초기화
         mStateMachine = new AgentStateMachine(this);
-        mDebugCurrentState = CurrentState;
+        mCurrentState = CurrentState;
 
         // 자신의 Interactable 컴포넌트 구독
         mInteractable = GetComponent<Interactable>();
@@ -148,7 +148,7 @@ public class AgentController : MonoBehaviour
         }
     }
 
-    // 목적지 도착 이벤트 발생 시 호출되는 함수
+    // 목적지(오브젝트만) 도착 이벤트 발생 시 호출되는 함수
     // 애니메이션 업데이트, Status 업데이트, 활동 시작
     private void HandleDestinationReached()
     {
@@ -160,33 +160,6 @@ public class AgentController : MonoBehaviour
         // 이동 애니메이션 정지
         animator.SetBool("isMoving", false);
 
-        // 도착한 위치에 따라 감정 상태 업데이트 -> 타겟 오브젝트에 따라 감정 상태 업데이트
-        //UpdateAgentNeedsByLocation(mMovement.TargetName);
-
-        // 현재 상태에 따른 처리
-        // switch (CurrentState)
-        // {
-        //     case AgentState.MOVE_TO_LOCATION:
-
-        //         // 위치 도착 후 상호작용 가능 여부 확인
-        //         if (CheckInteractableAvailable())
-        //         {
-        //             ChangeState(AgentState.MOVE_TO_INTERACTABLE);
-        //         }
-        //         else
-        //         {
-        //             ChangeState(AgentState.WAIT);
-        //         }
-        //         break;
-                
-        //     case AgentState.MOVE_TO_INTERACTABLE:
-        //         // 상호작용 가능 시 상호작용 시작
-        //         ChangeState(AgentState.INTERACTION);
-        //         break;
-        // }
-
-        // 활동 시작
-        // StartAction();
     }
 
     // 이동 불가능 이벤트 핸들러
@@ -236,10 +209,12 @@ public class AgentController : MonoBehaviour
     }
 
     // 자신의 Interactable 위치 변경 이벤트 핸들러
-    private void HandleMyLocationChanged(Interactable interactable, string newLocation)
+    // Interactable의 이벤트를 구독하여 위치 변경 시 호출
+    private void HandleMyLocationChanged(Interactable _interactable, string _newLocation)
     {
+        mCurrentLocation = _newLocation;
         // mCurrentAction이 null이 아니고, 새로운 위치가 목표 위치와 같으면 상태 전환
-        if (mCurrentAction != null && newLocation == mCurrentAction.LocationName)
+        if (mCurrentAction != null && _newLocation == mCurrentAction.LocationName)
         {
             ChangeState(AgentState.MOVE_TO_INTERACTABLE);
         }
@@ -272,11 +247,11 @@ public class AgentController : MonoBehaviour
     public void ChangeState(AgentState _newState)
     {
         mStateMachine.ChangeState(_newState);
-        mDebugCurrentState = CurrentState;
+        mCurrentState = CurrentState;
     }
 
     // 새 활동 시작 (AgentScheduler에서 호출)
-    public void StartNewAction(ScheduleItem _action)
+    public void StartAction(ScheduleItem _action)
     {
         if (_action == null)
         {
@@ -381,60 +356,33 @@ public class AgentController : MonoBehaviour
     }
 
     // 활동 시작하는 함수
-    public void StartAction()
-    {
-        // 활동 정보 없으면 스케줄러에서 가져오기
-        if (mCurrentAction == null)
-        {
-            string actionName = mScheduler.GetCurrentActionName();
-            if (actionName == "대기 중")
-            {
-                // 활동 없음 - 대기 상태로
-                // mCurrentState = AgentState.IDLE;
-                mStateMachine.ChangeState(AgentState.IDLE);
-                return;
-            }
+    // public void StartAction()
+    // {
+    //     // 활동 정보 없으면 스케줄러에서 가져오기
+    //     if (mCurrentAction == null)
+    //     {
+    //         string actionName = mScheduler.GetCurrentActionName();
+    //         if (actionName == "대기 중")
+    //         {
+    //             // 활동 없음 - 대기 상태로
+    //             // mCurrentState = AgentState.IDLE;
+    //             mStateMachine.ChangeState(AgentState.IDLE);
+    //             return;
+    //         }
             
-            // 임시 활동 객체 생성
-            mCurrentAction = new ScheduleItem
-            {
-                ActionName = actionName,
-                LocationName = mScheduler.GetCurrentDestinationLocation(),
-                TargetName = mScheduler.GetCurrentDestinationTarget()
-            };
-        }
+    //         // 임시 활동 객체 생성
+    //         mCurrentAction = new ScheduleItem
+    //         {
+    //             ActionName = actionName,
+    //             LocationName = mScheduler.GetCurrentDestinationLocation(),
+    //             TargetName = mScheduler.GetCurrentDestinationTarget()
+    //         };
+    //     }
+    // }
 
-        // 현재 위치에서 상호작용 가능한 오브젝트 찾기
-        GameObject interactableObject = FindInteractableInCurrentLocation();
-        if (interactableObject != null)
-        {
-            LogManager.Log("Agent", $"상호작용 가능한 오브젝트 찾음: {interactableObject}", 2);
-            StartInteraction(interactableObject);
-        }
-        else
-        {
-            mCurrentActionTime = 0f;
-        }
-    }
-
-    // 현재 위치에서 상호작용 가능한 오브젝트 찾기
-    private GameObject FindInteractableInCurrentLocation()
-    {
-        LogManager.Log("Agent", "오브젝트 찾기", 3);
-        Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, 2f);
-        foreach (Collider2D collider in colliders)
-        {
-            Interactable interactable = collider.GetComponent<Interactable>();
-            if (interactable != null && interactable.mInteractableData != null)
-            {
-                LogManager.Log("Agent", $"발견된 Interactable 오브젝트: {collider.gameObject.name}", 3);
-                return collider.gameObject;
-            }
-        }
-        return null;
-    }
 
     // 오브젝트와 상호작용 시작
+    // 일단 대기
     private void StartInteraction(GameObject _interactableObject)
     {
         if (mShowDebugInfo)
@@ -572,11 +520,5 @@ public class AgentController : MonoBehaviour
                 lastIncreaseTime = currentTime;
             }
         }
-    }
-
-    // 위치 정보 갱신 메서드
-    public void UpdateCurrentLocation(string location)
-    {
-        mDebugCurrentLocation = location;
     }
 }
