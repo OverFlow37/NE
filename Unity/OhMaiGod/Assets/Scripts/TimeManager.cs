@@ -23,23 +23,17 @@ public class TimeManager : MonoBehaviour
     }
 
     [Header("시간 설정")]
-    [Tooltip("현실 시간 1초당 게임 내 시간이 몇 초 흐를지 설정")]
-    [SerializeField] private float mGameToRealTimeRatio = 60.0f;    // 기본: 1초당 1분(60초)
+    [Tooltip("현실 시간 1초당 게임 내 시간이 몇 분 흐를지 설정")]
+    [SerializeField] private float mGameMinutesPerRealSecond = 1.0f;    // 현실 1초에 게임 내 몇 분이 흐를지
     
     [Header("디버깅")]
     [SerializeField] private bool mShowDebugInfo = true;            // 디버그 로그 출력 여부
 
     // 시간 관리 변수들
-    [SerializeField, HideInInspector] private DateTime mGameDate;             // 현재 게임 날짜
-    [SerializeField, HideInInspector] private TimeSpan mCurrentGameTime;      // 현재 게임 내 시간
-    private bool mIsPaused = false;     // 시간 흐름 일시정지 상태 여부
+    private DateTime mGameDate;             // 현재 게임 날짜
+    private TimeSpan mCurrentGameTime;      // 현재 게임 내 시간
+    private bool mIsPaused = false;         // 시간 흐름 일시정지 상태 여부
 
-    // 인스펙터에서 확인용 string 필드
-    [SerializeField] private string mGameDateString;      // 인스펙터용 날짜 문자열
-    [SerializeField] private string mCurrentGameTimeString; // 인스펙터용 시간 문자열
-
-    public DateTime GameDate {get => mGameDate;}
-    public TimeSpan GameTime {get => mCurrentGameTime;}
     public bool isPaused {get => mIsPaused; set => mIsPaused = value; }
 
     private void Awake()
@@ -57,18 +51,11 @@ public class TimeManager : MonoBehaviour
         // 게임 날짜 및 시간 초기화
         mGameDate = DateTime.Today;
         mCurrentGameTime = new TimeSpan(6, 0, 0);
-        
-        // string 값도 초기화
-        mGameDateString = mGameDate.ToString("yyyy-MM-dd");
-        mCurrentGameTimeString = mCurrentGameTime.ToString(@"hh\:mm\:ss");
     }
 
     private void Update()
     {
         if (mIsPaused) return;
-        
-        // 이전 값 저장
-        DateTime prevDate = mGameDate;
         
         // 게임 시간 업데이트
         UpdateGameTime();
@@ -77,8 +64,8 @@ public class TimeManager : MonoBehaviour
     // 게임 시간 업데이트
     private void UpdateGameTime()
     {
-        // 실제 시간의 흐름이 인게임 시간의 흐름과 어느 비율로 흐르는지에 따라 인게임 시간 계산
-        mCurrentGameTime = mCurrentGameTime.Add(TimeSpan.FromSeconds(Time.deltaTime * mGameToRealTimeRatio));
+        // 현실 시간의 흐름에 따라 게임 내 분 단위로 시간 증가
+        mCurrentGameTime = mCurrentGameTime.Add(TimeSpan.FromMinutes(Time.deltaTime * mGameMinutesPerRealSecond));
         
         // 날짜 변경 확인
         if (mCurrentGameTime.Days > 0)
@@ -91,9 +78,6 @@ public class TimeManager : MonoBehaviour
                 LogManager.Log("Time", $"새로운 날: {mGameDate.ToString("yyyy-MM-dd")} ({GetDayOfWeekString()})", 3);
             }
         }
-        // string 값 갱신
-        mGameDateString = mGameDate.ToString("yyyy-MM-dd");
-        mCurrentGameTimeString = mCurrentGameTime.ToString(@"hh\:mm\:ss");
     }
 
     // 현재 게임 내 시간 반환
@@ -136,7 +120,7 @@ public class TimeManager : MonoBehaviour
     // 게임 시간 흐름 속도 설정
     public void SetTimeScale(float _minutesPerSecond)
     {
-        mGameToRealTimeRatio = _minutesPerSecond;
+        mGameMinutesPerRealSecond = _minutesPerSecond;
 
         if (mShowDebugInfo)
         {
@@ -149,10 +133,6 @@ public class TimeManager : MonoBehaviour
     {
         mGameDate = _date;
         mCurrentGameTime = new TimeSpan(_hours, _minutes, 0);
-        
-        // string 값 갱신
-        mGameDateString = mGameDate.ToString("yyyy-MM-dd");
-        mCurrentGameTimeString = mCurrentGameTime.ToString(@"hh\:mm\:ss");
         
         if (mShowDebugInfo)
         {

@@ -337,83 +337,97 @@ public class AgentScheduler : MonoBehaviour
         {
             ID = "breakfast",
             ActionName = "아침 식사",
-            LocationName = "Kitchen",
+            LocationName = "house",
+            TargetName = "Apple",
             StartHour = 8, StartMinute = 0, StartSecond = 0,
             EndHour = 8, EndMinute = 30, EndSecond = 0,
             Priority = 5,
-            IsFlexible = false
+            IsFlexible = false,
+            Reason = "Dummy Schedule"
         });
         
         // 오전 일과
-        AddScheduleItem(new ScheduleItem
-        {
-            ID = "morning_work",
-            ActionName = "오전 업무",
-            LocationName = "Desk",
-            StartHour = 9, StartMinute = 0, StartSecond = 0,
-            EndHour = 9, EndMinute = 30, EndSecond = 0,
-            Priority = 8,
-            IsFlexible = false
-        });
+        // AddScheduleItem(new ScheduleItem
+        // {
+        //     ID = "morning_work",
+        //     ActionName = "오전 업무",
+        //     LocationName = "house",
+        //     TargetName = "Desk",
+        //     StartHour = 9, StartMinute = 0, StartSecond = 0,
+        //     EndHour = 9, EndMinute = 30, EndSecond = 0,
+        //     Priority = 8,
+        //     IsFlexible = false,
+        //     Reason = "Dummy Schedule"
+        // });
         
         // 점심 식사
         AddScheduleItem(new ScheduleItem
         {
             ID = "lunch",
             ActionName = "점심 식사",
-            LocationName = "Cafeteria",
+            LocationName = "cafeteria",
+            TargetName = "Apple",
             StartHour = 10, StartMinute = 0, StartSecond = 0,
             EndHour = 10, EndMinute = 30, EndSecond = 0,
             Priority = 5,
-            IsFlexible = true
+            IsFlexible = true,
+            Reason = "Dummy Schedule"
         });
         
         // 오후 일과
-        AddScheduleItem(new ScheduleItem
-        {
-            ID = "afternoon_work",
-            ActionName = "오후 업무",
-            LocationName = "Desk",
-            StartHour = 11, StartMinute = 0, StartSecond = 0,
-            EndHour = 11, EndMinute = 30, EndSecond = 0,
-            Priority = 8,
-            IsFlexible = false
-        });
+        // AddScheduleItem(new ScheduleItem
+        // {
+        //     ID = "afternoon_work",
+        //     ActionName = "오후 업무",
+        //     LocationName = "house",
+        //     TargetName = "Desk",
+        //     StartHour = 11, StartMinute = 0, StartSecond = 0,
+        //     EndHour = 11, EndMinute = 30, EndSecond = 0,
+        //     Priority = 8,
+        //     IsFlexible = false,
+        //     Reason = "Dummy Schedule"
+        // });
         
         // 저녁 식사
-        AddScheduleItem(new ScheduleItem
-        {
-            ID = "dinner",
-            ActionName = "저녁 식사",
-            LocationName = "Kitchen",
-            StartHour = 12, StartMinute = 0, StartSecond = 0,
-            EndHour = 12, EndMinute = 30, EndSecond = 0,
-            Priority = 5,
-            IsFlexible = true
-        });
+        // AddScheduleItem(new ScheduleItem
+        // {
+        //     ID = "dinner",
+        //     ActionName = "저녁 식사",
+        //     LocationName = "house",
+        //     TargetName = "Kitchen",
+        //     StartHour = 12, StartMinute = 0, StartSecond = 0,
+        //     EndHour = 12, EndMinute = 30, EndSecond = 0,
+        //     Priority = 5,
+        //     IsFlexible = true,
+        //     Reason = "Dummy Schedule"
+        // });
         
-        // 여가 시간
-        AddScheduleItem(new ScheduleItem
-        {
-            ID = "leisure",
-            ActionName = "여가 시간",
-            LocationName = "LivingRoom",
-            StartHour = 13, StartMinute = 0, StartSecond = 0,
-            EndHour = 13, EndMinute = 30, EndSecond = 0,
-            Priority = 3,
-            IsFlexible = true
-        });
+        // // 여가 시간
+        // AddScheduleItem(new ScheduleItem
+        // {
+        //     ID = "leisure",
+        //     ActionName = "여가 시간",
+        //     LocationName = "house",
+        //     TargetName = "LivingRoom",
+        //     StartHour = 13, StartMinute = 0, StartSecond = 0,
+        //     EndHour = 13, EndMinute = 30, EndSecond = 0,
+        //     Priority = 3,
+        //     IsFlexible = true,
+        //     Reason = "Dummy Schedule"
+        // });
         
         // 취침
         AddScheduleItem(new ScheduleItem
         {
             ID = "sleep",
             ActionName = "취침",
-            LocationName = "Bedroom",
+            LocationName = "house",
+            TargetName = "Bed",
             StartHour = 14, StartMinute = 0, StartSecond = 0,
             EndHour = 14, EndMinute = 30, EndSecond = 30,
             Priority = 7,
-            IsFlexible = false
+            IsFlexible = false,
+            Reason = "Dummy Schedule"
         });
     }
 
@@ -425,7 +439,7 @@ public class AgentScheduler : MonoBehaviour
         System.Text.StringBuilder sb = new System.Text.StringBuilder();
         foreach (var item in mDailySchedule)
         {
-            sb.AppendLine($"{item.ActionName} ({item.LocationName}) : {item.StartHour:D2}:{item.StartMinute:D2} ~ {item.EndHour:D2}:{item.EndMinute:D2}");
+            sb.AppendLine($"{item.ActionName} ({item.LocationName}/{item.TargetName}) : {item.StartHour:D2}:{item.StartMinute:D2} ~ {item.EndHour:D2}:{item.EndMinute:D2}");
         }
         return sb.ToString();
     }
