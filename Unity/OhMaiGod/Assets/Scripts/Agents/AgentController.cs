@@ -333,7 +333,7 @@ public class AgentController : MonoBehaviour
                 break;
 
             case AgentState.MOVE_TO_INTERACTABLE:
-                Interactable interactable = tileController.ChildInteractables.Find(interactable => interactable.name == mCurrentAction.TargetName);
+                Interactable interactable = tileController.ChildInteractables.Find(interactable => interactable.InteractableName == mCurrentAction.TargetName);
                 mMovement.MoveToTarget(interactable.TargetController);
                 break;
         }
