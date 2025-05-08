@@ -26,7 +26,11 @@ public class MovementController : MonoBehaviour
 
     // 목적지 도착 이벤트
     public event System.Action OnDestinationReached;
-    private bool mDestinationReachedEventFired = false;              // 이벤트 발생 여부 추적
+
+    // 이동 불가능 이벤트
+    public delegate void MovementBlockedHandler();
+    public event MovementBlockedHandler OnMovementBlocked;
+
 
     // 초기화
     private void Awake()
@@ -57,26 +61,33 @@ public class MovementController : MonoBehaviour
     public void MoveToTarget(TargetController _targetController)
     {
         mTargetController = _targetController;
+        _targetController.UpdateStandingPoints();
         List<Vector2> availablePositions = _targetController.StandingPoints;
         // 가장 비용이 적은 후보지로 이동
         if (availablePositions.Count > 0)
         {
+            float minCost = float.MaxValue;
             Vector2 nearestPosition = availablePositions[0];
-            float minDistance = Vector2.Distance(transform.position, nearestPosition);
             foreach (Vector2 pos in availablePositions)
             {
-                float distance = Vector2.Distance(transform.position, pos);
-                if (distance < minDistance)
+                float cost = PathFinder.Instance.CalculatePathCost(transform.position, pos, this.gameObject);
+                if (cost < minCost)
                 {
-                nearestPosition = pos;
-                minDistance = distance;
+                    nearestPosition = pos;
+                    minCost = cost;
                 }
             }
             MoveToPosition(nearestPosition);
         }
         else
         {
-            // TODO: 이동 불가능 이벤트 발생
+            OnMovementBlocked?.Invoke();
+            mIsMoving = false;
+            mTargetController = null;
+            mTargetPosition = Vector2.zero;
+            mCurrentPath = null;
+            mCurrentPathIndex = 0;
+            mCurrentPoint = Vector2.zero;
             LogManager.Log("Movement", $"{gameObject.name}이(가) 목표 타겟의 유효한 위치가 없습니다.", 1);
         }
     }
@@ -97,18 +108,47 @@ public class MovementController : MonoBehaviour
             mCurrentPoint = TileManager.Instance.GroundTilemap.GetCellCenterWorld(
                 new Vector3Int(mCurrentPath[mCurrentPathIndex].x, mCurrentPath[mCurrentPathIndex].y, 0));
             mIsMoving = true;
+            LogManager.Log("Movement", $"MTP {mCurrentPoint}, {mIsMoving} 설정", 2);
         }
         else
         {
-            LogManager.Log("Movement", $"{gameObject.name}이(가) {_targetPosition}까지의 경로를 찾을 수 없습니다.", 1);
             mIsMoving = false;
-            return;
+            OnMovementBlocked?.Invoke();
+            LogManager.Log("Movement", $"{gameObject.name}이(가) {_targetPosition}까지의 경로를 찾을 수 없습니다.", 1);
         }
     }
 
     private void UpdatePath()
     {
         mCurrentPath = PathFinder.Instance.FindPath(transform.position, mTargetPosition, this.gameObject);
+        if (mCurrentPath != null && mCurrentPath.Count > 0)
+        {
+            // 현재 위치에서 가장 가까운 경로 노드 인덱스 찾기
+            float minDist = float.MaxValue;
+            int nearestIdx = 0;
+            Vector2 currentPos = new Vector2(transform.position.x, transform.position.y);
+            for (int i = 0; i < mCurrentPath.Count; i++)
+            {
+                Vector3 nodeWorld = TileManager.Instance.GroundTilemap.GetCellCenterWorld(
+                    new Vector3Int(mCurrentPath[i].x, mCurrentPath[i].y, 0));
+                float dist = Vector2.Distance(currentPos, nodeWorld);
+                if (dist < minDist)
+                {
+                    minDist = dist;
+                    nearestIdx = i;
+                }
+            }
+            mCurrentPathIndex = nearestIdx;
+            mCurrentPoint = TileManager.Instance.GroundTilemap.GetCellCenterWorld(
+                new Vector3Int(mCurrentPath[mCurrentPathIndex].x, mCurrentPath[mCurrentPathIndex].y, 0));
+            mIsMoving = true;
+        }
+        else
+        {
+            // 경로를 찾지 못하면 이동 중지 및 로그 출력
+            mIsMoving = false;
+            LogManager.Log("Movement", $"{gameObject.name}이(가) {mTargetPosition}까지의 경로를 찾을 수 없습니다.", 1);
+        }
     }
 
     // 현재 이동 중지
@@ -185,11 +225,7 @@ public class MovementController : MonoBehaviour
             mCurrentPoint = Vector2.zero;
             mTargetPosition = Vector2.zero;
             mTargetController = null;
-            if (!mDestinationReachedEventFired)
-            {
-                OnDestinationReached?.Invoke();
-                mDestinationReachedEventFired = true;
-            }
+            OnDestinationReached?.Invoke();
         }
     }
 
@@ -197,7 +233,7 @@ public class MovementController : MonoBehaviour
     private bool IsObstacleInFrontTiles()
     {
         // 이동 방향(혹은 바라보는 방향) 계산
-        Vector2 direction = mTargetPosition - (Vector2)transform.position;
+        Vector2 direction = mCurrentPoint - (Vector2)transform.position;
         if (direction.sqrMagnitude < 0.01f) return false; // 방향이 없으면 감지 안 함
         direction.Normalize();
 
@@ -214,7 +250,7 @@ public class MovementController : MonoBehaviour
             Vector3 checkWorldPos = groundTilemap.GetCellCenterWorld(checkCell);
 
             // 해당 셀 중심에서 충돌체 감지
-            Collider2D[] colliders = Physics2D.OverlapCircleAll(checkWorldPos, 0.4f, TileManager.Instance.ObstacleLayerMask);
+            Collider2D[] colliders = Physics2D.OverlapCircleAll(checkWorldPos, 0.2f, TileManager.Instance.ObstacleLayerMask);
             foreach (Collider2D collider in colliders)
             {
                 if (collider.gameObject == this.gameObject)  // 자기 자신은 이벤트 발생하지 않음
@@ -222,6 +258,7 @@ public class MovementController : MonoBehaviour
                 if (mTargetController != null && collider.gameObject == mTargetController.gameObject)  // 목표 타겟은 이벤트 발생하지 않음
                     continue;
                 // 감지된 오브젝트가 있으면 true 반환
+                LogManager.Log("Movement", $"{gameObject.name}이(가) {collider.gameObject.name}을(를) 감지함", 1);
                 return true;
             }
         }

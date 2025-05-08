@@ -70,14 +70,11 @@ public class AgentController : MonoBehaviour
     // AIBridge에서 Agent만 가져오면 나머지도 가져올 수 있게 public으로 변경
     [SerializeField] public AgentScheduler mScheduler;
     [SerializeField] public MovementController mMovement;
-    [SerializeField] private Interactable mInteractable;
+    [SerializeField] public Interactable mInteractable;
 
 
     // 시야 내의 오브젝트 목록
     public List<Interactable> mVisibleInteractables = new List<Interactable>();
-
-    // 자신의 Interactable 위치 변경 이벤트 구독용 변수
-    private Interactable mMyInteractable;
 
     private void Awake()
     {
@@ -95,6 +92,7 @@ public class AgentController : MonoBehaviour
         if (mMovement != null)
         {
             mMovement.OnDestinationReached += HandleDestinationReached;
+            mMovement.OnMovementBlocked += HandleMovementBlocked;
         }
 
         // AgentVision의 이벤트 구독
@@ -122,10 +120,10 @@ public class AgentController : MonoBehaviour
         mCurrentState = CurrentState;
 
         // 자신의 Interactable 컴포넌트 구독
-        mMyInteractable = GetComponent<Interactable>();
-        if (mMyInteractable != null)
+        mInteractable = GetComponent<Interactable>();
+        if (mInteractable != null)
         {
-            mMyInteractable.OnLocationChanged += HandleMyLocationChanged;
+            mInteractable.OnLocationChanged += HandleMyLocationChanged;
         }
     }
 
@@ -135,6 +133,7 @@ public class AgentController : MonoBehaviour
         if (mMovement != null)
         {
             mMovement.OnDestinationReached -= HandleDestinationReached;
+            mMovement.OnMovementBlocked -= HandleMovementBlocked;
         }
 
         if (agentVision != null)
@@ -143,9 +142,9 @@ public class AgentController : MonoBehaviour
         }
 
         // 자신의 Interactable 위치 변경 이벤트 구독 해제
-        if (mMyInteractable != null)
+        if (mInteractable != null)
         {
-            mMyInteractable.OnLocationChanged -= HandleMyLocationChanged;
+            mInteractable.OnLocationChanged -= HandleMyLocationChanged;
         }
     }
 
@@ -161,6 +160,28 @@ public class AgentController : MonoBehaviour
         // 이동 애니메이션 정지
         animator.SetBool("isMoving", false);
 
+    }
+
+    // 이동 불가능 이벤트 핸들러
+    private void HandleMovementBlocked()
+    {
+        Debug.Log($"{mName}: 이동 불가능 이벤트 발생");
+        // 현재 상태에 따라 처리 (기본적으로 WAIT 상태로 전환)
+        switch (CurrentState)
+        {
+            case AgentState.MOVE_TO_LOCATION:
+                // TODO: 로케이션으로 이동할 수 없는 경우 반응
+                ChangeState(AgentState.WAIT);
+                break;
+            case AgentState.MOVE_TO_INTERACTABLE:
+                // TODO: 상호작용 가능한 오브젝트로 이동할 수 없는 경우 반응
+                ChangeState(AgentState.WAIT);
+                break;
+            default:
+                // TODO: 기타 이동 불가능 상황 반응
+                ChangeState(AgentState.WAIT);
+                break;
+        }
     }
 
     // 시야 범위 변경 이벤트 처리
@@ -248,13 +269,13 @@ public class AgentController : MonoBehaviour
         mCurrentAction = _action;
         
         // 현재 위치와 목표 위치가 다르면 MOVE_TO_LOCATION 상태로 전환
-        if (mCurrentAction.LocationName != null && mCurrentAction.LocationName != mMyInteractable.CurrentLocation)
+        if (mCurrentAction.LocationName != null && mCurrentAction.LocationName != mInteractable.CurrentLocation)
         {
             ChangeState(AgentState.MOVE_TO_LOCATION);
         }
 
         // 현재 위치와 목표 위치가 같으면 오브젝트로 이동
-        if (mCurrentAction.LocationName != null && mCurrentAction.LocationName == mMyInteractable.CurrentLocation)
+        if (mCurrentAction.LocationName != null && mCurrentAction.LocationName == mInteractable.CurrentLocation)
         {
             ChangeState(AgentState.MOVE_TO_INTERACTABLE);
         }
@@ -304,19 +325,34 @@ public class AgentController : MonoBehaviour
         switch (CurrentState)
         {
             case AgentState.MOVE_TO_LOCATION:
-                mMovement.MoveToPosition(tileController.CenterPosition);
+                Vector2 availablePosition = tileController.AvailablePosition;
+                if (availablePosition != Vector2.zero)
+                {
+                    mMovement.MoveToPosition(availablePosition);
+                }
+                else
+                {
+                    HandleMovementBlocked();
+                    LogManager.Log("Agent", $"{mName}: {mCurrentAction.LocationName} 타일에 이동 가능한 위치가 없습니다.", 1);
+                }
                 break;
 
             case AgentState.MOVE_TO_INTERACTABLE:
-                // 타겟 오브젝트 찾기
-                Interactable interactable = tileController.ChildInteractables.Find(interactable => interactable.InteractableName == mCurrentAction.TargetName);
-                mMovement.MoveToTarget(interactable.TargetController);
-                mCurrentTargetInteractable = interactable; // 현재 타겟 오브젝트 갱신
+                Interactable interactable = tileController.ChildInteractables.Find(interactable => interactable.InteractableName == mCurrentAction.TargetName && interactable.TargetController.StandingPoints.Count > 0);
+                if (interactable != null)
+                {
+                    mMovement.MoveToTarget(interactable.TargetController);
+                }
+                else
+                {
+                    HandleMovementBlocked();
+                    Debug.LogWarning($"{mName}: {mCurrentAction.TargetName} 상호작용 가능한 오브젝트를 찾을 수 없습니다.");
+                }
                 break;
         }
 
         // 이동 애니메이션 시작
-        animator.SetBool("isMoving", true);
+        // animator.SetBool("isMoving", true);
     }
 
     // 활동 시작하는 함수
