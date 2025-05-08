@@ -26,7 +26,7 @@ public class AgentScheduler : MonoBehaviour
         ResetSchedule();
 
         // Test 용으로 더미 스케줄 등록
-        CreateDummySchedule();
+        //CreateDummySchedule();
     }
 
     private void Update()
