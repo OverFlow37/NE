@@ -10,7 +10,7 @@ namespace OhMAIGod.Agent
             base.OnStateEnter(_controller);
             
             // 상호작용 오브젝트로 이동 시작 (필요시 별도 메서드 구현)
-            // _controller.StartMovingToInteractable();
+            _controller.StartMovingToAction();
         }
 
         public override void OnStateExecute(AgentController _controller)

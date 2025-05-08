@@ -153,7 +153,20 @@ public class AIBridge : MonoBehaviour
         // 각 파라미터별 값 로그
         Debug.Log($"[AIBridge] AgentName: {agent.AgentName}");
         Debug.Log($"[AIBridge] AgentNeeds: {JsonUtility.ToJson(currentNeeds)}");
-        string agentLocation = (movement != null && !string.IsNullOrEmpty(movement.TargetName) ? movement.TargetName : "Bedroom");
+        
+        // 에이전트의 현재 위치 가져오기 (CurrentAction이 null일 경우 대비)
+        string agentLocation = "Unknown"; // 기본값
+        Interactable agentInteractable = agent.GetComponent<Interactable>();
+        if (agentInteractable != null && !string.IsNullOrEmpty(agentInteractable.CurrentLocation))
+        {
+            agentLocation = agentInteractable.CurrentLocation;
+        }
+        else if (agent.CurrentAction != null && !string.IsNullOrEmpty(agent.CurrentAction.LocationName))
+        {
+            // CurrentAction이 있고 LocationName이 유효하면 해당 위치 사용
+            agentLocation = agent.CurrentAction.LocationName;
+        }
+
         Debug.Log($"[AIBridge] Location: {agentLocation}");
         Debug.Log($"[AIBridge] Personality: friendly, helpful");
         Debug.Log($"[AIBridge] visibleObjectGroups.Count: {visibleObjectGroups.Length}");

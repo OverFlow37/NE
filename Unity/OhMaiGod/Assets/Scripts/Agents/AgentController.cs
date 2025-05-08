@@ -45,7 +45,7 @@ public class AgentController : MonoBehaviour
     [SerializeField] private int mID;                               // 에이전트 고유 식별자
     [SerializeField] private string mName;                          // 이름
     [SerializeField] private string mDescription;                   // 초기 설명    
-    [SerializeField] private float mVisualRange;                // 시야 범위
+    [SerializeField] private float mVisualRange;                    // 시야 범위
     [SerializeField] private float mActionMinDuration = 1.0f;       // 활동 최소 지속 시간 (분)
     [SerializeField] private bool mAutoStart = true;                // 자동 시작 여부
     private AgentStateMachine mStateMachine;
@@ -62,6 +62,7 @@ public class AgentController : MonoBehaviour
     public string AgentName => mName;                                       // 에이전트 이름
     public int AgentID => mID;                                              // 에이전트 ID
     public AgentNeeds AgnetNeeds => mAgentNeeds;
+    public ScheduleItem CurrentAction => mCurrentAction;
 
     private Animator animator;  // 애니메이터
     // AIBridge에서 Agent만 가져오면 나머지도 가져올 수 있게 public으로 변경
@@ -71,6 +72,9 @@ public class AgentController : MonoBehaviour
 
     // 시야 내의 오브젝트 목록
     public List<Interactable> mVisibleInteractables = new List<Interactable>();
+
+    // 자신의 Interactable 위치 변경 이벤트 구독용 변수
+    private Interactable mMyInteractable;
 
     private void Awake()
     {
@@ -96,7 +100,10 @@ public class AgentController : MonoBehaviour
             agentVision.OnVisionChanged += HandleVisionChanged;
             // 초기 시야 범위 내 오브젝트들 추가
             var initialInteractables = agentVision.GetVisibleInteractables();
-            mVisibleInteractables.AddRange(initialInteractables);
+            if (initialInteractables != null)
+            {
+                mVisibleInteractables.AddRange(initialInteractables);
+            }
         }
 
         // 감정 상태 초기화
@@ -110,6 +117,13 @@ public class AgentController : MonoBehaviour
         // FSM 초기화
         mStateMachine = new AgentStateMachine(this);
         mDebugCurrentState = CurrentState;
+
+        // 자신의 Interactable 컴포넌트 구독
+        mMyInteractable = GetComponent<Interactable>();
+        if (mMyInteractable != null)
+        {
+            mMyInteractable.OnLocationChanged += HandleMyLocationChanged;
+        }
     }
 
     private void OnDestroy()
@@ -124,6 +138,12 @@ public class AgentController : MonoBehaviour
         {
             agentVision.OnVisionChanged -= HandleVisionChanged;
         }
+
+        // 자신의 Interactable 위치 변경 이벤트 구독 해제
+        if (mMyInteractable != null)
+        {
+            mMyInteractable.OnLocationChanged -= HandleMyLocationChanged;
+        }
     }
 
     // 목적지 도착 이벤트 발생 시 호출되는 함수
@@ -132,7 +152,7 @@ public class AgentController : MonoBehaviour
     {
         if (mShowDebugInfo)
         {
-            Debug.Log($"{mName}: 목적지 도착 - {mMovement.TargetName}");
+            Debug.Log($"{mName}: 목적지 도착 - {mCurrentAction.TargetName}");
         }
 
         // 이동 애니메이션 정지
@@ -191,6 +211,16 @@ public class AgentController : MonoBehaviour
         }
     }
 
+    // 자신의 Interactable 위치 변경 이벤트 핸들러
+    private void HandleMyLocationChanged(Interactable interactable, string newLocation)
+    {
+        // mCurrentAction이 null이 아니고, 새로운 위치가 목표 위치와 같으면 상태 전환
+        if (mCurrentAction != null && newLocation == mCurrentAction.LocationName)
+        {
+            ChangeState(AgentState.MOVE_TO_INTERACTABLE);
+        }
+    }
+
     private void Start()
     {
         if (mAutoStart)
@@ -244,8 +274,17 @@ public class AgentController : MonoBehaviour
         // 새 활동 설정
         mCurrentAction = _action;
         
-        // MOVE_TO_LOCATION 상태로 전환
-        ChangeState(AgentState.MOVE_TO_LOCATION);
+        // 현재 위치와 목표 위치가 다르면 MOVE_TO_LOCATION 상태로 전환
+        if (mCurrentAction.LocationName != null && mCurrentAction.LocationName != mMyInteractable.CurrentLocation)
+        {
+            ChangeState(AgentState.MOVE_TO_LOCATION);
+        }
+
+        // 현재 위치와 목표 위치가 같으면 오브젝트로 이동
+        if (mCurrentAction.LocationName != null && mCurrentAction.LocationName == mMyInteractable.CurrentLocation)
+        {
+            ChangeState(AgentState.MOVE_TO_INTERACTABLE);
+        }
 
         // 활동 시작 시 말풍선 표시
         agentUI.StartSpeech(mCurrentAction.Reason);
@@ -283,9 +322,26 @@ public class AgentController : MonoBehaviour
         {
             Debug.Log($"{mName}: {mCurrentAction.LocationName}(으)로 이동 시작. ({mCurrentAction.ActionName} 위해)");
         }
-        
+
         // 이동 시작
-        mMovement.MoveToLocation(mCurrentAction.TargetName, mCurrentAction.LocationName);
+        TileController tileController = TileManager.Instance.GetTileController(mCurrentAction.LocationName);
+        if (tileController == null)
+        {
+            Debug.LogWarning($"{mName}: {mCurrentAction.LocationName} 타일 컨트롤러를 찾을 수 없습니다.");
+            return;
+        }
+
+        switch (CurrentState)
+        {
+            case AgentState.MOVE_TO_LOCATION:
+                mMovement.MoveToPosition(tileController.CenterPosition);
+                break;
+
+            case AgentState.MOVE_TO_INTERACTABLE:
+                Interactable interactable = tileController.ChildInteractables.Find(interactable => interactable.name == mCurrentAction.TargetName);
+                mMovement.MoveToTarget(interactable.TargetController);
+                break;
+        }
 
         // 이동 애니메이션 시작
         animator.SetBool("isMoving", true);
