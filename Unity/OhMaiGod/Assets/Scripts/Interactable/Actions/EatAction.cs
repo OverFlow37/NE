@@ -21,17 +21,17 @@ public class EatAction : InteractionAction
         Interactable targetInteractable = targetObject.GetComponent<Interactable>();
         if (targetInteractable == null)
         {
-            Debug.LogWarning($"상호작용 대상에 Interactable 컴포넌트가 없습니다: {targetObject.name}");
+            LogManager.Log("Interact", $"상호작용 대상에 Interactable 컴포넌트가 없습니다: {targetObject.name}", 1);
             return false;
         }
         if(targetInteractable.mInteractableData.mType != InteractableData.Types.Food)
         {
-            Debug.LogWarning($"상호작용 대상이 음식이 아닙니다: {targetObject.name}");
+            LogManager.Log("Interact", $"상호작용 대상이 음식이 아닙니다: {targetObject.name}", 1);
             return false;
         }
         if(interactor == null)
         {
-            Debug.LogWarning($"상호작용 주체가 없습니다: {interactor.name}");
+            LogManager.Log("Interact", $"상호작용 주체가 없습니다: {interactor.name}", 1);
             return false;
         }
         

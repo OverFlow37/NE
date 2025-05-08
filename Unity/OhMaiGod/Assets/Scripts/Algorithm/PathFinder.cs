@@ -65,7 +65,7 @@ public class PathFinder : MonoBehaviour
         mGameObject = _gameObject;
         if (TileManager.Instance == null)
         {
-            Debug.LogError("TileManager에 바닥 타일맵이 할당되지 않았습니다!", this);
+            LogManager.Log("Movement", "TileManager에 바닥 타일맵이 할당되지 않았습니다!", 0);
             return null;
         }
         // 월드좌표를 셀좌표로 변환
@@ -74,7 +74,7 @@ public class PathFinder : MonoBehaviour
         // 맵 범위 체크
         if (!IsPositionInMap(startCell) || !IsPositionInMap(targetCell))
         {
-            Debug.LogError($"시작점({startCell}) 또는 목표점({targetCell})이 맵 범위를 벗어났습니다. 맵: {mMapMinCell} ~ {mMapMaxCell}");
+            LogManager.Log("Movement", $"시작점({startCell}) 또는 목표점({targetCell})이 맵 범위를 벗어났습니다. 맵: {mMapMinCell} ~ {mMapMaxCell}", 0);
             return null;
         }
         InitializeNodeArray();
@@ -84,12 +84,12 @@ public class PathFinder : MonoBehaviour
         // 시작점이나 목표점이 벽인지 확인
         if (startNode.isWall)
         {
-            Debug.LogError($"시작점이 벽입니다. 위치: {startCell}");
+            LogManager.Log("Movement", $"시작점이 벽입니다. 위치: {startCell}", 0);
             return null;
         }
         if (targetNode.isWall)
         {
-            Debug.Log($"목표점이 벽입니다. 위치: {targetCell}");
+            LogManager.Log("Movement", $"목표점이 벽입니다. 위치: {targetCell}", 0);
             return null;
         }
 
@@ -112,7 +112,7 @@ public class PathFinder : MonoBehaviour
             ExploreNeighbors(currentNode, targetNode);
         }
 
-        Debug.LogWarning($"경로를 찾을 수 없습니다. 시작점: {startCell}, 목표점: {targetCell}");
+        LogManager.Log("Movement", $"경로를 찾을 수 없습니다. 시작점: {startCell}, 목표점: {targetCell}", 1);
         return null;
     }
 

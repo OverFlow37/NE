@@ -17,7 +17,7 @@ public class TargetController : MonoBehaviour
         mTargetCollider = GetComponent<Collider2D>();
         if (mTargetCollider == null)
         {
-            Debug.LogError("TargetController에 Collider2D가 없습니다!", this);
+            LogManager.Log("Movement", "TargetController에 Collider2D가 없습니다!", 0);
             enabled = false;
             return;
         }
@@ -62,7 +62,7 @@ public class TargetController : MonoBehaviour
         }
         if (mShowDebug)
         {
-            Debug.Log($"[{gameObject.name}] 차지하는 셀 {mOccupiedCells.Count}개 찾음.", this);
+            LogManager.Log("Movement", $"[{gameObject.name}] 차지하는 셀 {mOccupiedCells.Count}개 찾음.", 3);
         }
     }
 
@@ -86,7 +86,7 @@ public class TargetController : MonoBehaviour
             }
         }
 
-        if (mShowDebug) { Debug.Log($"[{gameObject.name}] 인접 후보 셀 {neighborCells.Count}개 찾음."); }
+        if (mShowDebug) { LogManager.Log("Movement", $"[{gameObject.name}] 인접 후보 셀 {neighborCells.Count}개 찾음.", 3); }
 
         // 2. 인접 셀들의 유효성 검사
         foreach (Vector3Int cell in neighborCells)
@@ -113,18 +113,18 @@ public class TargetController : MonoBehaviour
                 }
                 else if (mShowDebug)
                 {
-                    Debug.Log($"[{gameObject.name}] 위치 {worldPos} (셀: {cell}) 사용 불가 - 벽: {hasWall}, 타겟: {hasOtherTarget}", this);
+                    LogManager.Log("Movement", $"[{gameObject.name}] 위치 {worldPos} (셀: {cell}) 사용 불가 - 벽: {hasWall}, 타겟: {hasOtherTarget}", 3);
                 }
             }
             else if (mShowDebug)
             {
-                Debug.LogWarning($"[{gameObject.name}] 셀 {cell} 에 타일 없음", this);
+                LogManager.Log("Movement", $"[{gameObject.name}] 셀 {cell} 에 타일 없음", 1);
             }
         }
 
         if (mShowDebug)
         {
-            Debug.Log($"[{gameObject.name}] 최종 사용 가능 위치 {mAvailablePositions.Count}개 확정.", this);
+            LogManager.Log("Movement", $"[{gameObject.name}] 최종 사용 가능 위치 {mAvailablePositions.Count}개 확정.", 3);
         }
     }
 

@@ -6,7 +6,6 @@ public class AgentVision : MonoBehaviour
 {
     [Header("Vision Settings")]
     [SerializeField] private float mVisionRange = 5f;        // 시야 범위
-    [SerializeField] private bool mShowDebugInfo = false;    // 디버그 정보 표시 여부
     [SerializeField] private string mAgentName;              // 에이전트 이름 (자신을 제외하기 위한 식별자)
 
     [Header("Target Layers")]
@@ -38,8 +37,8 @@ public class AgentVision : MonoBehaviour
         // Obstacles와 NPC 레이어 모두 감지하도록 설정
         LayerMask combinedMask = mObstaclesLayer | mNPCLayer;
         mVisionCollider.includeLayers = combinedMask;
-        Debug.Log($"[AgentVision] Combined Layer Mask: {combinedMask.value}");
-        Debug.Log($"[AgentVision] Obstacles Layer: {mObstaclesLayer.value}, NPC Layer: {mNPCLayer.value}");
+        LogManager.Log("Vision", $"[AgentVision] Combined Layer Mask: {combinedMask.value}", 2);
+        LogManager.Log("Vision", $"[AgentVision] Obstacles Layer: {mObstaclesLayer.value}, NPC Layer: {mNPCLayer.value}", 2);
         
         UpdateVisionRange(mVisionRange);
     }
@@ -64,16 +63,16 @@ public class AgentVision : MonoBehaviour
         LayerMask combinedMask = mObstaclesLayer | mNPCLayer;
         Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, mVisionRange, combinedMask);
         
-        Debug.Log($"[AgentVision] Initial Check - Found {colliders.Length} colliders in range");
+        LogManager.Log("Vision", $"[AgentVision] Initial Check - Found {colliders.Length} colliders in range", 2);
         foreach (Collider2D collider in colliders)
         {
             if (collider.gameObject.name.Contains(mAgentName))
             {
-                Debug.Log($"[AgentVision] Skipping self: {collider.gameObject.name}");
+                LogManager.Log("Vision", $"[AgentVision] Skipping self: {collider.gameObject.name}", 3);
                 continue;
             }
 
-            Debug.Log($"[AgentVision] Found object: {collider.gameObject.name} on layer: {LayerMask.LayerToName(collider.gameObject.layer)}");
+            LogManager.Log("Vision", $"[AgentVision] Found object: {collider.gameObject.name} on layer: {LayerMask.LayerToName(collider.gameObject.layer)}", 2);
             Interactable interactable = collider.GetComponent<Interactable>();
             if (interactable != null)
             {
@@ -85,18 +84,18 @@ public class AgentVision : MonoBehaviour
     // 시야 범위에 들어왔을 때
     private void OnTriggerEnter2D(Collider2D other)
     {
-        Debug.Log($"[AgentVision] OnTriggerEnter2D - Object: {other.gameObject.name}, Layer: {LayerMask.LayerToName(other.gameObject.layer)}");
+        LogManager.Log("Vision", $"[AgentVision] OnTriggerEnter2D - Object: {other.gameObject.name}, Layer: {LayerMask.LayerToName(other.gameObject.layer)}", 2);
         
         // 자신은 무시
         if (other.gameObject.name.Contains(mAgentName))
         {
-            Debug.Log($"[AgentVision] Skipping self: {other.gameObject.name}");
+            LogManager.Log("Vision", $"[AgentVision] Skipping self: {other.gameObject.name}", 3);
             return;
         }
 
         if (!IsInTargetLayer(other.gameObject.layer))
         {
-            Debug.Log($"[AgentVision] Object {other.gameObject.name} is not in target layers");
+            LogManager.Log("Vision", $"[AgentVision] Object {other.gameObject.name} is not in target layers", 3);
             return;
         }
 
@@ -124,7 +123,7 @@ public class AgentVision : MonoBehaviour
     {
         bool isInObstacles = ((1 << layer) & mObstaclesLayer) != 0;
         bool isInNPC = ((1 << layer) & mNPCLayer) != 0;
-        Debug.Log($"[AgentVision] Layer Check - Layer: {layer}, IsInObstacles: {isInObstacles}, IsInNPC: {isInNPC}");
+        LogManager.Log("Vision", $"[AgentVision] Layer Check - Layer: {layer}, IsInObstacles: {isInObstacles}, IsInNPC: {isInNPC}", 3);
         return isInObstacles || isInNPC;
     }
 
@@ -133,10 +132,7 @@ public class AgentVision : MonoBehaviour
     {
         if (mVisibleInteractables.Add(interactable))
         {
-            if (mShowDebugInfo)
-            {
-                Debug.Log($"[AgentVision] {interactable.name} 시야 범위 진입");
-            }
+            LogManager.Log("Vision", $"[AgentVision] {interactable.name} 시야 범위 진입", 3);
             UpdateDebugList();
             OnVisionChanged?.Invoke(interactable, true);
         }
@@ -147,10 +143,7 @@ public class AgentVision : MonoBehaviour
     {
         if (mVisibleInteractables.Remove(interactable))
         {
-            if (mShowDebugInfo)
-            {
-                Debug.Log($"[AgentVision] {interactable.name} 시야 범위 이탈");
-            }
+            LogManager.Log("Vision", $"[AgentVision] {interactable.name} 시야 범위 이탈", 3);
             UpdateDebugList();
             OnVisionChanged?.Invoke(interactable, false);
         }
@@ -235,7 +228,10 @@ public class AgentVision : MonoBehaviour
         // 레이어 설정이 변경되었을 때 로그
         if (Application.isPlaying)
         {
-            Debug.Log($"[AgentVision] Layer Settings - Obstacles: {mObstaclesLayer.value}, NPC: {mNPCLayer.value}");
+            if (LogManager.Instance != null)
+            {
+                LogManager.Log("Vision", $"[AgentVision] Layer Settings - Obstacles: {mObstaclesLayer.value}, NPC: {mNPCLayer.value}", 2);
+            }
         }
     }
 }

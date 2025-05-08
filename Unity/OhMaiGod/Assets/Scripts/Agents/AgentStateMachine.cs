@@ -45,7 +45,7 @@ namespace OhMAIGod.Agent
             if (mCurrentStateType == _newStateType)  return;
 
             // 디버깅용
-            Debug.Log($"{mController.AgentName}: 상태 변경 {mCurrentStateType} -> {_newStateType}");
+            LogManager.Log("Agent", $"{mController.AgentName}: 상태 변경 {mCurrentStateType} -> {_newStateType}", 2);
 
             // 이전 상태 종료
             if (mCurrentState != null)

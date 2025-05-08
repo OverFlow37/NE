@@ -41,9 +41,7 @@ public struct AgentRequest
 public struct ActionDetails
 {
     public string location;    // 행동을 수행할 위치
-    public string message;     // 행동과 관련된 메시지
     public string target;      // 행동의 대상
-    public string using_item;  // 사용할 아이템 (JSON의 "using"에 매핑)
 }
 
 // AI가 결정한 행동 정보
@@ -130,7 +128,7 @@ public class AIBridge : MonoBehaviour
     {
         if (mIsRequesting)
         {
-            Debug.LogWarning($"요청 진행 중입니다. 기다려주세요. (에이전트: {agent.AgentName})");
+            LogManager.Log("AI", $"요청 진행 중입니다. 기다려주세요. (에이전트: {agent.AgentName})", 1);
             return;
         }
         agent.ChangeState(AgentState.WAIT_FOR_AI_RESPONSE);
@@ -149,10 +147,6 @@ public class AIBridge : MonoBehaviour
 
         // AI 서버에 보낼 요청 데이터 생성
         var visibleObjectGroups = ConvertToObjectGroups(agent.mVisibleInteractables);
-
-        // 각 파라미터별 값 로그
-        Debug.Log($"[AIBridge] AgentName: {agent.AgentName}");
-        Debug.Log($"[AIBridge] AgentNeeds: {JsonUtility.ToJson(currentNeeds)}");
         
         // 에이전트의 현재 위치 가져오기 (CurrentAction이 null일 경우 대비)
         string agentLocation = "Unknown"; // 기본값
@@ -167,12 +161,9 @@ public class AIBridge : MonoBehaviour
             agentLocation = agent.CurrentAction.LocationName;
         }
 
-        Debug.Log($"[AIBridge] Location: {agentLocation}");
-        Debug.Log($"[AIBridge] Personality: friendly, helpful");
-        Debug.Log($"[AIBridge] visibleObjectGroups.Count: {visibleObjectGroups.Length}");
         for (int i = 0; i < visibleObjectGroups.Length; i++)
         {
-            Debug.Log($"[AIBridge] ObjectGroup {i}: location={visibleObjectGroups[i].location}, objects=[{string.Join(",", visibleObjectGroups[i].objects)}]");
+            LogManager.Log("AI", $"[AIBridge] ObjectGroup {i}: location={visibleObjectGroups[i].location}, objects=[{string.Join(",", visibleObjectGroups[i].objects)}]", 3);
         }
 
         AgentRequest requestData = new AgentRequest
@@ -188,11 +179,11 @@ public class AIBridge : MonoBehaviour
         };
 
         // requestData 전체 구조를 JSON으로 출력
-        Debug.Log($"[AIBridge] requestData 전체: {JsonUtility.ToJson(requestData, true)}");
+        LogManager.Log("AI", $"[AIBridge] requestData 전체: {JsonUtility.ToJson(requestData, true)}", 3);
 
         // 요청 데이터를 JSON으로 변환
         string jsonData = JsonUtility.ToJson(requestData, true);
-        Debug.Log($"보낼 JSON (에이전트: {agent.AgentName}):\n" + jsonData);
+        LogManager.Log("AI", $"보낼 JSON (에이전트: {agent.AgentName}):\n" + jsonData, 3);
 
         // HTTP 요청 설정
         UnityWebRequest request = new UnityWebRequest("http://127.0.0.1:5000/action", "POST");
@@ -217,15 +208,15 @@ public class AIBridge : MonoBehaviour
         // 응답 처리
         if (request.result == UnityWebRequest.Result.Success)
         {
-            Debug.Log($"✅ 응답 (에이전트: {agent.AgentName}): " + request.downloadHandler.text);
-            Debug.Log($"⏱️ 요청 소요 시간: {elapsedMs} ms");
+            LogManager.Log("AI", $"✅ 응답 (에이전트: {agent.AgentName}): " + request.downloadHandler.text, 2);
+            LogManager.Log("AI", $"⏱️ 요청 소요 시간: {elapsedMs} ms", 2);
 
             // AI 응답 처리
             ProcessResponse(request.downloadHandler.text, agent);
         }
         else
         {
-            Debug.LogError($"❌ 실패 (에이전트: {agent.AgentName}): " + request.error);
+            LogManager.Log("AI", $"❌ 실패 (에이전트: {agent.AgentName}): " + request.error, 0);
         }
     }
 
@@ -236,11 +227,11 @@ public class AIBridge : MonoBehaviour
         {
             // JSON 응답을 객체로 변환
             AgentResponse agentResponse = JsonUtility.FromJson<AgentResponse>(response);
-            Debug.Log($"응답: {agentResponse}");
+            LogManager.Log("AI", $"응답: {agentResponse}", 3);
             // 응답 유효성 검사
             if (agentResponse.status != "OK" || string.IsNullOrEmpty(agentResponse.data.action.action))
             {
-                Debug.LogError($"Invalid response format or status is not OK (에이전트: {agent.AgentName})");
+                LogManager.Log("AI", $"Invalid response format or status is not OK (에이전트: {agent.AgentName})", 0);
                 return;
             }
             Action action = agentResponse.data.action;
@@ -273,16 +264,16 @@ public class AIBridge : MonoBehaviour
             // 일정 추가 결과 로깅
             if (!success)
             {
-                Debug.LogError($"Failed to add schedule item: {newScheduleItem.ActionName} @ {newScheduleItem.LocationName} (에이전트: {agent.AgentName})");
+                LogManager.Log("AI", $"Failed to add schedule item: {newScheduleItem.ActionName} @ {newScheduleItem.LocationName} (에이전트: {agent.AgentName})", 0);
             }
             else
             {
-                Debug.Log($"Successfully added and started new Action: {newScheduleItem.ActionName} @ {newScheduleItem.LocationName} (에이전트: {agent.AgentName})");
+                LogManager.Log("AI", $"Successfully added and started new Action: {newScheduleItem.ActionName} @ {newScheduleItem.LocationName} (에이전트: {agent.AgentName})", 2);
             }
         }
         catch (Exception ex)
         {
-            Debug.LogError($"Error processing response (에이전트: {agent.AgentName}): {ex.Message}\n{ex.StackTrace}");
+            LogManager.Log("AI", $"Error processing response (에이전트: {agent.AgentName}): {ex.Message}\n{ex.StackTrace}", 0);
         }
     }
 } 

@@ -7,37 +7,37 @@ using OhMAIGod.Agent;
 
 public class AgentController : MonoBehaviour
 {
-    [SerializeField] private AgentUI agentUI;
+    [SerializeField] private AgentUI mAgentUI;
     [SerializeField] private AgentVision agentVision;  // AgentVision 컴포넌트 참조 추가
 
     [Header("Agent States")]
     [SerializeField] private AgentNeeds mAgentNeeds;                // 현재 Agent의 욕구 수치
     
     // Needs 수정을 위한 메서드들
-    public void ModifyHunger(int amount) 
-    { 
-        mAgentNeeds.Hunger = Mathf.Clamp(mAgentNeeds.Hunger + amount, 0, 10);
+    public void ModifyHunger(int _amount)
+    {
+        mAgentNeeds.Hunger = Mathf.Clamp(mAgentNeeds.Hunger + _amount, 0, 10);
         if (mShowDebugInfo)
         {
-            Debug.Log($"{mName}의 배고픔 변화: {amount} (현재: {mAgentNeeds.Hunger})");
+            LogManager.Log("Agent", $"{mName}의 배고픔 변화: {_amount} (현재: {mAgentNeeds.Hunger})", 3);
         }
     }
     
-    public void ModifySleepiness(int amount) 
-    { 
-        mAgentNeeds.Sleepiness = Mathf.Clamp(mAgentNeeds.Sleepiness + amount, 0, 10);
+    public void ModifySleepiness(int _amount)
+    {
+        mAgentNeeds.Sleepiness = Mathf.Clamp(mAgentNeeds.Sleepiness + _amount, 0, 10);
         if (mShowDebugInfo)
         {
-            Debug.Log($"{mName}의 졸림 변화: {amount} (현재: {mAgentNeeds.Sleepiness})");
+            LogManager.Log("Agent", $"{mName}의 졸림 변화: {_amount} (현재: {mAgentNeeds.Sleepiness})", 3);
         }
     }
     
-    public void ModifyLoneliness(int amount) 
-    { 
-        mAgentNeeds.Loneliness = Mathf.Clamp(mAgentNeeds.Loneliness + amount, 0, 10);
+    public void ModifyLoneliness(int _amount)
+    {
+        mAgentNeeds.Loneliness = Mathf.Clamp(mAgentNeeds.Loneliness + _amount, 0, 10);
         if (mShowDebugInfo)
         {
-            Debug.Log($"{mName}의 외로움 변화: {amount} (현재: {mAgentNeeds.Loneliness})");
+            LogManager.Log("Agent", $"{mName}의 외로움 변화: {_amount} (현재: {mAgentNeeds.Loneliness})", 3);
         }
     }
 
@@ -53,6 +53,7 @@ public class AgentController : MonoBehaviour
     [Header("디버깅")]
     [SerializeField] private bool mShowDebugInfo = true;            // 디버그 정보 표시 여부
     [SerializeField, ReadOnly] private AgentState mDebugCurrentState; // 현재 상태 Inspector 디버그용
+    [SerializeField, ReadOnly] private string mDebugCurrentLocation;  // 현재 위치 Inspector 디버그용
 
     private float mCurrentActionTime = 0f;                          // 현재 활동 진행 시간
     private ScheduleItem mCurrentAction = null;                     // 현재 활동 정보
@@ -63,11 +64,13 @@ public class AgentController : MonoBehaviour
     public int AgentID => mID;                                              // 에이전트 ID
     public AgentNeeds AgnetNeeds => mAgentNeeds;
     public ScheduleItem CurrentAction => mCurrentAction;
+    public string CurrentLocation => mDebugCurrentLocation;
 
     private Animator animator;  // 애니메이터
     // AIBridge에서 Agent만 가져오면 나머지도 가져올 수 있게 public으로 변경
     [SerializeField] public AgentScheduler mScheduler;
     [SerializeField] public MovementController mMovement;
+    [SerializeField] private Interactable mInteractable;
 
 
     // 시야 내의 오브젝트 목록
@@ -152,7 +155,7 @@ public class AgentController : MonoBehaviour
     {
         if (mShowDebugInfo)
         {
-            Debug.Log($"{mName}: 목적지 도착 - {mCurrentAction.TargetName}");
+            LogManager.Log("Agent", $"{mName}: 목적지 도착 - {mCurrentAction.TargetName}", 2);
         }
 
         // 이동 애니메이션 정지
@@ -188,25 +191,25 @@ public class AgentController : MonoBehaviour
     }
 
     // 시야 범위 변경 이벤트 처리
-    private void HandleVisionChanged(Interactable interactable, bool entered)
+    private void HandleVisionChanged(Interactable _interactable, bool _entered)
     {
-        if (entered)
+        if (_entered)
         {
-            if (!mVisibleInteractables.Contains(interactable))
+            if (!mVisibleInteractables.Contains(_interactable))
             {
-                mVisibleInteractables.Add(interactable);
+                mVisibleInteractables.Add(_interactable);
                 if (mShowDebugInfo)
                 {
-                    Debug.Log($"{mName}이(가) {interactable.name}을(를) 발견했습니다.");
+                    LogManager.Log("Agent", $"{mName}이(가) {_interactable.name}을(를) 발견했습니다.", 2);
                 }
             }
         }
         else
         {
-            mVisibleInteractables.Remove(interactable);
+            mVisibleInteractables.Remove(_interactable);
             if (mShowDebugInfo)
             {
-                Debug.Log($"{mName}이(가) {interactable.name}을(를) 시야에서 놓쳤습니다.");
+                LogManager.Log("Agent", $"{mName}이(가) {_interactable.name}을(를) 시야에서 놓쳤습니다.", 2);
             }
         }
     }
@@ -256,22 +259,17 @@ public class AgentController : MonoBehaviour
     {
         if (_action == null)
         {
-            Debug.LogWarning($"{mName}: 잘못된 활동 정보 받음");
+            LogManager.Log("Agent", $"{mName}: 잘못된 활동 정보 받음", 1);
             return;
         }
-
         if (mShowDebugInfo)
         {
-            Debug.Log($"{mName}: 새 활동 수신 - {_action.ActionName} @ {_action.LocationName}");
+            LogManager.Log("Agent", $"{mName}: 새 활동 수신 - {_action.ActionName} @ {_action.LocationName}", 2);
         }
-
-        // 이전 활동 정리
         if (mCurrentAction != null && mStateMachine.CurrentStateType == AgentState.INTERACTION)
         {
             CompleteAction();
         }
-
-        // 새 활동 설정
         mCurrentAction = _action;
         
         // 현재 위치와 목표 위치가 다르면 MOVE_TO_LOCATION 상태로 전환
@@ -287,24 +285,22 @@ public class AgentController : MonoBehaviour
         }
 
         // 활동 시작 시 말풍선 표시
-        agentUI.StartSpeech(mCurrentAction.Reason);
+        mAgentUI.StartSpeech(mCurrentAction.Reason);
     }
 
     // 활동 위치로 이동 시작
     public void StartMovingToAction()
     {
-        // 현재 활동 정보 가져오기 (없으면 스케줄러에서 가져오기)
         if (mCurrentAction == null)
         {
             string actionName = mScheduler.GetCurrentActionName();
             string destinationLocation = mScheduler.GetCurrentDestinationLocation();
             string destinationTarget = mScheduler.GetCurrentDestinationTarget();
-            
             if (string.IsNullOrEmpty(destinationTarget))
             {
                 if (mShowDebugInfo)
                 {
-                    Debug.LogWarning($"{mName}: 이동할 목적지 없음");
+                    LogManager.Log("Agent", $"{mName}: 이동할 목적지 없음", 1);
                 }
                 return;
             }
@@ -317,17 +313,16 @@ public class AgentController : MonoBehaviour
                 TargetName = destinationTarget
             };
         }
-        
         if (mShowDebugInfo)
         {
-            Debug.Log($"{mName}: {mCurrentAction.LocationName}(으)로 이동 시작. ({mCurrentAction.ActionName} 위해)");
+            LogManager.Log("Agent", $"{mName}: {mCurrentAction.LocationName}(으)로 이동 시작. ({mCurrentAction.ActionName} 위해)", 2);
         }
 
         // 이동 시작
         TileController tileController = TileManager.Instance.GetTileController(mCurrentAction.LocationName);
         if (tileController == null)
         {
-            Debug.LogWarning($"{mName}: {mCurrentAction.LocationName} 타일 컨트롤러를 찾을 수 없습니다.");
+            LogManager.Log("Agent", $"{mName}: {mCurrentAction.LocationName} 타일 컨트롤러를 찾을 수 없습니다.", 1);
             return;
         }
 
@@ -354,7 +349,6 @@ public class AgentController : MonoBehaviour
         if (mCurrentAction == null)
         {
             string actionName = mScheduler.GetCurrentActionName();
-            
             if (actionName == "대기 중")
             {
                 // 활동 없음 - 대기 상태로
@@ -374,20 +368,13 @@ public class AgentController : MonoBehaviour
 
         // 현재 위치에서 상호작용 가능한 오브젝트 찾기
         GameObject interactableObject = FindInteractableInCurrentLocation();
-
         if (interactableObject != null)
         {
-            Debug.Log($"상호작용 가능한 오브젝트 찾음: {interactableObject}");
-            // 상호작용 가능한 오브젝트가 있으면 상호작용 시작
-            // mStateMachine.ChangeState(AgentState.INTERACTION);
+            LogManager.Log("Agent", $"상호작용 가능한 오브젝트 찾음: {interactableObject}", 2);
             StartInteraction(interactableObject);
         }
         else
         {
-            // 상호작용 가능한 오브젝트가 없으면 일반 활동 수행
-            // mCurrentState = AgentState.INTERACTION;
-            // mStateMachine.ChangeState(AgentState.INTERACTION);
-
             mCurrentActionTime = 0f;
         }
     }
@@ -395,55 +382,31 @@ public class AgentController : MonoBehaviour
     // 현재 위치에서 상호작용 가능한 오브젝트 찾기
     private GameObject FindInteractableInCurrentLocation()
     {
-        Debug.Log("오브젝트 찾기");
-        // 현재 위치에 있는 모든 Interactable 컴포넌트를 가진 오브젝트 찾기
-        // 현재 콜라이더 기반으로 찾음, 추후에는 지역에 등록된 오브젝트 가져오는 것으로 변경필요
-        Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, 2f); // 2f는 상호작용 범위
-        
+        LogManager.Log("Agent", "오브젝트 찾기", 3);
+        Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, 2f);
         foreach (Collider2D collider in colliders)
         {
             Interactable interactable = collider.GetComponent<Interactable>();
-            if (interactable != null)
+            if (interactable != null && interactable.mInteractableData != null)
             {
-                Debug.Log($"발견된 Interactable 오브젝트: {collider.gameObject.name}");
-                Debug.Log($"Interactable 컴포넌트: {interactable}");
-                Debug.Log($"InteractableData: {interactable.mInteractableData}");
-                
-                if (interactable.mInteractableData != null)
-                {
-                    Debug.Log($"InteractableData 이름: {interactable.mInteractableData.mName}");
-                }
-                
-                if (interactable.mInteractableData != null)
-                {
-                    return collider.gameObject;
-                }
+                LogManager.Log("Agent", $"발견된 Interactable 오브젝트: {collider.gameObject.name}", 3);
+                return collider.gameObject;
             }
         }
-        
         return null;
     }
 
     // 오브젝트와 상호작용 시작
-    private void StartInteraction(GameObject interactableObject)
+    private void StartInteraction(GameObject _interactableObject)
     {
         if (mShowDebugInfo)
         {
-            Debug.Log($"{mName}: {interactableObject.name}와(과) 상호작용 시작");
+            LogManager.Log("Agent", $"{mName}: {_interactableObject.name}와(과) 상호작용 시작", 2);
         }
-        Debug.Log("상호작용 시작");
-
-        // INTERACTION 상태로 전환
+        LogManager.Log("Agent", "상호작용 시작", 3);
         mStateMachine.ChangeState(AgentState.INTERACTION);
-        
-        // Interactable 컴포넌트의 Interact 메서드 호출
-        var interactable = interactableObject.GetComponent<Interactable>();
-        if (interactable != null)
-        {
-            interactable.Interact(gameObject);
-        }
-        
-        // 상호작용 완료 후 활동 완료 처리
+        var interactable = _interactableObject.GetComponent<Interactable>();
+        interactable?.Interact(gameObject);
         CompleteAction();
     }
 
@@ -454,7 +417,7 @@ public class AgentController : MonoBehaviour
         {
             if (mShowDebugInfo)
             {
-                Debug.Log($"{mName}: 활동 완료 - {mCurrentAction.ActionName}");
+                LogManager.Log("Agent", $"{mName}: 활동 완료 - {mCurrentAction.ActionName}", 2);
             }
             
             // 스케줄러에 활동 완료 알림
@@ -462,7 +425,6 @@ public class AgentController : MonoBehaviour
             
             // 상태 초기화
             mCurrentAction = null;
-            // mCurrentState = AgentState.IDLE;
             mStateMachine.ChangeState(AgentState.IDLE);
         }
     }
@@ -483,13 +445,11 @@ public class AgentController : MonoBehaviour
     // 대기 상태로 전환하는 함수
     private void EnterWaitingState(float _waitTimeMinutes)
     {
-        // mCurrentState = AgentState.WAITING;
         mStateMachine.ChangeState(AgentState.WAIT);
-        mWaitTime = Mathf.Min(_waitTimeMinutes * 60f, 300f); // 최대 5분 (300초)
-        
+        mWaitTime = Mathf.Min(_waitTimeMinutes * 60f, 300f);
         if (mShowDebugInfo)
         {
-            Debug.Log($"{mName}: 대기 상태 시작 ({_waitTimeMinutes:F1}분)");
+            LogManager.Log("Agent", $"{mName}: 대기 상태 시작 ({_waitTimeMinutes:F1}분)", 2);
         }
     }
 
@@ -502,12 +462,10 @@ public class AgentController : MonoBehaviour
         // 대기 시간 종료 시 상태 변경
         if (mWaitTime <= 0f)
         {
-            // mCurrentState = AgentState.IDLE;
             mStateMachine.ChangeState(AgentState.WAIT);
-            
             if (mShowDebugInfo)
             {
-                Debug.Log($"{mName}: 대기 상태 종료");
+                LogManager.Log("Agent", $"{mName}: 대기 상태 종료", 2);
             }
         }
     }
@@ -554,11 +512,9 @@ public class AgentController : MonoBehaviour
     private IEnumerator AutoIncreaseAgentNeeds()
     {
         TimeSpan lastIncreaseTime = TimeManager.Instance.GetCurrentGameTime();
-
         while (true)
         {
-            yield return new WaitForSeconds(1f); // 1초마다 체크
-
+            yield return new WaitForSeconds(1f);
             TimeSpan currentTime = TimeManager.Instance.GetCurrentGameTime();
             TimeSpan timeDifference = currentTime - lastIncreaseTime;
 
@@ -569,15 +525,20 @@ public class AgentController : MonoBehaviour
                 ModifyHunger(1);
                 ModifySleepiness(1);
                 ModifyLoneliness(1);
-
                 if (mShowDebugInfo)
                 {
-                    Debug.Log($"[게임시간 {currentTime:hh\\:mm}] {mName}의 감정 상태 자동 증가");
+                    LogManager.Log("Agent", $"[게임시간 {currentTime:hh\\:mm}] {mName}의 감정 상태 자동 증가", 2);
                 }
 
                 // 마지막 증가 시간 업데이트
                 lastIncreaseTime = currentTime;
             }
         }
+    }
+
+    // 위치 정보 갱신 메서드
+    public void UpdateCurrentLocation(string location)
+    {
+        mDebugCurrentLocation = location;
     }
 }
