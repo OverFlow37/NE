@@ -2,634 +2,440 @@
   "John": {
     "memories": [
       {
-        "event": "witness meeting_table Village town_hall",
-        "action": "interact with meeting_table at town_hall",
-        "time": "2025.05.01.18:25",
-        "importance": 1
+        "event": "watch squirrel Forest forest_entrance",
+        "time": "2025.05.01.06:15",
+        "groupId": 1
       },
       {
-        "event": "witness squirrel Forest forest_entrance",
-        "action": "interact with squirrel at forest_entrance",
-        "time": "2025.05.01.20:01",
-        "importance": 3
+        "event": "interact squirrel Forest forest_entrance",
+        "time": "2025.05.01.06:20",
+        "groupId": 1
       },
       {
-        "event": "witness cactus Desert sand_dunes",
-        "action": "interact with cactus at sand_dunes",
-        "time": "2025.05.03.13:07",
-        "importance": 3
+        "event": "move Village cafe",
+        "time": "2025.05.01.07:00",
+        "groupId": 2
       },
       {
-        "event": "witness bench Village park",
-        "action": "interact with bench at park",
-        "time": "2025.04.26.17:08",
-        "importance": 2
+        "event": "interact coffee_machine Village cafe",
+        "time": "2025.05.01.07:05",
+        "groupId": 2
       },
       {
-        "event": "witness seagull Beach cliffside",
-        "action": "interact with seagull at cliffside",
-        "time": "2025.04.25.08:41",
-        "importance": 3
+        "event": "think Village cafe",
+        "time": "2025.05.01.07:10",
+        "groupId": 3
       },
       {
-        "event": "witness sandstorm Desert sand_dunes",
-        "action": "think",
-        "time": "2025.04.27.06:11",
-        "importance": 2
+        "event": "move Village park",
+        "time": "2025.05.01.08:00",
+        "groupId": 4
       },
       {
-        "event": "witness wild_boar Forest deep_forest",
-        "action": "interact with wild_boar at deep_forest",
-        "time": "2025.05.02.03:42",
-        "importance": 1
+        "event": "watch fountain Village park",
+        "time": "2025.05.01.08:05",
+        "groupId": 4
       },
       {
-        "event": "witness fountain Village park",
-        "action": "interact with fountain at park",
-        "time": "2025.05.04.13:09",
-        "importance": 3
+        "event": "eat raspberry Forest stream_bank",
+        "time": "2025.05.01.10:10",
+        "groupId": 5
       },
       {
-        "event": "witness seagull Beach cliffside",
-        "action": "interact with seagull at cliffside",
-        "time": "2025.04.26.00:03",
-        "importance": 1
+        "event": "wait Village house",
+        "time": "2025.05.01.12:00",
+        "groupId": 6
       },
       {
-        "event": "witness bench Village park",
-        "action": "interact with bench at park",
-        "time": "2025.05.03.04:04",
-        "importance": 2
+        "event": "interact bookshelf Village house",
+        "time": "2025.05.01.12:15",
+        "groupId": 7
       },
       {
-        "event": "witness seaweed Beach tidal_pool",
-        "action": "eat seaweed at tidal_pool",
-        "time": "2025.05.01.17:01",
-        "importance": 4
+        "event": "groupIdle Village house",
+        "time": "2025.05.01.13:00",
+        "groupId": 8
       },
       {
-        "event": "witness snail Beach tidal_pool",
-        "action": "eat snail at tidal_pool",
-        "time": "2025.04.25.00:26",
-        "importance": 5
+        "event": "sleep Village house",
+        "time": "2025.05.01.22:00",
+        "groupId": 9
       },
       {
-        "event": "receive seashell Beach shoreline",
-        "action": "talk to Sarah at shoreline",
-        "time": "2025.05.02.13:29",
-        "importance": 5
+        "event": "move Desert oasis",
+        "time": "2025.05.02.07:30",
+        "groupId": 10
       },
       {
-        "event": "receive pastry_display Village cafe",
-        "action": "talk to Sarah at cafe",
-        "time": "2025.04.30.03:04",
-        "importance": 4
+        "event": "interact water_pool Desert oasis",
+        "time": "2025.05.02.07:35",
+        "groupId": 10
       },
       {
-        "event": "receive acorn Forest deep_forest",
-        "action": "talk to Sarah at deep_forest",
-        "time": "2025.05.02.08:25",
-        "importance": 6
+        "event": "watch camel Desert oasis",
+        "time": "2025.05.02.07:40",
+        "groupId": 11
       },
       {
-        "event": "receive coffee_machine Village cafe",
-        "action": "talk to Sarah at cafe",
-        "time": "2025.05.02.20:55",
-        "importance": 5
+        "event": "think Desert oasis",
+        "time": "2025.05.02.07:45",
+        "groupId": 11
       },
       {
-        "event": "receive oak_tree Forest forest_entrance",
-        "action": "talk to Sarah at forest_entrance",
-        "time": "2025.05.04.09:57",
-        "importance": 6
+        "event": "move Village construction_site",
+        "time": "2025.05.02.10:00",
+        "groupId": 12
       },
       {
-        "event": "feel calm Village town_hall",
-        "action": "think",
-        "time": "2025.05.04.10:51",
-        "importance": 3
+        "event": "interact library_foundation Village construction_site",
+        "time": "2025.05.02.10:10",
+        "groupId": 12
       },
       {
-        "event": "feel sad Forest stream_bank",
-        "action": "think",
-        "time": "2025.04.26.00:37",
-        "importance": 2
+        "event": "eat crab Beach shoreline",
+        "time": "2025.05.02.12:00",
+        "groupId": 13
       },
       {
-        "event": "feel tired Village cafe",
-        "action": "think",
-        "time": "2025.05.03.11:20",
-        "importance": 2
+        "event": "move Beach cliffsgroupIde",
+        "time": "2025.05.02.12:30",
+        "groupId": 14
       },
       {
-        "event": "feel calm Village town_hall",
-        "action": "idle",
-        "time": "2025.05.03.18:45",
-        "importance": 1
+        "event": "watch seagull Beach cliffsgroupIde",
+        "time": "2025.05.02.12:35",
+        "groupId": 14
       },
       {
-        "event": "feel hungry Village park",
-        "action": "move to cafe",
-        "time": "2025.04.28.23:49",
-        "importance": 2
+        "event": "interact rain_collector Beach cliffsgroupIde",
+        "time": "2025.05.02.12:50",
+        "groupId": 15
       },
       {
-        "event": "feel hungry Beach cliffside",
-        "action": "move to house",
-        "time": "2025.04.27.23:24",
-        "importance": 2
+        "event": "wait Beach cliffsgroupIde",
+        "time": "2025.05.02.13:00",
+        "groupId": 16
       },
       {
-        "event": "feel hungry Village cafe",
-        "action": "eat pastry at cafe",
-        "time": "2025.04.26.16:56",
-        "importance": 2
+        "event": "sleep Village house",
+        "time": "2025.05.02.22:00",
+        "groupId": 17
       },
       {
-        "event": "feel hungry Desert oasis",
-        "action": "move to cafe",
-        "time": "2025.04.30.01:31",
-        "importance": 1
+        "event": "move Forest orchard",
+        "time": "2025.05.03.06:10",
+        "groupId": 18
       },
       {
-        "event": "feel happy Beach cliffside",
-        "action": "idle",
-        "time": "2025.04.25.14:55",
-        "importance": 2
+        "event": "watch fruit_trees Forest orchard",
+        "time": "2025.05.03.06:20",
+        "groupId": 18
       },
       {
-        "event": "feel bored Forest forest_entrance",
-        "action": "idle",
-        "time": "2025.04.25.01:50",
-        "importance": 3
+        "event": "eat raspberry Forest stream_bank",
+        "time": "2025.05.03.07:30",
+        "groupId": 19
       },
       {
-        "event": "feel calm Village cafe",
-        "action": "idle",
-        "time": "2025.04.28.19:28",
-        "importance": 1
+        "event": "move Desert rocky_outcrop",
+        "time": "2025.05.03.08:50",
+        "groupId": 20
       },
       {
-        "event": "feel happy Desert oasis",
-        "action": "think",
-        "time": "2025.04.25.01:17",
-        "importance": 2
+        "event": "interact solar_panel_parts Desert rocky_outcrop",
+        "time": "2025.05.03.09:00",
+        "groupId": 20
       },
       {
-        "event": "discover squirrel Forest forest_entrance",
-        "action": "interact with squirrel at forest_entrance",
-        "time": "2025.05.02.07:24",
-        "importance": 2
+        "event": "think Desert rocky_outcrop",
+        "time": "2025.05.03.09:10",
+        "groupId": 21
       },
       {
-        "event": "discover meeting_table Village town_hall",
-        "action": "move to town_hall",
-        "time": "2025.05.01.03:21",
-        "importance": 2
+        "event": "move Village workshop",
+        "time": "2025.05.03.11:00",
+        "groupId": 22
       },
       {
-        "event": "discover oak_tree Forest forest_entrance",
-        "action": "move to forest_entrance",
-        "time": "2025.05.02.06:50",
-        "importance": 2
+        "event": "interact solar_charger Village workshop",
+        "time": "2025.05.03.11:05",
+        "groupId": 22
       },
       {
-        "event": "discover seashell Beach shoreline",
-        "action": "interact with seashell at shoreline",
-        "time": "2025.05.01.01:52",
-        "importance": 2
+        "event": "wait Village workshop",
+        "time": "2025.05.03.11:10",
+        "groupId": 23
       },
       {
-        "event": "discover clock Village town_hall",
-        "action": "interact with clock at town_hall",
-        "time": "2025.04.29.05:30",
-        "importance": 2
+        "event": "move Village garden",
+        "time": "2025.05.03.14:00",
+        "groupId": 24
       },
       {
-        "event": "discover seashell Beach shoreline",
-        "action": "move to shoreline",
-        "time": "2025.04.30.11:16",
-        "importance": 3
+        "event": "interact irrigation_system Village garden",
+        "time": "2025.05.03.14:05",
+        "groupId": 24
       },
       {
-        "event": "discover wild_boar Forest deep_forest",
-        "action": "move to deep_forest",
-        "time": "2025.04.30.19:17",
-        "importance": 1
+        "event": "groupIdle Village garden",
+        "time": "2025.05.03.14:20",
+        "groupId": 25
       },
       {
-        "event": "discover palm_tree Desert oasis",
-        "action": "interact with palm_tree at oasis",
-        "time": "2025.05.04.02:53",
-        "importance": 1
+        "event": "watch mushroom Forest deep_forest",
+        "time": "2025.05.03.16:30",
+        "groupId": 26
       },
       {
-        "event": "discover coffee_machine Village cafe",
-        "action": "move to cafe",
-        "time": "2025.05.03.02:20",
-        "importance": 1
+        "event": "sleep Village house",
+        "time": "2025.05.03.22:00",
+        "groupId": 27
       },
       {
-        "event": "discover meeting_table Village town_hall",
-        "action": "interact with meeting_table at town_hall",
-        "time": "2025.04.29.01:55",
-        "importance": 3
+        "event": "move Beach tgroupIdal_pool",
+        "time": "2025.05.04.07:00",
+        "groupId": 28
       },
       {
-        "event": "discover wild_boar Forest deep_forest",
-        "action": "move to deep_forest",
-        "time": "2025.05.02.09:48",
-        "importance": 3
+        "event": "watch starfish Beach tgroupIdal_pool",
+        "time": "2025.05.04.07:05",
+        "groupId": 28
       },
+      { "event": "move Beach dock", "time": "2025.05.04.08:00", "groupId": 29 },
       {
-        "event": "discover cozy_sofa Village cafe",
-        "action": "interact with cozy_sofa at cafe",
-        "time": "2025.04.25.01:24",
-        "importance": 1
+        "event": "interact fish Beach dock",
+        "time": "2025.05.04.08:05",
+        "groupId": 29
       },
       {
-        "event": "discover seagull Beach cliffside",
-        "action": "move to cliffside",
-        "time": "2025.04.30.17:25",
-        "importance": 1
+        "event": "eat fish Beach dock",
+        "time": "2025.05.04.08:20",
+        "groupId": 30
       },
       {
-        "event": "discover seagull Beach cliffside",
-        "action": "move to cliffside",
-        "time": "2025.04.29.02:14",
-        "importance": 3
+        "event": "move Village square",
+        "time": "2025.05.04.10:00",
+        "groupId": 31
       },
       {
-        "event": "discover stream_water Forest stream_bank",
-        "action": "move to stream_bank",
-        "time": "2025.05.04.02:05",
-        "importance": 1
+        "event": "watch broken_well Village square",
+        "time": "2025.05.04.10:05",
+        "groupId": 31
       },
       {
-        "event": "discover raspberry Forest stream_bank",
-        "action": "move to stream_bank",
-        "time": "2025.05.02.06:40",
-        "importance": 1
+        "event": "wait Village square",
+        "time": "2025.05.04.10:10",
+        "groupId": 32
       },
       {
-        "event": "discover clock Village town_hall",
-        "action": "move to town_hall",
-        "time": "2025.04.28.13:42",
-        "importance": 1
+        "event": "move Village garden",
+        "time": "2025.05.04.11:00",
+        "groupId": 33
       },
       {
-        "event": "discover sandstorm Desert sand_dunes",
-        "action": "move to sand_dunes",
-        "time": "2025.04.28.19:10",
-        "importance": 2
+        "event": "interact vegetable_seeds Village garden",
+        "time": "2025.05.04.11:05",
+        "groupId": 33
       },
       {
-        "event": "discover coffee_machine Village cafe",
-        "action": "move to cafe",
-        "time": "2025.05.01.04:17",
-        "importance": 1
+        "event": "think Village garden",
+        "time": "2025.05.04.11:15",
+        "groupId": 34
       },
       {
-        "event": "discover cactus Desert sand_dunes",
-        "action": "move to sand_dunes",
-        "time": "2025.05.03.10:04",
-        "importance": 3
+        "event": "sleep Village house",
+        "time": "2025.05.04.22:00",
+        "groupId": 35
       },
       {
-        "event": "discover scorpion Desert rocky_outcrop",
-        "action": "move to rocky_outcrop",
-        "time": "2025.04.26.00:00",
-        "importance": 1
+        "event": "move Forest deep_forest",
+        "time": "2025.05.05.06:30",
+        "groupId": 36
       },
       {
-        "event": "discover bench Village park",
-        "action": "move to park",
-        "time": "2025.05.02.14:29",
-        "importance": 1
+        "event": "watch wild_boar Forest deep_forest",
+        "time": "2025.05.05.06:35",
+        "groupId": 36
       },
       {
-        "event": "discover pastry_display Village cafe",
-        "action": "move to cafe",
-        "time": "2025.04.25.05:11",
-        "importance": 2
+        "event": "wait Forest deep_forest",
+        "time": "2025.05.05.06:40",
+        "groupId": 37
       },
       {
-        "event": "discover squirrel Forest forest_entrance",
-        "action": "move to forest_entrance",
-        "time": "2025.05.01.01:32",
-        "importance": 3
+        "event": "move Forest stream_bank",
+        "time": "2025.05.05.07:00",
+        "groupId": 38
       },
       {
-        "event": "observe driftwood Beach shoreline",
-        "action": "interact with driftwood at shoreline",
-        "time": "2025.04.25.04:04",
-        "importance": 1
+        "event": "eat raspberry Forest stream_bank",
+        "time": "2025.05.05.07:05",
+        "groupId": 38
       },
       {
-        "event": "observe dining_table Village house",
-        "action": "interact with dining_table at house",
-        "time": "2025.04.30.22:19",
-        "importance": 2
+        "event": "move Village town_hall",
+        "time": "2025.05.05.08:30",
+        "groupId": 39
       },
       {
-        "event": "observe lizard Desert sand_dunes",
-        "action": "interact with lizard at sand_dunes",
-        "time": "2025.04.28.18:28",
-        "importance": 1
+        "event": "interact bulletin_board Village town_hall",
+        "time": "2025.05.05.08:35",
+        "groupId": 39
       },
       {
-        "event": "observe mushroom Forest deep_forest",
-        "action": "idle",
-        "time": "2025.04.26.12:57",
-        "importance": 2
+        "event": "think Village town_hall",
+        "time": "2025.05.05.08:40",
+        "groupId": 40
       },
       {
-        "event": "observe camel Desert oasis",
-        "action": "interact with camel at oasis",
-        "time": "2025.05.03.03:48",
-        "importance": 3
+        "event": "move Village storage",
+        "time": "2025.05.05.09:30",
+        "groupId": 41
       },
       {
-        "event": "observe sandstorm Desert sand_dunes",
-        "action": "interact with sandstorm at sand_dunes",
-        "time": "2025.05.01.20:01",
-        "importance": 2
+        "event": "interact old_blueprint Village storage",
+        "time": "2025.05.05.09:35",
+        "groupId": 41
       },
       {
-        "event": "observe acorn Forest deep_forest",
-        "action": "interact with acorn at deep_forest",
-        "time": "2025.05.04.01:41",
-        "importance": 3
+        "event": "move Village workshop",
+        "time": "2025.05.05.11:00",
+        "groupId": 42
       },
       {
-        "event": "observe seagull Beach cliffside",
-        "action": "interact with seagull at cliffside",
-        "time": "2025.05.04.08:38",
-        "importance": 2
+        "event": "interact handcrafted_tool Village workshop",
+        "time": "2025.05.05.11:05",
+        "groupId": 42
       },
       {
-        "event": "observe camel Desert oasis",
-        "action": "interact with camel at oasis",
-        "time": "2025.05.02.13:07",
-        "importance": 2
+        "event": "sleep Village house",
+        "time": "2025.05.05.22:00",
+        "groupId": 43
       },
       {
-        "event": "observe coffee_machine Village cafe",
-        "action": "interact with coffee_machine at cafe",
-        "time": "2025.05.04.14:23",
-        "importance": 3
+        "event": "move Desert sand_dunes",
+        "time": "2025.05.06.07:00",
+        "groupId": 44
       },
       {
-        "event": "observe rock Beach cliffside",
-        "action": "interact with rock at cliffside",
-        "time": "2025.05.02.09:03",
-        "importance": 1
+        "event": "watch sandstorm Desert sand_dunes",
+        "time": "2025.05.06.07:05",
+        "groupId": 44
       },
       {
-        "event": "observe stream_water Forest stream_bank",
-        "action": "interact with stream_water at stream_bank",
-        "time": "2025.04.27.05:36",
-        "importance": 3
+        "event": "wait Desert sand_dunes",
+        "time": "2025.05.06.07:10",
+        "groupId": 45
       },
       {
-        "event": "observe sandstone Desert rocky_outcrop",
-        "action": "idle",
-        "time": "2025.04.29.17:42",
-        "importance": 3
+        "event": "move Desert rocky_outcrop",
+        "time": "2025.05.06.08:00",
+        "groupId": 46
       },
       {
-        "event": "observe stone Forest stream_bank",
-        "action": "talk to Sarah at stream_bank",
-        "time": "2025.05.04.00:24",
-        "importance": 7
+        "event": "interact scorpion Desert rocky_outcrop",
+        "time": "2025.05.06.08:05",
+        "groupId": 46
       },
       {
-        "event": "observe meeting_table Village town_hall",
-        "action": "idle",
-        "time": "2025.04.25.16:32",
-        "importance": 3
+        "event": "move Desert oasis",
+        "time": "2025.05.06.09:00",
+        "groupId": 47
       },
       {
-        "event": "observe wild_boar Forest deep_forest",
-        "action": "idle",
-        "time": "2025.05.03.09:26",
-        "importance": 3
+        "event": "interact water_pool Desert oasis",
+        "time": "2025.05.06.09:05",
+        "groupId": 47
       },
       {
-        "event": "observe sandstone Desert rocky_outcrop",
-        "action": "talk to Sarah at rocky_outcrop",
-        "time": "2025.04.30.12:55",
-        "importance": 5
+        "event": "move Village cafe",
+        "time": "2025.05.06.11:00",
+        "groupId": 48
       },
       {
-        "event": "observe sandstone Desert rocky_outcrop",
-        "action": "idle",
-        "time": "2025.05.04.02:03",
-        "importance": 2
+        "event": "interact pastry_display Village cafe",
+        "time": "2025.05.06.11:05",
+        "groupId": 48
       },
       {
-        "event": "observe driftwood Beach shoreline",
-        "action": "talk to Sarah at shoreline",
-        "time": "2025.05.04.17:29",
-        "importance": 4
+        "event": "eat pastry_display Village cafe",
+        "time": "2025.05.06.11:15",
+        "groupId": 49
       },
       {
-        "event": "observe raspberry Forest stream_bank",
-        "action": "idle",
-        "time": "2025.04.28.11:17",
-        "importance": 1
+        "event": "think Village cafe",
+        "time": "2025.05.06.11:20",
+        "groupId": 50
       },
       {
-        "event": "observe squirrel Forest forest_entrance",
-        "action": "idle",
-        "time": "2025.05.04.05:14",
-        "importance": 3
+        "event": "sleep Village house",
+        "time": "2025.05.06.22:00",
+        "groupId": 51
       },
       {
-        "event": "observe water_pool Desert oasis",
-        "action": "idle",
-        "time": "2025.04.25.08:15",
-        "importance": 3
+        "event": "move Beach shoreline",
+        "time": "2025.05.07.06:10",
+        "groupId": 52
       },
       {
-        "event": "discover mushroom Forest deep_forest",
-        "action": "move to deep_forest",
-        "time": "2025.05.01.05:11",
-        "importance": 3
+        "event": "watch crab Beach shoreline",
+        "time": "2025.05.07.06:15",
+        "groupId": 52
       },
       {
-        "event": "discover raspberry Forest stream_bank",
-        "action": "move to stream_bank",
-        "time": "2025.04.25.10:54",
-        "importance": 1
+        "event": "move Beach cliffsgroupIde",
+        "time": "2025.05.07.06:40",
+        "groupId": 53
       },
       {
-        "event": "discover binocular_spot Beach cliffside",
-        "action": "move to cliffside",
-        "time": "2025.05.01.15:29",
-        "importance": 1
+        "event": "watch seagull Beach cliffsgroupIde",
+        "time": "2025.05.07.06:45",
+        "groupId": 53
       },
       {
-        "event": "discover coffee_machine Village cafe",
-        "action": "interact with coffee_machine at cafe",
-        "time": "2025.04.26.05:47",
-        "importance": 2
+        "event": "interact rain_collector Beach cliffsgroupIde",
+        "time": "2025.05.07.06:50",
+        "groupId": 54
       },
       {
-        "event": "discover binocular_spot Beach cliffside",
-        "action": "interact with binocular_spot at cliffside",
-        "time": "2025.04.27.09:43",
-        "importance": 1
+        "event": "wait Beach cliffsgroupIde",
+        "time": "2025.05.07.06:55",
+        "groupId": 55
       },
       {
-        "event": "discover cozy_sofa Village cafe",
-        "action": "move to cafe",
-        "time": "2025.04.26.05:29",
-        "importance": 3
+        "event": "move Village construction_site",
+        "time": "2025.05.07.09:00",
+        "groupId": 56
       },
       {
-        "event": "discover stone Forest stream_bank",
-        "action": "interact with stone at stream_bank",
-        "time": "2025.04.27.15:14",
-        "importance": 3
+        "event": "interact library_shelves Village construction_site",
+        "time": "2025.05.07.09:05",
+        "groupId": 56
       },
       {
-        "event": "discover scorpion Desert rocky_outcrop",
-        "action": "move to rocky_outcrop",
-        "time": "2025.05.03.23:09",
-        "importance": 1
+        "event": "think Village construction_site",
+        "time": "2025.05.07.09:10",
+        "groupId": 57
       },
       {
-        "event": "discover seashell Beach shoreline",
-        "action": "move to shoreline",
-        "time": "2025.05.04.11:54",
-        "importance": 2
+        "event": "move Village garden",
+        "time": "2025.05.07.10:30",
+        "groupId": 58
       },
       {
-        "event": "discover crab Beach shoreline",
-        "action": "interact with crab at shoreline",
-        "time": "2025.05.03.16:05",
-        "importance": 2
+        "event": "interact greenhouse_frame Village garden",
+        "time": "2025.05.07.10:35",
+        "groupId": 58
       },
       {
-        "event": "discover crab Beach shoreline",
-        "action": "move to shoreline",
-        "time": "2025.05.02.18:42",
-        "importance": 2
+        "event": "groupIdle Village garden",
+        "time": "2025.05.07.10:40",
+        "groupId": 59
       },
       {
-        "event": "discover sandstone Desert rocky_outcrop",
-        "action": "interact with sandstone at rocky_outcrop",
-        "time": "2025.04.27.14:39",
-        "importance": 2
-      },
-      {
-        "event": "discover coffee_machine Village cafe",
-        "action": "move to cafe",
-        "time": "2025.04.30.03:22",
-        "importance": 1
-      },
-      {
-        "event": "discover seashell Beach shoreline",
-        "action": "move to shoreline",
-        "time": "2025.04.30.13:27",
-        "importance": 2
-      },
-      {
-        "event": "discover pastry_display Village cafe",
-        "action": "move to cafe",
-        "time": "2025.04.29.20:36",
-        "importance": 3
-      },
-      {
-        "event": "discover binocular_spot Beach cliffside",
-        "action": "move to cliffside",
-        "time": "2025.05.03.12:32",
-        "importance": 2
-      },
-      {
-        "event": "discover meeting_table Village town_hall",
-        "action": "move to town_hall",
-        "time": "2025.05.01.10:06",
-        "importance": 3
-      },
-      {
-        "event": "discover mushroom Forest deep_forest",
-        "action": "move to deep_forest",
-        "time": "2025.04.26.14:48",
-        "importance": 1
-      },
-      {
-        "event": "discover palm_tree Desert oasis",
-        "action": "move to oasis",
-        "time": "2025.04.25.12:58",
-        "importance": 1
-      },
-      {
-        "event": "discover acorn Forest deep_forest",
-        "action": "move to deep_forest",
-        "time": "2025.04.28.01:22",
-        "importance": 1
-      },
-      {
-        "event": "discover stone Forest stream_bank",
-        "action": "interact with stone at stream_bank",
-        "time": "2025.04.28.00:35",
-        "importance": 3
-      },
-      {
-        "event": "discover rock Beach cliffside",
-        "action": "interact with rock at cliffside",
-        "time": "2025.05.04.09:31",
-        "importance": 2
-      },
-      {
-        "event": "discover starfish Beach tidal_pool",
-        "action": "interact with starfish at tidal_pool",
-        "time": "2025.05.03.09:35",
-        "importance": 1
-      },
-      {
-        "event": "discover coffee_machine Village cafe",
-        "action": "interact with coffee_machine at cafe",
-        "time": "2025.04.26.22:37",
-        "importance": 1
-      },
-      {
-        "event": "observe Sarah Village town_hall",
-        "action": "talk to Sarah at town_hall",
-        "time": "2025.04.25.09:15",
-        "importance": 5
-      },
-      {
-        "event": "observe Sarah Forest deep_forest",
-        "action": "talk to Sarah at deep_forest",
-        "time": "2025.04.26.14:30",
-        "importance": 6
-      },
-      {
-        "event": "observe Sarah Desert oasis",
-        "action": "talk to Sarah at oasis",
-        "time": "2025.04.28.11:45",
-        "importance": 4
-      },
-      {
-        "event": "observe Sarah Beach cliffside",
-        "action": "talk to Sarah at cliffside",
-        "time": "2025.04.29.16:20",
-        "importance": 7
-      },
-      {
-        "event": "observe Sarah Village park",
-        "action": "talk to Sarah at park",
-        "time": "2025.05.01.08:50",
-        "importance": 5
-      },
-      {
-        "event": "observe Sarah Forest stream_bank",
-        "action": "talk to Sarah at stream_bank",
-        "time": "2025.05.03.19:05",
-        "importance": 6
+        "event": "sleep Village house",
+        "time": "2025.05.07.22:00",
+        "groupId": 60
       }
     ]
   }

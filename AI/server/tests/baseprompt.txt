@@ -55,6 +55,7 @@ Use the following information to create a meaningful and balanced plan for the c
 - `think`: engage in internal reflection
 - `idle`: rest without doing anything
 - `sleep`: sleep to recover energy
+- `watch` : Observe objects or people.
 
 ---
 
@@ -68,7 +69,11 @@ Use the following information to create a meaningful and balanced plan for the c
 * `time_slots` must follow this format:  
   `["action", "location", "target", "start time", "end time"]`
 * `action` must be chosen from the AVAILABLE ACTIONS
-* target must be an object explicitly listed within the location on the map (see [] brackets)
+* The map is structured in three levels: Region → Location → Object.
+* The "location" field must refer only to a valid location within the given region. Do not use a region or object name in this field.
+* The "target" field (object) must exist within the specified location. Do not use an object from a different location.
+*All targets must match the object list defined for that specific location (see the map reference).
+
 * You must generate a plan for the **next day** following the latest date in John’s existing plans  
   (e.g., if the last plan is for "2025.05.04", generate one for "2025.05.05")
 
