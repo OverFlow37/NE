@@ -267,7 +267,7 @@ public class AgentScheduler : MonoBehaviour
             // 에이전트에 활동 시작 알림
             if (mAgentController != null)
             {
-                mAgentController.StartNewAction(mCurrentAction);
+                mAgentController.StartAction(mCurrentAction);
             }
         }
         else

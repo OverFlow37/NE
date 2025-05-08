@@ -10,7 +10,7 @@ namespace OhMAIGod.Agent
             base.OnStateEnter(_controller);
 
             // 상호작용 시작
-            _controller.StartAction();
+            // _controller.StartAction();
         }
 
         public override void OnStateExecute(AgentController _controller)
