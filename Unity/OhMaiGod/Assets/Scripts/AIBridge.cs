@@ -239,27 +239,30 @@ public class AIBridge : MonoBehaviour
             TimeSpan currentTime = TimeManager.Instance.GetCurrentGameTime();
             TimeSpan duration = TimeSpan.FromMinutes(30); // 기본 30분으로 설정
             string location = action.details.location;
-            if (!TileManager.Instance.GetLocationNames().Contains(location))
-            {
-                SendAgent(agent);
-                return;
-            }
+            // if (!TileManager.Instance.GetLocationNames().Contains(location))
+            // {
+            //     SendAgent(agent);
+            //     return;
+            // }
             // 새로운 일정 아이템 생성
+            TimeSpan endTime = currentTime.Add(duration);
             ScheduleItem newScheduleItem = new ScheduleItem
             {
                 ID = System.Guid.NewGuid().ToString(),
                 ActionName = action.action,
                 LocationName = location,
                 TargetName = action.details.target,
-                StartTime = currentTime,
-                EndTime = currentTime.Add(duration),
+                
+                // 시간 정보 변환 (정확하게 계산)
+                StartHour = currentTime.Hours, StartMinute = currentTime.Minutes, StartSecond = currentTime.Seconds,
+                EndHour = endTime.Hours, EndMinute = endTime.Minutes, EndSecond = endTime.Seconds,
                 Priority = 1, // 최우선순위로 설정
                 IsFlexible = true,
                 IsCompleted = false,
                 ActionDetails = JsonUtility.ToJson(action.details),
                 Reason = action.reason
             };
-            // 스케줄러에 새 일정 추가 (기존 일정은 자동으로 취소됨)
+            // 스케줄러에 새 일정 추가
             bool success = agent.mScheduler.AddScheduleItem(newScheduleItem);
             // 일정 추가 결과 로깅
             if (!success)

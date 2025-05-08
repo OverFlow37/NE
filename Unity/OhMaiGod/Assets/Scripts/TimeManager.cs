@@ -30,15 +30,17 @@ public class TimeManager : MonoBehaviour
     [SerializeField] private bool mShowDebugInfo = true;            // 디버그 로그 출력 여부
 
     // 시간 관리 변수들
-    [SerializeField]private DateTime mGameDate;             // 현재 게임 날짜
-    [SerializeField]private TimeSpan mCurrentGameTime;      // 현재 게임 내 시간
+    [SerializeField, HideInInspector] private DateTime mGameDate;             // 현재 게임 날짜
+    [SerializeField, HideInInspector] private TimeSpan mCurrentGameTime;      // 현재 게임 내 시간
     private bool mIsPaused = false;     // 시간 흐름 일시정지 상태 여부
+
+    // 인스펙터에서 확인용 string 필드
+    [SerializeField] private string mGameDateString;      // 인스펙터용 날짜 문자열
+    [SerializeField] private string mCurrentGameTimeString; // 인스펙터용 시간 문자열
 
     public DateTime GameDate {get => mGameDate;}
     public TimeSpan GameTime {get => mCurrentGameTime;}
     public bool isPaused {get => mIsPaused; set => mIsPaused = value; }
-
-    // public event Action OnDayChanged;
 
     private void Awake()
     {
@@ -52,9 +54,13 @@ public class TimeManager : MonoBehaviour
         mInstance = this;
         DontDestroyOnLoad(gameObject);
         
-        // 게임 날짜 및 시간 초기화 (오전 8시 시작)
+        // 게임 날짜 및 시간 초기화
         mGameDate = DateTime.Today;
-        mCurrentGameTime = new TimeSpan(8, 0, 0);
+        mCurrentGameTime = new TimeSpan(6, 0, 0);
+        
+        // string 값도 초기화
+        mGameDateString = mGameDate.ToString("yyyy-MM-dd");
+        mCurrentGameTimeString = mCurrentGameTime.ToString(@"hh\:mm\:ss");
     }
 
     private void Update()
@@ -66,12 +72,6 @@ public class TimeManager : MonoBehaviour
         
         // 게임 시간 업데이트
         UpdateGameTime();
-        
-        // 날짜가 변경된 경우 이벤트 발생
-        // if (prevDate.Date != mGameDate.Date && OnDayChanged != null)
-        // {
-        //     OnDayChanged.Invoke();
-        // }
     }
 
     // 게임 시간 업데이트
@@ -91,6 +91,9 @@ public class TimeManager : MonoBehaviour
                 LogManager.Log("Time", $"새로운 날: {mGameDate.ToString("yyyy-MM-dd")} ({GetDayOfWeekString()})", 3);
             }
         }
+        // string 값 갱신
+        mGameDateString = mGameDate.ToString("yyyy-MM-dd");
+        mCurrentGameTimeString = mCurrentGameTime.ToString(@"hh\:mm\:ss");
     }
 
     // 현재 게임 내 시간 반환
@@ -146,6 +149,10 @@ public class TimeManager : MonoBehaviour
     {
         mGameDate = _date;
         mCurrentGameTime = new TimeSpan(_hours, _minutes, 0);
+        
+        // string 값 갱신
+        mGameDateString = mGameDate.ToString("yyyy-MM-dd");
+        mCurrentGameTimeString = mCurrentGameTime.ToString(@"hh\:mm\:ss");
         
         if (mShowDebugInfo)
         {
