@@ -372,8 +372,8 @@ public class AgentController : MonoBehaviour
         {
             LogManager.Log("Agent", $"{mName}: {CurrentTargetInteractable.name}와(과) 상호작용 시작", 2);
         }
-        LogManager.Log("Agent", "상호작용 시작", 3);
-        CurrentTargetInteractable?.Interact(gameObject);
+        LogManager.Log("Agent", "상호작용 시작: "+mCurrentAction.ActionName, 3);
+        CurrentTargetInteractable?.Interact(gameObject,mCurrentAction.ActionName);
         CompleteAction();
     }
 

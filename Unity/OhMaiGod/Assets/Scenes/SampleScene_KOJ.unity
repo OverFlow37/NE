@@ -214,7 +214,7 @@ MonoBehaviour:
   - Interact
   - Time
   - Default
-  categoryEnabled: 000000000100000000
+  categoryEnabled: 010000000100010000
 --- !u!1 &200844204
 GameObject:
   m_ObjectHideFlags: 0

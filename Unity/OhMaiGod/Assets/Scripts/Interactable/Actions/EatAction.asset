@@ -12,3 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 000e6001234c8cc4ba9bf1626d97158c, type: 3}
   m_Name: EatAction
   m_EditorClassIdentifier: 
+  _actionName: eat
