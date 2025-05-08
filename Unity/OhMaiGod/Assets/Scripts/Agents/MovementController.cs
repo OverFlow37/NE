@@ -100,7 +100,7 @@ public class MovementController : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning($"{gameObject.name}이(가) {_targetPosition}까지의 경로를 찾을 수 없습니다.");
+            LogManager.Log("Movement", $"{gameObject.name}이(가) {_targetPosition}까지의 경로를 찾을 수 없습니다.", 1);
             mIsMoving = false;
             return;
         }
@@ -118,7 +118,7 @@ public class MovementController : MonoBehaviour
 
         mIsMoving = false;
 
-        Debug.Log($"{gameObject.name}의 이동이 중지됨");
+        LogManager.Log("Movement", $"{gameObject.name}의 이동이 중지됨", 2);
     }
 
     // 이동을 재개
@@ -128,7 +128,7 @@ public class MovementController : MonoBehaviour
 
         mIsMoving = true;
 
-        Debug.Log($"{gameObject.name}의 이동이 재개됨");
+        LogManager.Log("Movement", $"{gameObject.name}의 이동이 재개됨", 2);
     }
 
     // 이동 중인지 여부 반환

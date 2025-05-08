@@ -88,7 +88,7 @@ public class TimeManager : MonoBehaviour
             
             if (mShowDebugInfo)
             {
-                Debug.Log($"새로운 날: {mGameDate.ToString("yyyy-MM-dd")} ({GetDayOfWeekString()})");
+                LogManager.Log("Time", $"새로운 날: {mGameDate.ToString("yyyy-MM-dd")} ({GetDayOfWeekString()})", 3);
             }
         }
     }
@@ -137,7 +137,7 @@ public class TimeManager : MonoBehaviour
 
         if (mShowDebugInfo)
         {
-            Debug.Log($"시간 속도 변경: {_minutesPerSecond}분/초");
+            LogManager.Log("Time", $"시간 속도 변경: {_minutesPerSecond}분/초", 3);
         }
     }
 
@@ -149,7 +149,7 @@ public class TimeManager : MonoBehaviour
         
         if (mShowDebugInfo)
         {
-            Debug.Log($"날짜/시간 설정: {GetDateString()} {GetTimeString()}");
+            LogManager.Log("Time", $"날짜/시간 설정: {GetDateString()} {GetTimeString()}", 3);
         }
     }
 

@@ -8,23 +8,17 @@ Can interact with: {interact_desc}
 TASK: For each agent, determine ONE NEXT ACTION based on their current state.
 
 ACTION OPTIONS:
-- move: go to a new location
+- use: use this object
 - interact: use/manipulate an object
 - eat: consume food
-- talk: speak to another agent
-- wait: remain inactive briefly
-- think: internal thought process
-- idle: remain idle without taking any action  
-- sleep: sleep to recover energy (agent becomes inactive for a longer period)  
-- die: be removed from the simulation  
 
 LOCATION OPTIONS:
 - house: a private residence where agents can live and rest
 - cafeteria: communal dining area where agents can eat and socialize
 
 OBJECT OPTIONS:
-- Bed: a private space for sleeping and personal activities
-- Apple: it's delicious, relieve hunger
+- Bed: a private space for sleeping and personal activities (action: use)
+- Apple: it's delicious, relieve hunger (action: eat)
 
 REASONING GUIDELINES:
 - Explain the reasons for your actions in 100 characters or less
@@ -38,8 +32,6 @@ RESPONSE FORMAT (provide ONLY valid JSON):
   "details": {{
     "location": "location_name",
     "target": "object_or_agent",
-    "using": "item_if_needed",
-    "message": "spoken_text_or_thought"
   }},
   "reason": "reasoning_text"
 }}

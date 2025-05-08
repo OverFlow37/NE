@@ -67,7 +67,7 @@ public class TileManager : MonoBehaviour
                 mLocationTilemaps.Add(controller.Tilemap);
                 if (mShowDebug)
                 {
-                    Debug.Log($"TileManager: {controller.LocationName} 환경이 등록되었습니다.");
+                    LogManager.Log("Env", $"TileManager: {controller.LocationName} 환경이 등록되었습니다.", 3);
                 }
             }
         }
@@ -93,7 +93,7 @@ public class TileManager : MonoBehaviour
                 mPendingTargets.Add(target);
                 if (mShowDebug)
                 {
-                    Debug.Log($"TileManager: {target.name}을(를) 대기 목록에 추가했습니다.");
+                    LogManager.Log("Env", $"TileManager: {target.name}을(를) 대기 목록에 추가했습니다.", 3);
                 }
             }
             return;
@@ -118,12 +118,12 @@ public class TileManager : MonoBehaviour
             
             if (mShowDebug)
             {
-                Debug.Log($"TileManager: {target.name}을(를) {locationName}에 등록했습니다.");
+                LogManager.Log("Env", $"TileManager: {target.name}을(를) {locationName}에 등록했습니다.", 3);
             }
         }
         else
         {
-            Debug.LogWarning($"TileManager: {target.name}의 위치에 해당하는 TileController를 찾을 수 없습니다.");
+            LogManager.Log("Env", $"TileManager: {target.name}의 위치에 해당하는 TileController를 찾을 수 없습니다.", 1);
         }
     }
 
@@ -135,7 +135,7 @@ public class TileManager : MonoBehaviour
             mPendingTargets.Remove(target);
             if (mShowDebug)
             {
-                Debug.Log($"TileManager: {target.name}을(를) 대기 목록에서 제거했습니다.");
+                LogManager.Log("Env", $"TileManager: {target.name}을(를) 대기 목록에서 제거했습니다.", 3);
             }
             return;
         }
@@ -153,14 +153,14 @@ public class TileManager : MonoBehaviour
                 target.UpdateCurrentLocation(null); // 위치 정보 초기화
                 if (mShowDebug)
                 {
-                    Debug.Log($"TileManager: {target.name}을(를) {tileController.LocationName}에서 제거했습니다.");
+                    LogManager.Log("Env", $"TileManager: {target.name}을(를) {tileController.LocationName}에서 제거했습니다.", 3);
                 }
             }
         }
 
         if (!removed && mShowDebug)
         {
-            Debug.Log($"TileManager: {target.name}이(가) 어떤 환경에도 등록되어 있지 않았습니다.");
+            LogManager.Log("Env", $"TileManager: {target.name}이(가) 어떤 환경에도 등록되어 있지 않았습니다.", 3);
         }
     }
 
@@ -184,13 +184,13 @@ public class TileManager : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            Debug.Log($"타일맵트리");
+            LogManager.Log("Env", $"타일맵트리", 2);
             foreach (var tileController in mTileTree)
             {
-                Debug.Log($"타일맵 : {tileController.LocationName}");
+                LogManager.Log("Env", $"타일맵 : {tileController.LocationName}", 2);
                 foreach (var childInteractable in tileController.ChildInteractables)
                 {
-                    Debug.Log($"오브젝트 : {childInteractable.mInteractableData.mName}");
+                    LogManager.Log("Env", $"오브젝트 : {childInteractable.mInteractableData.mName}", 2);
                 }
             }
         }
@@ -209,15 +209,15 @@ public class TileManager : MonoBehaviour
     {
         if (mShowDebug)
         {
-            Debug.Log($"TileManager: 위치 {position}에서 TileController 검색 중");
-            Debug.Log($"등록된 Tilemap 수: {mLocationTilemaps.Count}");
+            LogManager.Log("Env", $"TileManager: 위치 {position}에서 TileController 검색 중", 3);
+            LogManager.Log("Env", $"등록된 Tilemap 수: {mLocationTilemaps.Count}", 3);
         }
 
         foreach (var locationTilemap in mLocationTilemaps)
         {
             if (mShowDebug)
             {
-                Debug.Log($"검사 중인 Tilemap: {locationTilemap.name}, HasTile: {locationTilemap.HasTile(position)}");
+                LogManager.Log("Env", $"검사 중인 Tilemap: {locationTilemap.name}, HasTile: {locationTilemap.HasTile(position)}", 3);
             }
 
             if (locationTilemap.HasTile(position))

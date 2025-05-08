@@ -36,7 +36,7 @@ public class Interactable : MonoBehaviour
         // ObjectData가 할당되지 않았으면 경고
         if (mInteractableData == null)
         {
-            Debug.LogWarning("Interactable 컴포넌트에 mInteractableData 할당되지 않았습니다: " + gameObject.name);
+            LogManager.Log("Interact", "Interactable 컴포넌트에 mInteractableData 할당되지 않았습니다: " + gameObject.name, 1);
         }
         else
         {
@@ -70,7 +70,7 @@ public class Interactable : MonoBehaviour
     // 환경에 자신을 등록
     private void RegisterToEnvironment()
     {
-        Debug.Log("RegisterToEnvironment: " + gameObject.name);
+        LogManager.Log("Interact", "RegisterToEnvironment: " + gameObject.name, 3);
         if (TileManager.Instance == null) return;
         TileManager.Instance.RegisterTarget(this);
 
@@ -106,11 +106,11 @@ public class Interactable : MonoBehaviour
         // InteractableData가 없거나 행동 목록이 없으면 상호작용 처리 불가
         if (mInteractableData == null || mInteractableData.mActions == null || mInteractableData.mActions.Length == 0)
         {
-            Debug.LogWarning($"Interactable 오브젝트에 정의된 행동이 없어 상호작용 처리 불가: {gameObject.name}");
+            LogManager.Log("Interact", $"Interactable 오브젝트에 정의된 행동이 없어 상호작용 처리 불가: {gameObject.name}", 1);
             return;
         }
 
-        Debug.Log($"{interactor.name}가 {mInteractableData.mName}와 상호작용 시도.");
+        LogManager.Log("Interact", $"{interactor.name}가 {mInteractableData.mName}와 상호작용 시도.", 2);
 
         // === 상호작용 처리 로직 ===
         // InteractableData에 연결된 모든 InteractionAction을 순회하며 실행
@@ -131,11 +131,11 @@ public class Interactable : MonoBehaviour
 
         if (anyActionSuccessful)
         {
-            Debug.Log($"{mInteractableData.mName} 상호작용 성공.");
+            LogManager.Log("Interact", $"{mInteractableData.mName} 상호작용 성공.", 2);
         }
         else
         {
-            Debug.Log($"{mInteractableData.mName} 상호작용 실패 또는 실행된 행동 없음.");
+            LogManager.Log("Interact", $"{mInteractableData.mName} 상호작용 실패 또는 실행된 행동 없음.", 2);
         }
     }
 
@@ -166,7 +166,7 @@ public class Interactable : MonoBehaviour
         // Location 레이어인 경우에만 처리
         if (other.gameObject.layer == LayerMask.NameToLayer("Location"))
         {
-            Debug.Log($"[{gameObject.name}] {other.name} 영역에서 벗어남");
+            LogManager.Log("Interact", $"[{gameObject.name}] {other.name} 영역에서 벗어남", 2);
             StartCoroutine(UpdateEnvironmentRegistration());
         }
     }
@@ -176,7 +176,7 @@ public class Interactable : MonoBehaviour
         // Location 레이어인 경우에만 처리
         if (other.gameObject.layer == LayerMask.NameToLayer("Location"))
         {
-            Debug.Log($"[{gameObject.name}] {other.name} 영역으로 진입");
+            LogManager.Log("Interact", $"[{gameObject.name}] {other.name} 영역으로 진입", 2);
             StartCoroutine(UpdateEnvironmentRegistration());
         }
     }
@@ -198,13 +198,13 @@ public class Interactable : MonoBehaviour
             // 기존 환경에서 제거 후 새로운 환경에 등록
             TileManager.Instance.UnregisterTarget(this);
             TileManager.Instance.RegisterTarget(this);
-            Debug.Log($"[{gameObject.name}] 환경 업데이트 완료 - 새 위치: {newTileController.LocationName}");
+            LogManager.Log("Interact", $"[{gameObject.name}] 환경 업데이트 완료 - 새 위치: {newTileController.LocationName}", 2);
         }
         else
         {
             // 새로운 환경을 찾지 못한 경우 기존 환경에서만 제거
             TileManager.Instance.UnregisterTarget(this);
-            Debug.Log($"[{gameObject.name}] 유효한 환경을 찾을 수 없음");
+            LogManager.Log("Interact", $"[{gameObject.name}] 유효한 환경을 찾을 수 없음", 1);
         }
     }
 

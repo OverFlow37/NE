@@ -40,7 +40,7 @@ public class AgentScheduler : MonoBehaviour
         // ID 중복 확인
         if (mDailySchedule.Any(item => item.ID == _item.ID))
         {
-            Debug.LogWarning($"중복된 ID의 일정 항목: {_item.ID}");
+            LogManager.Log("Scheduler", $"중복된 ID의 일정 항목: {_item.ID}", 1);
             return false;
         }
         
@@ -57,10 +57,10 @@ public class AgentScheduler : MonoBehaviour
         {
             if (mShowDebugInfo)
             {
-                Debug.Log($"일정 충돌 발생: {_item.ActionName} @ {_item.StartTime}");
+                LogManager.Log("AgentScheduler", $"일정 충돌 발생: {_item.ActionName} @ {_item.StartTime}", 1);
                 foreach (var conflict in conflictingItems)
                 {
-                    Debug.Log($" - 충돌 항목: {conflict.ActionName} @ {conflict.StartTime}");
+                    LogManager.Log("AgentScheduler", $" - 충돌 항목: {conflict.ActionName} @ {conflict.StartTime}", 1);
                 }
             }
             return false;
@@ -75,7 +75,7 @@ public class AgentScheduler : MonoBehaviour
         
         if (mShowDebugInfo)
         {
-            Debug.Log($"새 일정 추가됨: {_item.ActionName} @ {_item.StartTime}-{_item.EndTime}");
+            LogManager.Log("Scheduler", $"새 일정 추가됨: {_item.ActionName} @ {_item.StartTime}-{_item.EndTime}", 2);
         }
         
         return true;
@@ -100,7 +100,7 @@ public class AgentScheduler : MonoBehaviour
             
             if (mShowDebugInfo)
             {
-                Debug.Log($"일정 항목 삭제됨: {_itemID}");
+                LogManager.Log("Scheduler", $"일정 항목 삭제됨: {_itemID}", 2);
             }
         }
         
@@ -139,7 +139,7 @@ public class AgentScheduler : MonoBehaviour
         
         if (mShowDebugInfo)
         {
-            Debug.Log($"전체 일정 갱신됨: {mDailySchedule.Count}개 항목");
+            LogManager.Log("Scheduler", $"전체 일정 갱신됨: {mDailySchedule.Count}개 항목", 2);
         }
     }
 
@@ -152,7 +152,7 @@ public class AgentScheduler : MonoBehaviour
             
             if (mShowDebugInfo)
             {
-                Debug.Log($"활동 완료: {mCurrentAction.ActionName}");
+                LogManager.Log("Scheduler", $"활동 완료: {mCurrentAction.ActionName}", 2);
             }
             
             // 다음 활동 평가
@@ -203,7 +203,7 @@ public class AgentScheduler : MonoBehaviour
                     
                     if (mShowDebugInfo)
                     {
-                        Debug.Log($"활동 자동 완료 (시간 초과): {mCurrentAction.ActionName}");
+                        LogManager.Log("Scheduler", $"활동 자동 완료 (시간 초과): {mCurrentAction.ActionName}", 2);
                     }
                 }
                 
@@ -236,7 +236,7 @@ public class AgentScheduler : MonoBehaviour
             
             if (mShowDebugInfo)
             {
-                Debug.Log($"새 활동 시작: {mCurrentAction.ActionName} @ {mCurrentAction.LocationName}");
+                LogManager.Log("Scheduler", $"새 활동 시작: {mCurrentAction.ActionName} @ {mCurrentAction.LocationName}", 2);
             }
             
             // 에이전트에 활동 시작 알림
@@ -260,7 +260,7 @@ public class AgentScheduler : MonoBehaviour
                 if (mShowDebugInfo)
                 {
                     TimeSpan timeUntilNext = mNextAction.StartTime - TimeManager.Instance.GetCurrentGameTime();
-                    Debug.Log($"다음 활동: {mNextAction.ActionName} (남은 시간: {timeUntilNext.Hours}시간 {timeUntilNext.Minutes}분)");
+                    LogManager.Log("Scheduler", $"다음 활동: {mNextAction.ActionName} (남은 시간: {timeUntilNext.Hours}시간 {timeUntilNext.Minutes}분)", 2);
                 }
             }
         }
@@ -300,7 +300,7 @@ public class AgentScheduler : MonoBehaviour
         
         if (mShowDebugInfo)
         {
-            Debug.Log("모든 스케줄 항목 삭제됨");
+            LogManager.Log("Scheduler", "모든 스케줄 항목 삭제됨", 2);
         }
     }
 
