@@ -4,19 +4,15 @@ using UnityEngine;
 namespace OhMAIGod.Agent
 {
     // Agent의 행동 상태
+    // TODO: 상태 이름 변경 필요(WAIT -> WAITING)
     [System.Serializable]
     public enum AgentState
     {
-        IDLE = 0,
-        WAITING,
-        MOVING,
-        INTERACTION,        // 모든 행동
-        MovingToLocation,
-
-        WAIT_FOR_AI_RESPONSE,
         WAIT,
+        WAIT_FOR_AI_RESPONSE,
         MOVE_TO_LOCATION,
         MOVE_TO_INTERACTABLE,
+        INTERACTION,        // 모든 행동
     }
 
     public abstract class AgentStateHandler

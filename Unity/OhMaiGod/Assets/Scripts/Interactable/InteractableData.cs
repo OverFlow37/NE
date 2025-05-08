@@ -16,8 +16,16 @@ public class InteractableData : ScriptableObject
     [Tooltip("오브젝트의 현재 상태")]
     [SerializeField] public States mState;
 
-    [Tooltip("이 오브젝트와 상호작용했을 때 실행될 행동 목록")]
-    [SerializeField] public InteractionAction[] mActions;
+    [System.Serializable]
+    public struct InteractionActionInfo
+    {
+        public InteractionAction mAction;
+        public int mDuration;
+    }
+
+    [Tooltip("이 오브젝트와 상호작용했을 때 실행될 행동 및 소요 시간 목록")]
+    [SerializeField] public InteractionActionInfo[] mActions;
+    
 
     // 상호작용 효과
     [Header("Interaction Effects")]

@@ -150,6 +150,7 @@ public class AgentController : MonoBehaviour
 
     // 목적지(오브젝트만) 도착 이벤트 발생 시 호출되는 함수
     // 애니메이션 업데이트, Status 업데이트, 활동 시작
+    // movementController의 이벤트로 호출
     private void HandleDestinationReached()
     {
         if (mShowDebugInfo)
@@ -159,7 +160,7 @@ public class AgentController : MonoBehaviour
 
         // 이동 애니메이션 정지
         animator.SetBool("isMoving", false);
-
+        mStateMachine.ChangeState(AgentState.INTERACTION); // 상태 INTERACTION으로 전환
     }
 
     // 이동 불가능 이벤트 핸들러
@@ -380,19 +381,35 @@ public class AgentController : MonoBehaviour
     //     }
     // }
 
+    // // 상호작용 시작
+    // public void StartInteraction()
+    // {
+        
+    // }
+
+    // 상호작용 진행
+    public void ProcessInteraction()
+    {
+        //
+    }
+
+    // 상호작용 종료        
+    public void EndInteraction() 
+    {
+        //
+    }
+
 
     // 오브젝트와 상호작용 시작
     // 일단 대기
-    private void StartInteraction(GameObject _interactableObject)
+    public void StartInteraction()
     {
         if (mShowDebugInfo)
         {
-            LogManager.Log("Agent", $"{mName}: {_interactableObject.name}와(과) 상호작용 시작", 2);
+            LogManager.Log("Agent", $"{mName}: {CurrentTargetInteractable.name}와(과) 상호작용 시작", 2);
         }
-        LogManager.Log("Agent", "상호작용 시작", 3);
-        mStateMachine.ChangeState(AgentState.INTERACTION);
-        var interactable = _interactableObject.GetComponent<Interactable>();
-        interactable?.Interact(gameObject);
+        LogManager.Log("Agent", "상호작용 시작: "+mCurrentAction.ActionName, 3);
+        CurrentTargetInteractable?.Interact(gameObject,mCurrentAction.ActionName);
         CompleteAction();
     }
 
@@ -411,22 +428,22 @@ public class AgentController : MonoBehaviour
             
             // 상태 초기화
             mCurrentAction = null;
-            mStateMachine.ChangeState(AgentState.IDLE);
+            mStateMachine.ChangeState(AgentState.WAIT);
         }
     }
 
     // 활동 시간 증가 함수
-    public void UpdateActionTime()
-    {
-        // 활동 시간 증가
-        mCurrentActionTime += Time.deltaTime;
+    // public void UpdateActionTime()
+    // {
+    //     // 활동 시간 증가
+    //     mCurrentActionTime += Time.deltaTime;
         
-        // 최소 지속 시간 이후 활동 완료
-        if (mCurrentActionTime >= mActionMinDuration * 60f)
-        {
-            CompleteAction();
-        }
-    }
+    //     // 최소 지속 시간 이후 활동 완료
+    //     if (mCurrentActionTime >= mActionMinDuration * 60f)
+    //     {
+    //         CompleteAction();
+    //     }
+    // }
 
     // 대기 상태로 전환하는 함수
     private void EnterWaitingState(float _waitTimeMinutes)
@@ -453,44 +470,6 @@ public class AgentController : MonoBehaviour
             {
                 LogManager.Log("Agent", $"{mName}: 대기 상태 종료", 2);
             }
-        }
-    }
-
-    // 상태 평가 코루틴 (지속적으로 상태 확인)
-    // TODO: 코루틴 사용안하고 Update에 넣어서 매 프레임 확인하게 하는것 고려해보기
-    private IEnumerator EvaluateStateRoutine()
-    {
-        while (true)
-        {
-            // 이미 활동 중이거나 이동 중이면 건너뛰기
-            if (mStateMachine.CurrentStateType != AgentState.IDLE && mStateMachine.CurrentStateType != AgentState.WAITING)
-            {
-                yield return new WaitForSeconds(1.0f);
-                continue;
-            }
-            
-            // 현재 활동 확인
-            string destination = mScheduler.GetCurrentDestinationTarget();
-
-            if (!string.IsNullOrEmpty(destination))
-            {
-                // 활동 있음 => 위치로 이동 시작
-                mCurrentAction = null; // AgentScheduler에서 정보를 다시 가져오기 위해 초기화
-                StartMovingToAction();
-            }
-            else
-            {
-                // 활동 없음 => 다음 활동까지 대기
-                TimeSpan timeUntilNext = mScheduler.GetTimeUntilNextAction();
-                
-                // 1시간 이상 남았으면 대기 상태로 전환
-                if (timeUntilNext.TotalMinutes > 60)
-                {
-                    EnterWaitingState((float)timeUntilNext.TotalMinutes);
-                }
-            }
-            
-            yield return new WaitForSeconds(3.0f);
         }
     }
 
