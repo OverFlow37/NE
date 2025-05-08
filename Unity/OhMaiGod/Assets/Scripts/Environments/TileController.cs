@@ -54,6 +54,36 @@ public class TileController : MonoBehaviour
         mChildInteractables.Clear();
     }
 
+    public Vector2 CenterPosition
+    {
+        get
+        {
+            // 실제 타일이 있는 셀들의 중심 계산
+            BoundsInt bounds = mTilemap.cellBounds;
+            Vector3 centerSum = Vector3.zero;
+            int count = 0;
+            for (int x = bounds.min.x; x < bounds.max.x; x++)
+            {
+                for (int y = bounds.min.y; y < bounds.max.y; y++)
+                {
+                    Vector3Int cell = new Vector3Int(x, y, 0);
+                    if (mTilemap.HasTile(cell))
+                    {
+                        centerSum += mTilemap.GetCellCenterWorld(cell);
+                        count++;
+                    }
+                }
+            }
+            if (count == 0) return mTilemap.transform.position; // 타일이 없으면 자기 위치 반환
+
+            Vector3 avgWorld = centerSum / count;
+
+            // 그라운드 타일맵 기준 셀로 변환 후, 그 셀의 중심 반환
+            Vector3Int groundCell = TileManager.Instance.GroundTilemap.WorldToCell(avgWorld);
+            return TileManager.Instance.GroundTilemap.GetCellCenterWorld(groundCell);
+        }
+    }
+
     // 위치 이름 기반으로 고유한 색상 생성
     private Color GetLocationColor()
     {

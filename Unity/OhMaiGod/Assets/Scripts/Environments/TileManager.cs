@@ -111,6 +111,10 @@ public class TileManager : MonoBehaviour
             // 위치 정보 업데이트
             mInteractableLocations[target] = locationName;
             target.UpdateCurrentLocation(locationName);
+            if (target.mInteractableData.mType != InteractableData.Types.Agent)
+            {
+                target.TargetController.UpdateStandingPoints();
+            }
             
             if (mShowDebug)
             {

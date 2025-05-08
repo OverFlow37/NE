@@ -4,15 +4,9 @@ using UnityEngine;
 // 타겟의 서있는 지점을 관리하는 컨트롤러
 public class TargetController : MonoBehaviour
 {
-    private string mInteractableName;
-    private TileController mParentLocation;
-    private bool mIsInitialized = false;
-    
-    [SerializeField] private GameObject mStandingPointPrefab;    // 서있는 지점 프리팹
     [SerializeField] private float mCheckRadius = 0.4f;          // 주변 충돌 확인 반경 (타일 크기에 맞게 조정)
     [SerializeField] private bool mShowDebug = false;            // 디버그 정보 표시 여부
 
-    private List<GameObject> mStandingPoints;                   // 생성된 서있는 지점들
     private List<Vector2> mAvailablePositions;                  // 사용 가능한 위치 목록
     private Collider2D mTargetCollider;                         // 타겟의 콜라이더
     private HashSet<Vector3Int> mOccupiedCells;                 // 타겟이 차지하는 셀 목록
@@ -21,66 +15,27 @@ public class TargetController : MonoBehaviour
     private void Awake()
     {
         mTargetCollider = GetComponent<Collider2D>();
-        if (mStandingPointPrefab == null)
-        {
-            Debug.LogError("StandingPointPrefab이 할당되지 않았습니다!", this);
-            enabled = false;
-            return;
-        }
         if (mTargetCollider == null)
         {
             Debug.LogError("TargetController에 Collider2D가 없습니다!", this);
             enabled = false;
             return;
         }
-        mInteractableName = gameObject.name;
-        mStandingPoints = new List<GameObject>();
         mAvailablePositions = new List<Vector2>();
         mOccupiedCells = new HashSet<Vector3Int>();
     }
 
-    private void Start()
-    {
-        // // TileManager가 있으면 등록 시도
-        // if (TileManager.Instance != null)
-        // {
-        //     TileManager.Instance.RegisterTarget(this);
-        // }
-        // else
-        // {
-        //     Debug.LogError($"[{gameObject.name}] TileManager를 찾을 수 없습니다.");
-        // }
-    }
-
-    public string InteractableName { get { return mInteractableName; } }
-    public TileController ParentLocation { get { return mParentLocation; } }
-
     // 서있는 지점들 초기화
     private void InitializeStandingPoints()
     {
-        if (mStandingPointPrefab == null)
-        {
-            Debug.LogError("StandingPointPrefab이 할당되지 않았습니다!", this);
-            return;
-        }
-
         ClearStandingPoints();
         FindOccupiedCells(); // 타겟이 차지하는 셀 먼저 찾기
         FindAvailableAdjacentCells(); // 차지하는 셀 주변의 사용 가능한 셀 찾기
-        CreateStandingPoints();
     }
 
     // 기존 서있는 지점들 제거
     private void ClearStandingPoints()
     {
-        foreach (Transform child in transform)
-        {
-            if (child.CompareTag("StandingPoint"))
-            {
-                Destroy(child.gameObject);
-            }
-        }
-        mStandingPoints.Clear();
         mAvailablePositions.Clear();
         mOccupiedCells.Clear();
     }
@@ -173,17 +128,6 @@ public class TargetController : MonoBehaviour
         }
     }
 
-    // 서있는 지점들 생성
-    private void CreateStandingPoints()
-    {
-        foreach (Vector2 pos in mAvailablePositions)
-        {
-            GameObject standingPoint = Instantiate(mStandingPointPrefab, pos, Quaternion.identity, transform);
-            standingPoint.tag = "StandingPoint";
-            mStandingPoints.Add(standingPoint);
-        }
-    }
-
     // 서있는 지점들 업데이트
     public void UpdateStandingPoints()
     {
@@ -192,10 +136,7 @@ public class TargetController : MonoBehaviour
     }
 
     // 서있는 지점들의 위치 목록 반환
-    public List<Vector2> GetStandingPositions()
-    {
-        return new List<Vector2>(mAvailablePositions);
-    }
+    public List<Vector2> StandingPoints { get { return mAvailablePositions; } }
 
     // 디버그 정보 표시
     private void OnDrawGizmos()

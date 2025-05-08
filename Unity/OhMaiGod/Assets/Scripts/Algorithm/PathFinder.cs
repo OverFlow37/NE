@@ -144,18 +144,19 @@ public class PathFinder : MonoBehaviour
     // 해당 셀에 벽이 있는지 확인 (타일맵 기준)
     private bool CheckForWall(Vector3Int cell)
     {
-        if (!TileManager.Instance.GroundTilemap.HasTile(cell)) return true; // 타일이 없으면 벽으로 간주
+        // 해당 셀에 타일이 없으면 벽으로 간주
+        if (!TileManager.Instance.GroundTilemap.HasTile(cell)) return true;
         Vector2 checkPos = TileManager.Instance.GroundTilemap.GetCellCenterWorld(cell);
-        Collider2D[] colliders = Physics2D.OverlapCircleAll(checkPos, 0.4f, TileManager.Instance.ObstacleLayerMask);
-        if (colliders.Length > 0)
+        // 감지 반경을 0.3으로 줄임
+        Collider2D[] colliders = Physics2D.OverlapCircleAll(checkPos, 0.3f, TileManager.Instance.ObstacleLayerMask);
+        foreach (Collider2D collider in colliders)
         {
-            foreach (Collider2D collider in colliders)
+            // 자기 자신은 무조건 무시
+            if (mGameObject != null && collider.gameObject == mGameObject) continue;
+            // 장애물 레이어에 속한 오브젝트만 벽으로 간주
+            if (((1 << collider.gameObject.layer) & TileManager.Instance.ObstacleLayerMask) != 0)
             {
-                if (collider.gameObject == mGameObject) continue;
-                if (((1 << collider.gameObject.layer) & TileManager.Instance.ObstacleLayerMask) != 0)
-                {
-                    return true;
-                }
+                return true;
             }
         }
         return false;

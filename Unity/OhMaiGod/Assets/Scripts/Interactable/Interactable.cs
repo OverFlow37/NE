@@ -21,8 +21,15 @@ public class Interactable : MonoBehaviour
     public delegate void InteractableRemovedHandler(Interactable interactable);
     public event InteractableRemovedHandler OnInteractableRemoved;
 
+    // 위치 변경 이벤트 델리게이트 및 이벤트 정의
+    public delegate void LocationChangedHandler(Interactable interactable, string newLocation);
+    public event LocationChangedHandler OnLocationChanged;
+
     // 타일매니저
     TileManager mtileManager;
+    // 타겟컨트롤러
+    private TargetController mTargetController;
+    public TargetController TargetController { get { return mTargetController; } }
 
     void Awake()
     {
@@ -36,6 +43,8 @@ public class Interactable : MonoBehaviour
             // InteractableData와 이름 동기화
             InteractableName = mInteractableData.mName;
         }
+
+        mTargetController = GetComponent<TargetController>();
     }
 
     void Start()
@@ -205,7 +214,8 @@ public class Interactable : MonoBehaviour
         if (CurrentLocation != locationName)
         {
             CurrentLocation = locationName;
-            // 위치 변경 시 필요한 추가 로직이 있다면 여기에 구현
+            // 위치가 변경되면 이벤트 발생
+            OnLocationChanged?.Invoke(this, locationName);
         }
     }
 }
