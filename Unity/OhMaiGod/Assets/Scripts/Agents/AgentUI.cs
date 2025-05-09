@@ -51,19 +51,25 @@ public class AgentUI : MonoBehaviour
     private IEnumerator UpdateSpeechLate()
     {
         RectTransform speechTransform = speechBubble.GetComponent<RectTransform>();
-        
+        Canvas canvas = speechBubble.GetComponentInParent<Canvas>();
+        Camera uiCam = canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : cam;
+
         while (true)
         {
             yield return new WaitForEndOfFrame();
             if (speechBubble.activeSelf && character != null)
             {
-                // World Space에서는 직접 위치를 설정
-                speechTransform.position = character.position + speech_offset;
-                
-                // 말풍선이 항상 카메라를 향하도록 회전
+                // 월드 좌표 → 스크린 좌표 변환
+                Vector3 worldPos = character.position + speech_offset;
+                Vector3 screenPos = RectTransformUtility.WorldToScreenPoint(cam, worldPos);
+
+                // 스크린 좌표를 RectTransform 위치로 적용
+                speechTransform.position = screenPos;
+
+                // 말풍선이 항상 카메라를 향하도록 회전 (필요시)
                 if (cam != null)
                 {
-                    speechTransform.rotation = cam.transform.rotation;
+                    speechTransform.rotation = Quaternion.identity;
                 }
             }
         }

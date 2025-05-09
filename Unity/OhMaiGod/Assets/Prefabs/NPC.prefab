@@ -14,6 +14,10 @@ GameObject:
   - component: {fileID: 5857856110383237363}
   - component: {fileID: 3049116197355406548}
   - component: {fileID: 5029068935263893207}
+  - component: {fileID: 7269809324673139355}
+  - component: {fileID: 2587423533528205476}
+  - component: {fileID: 5700669086754334966}
+  - component: {fileID: 6628251807268933205}
   m_Layer: 9
   m_Name: NPC
   m_TagString: NPC
@@ -33,7 +37,8 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 7761397815973102772}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &7374676217253161889
@@ -135,7 +140,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 0.9, y: 0.9}
   m_EdgeRadius: 0
 --- !u!114 &5857856110383237363
 MonoBehaviour:
@@ -149,15 +154,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f4a6e55d328f7624db1e3da8f7dfd199, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  mAgentUI: {fileID: 2587423533528205476}
+  agentVision: {fileID: 1374414925359560101}
+  mAgentNeeds:
+    hunger: 0
+    sleepiness: 0
+    loneliness: 0
   mID: 1
   mName: Tom
   mDescription: 
-  mVisualRange: {fileID: 0}
-  mActivityMinDuration: 1
+  mVisualRange: 0
+  mActionMinDuration: 1
   mAutoStart: 1
+  mShowDebugInfo: 1
+  mCurrentState: 0
+  mCurrentLocation: 
+  mCurrentTargetInteractable: {fileID: 0}
+  animator: {fileID: 0}
   mScheduler: {fileID: 5029068935263893207}
   mMovement: {fileID: 3049116197355406548}
-  mShowDebugInfo: 1
+  mInteractable: {fileID: 7269809324673139355}
+  mVisibleInteractables: []
 --- !u!114 &3049116197355406548
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -170,14 +187,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3172a5bfe568b2d41ba98d2b3d689661, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mMoveSpeed: 2
+  mMoveSpeed: 5
   mReachedDistance: 0.01
-  mMapBottomLeft: {x: -10, y: -10}
-  mMapTopRight: {x: 10, y: 10}
-  mTargetName: 
-  mTargetSearchInterval: 1
-  mPathUpdateInterval: 1
-  mUseNavMesh: 0
+  mDetectionTileCount: 1
+  mDrawPath: 1
 --- !u!114 &5029068935263893207
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -190,5 +203,181 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c80c74bc3cce4064fb3e5a99b8013fda, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mGameToRealTimeRatio: 120
-  mShowDebugInfo: 0
+  mShowDebugInfo: 1
+--- !u!114 &7269809324673139355
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3410451549725341278}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 24b49108923803d4f8baa0cd7ae5c9ad, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mInteractableData: {fileID: 11400000, guid: 0a466bbf8dd37ab47afc873f2213c759, type: 2}
+--- !u!114 &2587423533528205476
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3410451549725341278}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c02464dbd72f4c1468831e98132f022d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  isSpeechBubble: 1
+  speechBubble: {fileID: 0}
+  character: {fileID: 3703094993806506679}
+  agentController: {fileID: 5857856110383237363}
+  emoteUI:
+    hungerText: {fileID: 0}
+    sleepinessText: {fileID: 0}
+    lonelinessText: {fileID: 0}
+  speech_offset: {x: 0, y: 0.2, z: 0}
+  speechDuration: 7
+--- !u!95 &5700669086754334966
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3410451549725341278}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 921ea2b4149106940a72553f32da3a8b, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
+--- !u!50 &6628251807268933205
+Rigidbody2D:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3410451549725341278}
+  m_BodyType: 1
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 0
+  m_UseAutoMass: 0
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_GravityScale: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_Interpolate: 0
+  m_SleepingMode: 1
+  m_CollisionDetection: 0
+  m_Constraints: 0
+--- !u!1 &4570233033437522169
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7761397815973102772}
+  - component: {fileID: 9183424403366410145}
+  - component: {fileID: 1374414925359560101}
+  m_Layer: 11
+  m_Name: Vision
+  m_TagString: Vision
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7761397815973102772
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4570233033437522169}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 3703094993806506679}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!58 &9183424403366410145
+CircleCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4570233033437522169}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0, y: 0}
+  m_Radius: 0.5
+--- !u!114 &1374414925359560101
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4570233033437522169}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cea7171ed1134d54e9a32ab797cedf69, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mVisionRange: 50
+  mAgentName: NPC
+  mObstaclesLayer:
+    serializedVersion: 2
+    m_Bits: 256
+  mNPCLayer:
+    serializedVersion: 2
+    m_Bits: 512
+  mGizmoColor: {r: 0.2, g: 0.8, b: 1, a: 0.2}
+  mShowGizmo: 1
+  mShowVisibleObjects: 1
+  mDebugVisibleList: []

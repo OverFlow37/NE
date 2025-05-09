@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
@@ -40,7 +41,7 @@ public class MovementController : MonoBehaviour
     }
 
     // 매 프레임 업데이트
-    private void Update()
+    private void FixedUpdate()
     {
         if (mCurrentPoint == null || !mIsMoving) return;
 
@@ -118,6 +119,7 @@ public class MovementController : MonoBehaviour
 
     private void UpdatePath()
     {
+        LogManager.Log("Movement", $"경로 재탐색 발생! {gameObject.name}이(가) {transform.position}에서 {mTargetPosition}까지 경로 재탐색.", 3);
         mCurrentPath = PathFinder.Instance.FindPath(transform.position, mTargetPosition, this.gameObject);
         if (mCurrentPath != null && mCurrentPath.Count > 0)
         {
@@ -188,14 +190,16 @@ public class MovementController : MonoBehaviour
         // 목표 방향 계산
         Vector2 direction = (mCurrentPoint - currentPosition).normalized;
         // 이동 (2D)
-        Vector3 movement = new Vector3(direction.x, direction.y, 0) * mMoveSpeed * Time.deltaTime;
+        float viasTime = Time.deltaTime;
+        viasTime = Mathf.Clamp(viasTime, 0, 0.03f);
+        Vector3 movement = new Vector3(direction.x, direction.y, 0) * mMoveSpeed * viasTime;
         transform.position += movement;
         // 이동방향이 왼쪽이면 x축 플립
-        if (direction.x < 0)
+        if (direction.x < -0.2f)
         {
             mSpriteRenderer.flipX = true;
         }
-        else
+        else if (direction.x > 0.2f)
         {
             mSpriteRenderer.flipX = false;
         }
