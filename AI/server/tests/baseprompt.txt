@@ -72,6 +72,8 @@ use: interact with an object
 * Each `eat` action must last exactly **1 hour**.
 * Each `use` action must last at least **2 hours**.
   - If no natural break occurs, longer `use` actions may be split into multiple related blocks.
+* Each plan must contain **at least 10 distinct activities** in the `daily_plan`.
+  - This ensures the full day (06:00–24:00) is meaningfully scheduled without excessive repetition or idle time.
 * The map is structured in three levels: Region → Location → Object.
 * The "location" field must refer only to a valid location within the given region. Do not use a region or object name in this field.
 * The "target" field (object) must exist within the specified location. Do not use an object from a different location.
@@ -85,14 +87,18 @@ use: interact with an object
   * **9–10**: Major life-changing actions or decisions
 
 
+**IMPORTANT RULES**
+
+* Daily schedule must span the entire period from 06:00 to 24:00. (StartTime : 06:00 , EndTIme : 24:00
+
 * You must generate a plan for the **next day** following the latest date in John’s existing plans  
   (e.g., if the last plan is for "2025.05.04", generate one for "2025.05.05")
 
-❗ DO NOT repeat the previous day's schedule. Create a **fresh, meaningful plan** that reflects variation in activities and priorities.
+* DO NOT repeat the previous day's schedule. Create a **fresh, meaningful plan** that reflects variation in activities and priorities.
 
-🔸 Avoid repeating low-priority or unimportant objects unless they are highly emphasized in the reflections.
+* Avoid repeating low-priority or unimportant objects unless they are highly emphasized in the reflections.
 
-❗ Daily schedule must span the entire period from 06:00 to 24:00.
+
 ---
 
 **📤 OUTPUT FORMAT (strictly JSON):**
