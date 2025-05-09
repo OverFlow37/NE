@@ -86,85 +86,77 @@ class MemoryUtils:
         
         # 현재 파일의 절대 경로를 기준으로 상위 디렉토리 찾기
         current_dir = Path(__file__).parent
-        root_dir = current_dir.parent.parent  # AI 디렉토리
-        self.agent_path = root_dir / "agent" / "data" / "agent.json"
-        print(f"📁 agent.json 경로: {self.agent_path}")
+        root_dir = current_dir.parent  # agent 디렉토리
+        data_dir = root_dir / "data"
+        
+        self.memories_file = data_dir / "memories.json"
+        self.plans_file = data_dir / "plans.json"
+        self.reflections_file = data_dir / "reflections.json"
+        
+        # data 디렉토리가 없으면 생성
+        data_dir.mkdir(exist_ok=True)
+        
+        self._ensure_files_exist()
 
-    def event_to_sentence(self, event_obj: Dict[str, Any]) -> str:
-        """
-        이벤트 객체를 문장으로 변환
-        
-        Args:
-            event_obj: 이벤트 객체 (event_type만 사용)
-        
-        Returns:
-            str: 변환된 문장
-        """
-        event_type = event_obj.get("type")
-        if not event_type or event_type not in EVENT_SENTENCE_TEMPLATES:
-            return "unknown event occurred"
-            
-        return EVENT_SENTENCE_TEMPLATES[event_type]["example"]
+    def _ensure_files_exist(self):
+        """필요한 JSON 파일들이 존재하는지 확인하고, 없다면 생성"""
+        for file_path in [self.memories_file, self.plans_file, self.reflections_file]:
+            if not file_path.exists():
+                with open(file_path, 'w', encoding='utf-8') as f:
+                    json.dump({"John": [], "Sarah": []}, f, ensure_ascii=False, indent=2)
 
-    def get_embedding(self, text: str) -> List[float]:
-        """
-        텍스트를 임베딩 벡터로 변환
-        
-        Args:
-            text: 임베딩할 텍스트
-        
-        Returns:
-            List[float]: 임베딩 벡터
-        """
-        tokens = [w.lower() for w in text.split() if w.lower() in self.model]
-        if not tokens:
-            return [0.0] * self.vector_size
-        
-        # 단어 벡터의 평균을 문장 벡터로 사용
-        vector = np.mean([self.model[w] for w in tokens], axis=0)
-        return vector.tolist()
-
-    def save_memory(self, event_sentence: str, embedding: List[float], event_time: str, agent_name: str, importance: str = "normal") -> bool:
-        """
-        메모리를 agent.json에 저장
-        
-        Args:
-            event_sentence: 이벤트 문장
-            embedding: 임베딩 벡터
-            event_time: 이벤트 시간 (datetime 문자열)
-            agent_name: 메모리를 저장할 에이전트 이름
-            importance: 중요도 ("high", "normal", "low")
-        
-        Returns:
-            bool: 저장 성공 여부
-        """
+    def _load_memories(self) -> Dict[str, List[Dict[str, Any]]]:
+        """메모리 데이터 로드"""
         try:
-            # 기존 데이터 로드
-            with open(self.agent_path, 'r', encoding='utf-8') as f:
-                agent_data = json.load(f)
-            
-            # 새 메모리 객체 생성
-            new_memory = {
-                "event": event_sentence,
-                "time": event_time,
-                "importance": importance,
-                "embeddings": embedding
-            }
-            
-            # 지정된 에이전트의 memories에만 추가
-            if agent_name in agent_data:
-                agent_data[agent_name]["memories"].append(new_memory)
-                print(f"💾 {agent_name}의 메모리 저장 완료")
-            else:
-                print(f"❌ {agent_name} 에이전트를 찾을 수 없음")
-                return False
-            
-            # 저장
-            with open(self.agent_path, 'w', encoding='utf-8') as f:
-                json.dump(agent_data, f, ensure_ascii=False, indent=2)
-            
-            return True
-            
+            with open(self.memories_file, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except Exception as e:
+            print(f"메모리 로드 중 오류 발생: {e}")
+            return {"John": [], "Sarah": []}
+
+    def _save_memories(self, memories: Dict[str, List[Dict[str, Any]]]):
+        """메모리 데이터 저장"""
+        try:
+            with open(self.memories_file, 'w', encoding='utf-8') as f:
+                json.dump(memories, f, ensure_ascii=False, indent=2)
         except Exception as e:
             print(f"메모리 저장 중 오류 발생: {e}")
-            return False 
+
+    def save_memory(self, event_sentence: str, embedding: List[float], event_time: str, agent_name: str):
+        """새로운 메모리 저장"""
+        memories = self._load_memories()
+        
+        if agent_name not in memories:
+            memories[agent_name] = []
+            
+        memory = {
+            "event": event_sentence,
+            "time": event_time,
+            "importance": "normal",
+            "embeddings": embedding
+        }
+        
+        memories[agent_name].append(memory)
+        self._save_memories(memories)
+
+    def get_embedding(self, text: str) -> List[float]:
+        """텍스트의 임베딩 벡터 생성 (임시 구현)"""
+        # 실제로는 여기에 임베딩 모델을 사용해야 합니다
+        return [0.1] * 384  # 384차원 벡터 반환
+
+    def event_to_sentence(self, event: Dict[str, Any]) -> str:
+        """이벤트를 문장으로 변환"""
+        event_type = event.get("type", "")
+        location = event.get("location", "")
+        object_type = event.get("object_type", "")
+        
+        if event_type == "witness":
+            return f"witness {object_type} at {location}"
+        elif event_type == "request":
+            return f"request {object_type} at {location}"
+        elif event_type == "feel":
+            return f"feel {object_type} at {location}"
+        elif event_type == "discover":
+            return f"discover {object_type} at {location}"
+        else:
+            return f"{event_type} {object_type} at {location}" 

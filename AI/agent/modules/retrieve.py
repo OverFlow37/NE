@@ -1,109 +1,71 @@
 import json
+import os
+from typing import List, Dict, Any, Optional, Tuple
 import numpy as np
+from datetime import datetime
 from pathlib import Path
-from typing import Dict, Any, List, Tuple, Optional
 
 class Retrieve:
     def __init__(self):
-        """
-        Retrieve 모듈 초기화
-        """
         # 현재 파일의 절대 경로를 기준으로 상위 디렉토리 찾기
         current_dir = Path(__file__).parent
-        root_dir = current_dir.parent.parent  # AI 디렉토리
-        self.agent_path = root_dir / "agent" / "data" / "agent.json"
-        print(f"📁 agent.json 경로: {self.agent_path}")
+        root_dir = current_dir.parent  # agent 디렉토리
+        data_dir = root_dir / "data"
+        
+        self.memories_file = data_dir / "memories.json"
+        
+        # data 디렉토리가 없으면 생성
+        data_dir.mkdir(exist_ok=True)
+        
+        self._ensure_file_exists()
 
-    def should_react(self, event_obj: Dict[str, Any]) -> bool:
-        """
-        이벤트에 반응할지 결정
-        
-        Args:
-            event_obj: 이벤트 객체
-        
-        Returns:
-            bool: 반응 여부
-        """
-        # TODO: 실제 반응 기준 구현 필요
+    def _ensure_file_exists(self):
+        """memories.json 파일이 존재하는지 확인하고, 없다면 생성"""
+        if not self.memories_file.exists():
+            with open(self.memories_file, 'w', encoding='utf-8') as f:
+                json.dump({"John": [], "Sarah": []}, f, ensure_ascii=False, indent=2)
+
+    def _load_memories(self) -> Dict[str, List[Dict[str, Any]]]:
+        """메모리 데이터 로드"""
+        try:
+            with open(self.memories_file, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except Exception as e:
+            print(f"메모리 로드 중 오류 발생: {e}")
+            return {"John": [], "Sarah": []}
+
+    def should_react(self, event: Dict[str, Any]) -> bool:
+        """이벤트에 반응해야 하는지 결정"""
+        # 현재는 모든 이벤트에 반응
         return True
 
-    def _calculate_cosine_similarity(self, v1: List[float], v2: List[float]) -> float:
-        """
-        두 벡터 간의 코사인 유사도 계산
+    def _find_similar_memories(self, event_embedding: List[float], agent_name: str, top_k: int = 3) -> List[Tuple[Dict[str, Any], float]]:
+        """유사한 메모리 검색"""
+        memories = self._load_memories()
         
-        Args:
-            v1: 첫 번째 벡터
-            v2: 두 번째 벡터
-        
-        Returns:
-            float: 코사인 유사도 (0~1 사이 값)
-        """
-        v1_array = np.array(v1)
-        v2_array = np.array(v2)
-        
-        if np.all(v1_array == 0) or np.all(v2_array == 0):
-            return 0.0
-            
-        return float(np.dot(v1_array, v2_array) / (np.linalg.norm(v1_array) * np.linalg.norm(v2_array)))
-
-    def _find_similar_memories(self, event_embedding: List[float], agent_name: str, top_k: int = 5) -> List[Tuple[Dict[str, Any], float]]:
-        """
-        특정 에이전트의 메모리에서 이벤트와 유사한 메모리 검색
-        
-        Args:
-            event_embedding: 이벤트 임베딩 벡터
-            agent_name: 검색할 에이전트 이름
-            top_k: 반환할 최대 메모리 수
-        
-        Returns:
-            List[Tuple[Dict, float]]: 유사도 순으로 정렬된 (메모리, 유사도) 튜플 리스트
-        """
-        try:
-            if not self.agent_path.exists():
-                print("❌ 메모리 파일이 존재하지 않습니다.")
-                return []
-                
-            with open(self.agent_path, 'r', encoding='utf-8') as f:
-                memories_data = json.load(f)
-            
-            similarities = []
-            # 모든 메모리에 대해 유사도 계산
-            for memory in memories_data[agent_name]["memories"]:
-                if "embeddings" in memory:
-                    similarity = self._calculate_cosine_similarity(
-                        event_embedding,
-                        memory["embeddings"]
-                    )
-                    similarities.append((memory, similarity))
-            
-            # 유사도 기준 내림차순 정렬
-            sorted_similarities = sorted(similarities, key=lambda x: x[1], reverse=True)
-            
-            print(f"🔍 유사 메모리 검색 결과: {len(sorted_similarities)}개 발견")
-            for memory, similarity in sorted_similarities[:top_k]:
-                print(f"  - 유사도: {similarity:.3f}, 이벤트: {memory.get('event', '')}")
-            
-            return sorted_similarities[:top_k]
-            
-        except Exception as e:
-            print(f"❌ 유사 메모리 검색 중 오류 발생: {e}")
+        if agent_name not in memories or not memories[agent_name]:
             return []
+            
+        # 코사인 유사도 계산
+        similarities = []
+        for memory in memories[agent_name]:
+            memory_embedding = memory.get("embeddings", [])
+            if memory_embedding:
+                similarity = self._cosine_similarity(event_embedding, memory_embedding)
+                similarities.append((memory, similarity))
+        
+        # 유사도 기준으로 정렬하고 상위 k개 반환
+        similarities.sort(key=lambda x: x[1], reverse=True)
+        return similarities[:top_k]
+
+    def _cosine_similarity(self, vec1: List[float], vec2: List[float]) -> float:
+        """코사인 유사도 계산"""
+        vec1 = np.array(vec1)
+        vec2 = np.array(vec2)
+        return np.dot(vec1, vec2) / (np.linalg.norm(vec1) * np.linalg.norm(vec2))
 
     def create_reaction_prompt(self, event_sentence: str, event_embedding: List[float], agent_name: str, prompt_template: str, similar_data_cnt: int = 3, similarity_threshold: float = 0.5) -> Optional[str]:
-        """
-        이벤트에 대한 반응을 결정하기 위한 프롬프트 생성
-        
-        Args:
-            event_sentence: 이벤트 문장
-            event_embedding: 이벤트 임베딩 벡터
-            agent_name: 검색할 에이전트 이름
-            prompt_template: 프롬프트 템플릿 문자열
-            similar_data_cnt: 포함할 유사 이벤트 개수 (기본값: 3)
-            similarity_threshold: 유사도 기준값 (0.0 ~ 1.0, 기본값: 0.5)
-        
-        Returns:
-            Optional[str]: 생성된 프롬프트
-        """
+        """이벤트에 대한 반응을 결정하기 위한 프롬프트 생성"""
         # 반응 여부 결정
         if not self.should_react({"event": event_sentence}):
             return None
