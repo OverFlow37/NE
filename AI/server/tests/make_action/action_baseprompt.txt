@@ -1,0 +1,89 @@
+**TASK**: For each agent, determine **ONE NEXT ACTION** based on their current state.
+
+### 📥 Input Information
+
+* **name**: The agent's name
+* **state**: The agent's condition, including:
+
+  * `hunger`: 0–3 = not hungry, 4–6 = normal, 7–10 = very hungry
+  * `sleepiness`: 0–3 = not sleepy, 4–6 = normal, 7–10 = very sleepy
+  * `loneliness`: 0–3 = not lonely, 4–6 = normal, 7–10 = very lonely
+* **current\_location**: The agent's current position
+* **visible\_interactables**: Locations and objects currently visible to the agent
+
+  * `location`: A visible place
+  * `interactable`: Objects or characters visible within that location
+
+### ✅ Available Actions
+
+* `move`: Travel to a new location
+* `interact`: Use or manipulate an object
+* `eat`: Consume food
+* `talk`: Engage in conversation with another agent
+* `wait`: Remain inactive for a short time
+* `think`: Reflect or engage in internal thought
+* `idle`: Do nothing
+* `sleep`: Rest to recover energy
+
+---
+
+### 🗺 Map Structure
+
+The world is organized in **Region → Location → Object** format.
+
+#### 1. **Village**
+
+* `house`: \["dining\_table", "bookshelf", "bed"]
+* `town_hall`: \["bulletin\_board", "meeting\_table", "clock", "old\_maps"]
+* `cafe`: \["coffee\_machine", "pastry\_display", "cozy\_sofa"]
+* `park`: \["swing\_set", "fountain", "bench"]
+* `storage`: \["old\_blueprint", "vegetable\_seeds"]
+* `garden`: \["vegetable\_seeds", "garden\_beds", "greenhouse\_frame", "irrigation\_system"]
+* `square`: \["broken\_well", "water\_system"]
+* `farm`: \["chicken\_coop"]
+* `workshop`: \["solar\_charger", "handcrafted\_tool", "equipment"]
+* `construction_site`: \["library\_foundation", "library\_shelves"]
+
+#### 2. **Forest**
+
+* `forest_entrance`: \["oak\_tree", "fallen\_leaves", "squirrel"]
+* `deep_forest`: \["mushroom", "acorn", "wild\_boar"]
+* `stream_bank`: \["raspberry", "stream\_water", "stone"]
+* `orchard`: \["fruit\_trees"]
+
+#### 3. **Desert**
+
+* `sand_dunes`: \["cactus", "lizard", "sandstorm"]
+* `oasis`: \["palm\_tree", "water\_pool", "camel"]
+* `rocky_outcrop`: \["scorpion", "sandstone", "hawk", "solar\_panel\_parts"]
+
+#### 4. **Beach**
+
+* `shoreline`: \["seashell", "crab", "driftwood", "fishing\_dock", "temporary\_shelter"]
+* `cliffside`: \["seagull", "rock", "binocular\_spot", "rain\_collector"]
+* `tidal_pool`: \["starfish", "seaweed", "snail"]
+* `dock`: \["fish"]
+
+---
+
+### ⚠️ Important Rules
+
+* The map follows a **Region → Location → Object** hierarchy.
+* The `location` and `target` in the output must come from the `visible_interactables`.
+* If hunger ≥ 7 and any visible interactable is food or food-related, prioritize action "eat" on that object.
+* If no edible object is visible, and there is a known nearby location that contains food, choose action "move" toward that location.
+
+---
+
+### 📤 Output Format (Strictly JSON)
+
+```json
+{
+  "action": "AVAILABLE ACTION",
+  "details": {
+    "location": "Location",
+    "target": "Object"
+  },
+  "reason": "Brief reason for selecting the action"
+}
+```

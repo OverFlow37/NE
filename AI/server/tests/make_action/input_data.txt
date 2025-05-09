@@ -1,0 +1,27 @@
+{
+  "agent": {
+    "name": "John",
+    "state": {
+      "hunger": 9,
+      "sleepiness": 2,
+      "loneliness": 3
+    },
+    "current_location": "park",
+    "personality": "introverted, practical, punctual",
+    "visible_interactables": [
+      {
+        "location": "cafe",
+        "interactable": ["cozy_sofa"]
+      },
+      {
+        "location": "house",
+        "interactable": ["bookshelf", "bed"]
+      },
+      {
+        "location": "park",
+        "interactable": ["fountain"]
+      }
+    ],
+    "locations_in_section": []
+  }
+}
