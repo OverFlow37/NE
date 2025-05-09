@@ -312,6 +312,83 @@ async def react_to_event(payload: dict):
     except Exception as e:
         print(f"❌ 오류 발생: {str(e)}")
         return {"error": str(e)}, 500
+    
+ 
+
+
+try:
+    from tests.reflection_pipeline import process_reflection_request
+    print("✅ reflection_pipeline 임포트 완료")
+except Exception as e:
+    print(f"❌ reflection_pipeline 임포트 실패: {e}")
+
+@app.post("/reflect")
+async def reflection_endpoint(payload: dict):
+    ######################################################################################
+    ###                                     반성                                       ###
+    ######################################################################################
+    """
+    반성 엔드포인트
+    
+    유니티에서 요청하면 당일 또는 지정된 날짜의 메모리에 importance를 추가하고 반성을 생성합니다.
+    성공 여부에 따라 true/false를 반환합니다.
+    
+    요청 형식:
+    {
+        "agent": {
+            "name": "에이전트 이름",
+            "time": "YYYY.MM.DD" (선택적)
+        }
+    }
+    """
+    try:
+        # 요청 데이터 로깅
+        print("\n=== /reflect 엔드포인트 호출 ===")
+        print("📥 요청 데이터:", json.dumps(payload, indent=2, ensure_ascii=False))
+        
+        # 필수 필드 확인
+        if not payload or 'agent' not in payload or 'name' not in payload['agent']:
+            print("❌ 필수 필드 누락")
+            raise HTTPException(status_code=400, detail="agent.name is required")
+        
+        # 날짜 필드 확인 (제거 가능)
+        agent_time = payload.get('agent', {}).get('time', '')
+        if agent_time:
+            print(f"📅 요청된 날짜: {agent_time}")
+        else:
+            print("📅 날짜가 지정되지 않았습니다. 최신 메모리 날짜를 사용합니다.")
+
+        # 반성 처리 파이프라인 호출
+        print("🧠 반성 처리 시작...")
+        success = process_reflection_request(payload)
+        
+        # 결과 로깅
+        print(f"✅ 반성 처리 결과: {success}")
+        
+        # 결과 반환 (success: true/false)
+        return {
+            "success": success
+        }
+        
+    except Exception as e:
+        print(f"❌ 반성 처리 중 오류 발생: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"반성 처리 중 오류 발생: {str(e)}")
+
+
+
+
+
+
+
+
+######################################################################################
+###                                     계획                                       ###
+######################################################################################
+
+
+
+
+
 
 if __name__ == "__main__":
     print(f"\n=== 서버 초기화 완료 (총 소요시간: {time.time() - start_time:.2f}초) ===")
