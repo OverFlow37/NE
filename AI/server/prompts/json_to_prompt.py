@@ -5,11 +5,34 @@ import re
 import random
 from pathlib import Path
 import requests
+import os
 
 # 전역 변수로 세션 관리
 session = requests.Session()
 MODEL_NAME = "gemma3"
 API_URL = 'http://localhost:11434/api/generate'
+
+# 현재 파일의 절대 경로를 기준으로 상위 디렉토리 찾기
+CURRENT_DIR = Path(__file__).parent
+ROOT_DIR = CURRENT_DIR.parent.parent  # AI 디렉토리
+
+# paths.json에서 경로 로드
+def load_paths():
+    """
+    paths.json 파일에서 경로 정보를 로드
+    """
+    try:
+        # 현재 파일의 절대 경로를 기준으로 상위 디렉토리 찾기
+        current_dir = Path(__file__).parent
+        root_dir = current_dir.parent.parent  # AI 디렉토리
+        config_path = root_dir / "agent" / "config" / "paths.json"
+        
+        with open(config_path, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except FileNotFoundError:
+        raise FileNotFoundError("paths.json 파일을 찾을 수 없습니다.")
+
+PATHS = load_paths()
 
 # ==============================
 #  서버 호출 함수
@@ -132,10 +155,11 @@ def load_prompt_template() -> str:
     prompt.txt 파일에서 프롬프트 템플릿을 읽어옵니다.
     """
     try:
-        with open('./prompts/prompt.txt', 'r', encoding='utf-8') as f:
+        prompt_path = ROOT_DIR / 'agent' / 'prompts' / 'prompt.txt'
+        with open(prompt_path, 'r', encoding='utf-8') as f:
             return f.read().strip()
     except FileNotFoundError:
-        raise FileNotFoundError("prompt.txt 파일을 찾을 수 없습니다.")
+        raise FileNotFoundError(f"prompt.txt 파일을 찾을 수 없습니다. 경로: {prompt_path}")
 
 def format_prompt(state_obj: dict) -> str:
     """

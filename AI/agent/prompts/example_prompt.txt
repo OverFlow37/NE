@@ -1,0 +1,2 @@
+You are an AI assistant. Please help with the following task:
+{task_description} 
