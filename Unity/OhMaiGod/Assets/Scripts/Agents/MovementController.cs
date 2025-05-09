@@ -81,14 +81,13 @@ public class MovementController : MonoBehaviour
         }
         else
         {
-            OnMovementBlocked?.Invoke();
             mIsMoving = false;
             mTargetController = null;
             mTargetPosition = Vector2.zero;
             mCurrentPath = null;
             mCurrentPathIndex = 0;
             mCurrentPoint = Vector2.zero;
-            LogManager.Log("Movement", $"{gameObject.name}이(가) 목표 타겟의 유효한 위치가 없습니다.", 1);
+            OnMovementBlocked?.Invoke();
         }
     }
 
@@ -114,7 +113,6 @@ public class MovementController : MonoBehaviour
         {
             mIsMoving = false;
             OnMovementBlocked?.Invoke();
-            LogManager.Log("Movement", $"{gameObject.name}이(가) {_targetPosition}까지의 경로를 찾을 수 없습니다.", 1);
         }
     }
 
@@ -145,9 +143,15 @@ public class MovementController : MonoBehaviour
         }
         else
         {
-            // 경로를 찾지 못하면 이동 중지 및 로그 출력
-            mIsMoving = false;
-            LogManager.Log("Movement", $"{gameObject.name}이(가) {mTargetPosition}까지의 경로를 찾을 수 없습니다.", 1);
+            if (mTargetController != null)
+            {
+                MoveToTarget(mTargetController);
+            }
+            else
+            {
+                mIsMoving = false;
+                OnMovementBlocked?.Invoke();
+            }
         }
     }
 
@@ -257,8 +261,6 @@ public class MovementController : MonoBehaviour
                     continue;
                 if (mTargetController != null && collider.gameObject == mTargetController.gameObject)  // 목표 타겟은 이벤트 발생하지 않음
                     continue;
-                // 감지된 오브젝트가 있으면 true 반환
-                LogManager.Log("Movement", $"{gameObject.name}이(가) {collider.gameObject.name}을(를) 감지함", 1);
                 return true;
             }
         }

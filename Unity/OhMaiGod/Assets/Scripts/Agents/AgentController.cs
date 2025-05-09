@@ -172,11 +172,22 @@ public class AgentController : MonoBehaviour
         {
             case AgentState.MOVE_TO_LOCATION:
                 // TODO: 로케이션으로 이동할 수 없는 경우 반응
+                LogManager.Log("Agent", $"{mName}: 로케이션으로 이동할 수 없습니다.", 1);
                 ChangeState(AgentState.WAIT);
                 break;
             case AgentState.MOVE_TO_INTERACTABLE:
-                // TODO: 상호작용 가능한 오브젝트로 이동할 수 없는 경우 반응
                 ChangeState(AgentState.WAIT);
+                FindMovableInteractable(TileManager.Instance.GetTileController(mCurrentAction.LocationName));
+                if (mCurrentTargetInteractable == null)
+                {
+                    // TODO: 이동 가능한 새로운 오브젝트를 찾을 수 없을 때
+                    LogManager.Log("Agent", $"{mName}: 이동 가능한 오브젝트를 찾을 수 없습니다.", 1);
+                    ChangeState(AgentState.WAIT);
+                }
+                else
+                {
+                    ChangeState(AgentState.MOVE_TO_INTERACTABLE);  // 이동 재개
+                }
                 break;
             default:
                 // TODO: 기타 이동 불가능 상황 반응
@@ -310,16 +321,14 @@ public class AgentController : MonoBehaviour
                 TargetName = destinationTarget
             };
         }
-        if (mShowDebugInfo)
-        {
-            LogManager.Log("Agent", $"{mName}: {mCurrentAction.LocationName}(으)로 이동 시작. ({mCurrentAction.ActionName} 위해)", 2);
-        }
 
         // 이동 시작
         TileController tileController = TileManager.Instance.GetTileController(mCurrentAction.LocationName);
         if (tileController == null)
         {
+            // TODO: 잘못된 로케이션으로 가려고 할 때
             LogManager.Log("Agent", $"{mName}: {mCurrentAction.LocationName} 타일 컨트롤러를 찾을 수 없습니다.", 1);
+            ChangeState(AgentState.WAIT);
             return;
         }
 
@@ -329,31 +338,33 @@ public class AgentController : MonoBehaviour
                 Vector2 availablePosition = tileController.AvailablePosition;
                 if (availablePosition != Vector2.zero)
                 {
+                    LogManager.Log("Agent", $"{mName}: {mCurrentAction.LocationName}로 이동 시작", 2);
                     mMovement.MoveToPosition(availablePosition);
                 }
                 else
                 {
-                    HandleMovementBlocked();
+                    // TODO: 로케이션이 꽉 차있어서 이동 불가능할 때
                     LogManager.Log("Agent", $"{mName}: {mCurrentAction.LocationName} 타일에 이동 가능한 위치가 없습니다.", 1);
+                    ChangeState(AgentState.WAIT);
                 }
                 break;
 
             case AgentState.MOVE_TO_INTERACTABLE:
-                mCurrentTargetInteractable = tileController.ChildInteractables.Find(interactable => interactable.InteractableName == mCurrentAction.TargetName && interactable.TargetController.StandingPoints.Count > 0);
+                FindMovableInteractable(tileController);
                 if (mCurrentTargetInteractable != null)
                 {
+                    LogManager.Log("Agent", $"{mName}: {mCurrentAction.ActionName} 위해 {mCurrentAction.TargetName}로 이동 시작", 2);
+                    LogManager.Log("Agent", $"타겟컨트롤러: {mCurrentTargetInteractable.TargetController.name}", 2);
                     mMovement.MoveToTarget(mCurrentTargetInteractable.TargetController);
                 }
                 else
                 {
-                    HandleMovementBlocked();
-                    Debug.LogWarning($"{mName}: {mCurrentAction.TargetName} 상호작용 가능한 오브젝트를 찾을 수 없습니다.");
+                    // TODO: 상호작용 가능한 오브젝트를 찾을 수 없을 때
+                    LogManager.Log("Agent", $"{mName}: {mCurrentAction.TargetName} 상호작용 가능한 오브젝트를 찾을 수 없습니다.", 1);
+                    ChangeState(AgentState.WAIT);
                 }
                 break;
         }
-
-        // 이동 애니메이션 시작
-        // animator.SetBool("isMoving", true);
     }
 
     // 활동 시작하는 함수
@@ -497,6 +508,24 @@ public class AgentController : MonoBehaviour
 
                 // 마지막 증가 시간 업데이트
                 lastIncreaseTime = currentTime;
+            }
+        }
+    }
+
+    // 이동 가능한 오브젝트 탐색
+    private void FindMovableInteractable(TileController _tileController)
+    {
+        mCurrentTargetInteractable = null;
+        foreach (var interactable in _tileController.ChildInteractables)
+        {
+            if (interactable.InteractableName == mCurrentAction.TargetName)
+            {
+                interactable.TargetController.UpdateStandingPoints();
+                if (interactable.TargetController.StandingPoints.Count > 0)
+                {
+                    mCurrentTargetInteractable = interactable;
+                    return;
+                }
             }
         }
     }

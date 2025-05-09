@@ -103,11 +103,7 @@ public class CreatePower : MonoBehaviour
         Vector3 cellCenter = TileManager.Instance.GroundTilemap.GetCellCenterWorld(cellPos);
 
         // Wall, Obstacles, NPC 레이어에 오브젝트가 있으면 설치 불가
-        int wallLayer = LayerMask.NameToLayer("Wall");
-        int obstaclesLayer = LayerMask.NameToLayer("Obstacles");
-        int npcLayer = LayerMask.NameToLayer("NPC");
-        int mask = (1 << wallLayer) | (1 << obstaclesLayer) | (1 << npcLayer);
-        Collider2D hit = Physics2D.OverlapPoint(cellCenter, mask);
+        Collider2D hit = Physics2D.OverlapPoint(cellCenter, TileManager.Instance.ObstacleLayerMask);
         if (hit != null)
         {
             Debug.LogWarning("해당 타일에 벽, 장애물 또는 NPC가 있어 설치할 수 없습니다.");
