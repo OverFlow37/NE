@@ -209,21 +209,36 @@ async def react_to_event(payload: dict):
         print("📥 요청 데이터:", json.dumps(payload, indent=2, ensure_ascii=False))
         
         # 필수 필드 확인
-        if not payload or 'event_type' not in payload:
+        if not payload or 'agent' not in payload:
             print("❌ 필수 필드 누락")
-            return {"error": "event_type is required"}, 400
+            return {"error": "agent field is required"}, 400
             
-        # 이벤트 데이터 추출
-        event_type = payload.get('event_type')
-        agent_name = payload.get('agent_name', 'John')  # 기본값으로 'John' 사용
+        # 에이전트 데이터 추출
+        agent_data = payload.get('agent', {})
+        agent_name = agent_data.get('name', 'John')
         
-        print(f"🔍 이벤트 타입: {event_type}")
+        # 이벤트 데이터 추출
+        event_data = agent_data.get('event', {})
+        event_type = event_data.get('event_type', '')
+        event_location = event_data.get('event_location', '')
+        object_name = event_data.get('object', '')
+        
+        # 에이전트의 현재 시간 추출
+        agent_time = agent_data.get('date_time', '')
+        if not agent_time:
+            agent_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        
         print(f"👤 에이전트 이름: {agent_name}")
+        print(f"🔍 이벤트 타입: {event_type}")
+        print(f"📍 이벤트 위치: {event_location}")
+        print(f"🎯 이벤트 대상: {object_name}")
+        print(f"⏰ 에이전트 시간: {agent_time}")
         
         # 이벤트 객체 생성
         event = {
-            "type": event_type,
-            "agent_name": agent_name
+            "event_type": event_type,
+            "event_location": event_location,
+            "object": object_name
         }
         
         # 이벤트를 문장으로 변환
@@ -233,9 +248,6 @@ async def react_to_event(payload: dict):
         # 임베딩 생성
         embedding = memory_utils.get_embedding(event_sentence)
         print(f"🔢 임베딩 생성 완료 (차원: {len(embedding)})")
-        
-        # 현재 시간 생성
-        current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         
         # 프롬프트 생성
         prompt = retrieve.create_reaction_prompt(
@@ -279,10 +291,10 @@ async def react_to_event(payload: dict):
                     memory_utils.save_memory(
                         event_sentence=event_sentence,
                         embedding=embedding,
-                        event_time=current_time,
-                        agent_name=agent_name  # 에이전트 이름 추가
+                        event_time=agent_time,  # 에이전트의 시간 사용
+                        agent_name=agent_name
                     )
-                    print(f"💾 메모리 저장 완료 (시간: {current_time})")
+                    print(f"💾 메모리 저장 완료 (시간: {agent_time})")
                     
                     future.set_result(reaction_obj)
                 except json.JSONDecodeError as e:

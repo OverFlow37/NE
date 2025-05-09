@@ -10,6 +10,8 @@ RESPONSE FORMAT (provide ONLY valid JSON):
   "action": "action_type",  // MUST be one of: use, eat
   "details": {
     "location": "location_name",
-    "target": "object_or_agent"
+    "target": "object_or_agent",
+    "duration": "estimated time in seconds",
+    "reason": "explanation for the action and duration"
   }
 }
