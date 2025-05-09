@@ -7,21 +7,19 @@ from pathlib import Path
 
 class Retrieve:
     def __init__(self):
-        # 현재 파일의 절대 경로를 기준으로 상위 디렉토리 찾기
+        # AI 디렉토리의 절대 경로를 찾기
         current_dir = Path(__file__).parent
-        root_dir = current_dir.parent  # agent 디렉토리
-        data_dir = root_dir / "data"
+        root_dir = current_dir.parent.parent  # AI 디렉토리
+        agent_dir = root_dir / "agent"
+        data_dir = agent_dir / "data"
         
-        self.memories_file = data_dir / "memories.json"
-        
-        # data 디렉토리가 없으면 생성
-        data_dir.mkdir(exist_ok=True)
-        
+        self.memories_file = str(data_dir / "memories.json")
         self._ensure_file_exists()
 
     def _ensure_file_exists(self):
         """memories.json 파일이 존재하는지 확인하고, 없다면 생성"""
-        if not self.memories_file.exists():
+        if not os.path.exists(self.memories_file):
+            os.makedirs(os.path.dirname(self.memories_file), exist_ok=True)
             with open(self.memories_file, 'w', encoding='utf-8') as f:
                 json.dump({"John": [], "Sarah": []}, f, ensure_ascii=False, indent=2)
 

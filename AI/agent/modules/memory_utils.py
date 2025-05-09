@@ -1,107 +1,37 @@
 import json
+import os
+from typing import List, Dict, Any
 import numpy as np
 from datetime import datetime
 from pathlib import Path
 import gensim.downloader as api
-from gensim.models import KeyedVectors
-from typing import Dict, Any, List, Optional
-import os
-import time
-
-# 전역 변수로 모델 저장
-_word2vec_model = None
-
-def get_word2vec_model(model_name: str = "word2vec-google-news-300"):
-    """
-    Word2Vec 모델을 싱글톤으로 관리
-    
-    Args:
-        model_name: 사용할 Word2Vec 모델 이름
-    
-    Returns:
-        Word2Vec 모델
-    """
-    global _word2vec_model
-    if _word2vec_model is None:
-        print("\n=== Word2Vec 모델 로딩 시작 ===")
-        start_time = time.time()
-        
-        # 1. Gensim 데이터 디렉토리 확인
-        gensim_data_dir = os.path.expanduser("~/.gensim-data")
-        if os.name == 'nt':  # Windows
-            gensim_data_dir = os.path.join(os.environ['USERPROFILE'], 'gensim-data')
-        print(f"📁 Gensim 데이터 디렉토리: {gensim_data_dir}")
-        
-        # 2. 모델 로드 (api.load는 자동으로 캐시를 사용)
-        print("📥 모델 로드 중...")
-        load_start = time.time()
-        _word2vec_model = api.load(model_name)
-        load_time = time.time() - load_start
-        print(f"⏱ 모델 로드 시간: {load_time:.2f}초")
-        
-        # 3. 모델 정보 출력
-        print(f"📊 모델 정보:")
-        print(f"  - 벡터 크기: {_word2vec_model.vector_size}")
-        print(f"  - 어휘 크기: {len(_word2vec_model.key_to_index)}")
-        
-        total_time = time.time() - start_time
-        print(f"✅ 모델 로딩 완료 (총 소요시간: {total_time:.2f}초)")
-        
-    return _word2vec_model
-
-EVENT_SENTENCE_TEMPLATES = {
-    "power_usage": {
-        "example": "witness fire power phenomenon at ruins"
-    },
-    "interaction_request": {
-        "example": "request talk with John at square"
-    },
-    "emotion_change": {
-        "example": "feel happy at library"
-    },
-    "new_object_type": {
-        "example": "discover new artifact at temple"
-    },
-    "new_area": {
-        "example": "discover new desert area"
-    },
-    "preferred_object": {
-        "example": "observe favorite book at library"
-    },
-    "agent_observation": {
-        "example": "observe John at square"
-    },
-    "new_object": {
-        "example": "discover potion at lab"
-    }
-}
+from numpy import dot
+from numpy.linalg import norm
 
 class MemoryUtils:
     def __init__(self):
-        """
-        메모리 유틸리티 초기화
-        """
-        self.model = get_word2vec_model()
-        self.vector_size = self.model.vector_size
-        
         # 현재 파일의 절대 경로를 기준으로 상위 디렉토리 찾기
         current_dir = Path(__file__).parent
-        root_dir = current_dir.parent  # agent 디렉토리
-        data_dir = root_dir / "data"
+        root_dir = current_dir.parent.parent  # AI 디렉토리
+        agent_dir = root_dir / "agent"
+        data_dir = agent_dir / "data"
         
-        self.memories_file = data_dir / "memories.json"
-        self.plans_file = data_dir / "plans.json"
-        self.reflections_file = data_dir / "reflections.json"
+        self.memories_file = str(data_dir / "memories.json")
+        self.plans_file = str(data_dir / "plans.json")
+        self.reflections_file = str(data_dir / "reflections.json")
         
-        # data 디렉토리가 없으면 생성
-        data_dir.mkdir(exist_ok=True)
+        # Word2Vec 모델 초기화
+        print("🤖 Word2Vec 모델 로딩 중...")
+        self.model = api.load('word2vec-google-news-300')
+        print("✅ Word2Vec 모델 로딩 완료")
         
         self._ensure_files_exist()
 
     def _ensure_files_exist(self):
         """필요한 JSON 파일들이 존재하는지 확인하고, 없다면 생성"""
         for file_path in [self.memories_file, self.plans_file, self.reflections_file]:
-            if not file_path.exists():
+            if not os.path.exists(file_path):
+                os.makedirs(os.path.dirname(file_path), exist_ok=True)
                 with open(file_path, 'w', encoding='utf-8') as f:
                     json.dump({"John": [], "Sarah": []}, f, ensure_ascii=False, indent=2)
 
@@ -140,23 +70,55 @@ class MemoryUtils:
         self._save_memories(memories)
 
     def get_embedding(self, text: str) -> List[float]:
-        """텍스트의 임베딩 벡터 생성 (임시 구현)"""
-        # 실제로는 여기에 임베딩 모델을 사용해야 합니다
-        return [0.1] * 384  # 384차원 벡터 반환
+        """
+        텍스트를 임베딩 벡터로 변환
+        
+        Args:
+            text: 임베딩할 텍스트
+        
+        Returns:
+            List[float]: 임베딩 벡터
+        """
+        # 토큰화 및 소문자 변환
+        tokens = [w.lower() for w in text.split() if w.lower() in self.model]
+        
+        if not tokens:
+            return [0.0] * self.model.vector_size
+        
+        # 단어 벡터의 평균을 문장 벡터로 사용
+        word_vectors = [self.model[w] for w in tokens]
+        sentence_vector = np.mean(word_vectors, axis=0)
+        
+        # 정규화
+        norm = np.linalg.norm(sentence_vector)
+        if norm > 0:
+            sentence_vector = sentence_vector / norm
+            
+        return sentence_vector.tolist()
 
     def event_to_sentence(self, event: Dict[str, Any]) -> str:
         """이벤트를 문장으로 변환"""
-        event_type = event.get("type", "")
-        location = event.get("location", "")
-        object_type = event.get("object_type", "")
+        event_type = event.get("event_type", "")
+        location = event.get("event_location", "")
+        object = event.get("object", "")
         
         if event_type == "witness":
-            return f"witness {object_type} at {location}"
+            return f"witness {object} at {location}"
         elif event_type == "request":
-            return f"request {object_type} at {location}"
+            return f"request {object} at {location}"
         elif event_type == "feel":
-            return f"feel {object_type} at {location}"
+            return f"feel {object} at {location}"
         elif event_type == "discover":
-            return f"discover {object_type} at {location}"
+            return f"discover {object} at {location}"
+        elif event_type == "new_object_type":
+            return f"discover new {object} at {location}"
+        elif event_type == "new_area":
+            return f"discover new {location} area"
+        elif event_type == "preferred_object":
+            return f"observe favorite {object} at {location}"
+        elif event_type == "agent_observation":
+            return f"observe {object} at {location}"
+        elif event_type == "new_object":
+            return f"discover {object} at {location}"
         else:
-            return f"{event_type} {object_type} at {location}" 
+            return f"{object} at {location}" 
