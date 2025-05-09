@@ -11,6 +11,8 @@ namespace OhMAIGod.Agent
             
             // 상호작용 오브젝트로 이동 시작 (필요시 별도 메서드 구현)
             _controller.StartMovingToAction();
+            // 이동 애니메이션 시작
+            _controller.animator.SetBool("isMoving", true);
         }
 
         public override void OnStateExecute(AgentController _controller)
@@ -22,6 +24,8 @@ namespace OhMAIGod.Agent
         public override void OnStateExit(AgentController _controller)
         {
             base.OnStateExit(_controller);
+            // 이동 애니메이션 종료
+            _controller.animator.SetBool("isMoving", false);
         }
 
         protected override string GetStateName()

@@ -234,11 +234,11 @@ public class TileManager : MonoBehaviour
 
     public TileController GetTileController(string locationName)
     {
-        foreach (var locationTilemap in mLocationTilemaps)
+        foreach (var tileController in mTileTree)
         {
-            if (locationTilemap.name == locationName)
+            if (tileController.LocationName == locationName)
             {
-                return locationTilemap.GetComponent<TileController>();
+                return tileController;
             }
         }
         return null;

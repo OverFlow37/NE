@@ -26,7 +26,7 @@ public class AgentScheduler : MonoBehaviour
         ResetSchedule();
 
         // Test 용으로 더미 스케줄 등록
-        //CreateDummySchedule();
+        CreateDummySchedule();
     }
 
     private void Update()
@@ -336,7 +336,7 @@ public class AgentScheduler : MonoBehaviour
         AddScheduleItem(new ScheduleItem
         {
             ID = "breakfast",
-            ActionName = "아침 식사",
+            ActionName = "eat",
             LocationName = "house",
             TargetName = "Apple",
             StartHour = 6, StartMinute = 30, StartSecond = 0,
@@ -364,7 +364,7 @@ public class AgentScheduler : MonoBehaviour
         AddScheduleItem(new ScheduleItem
         {
             ID = "lunch",
-            ActionName = "점심 식사",
+            ActionName = "eat",
             LocationName = "cafeteria",
             TargetName = "Apple",
             StartHour = 7, StartMinute = 30, StartSecond = 0,
@@ -420,7 +420,7 @@ public class AgentScheduler : MonoBehaviour
         AddScheduleItem(new ScheduleItem
         {
             ID = "sleep",
-            ActionName = "취침",
+            ActionName = "use",
             LocationName = "house",
             TargetName = "Bed",
             StartHour = 14, StartMinute = 0, StartSecond = 0,
