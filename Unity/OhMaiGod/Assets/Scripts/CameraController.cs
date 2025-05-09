@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class CameraController : MonoBehaviour
 {
@@ -44,7 +45,19 @@ public class CameraController : MonoBehaviour
 
         // 마우스 휠로 부드러운 줌인/줌아웃
         float scroll = Input.GetAxis("Mouse ScrollWheel");
-        if (Mathf.Abs(scroll) > 0.01f && mCam != null)
+
+        // 마우스가 게임 화면(카메라 뷰포트) 안에 있는지 체크
+        bool isMouseInGameScreen = false;
+        if (mCam != null)
+        {
+            Vector3 mouseViewportPos = mCam.ScreenToViewportPoint(Input.mousePosition);
+            isMouseInGameScreen =
+                mouseViewportPos.x >= 0f && mouseViewportPos.x <= 1f &&
+                mouseViewportPos.y >= 0f && mouseViewportPos.y <= 1f;
+        }
+
+        // 게임 창에 포커스, 마우스가 게임 화면 안, UI 위에 없을 때만 동작
+        if (Mathf.Abs(scroll) > 0.01f && mCam != null && Application.isFocused && isMouseInGameScreen && !EventSystem.current.IsPointerOverGameObject())
         {
             mCam.orthographicSize = Mathf.Clamp(
                 mCam.orthographicSize - scroll * mZoomSpeed,
