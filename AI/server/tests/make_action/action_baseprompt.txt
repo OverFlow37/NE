@@ -70,6 +70,8 @@ The world is organized in **Region → Location → Object** format.
 
 * The map follows a **Region → Location → Object** hierarchy.
 * The `location` and `target` in the output must come from the `visible_interactables`.
+* If hunger ≥ 7 and any visible interactable is food or food-related, prioritize action "eat" on that object.
+* If no edible object is visible, and there is a known nearby location that contains food, choose action "move" toward that location.
 
 ---
 

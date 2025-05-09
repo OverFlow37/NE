@@ -10,8 +10,8 @@
     "personality": "introverted, practical, punctual",
     "visible_interactables": [
       {
-        "location": "storage",
-        "interactable": ["old_blueprint", "vegetable_seeds"]
+        "location": "cafe",
+        "interactable": ["cozy_sofa"]
       },
       {
         "location": "house",

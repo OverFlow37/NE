@@ -2,193 +2,111 @@
   "John": {
     "reflections": [
       {
-        "created": "2025.04.25.22:00",
-        "event": "discover old_blueprint Village storage",
-        "action": "read old_blueprint at storage",
-        "thought": "The blueprint revealed a forgotten history of the village. I felt a connection to those who came before. It was a valuable piece of information.",
+        "created": "2025.05.02.22:00",
+        "event": "watch camel Desert oasis",
+        "thought": "The sight of the camels in the desert oasis was truly remarkable. Their movements were graceful and purposeful, a stark contrast to the stillness of the landscape. It felt like witnessing a timeless tradition.",
         "importance": 7,
         "embeddings": []
       },
       {
-        "created": "2025.05.01.22:00",
-        "event": "witness first_electric_light Village house",
-        "action": "celebrate with Sarah at house",
-        "thought": "The light was truly astonishing; Sarah and I shared a moment of wonder and joy. It felt like a small step into a brighter future. I'm glad we experienced that together.",
-        "importance": 8,
-        "embeddings": []
-      },
-      {
-        "created": "2025.05.01.22:00",
-        "event": "install solar_panels Village house",
-        "action": "collaborate with Sarah at house",
-        "thought": "Working with Sarah to install the solar panels was productive and satisfying. We built something practical and sustainable for the house. It was a good team effort.",
+        "created": "2025.05.07.22:00",
+        "event": "move Village house",
+        "thought": "Moving the village house was a challenging task, requiring a coordinated effort. I’m beginning to understand the importance of community collaboration and logistics. It was a tangible demonstration of the village’s organizational structure.",
         "importance": 7,
         "embeddings": []
       },
       {
-        "created": "2025.05.04.22:00",
-        "event": "harvest first_vegetables Village garden",
-        "action": "cook dinner at house",
-        "thought": "The vegetables tasted wonderful after gathering them myself. Preparing the meal felt like a small, satisfying accomplishment. It was good to provide sustenance for everyone.",
-        "importance": 7,
+        "created": "2025.05.07.22:00",
+        "event": "interact crab Beach shoreline",
+        "thought": "Observing the crab on the beach was a surprisingly delicate encounter. The creature’s movements highlighted the intricate balance of the coastal ecosystem. It felt like a small, vital part of a larger, interconnected world.",
+        "importance": 5,
         "embeddings": []
       },
       {
-        "created": "2025.05.03.22:00",
-        "event": "build chicken_coop Village farm",
-        "action": "collaborate with Sarah at farm",
-        "thought": "Working with Sarah on the chicken coop was productive. We made good progress and established a helpful workflow. I felt a sense of accomplishment.",
+        "created": "2025.05.07.22:00",
+        "event": "interact rain_collector Beach cliffsgroupIde",
+        "thought": "The rain collector on the cliffs was a clever solution to gathering water. I appreciate the ingenuity of the design and its potential to sustain the community. It connects to my previous observations of resourcefulness.",
         "importance": 6,
-        "embeddings": []
-      },
-      {
-        "created": "2025.05.03.22:00",
-        "event": "build irrigation_system Village garden",
-        "action": "test water_flow at garden",
-        "thought": "Testing the irrigation system was crucial for the garden's success. Ensuring proper water flow was a necessary step. I carefully monitored the results.",
-        "importance": 5,
-        "embeddings": []
-      },
-      {
-        "created": "2025.05.03.22:00",
-        "event": "observe Sarah Forest stream_bank",
-        "action": "talk to Sarah at stream_bank",
-        "thought": "Talking with Sarah about the stream bank provided valuable context. Her observations about the ecosystem were insightful. I learned a lot about local hydrology.",
-        "importance": 5,
         "embeddings": []
       }
     ],
     "plans": {
-      "2025.05.03": {
+      "2025.05.07": {
         "wake_up_time": "06:00",
         "daily_plan": [
-          "eat breakfast at house",
-          "move to garden",
-          "interact with irrigation system at garden",
-          "think at garden to observe water flow",
-          "move to forest stream_bank",
-          "talk to Sarah at stream_bank",
-          "think at stream_bank about hydrology",
-          "move to cafe",
-          "eat lunch at cafe",
-          "idle on cozy_sofa at cafe",
-          "move to house",
-          "eat dinner at house",
-          "go to bed",
-          "sleep"
+          "use crab at shoreline",
+          "use seagull at cliffsgroupIde",
+          "use rain_collector at cliffsgroupIde",
+          "eat crab at cliffsgroupIde",
+          "use library_shelves at construction_site",
+          "use greenhouse_frame at garden",
+          "eat pastry_display at cafe",
+          "use cozy_sofa at cafe",
+          "use bookshelf at house"
         ],
         "time_slots": [
           [
-            "eat",
-            "house",
-            "dining_table",
+            "use",
+            "shoreline",
+            "crab",
             "06:00",
-            "06:30"
-          ],
-          [
-            "move",
-            "garden",
-            "",
-            "06:30",
-            "07:00"
-          ],
-          [
-            "interact",
-            "garden",
-            "irrigation_system",
-            "07:00",
             "08:00"
           ],
           [
-            "think",
-            "garden",
-            "water_flow",
+            "use",
+            "cliffsgroupIde",
+            "seagull",
             "08:00",
-            "09:30"
+            "10:00"
           ],
           [
-            "move",
-            "stream_bank",
-            "",
-            "09:30",
-            "10:30"
+            "use",
+            "cliffsgroupIde",
+            "rain_collector",
+            "10:00",
+            "12:00"
           ],
           [
-            "talk",
-            "stream_bank",
-            "Sarah",
-            "10:30",
-            "11:30"
-          ],
-          [
-            "think",
-            "stream_bank",
-            "ecosystem",
-            "11:30",
-            "12:30"
-          ],
-          [
-            "move",
-            "cafe",
-            "",
-            "12:30",
+            "eat",
+            "cliffsgroupIde",
+            "crab",
+            "12:00",
             "13:00"
+          ],
+          [
+            "use",
+            "construction_site",
+            "library_shelves",
+            "13:00",
+            "15:00"
+          ],
+          [
+            "use",
+            "garden",
+            "greenhouse_frame",
+            "15:00",
+            "17:30"
           ],
           [
             "eat",
             "cafe",
             "pastry_display",
-            "13:00",
-            "13:30"
-          ],
-          [
-            "idle",
-            "cafe",
-            "cozy_sofa",
-            "13:30",
-            "14:30"
-          ],
-          [
-            "move",
-            "house",
-            "",
-            "14:30",
-            "15:00"
-          ],
-          [
-            "sleep",
-            "house",
-            "bed",
-            "15:00",
-            "17:00"
-          ],
-          [
-            "eat",
-            "house",
-            "dining_table",
-            "18:00",
+            "17:30",
             "19:00"
           ],
           [
-            "idle",
+            "use",
+            "cafe",
+            "cozy_sofa",
+            "19:00",
+            "21:00"
+          ],
+          [
+            "use",
             "house",
             "bookshelf",
-            "19:00",
-            "20:00"
-          ],
-          [
-            "move",
-            "house",
-            "bed",
             "21:00",
-            "21:30"
-          ],
-          [
-            "sleep",
-            "house",
-            "bed",
-            "22:00",
-            "06:00"
+            "24:00"
           ]
         ]
       }
@@ -199,8 +117,8 @@
 Use the following information to create a meaningful and balanced plan for the character named **"John"**:
 
 **🧠 PRIORITY SOURCES** (in descending order):
-1. Reflections from **2025.05.03** (highest priority)
-2. Plan from **2025.05.03** (second priority)
+1. Reflections from **2025.05.07** (highest priority)
+2. Plan from **2025.05.07** (second priority)
 3. Other reflections from earlier dates (lower priority)
 
 ---
@@ -243,32 +161,43 @@ Use the following information to create a meaningful and balanced plan for the c
 ---
 
 **🎮 AVAILABLE ACTIONS:**
-- `move`: go to a new location
-- `interact`: use or manipulate an object
-- `eat`: consume food
-- `talk`: speak to another agent
-- `wait`: remain inactive briefly
-- `think`: engage in internal reflection
-- `idle`: rest without doing anything
-- `sleep`: sleep to recover energy
-- `watch` : Observe objects or people.
+
+eat: consume food
+use: interact with an object
 
 ---
 
 **🕓 PLANNING RULES:**
 
-* Wake-up time is fixed at **06:00**
-* Bedtime is fixed at **22:00**
-* ⛔️ Between **22:00 and 06:00**, the character **must** be marked with the action `"sleep"` in `time_slots` -> (["sleep", "house", "bed", "22:00", "22 :00"])
-* Total duration of `time_slots` must sum to **1440 minutes (24 hours)**
+* Each `daily_plan` entry must follow the format:
+   "<action> <object> at <location>"  
+* The `eat` action may be scheduled **at most 3 times per day**, and only at the following time slots:
+  - Breakfast: around **08:00**
+  - Lunch: around **12:00**
+  - Dinner: around **18:00**
+
+* Avoid scheduling `eat` outside these periods unless strongly justified by reflections or special context.
+
+* ⛔️ No activities may be scheduled between 24:00 and 06:00 — this time is reserved for sleep.
 * Each entry in `time_slots` must match an entry in `daily_plan`
 * `time_slots` must follow this format:  
-  `["action", "location", "target", "start time", "end time"]`
+  `["action", "location", "target", "start time", "end time", importance]`
 * `action` must be chosen from the AVAILABLE ACTIONS
+* Each `eat` action must last exactly **1 hour**.
+* Each `use` action must last at least **2 hours**.
+  - If no natural break occurs, longer `use` actions may be split into multiple related blocks.
 * The map is structured in three levels: Region → Location → Object.
 * The "location" field must refer only to a valid location within the given region. Do not use a region or object name in this field.
 * The "target" field (object) must exist within the specified location. Do not use an object from a different location.
-*All targets must match the object list defined for that specific location (see the map reference).
+* All targets must match the object list defined for that specific location (see the map reference).
+
+** Importance Scoring Criteria:**
+
+  * **1–3**: Minor everyday actions
+  * **4–6**: Moderate insights from regular experiences
+  * **7–8**: Significant personal realizations or reflections
+  * **9–10**: Major life-changing actions or decisions
+
 
 * You must generate a plan for the **next day** following the latest date in John’s existing plans  
   (e.g., if the last plan is for "2025.05.04", generate one for "2025.05.05")
@@ -277,6 +206,7 @@ Use the following information to create a meaningful and balanced plan for the c
 
 🔸 Avoid repeating low-priority or unimportant objects unless they are highly emphasized in the reflections.
 
+❗ Daily schedule must span the entire period from 06:00 to 24:00.
 ---
 
 **📤 OUTPUT FORMAT (strictly JSON):**
@@ -285,7 +215,7 @@ Use the following information to create a meaningful and balanced plan for the c
 {
   "John": {
     "plans": {
-      "2025.05.04": {
+      "2025.05.08": {
         "wake_up_time": "06:00",
         "daily_plan": [
           "action1",

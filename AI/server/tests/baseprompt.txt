@@ -3,8 +3,8 @@ You are a game assistant responsible for generating a character’s daily plan.
 Use the following information to create a meaningful and balanced plan for the character named **"John"**:
 
 **🧠 PRIORITY SOURCES** (in descending order):
-1. Reflections from **2025.05.03** (highest priority)
-2. Plan from **2025.05.03** (second priority)
+1. Reflections from **2025.05.07** (highest priority)
+2. Plan from **2025.05.07** (second priority)
 3. Other reflections from earlier dates (lower priority)
 
 ---
@@ -47,32 +47,43 @@ Use the following information to create a meaningful and balanced plan for the c
 ---
 
 **🎮 AVAILABLE ACTIONS:**
-- `move`: go to a new location
-- `interact`: use or manipulate an object
-- `eat`: consume food
-- `talk`: speak to another agent
-- `wait`: remain inactive briefly
-- `think`: engage in internal reflection
-- `idle`: rest without doing anything
-- `sleep`: sleep to recover energy
-- `watch` : Observe objects or people.
+
+eat: consume food
+use: interact with an object
 
 ---
 
 **🕓 PLANNING RULES:**
 
-* Wake-up time is fixed at **06:00**
-* Bedtime is fixed at **22:00**
-* ⛔️ Between **22:00 and 06:00**, the character **must** be marked with the action `"sleep"` in `time_slots` -> (["sleep", "house", "bed", "22:00", "22 :00"])
-* Total duration of `time_slots` must sum to **1440 minutes (24 hours)**
+* Each `daily_plan` entry must follow the format:
+   "<action> <object> at <location>"  
+* The `eat` action may be scheduled **at most 3 times per day**, and only at the following time slots:
+  - Breakfast: around **08:00**
+  - Lunch: around **12:00**
+  - Dinner: around **18:00**
+
+* Avoid scheduling `eat` outside these periods unless strongly justified by reflections or special context.
+
+* ⛔️ No activities may be scheduled between 24:00 and 06:00 — this time is reserved for sleep.
 * Each entry in `time_slots` must match an entry in `daily_plan`
 * `time_slots` must follow this format:  
-  `["action", "location", "target", "start time", "end time"]`
+  `["action", "location", "target", "start time", "end time", importance]`
 * `action` must be chosen from the AVAILABLE ACTIONS
+* Each `eat` action must last exactly **1 hour**.
+* Each `use` action must last at least **2 hours**.
+  - If no natural break occurs, longer `use` actions may be split into multiple related blocks.
 * The map is structured in three levels: Region → Location → Object.
 * The "location" field must refer only to a valid location within the given region. Do not use a region or object name in this field.
 * The "target" field (object) must exist within the specified location. Do not use an object from a different location.
-*All targets must match the object list defined for that specific location (see the map reference).
+* All targets must match the object list defined for that specific location (see the map reference).
+
+** Importance Scoring Criteria:**
+
+  * **1–3**: Minor everyday actions
+  * **4–6**: Moderate insights from regular experiences
+  * **7–8**: Significant personal realizations or reflections
+  * **9–10**: Major life-changing actions or decisions
+
 
 * You must generate a plan for the **next day** following the latest date in John’s existing plans  
   (e.g., if the last plan is for "2025.05.04", generate one for "2025.05.05")
@@ -81,6 +92,7 @@ Use the following information to create a meaningful and balanced plan for the c
 
 🔸 Avoid repeating low-priority or unimportant objects unless they are highly emphasized in the reflections.
 
+❗ Daily schedule must span the entire period from 06:00 to 24:00.
 ---
 
 **📤 OUTPUT FORMAT (strictly JSON):**
@@ -89,7 +101,7 @@ Use the following information to create a meaningful and balanced plan for the c
 {
   "John": {
     "plans": {
-      "2025.05.04": {
+      "2025.05.08": {
         "wake_up_time": "06:00",
         "daily_plan": [
           "action1",

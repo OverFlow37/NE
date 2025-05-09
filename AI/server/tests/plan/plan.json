@@ -1,41 +1,29 @@
 {
   "John": {
     "plans": {
-      "2025.05.03": {
+      "2025.05.07": {
         "wake_up_time": "06:00",
         "daily_plan": [
-          "eat breakfast at house",
-          "move to garden",
-          "interact with irrigation system at garden",
-          "think at garden to observe water flow",
-          "move to forest stream_bank",
-          "talk to Sarah at stream_bank",
-          "think at stream_bank about hydrology",
-          "move to cafe",
-          "eat lunch at cafe",
-          "idle on cozy_sofa at cafe",
-          "move to house",
-          "eat dinner at house",
-          "go to bed",
-          "sleep"
+          "use crab at shoreline",
+          "use seagull at cliffsgroupIde",
+          "use rain_collector at cliffsgroupIde",
+          "eat crab at cliffsgroupIde",
+          "use library_shelves at construction_site",
+          "use greenhouse_frame at garden",
+          "eat pastry_display at cafe",
+          "use cozy_sofa at cafe",
+          "use bookshelf at house"
         ],
         "time_slots": [
-          ["eat", "house", "dining_table", "06:00", "06:30"],
-          ["move", "garden", "", "06:30", "07:00"],
-          ["interact", "garden", "irrigation_system", "07:00", "08:00"],
-          ["think", "garden", "water_flow", "08:00", "09:30"],
-          ["move", "stream_bank", "", "09:30", "10:30"],
-          ["talk", "stream_bank", "Sarah", "10:30", "11:30"],
-          ["think", "stream_bank", "ecosystem", "11:30", "12:30"],
-          ["move", "cafe", "", "12:30", "13:00"],
-          ["eat", "cafe", "pastry_display", "13:00", "13:30"],
-          ["idle", "cafe", "cozy_sofa", "13:30", "14:30"],
-          ["move", "house", "", "14:30", "15:00"],
-          ["sleep", "house", "bed", "15:00", "17:00"],
-          ["eat", "house", "dining_table", "18:00", "19:00"],
-          ["idle", "house", "bookshelf", "19:00", "20:00"],
-          ["move", "house", "bed", "21:00", "21:30"],
-          ["sleep", "house", "bed", "22:00", "06:00"]
+          ["use", "shoreline", "crab", "06:00", "08:00"],
+          ["use", "cliffsgroupIde", "seagull", "08:00", "10:00"],
+          ["use", "cliffsgroupIde", "rain_collector", "10:00", "12:00"],
+          ["eat", "cliffsgroupIde", "crab", "12:00", "13:00"],
+          ["use", "construction_site", "library_shelves", "13:00", "15:00"],
+          ["use", "garden", "greenhouse_frame", "15:00", "17:30"],
+          ["eat", "cafe", "pastry_display", "17:30", "19:00"],
+          ["use", "cafe", "cozy_sofa", "19:00", "21:00"],
+          ["use", "house", "bookshelf", "21:00", "24:00"]
         ]
       }
     }

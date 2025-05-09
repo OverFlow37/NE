@@ -13,13 +13,6 @@ import json
 import time
 import urllib.request
 
-def extract_json_block(text: str) -> str:
-    """텍스트 내에서 첫 번째 JSON 블록만 추출"""
-    match = re.search(r'```json\s*(\{.*?\})\s*```', text, re.DOTALL)
-    if match:
-        return match.group(1)
-    else:
-        raise ValueError("JSON 블록을 찾을 수 없습니다.")
 
 def get_response(prompt: str) -> str:
     payload = {
@@ -41,37 +34,8 @@ def get_response(prompt: str) -> str:
 
     raw_text = raw.decode('utf-8')
     answer = json.loads(raw_text).get("response", "")
-
-    try:
-        json_text = extract_json_block(answer)
-        plan_data = json.loads(json_text)
-
-        # sleep 존재 여부 확인
-        john = plan_data.get("John", {})
-        plans = john.get("plans", {})
-        for date, content in plans.items():
-            time_slots = content.get("time_slots", [])
-            has_sleep = any(slot[0] == "sleep" for slot in time_slots)
-            if not has_sleep:
-                last_slot = time_slots[-1]
-                last_location = last_slot[1]
-                last_target = last_slot[2] if len(last_slot) > 2 else ""
-
-                # sleep 추가
-                time_slots.append(["sleep", last_location, last_target, "22:00", "06:00"])
-                content["time_slots"] = time_slots
-                content.setdefault("daily_plan", []).append("Sleep from 22:00 to 06:00 to recover energy.")
-
-        answer = json.dumps(plan_data, indent=2)
-
-    except Exception as e:
-        print("⚠️ sleep 보정 중 오류 발생:", e)
-
-    print("\n 응답:")
-    print(answer)
-    print(f"\n 응답시간: {elapsed:.3f}초\n")
-
-    return answer
+    print(f"Response time: {elapsed:.2f} seconds")
+    print(f"Response: {answer}")
 
 
 
@@ -82,8 +46,8 @@ def save_combined_memory():
     base_prompt_path = os.path.join(base_dir, "baseprompt.txt")
     output_path = os.path.join(base_dir, "planprompt.txt")
 
-    target_date = "2025.05.03"
-    target_datetime = "2025.05.03.22:00"
+    target_date = "2025.05.07"
+    target_datetime = "2025.05.07.22:00"
 
     result = {"John": {}}
 
@@ -99,7 +63,7 @@ def save_combined_memory():
     unique_reflections = []
 
     for r in high_importance + specific_date:
-        key = (r["event"], r["action"])
+        key = (r["event"])
         if key not in seen_keys:
             seen_keys.add(key)
             unique_reflections.append(r)
