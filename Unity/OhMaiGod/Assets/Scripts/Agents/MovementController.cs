@@ -239,30 +239,23 @@ public class MovementController : MonoBehaviour
         // 이동 방향(혹은 바라보는 방향) 계산
         Vector2 direction = mCurrentPoint - (Vector2)transform.position;
         if (direction.sqrMagnitude < 0.01f) return false; // 방향이 없으면 감지 안 함
+        
+        // 현재 위치에서 mCurrentPoint까지의 거리 계산
+        float distance = direction.magnitude;
         direction.Normalize();
 
-        // 타일맵 참조
-        Tilemap groundTilemap = TileManager.Instance.GroundTilemap;
+        // 현재 위치에서 최대 1 거리만큼 떨어진 지점 계산 (거리가 1보다 작으면 그 거리만큼만)
+        Vector2 checkPosition = (Vector2)transform.position + direction * Mathf.Min(distance, 1f);
 
-        // 현재 위치의 셀 좌표
-        Vector3Int currentCell = groundTilemap.WorldToCell(transform.position);
-
-        for (int i = 1; i <= mDetectionTileCount; i++)
+        // 해당 위치에서 충돌체 감지
+        Collider2D[] colliders = Physics2D.OverlapCircleAll(checkPosition, 0.2f, TileManager.Instance.ObstacleLayerMask);
+        foreach (Collider2D collider in colliders)
         {
-            // 정면 방향으로 i칸 앞 셀 좌표 계산
-            Vector3Int checkCell = currentCell + new Vector3Int(Mathf.RoundToInt(direction.x * i), Mathf.RoundToInt(direction.y * i), 0);
-            Vector3 checkWorldPos = groundTilemap.GetCellCenterWorld(checkCell);
-
-            // 해당 셀 중심에서 충돌체 감지
-            Collider2D[] colliders = Physics2D.OverlapCircleAll(checkWorldPos, 0.2f, TileManager.Instance.ObstacleLayerMask);
-            foreach (Collider2D collider in colliders)
-            {
-                if (collider.gameObject == this.gameObject)  // 자기 자신은 이벤트 발생하지 않음
-                    continue;
-                if (mTargetController != null && collider.gameObject == mTargetController.gameObject)  // 목표 타겟은 이벤트 발생하지 않음
-                    continue;
-                return true;
-            }
+            if (collider.gameObject == this.gameObject)  // 자기 자신은 이벤트 발생하지 않음
+                continue;
+            if (mTargetController != null && collider.gameObject == mTargetController.gameObject)  // 목표 타겟은 이벤트 발생하지 않음
+                continue;
+            return true;
         }
         return false;
     }
