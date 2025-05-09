@@ -9,11 +9,16 @@ public class AgentScheduler : MonoBehaviour
 {
     [Header("디버깅")]
     [SerializeField] private bool mShowDebugInfo = true; // 디버그 로그 출력 여부
+    [Header("테스트 옵션")]
+    [SerializeField] public bool mUseDummySchedule = false; // 더미 스케줄 등록 여부
+    private bool mPrevUseDummySchedule = false; // 더미 스케줄 등록 체크박스 이전 상태 저장
 
     // ==== 스케줄 관리 변수들 ====
     private List<ScheduleItem> mDailySchedule = new List<ScheduleItem>();   // 하루 전체 일정 목록
     private ScheduleItem mCurrentAction = null;                             // 현재 수행 중인 활동
     private ScheduleItem mNextAction = null;                                // 다음 예정된 활동
+
+    public ScheduleItem CurrentAction => mCurrentAction;
 
     private AgentController mAgentController;  // 에이전트 동작 제어를 위한 컨트롤러 참조
 
@@ -24,15 +29,20 @@ public class AgentScheduler : MonoBehaviour
         
         // 빈 일정으로 초기화
         ResetSchedule();
-
-        // Test 용으로 더미 스케줄 등록
-        CreateDummySchedule();
     }
 
     private void Update()
     {
         if (TimeManager.Instance.isPaused) return;
         
+        // 인스펙터에서 더미 스케줄 등록 체크박스가 켜진 순간에만 실행
+        if (!mPrevUseDummySchedule && mUseDummySchedule)
+        {
+            CreateDummySchedule();
+            LogManager.Log("Scheduler", "더미 스케줄이 등록되었습니다.", 2);
+        }
+        mPrevUseDummySchedule = mUseDummySchedule;
+
         // 현재 활동 업데이트
         UpdateAction();
     }
@@ -219,20 +229,25 @@ public class AgentScheduler : MonoBehaviour
         // 현재 활동이 있고 아직 유효한 경우
         if (mCurrentAction != null)
         {
-            if (TimeManager.Instance.GetCurrentGameTime() > mCurrentAction.EndTime)
+            // 다음 시작할 스케줄 찾기 (미완료, 현재시간 이상)
+            var nextSchedule = mDailySchedule
+                .Where(item => !item.IsCompleted && item.StartTime >= TimeManager.Instance.GetCurrentGameTime())
+                .OrderBy(item => item.StartTime)
+                .ThenByDescending(item => item.Priority)
+                .FirstOrDefault();
+
+            // 현재 활동이 끝났거나, 다음 스케줄이 지금 시작해야 하는 경우
+            if (TimeManager.Instance.GetCurrentGameTime() > mCurrentAction.EndTime ||
+                (nextSchedule != null && nextSchedule.StartTime <= TimeManager.Instance.GetCurrentGameTime() && nextSchedule.StartTime < mCurrentAction.EndTime))
             {
                 if (!mCurrentAction.IsCompleted)
                 {
-                    // 자동으로 완료 처리
                     mCurrentAction.IsCompleted = true;
-                    
                     if (mShowDebugInfo)
                     {
-                        LogManager.Log("Scheduler", $"활동 자동 완료 (시간 초과): {mCurrentAction.ActionName}", 2);
+                        LogManager.Log("Scheduler", $"활동 강제 완료(다음 스케줄 시작): {mCurrentAction.ActionName}", 2);
                     }
                 }
-                
-                // 활동 종료
                 mCurrentAction = null;
             }
             else
@@ -332,103 +347,20 @@ public class AgentScheduler : MonoBehaviour
     // 테스트용 더미 일정 생성
     private void CreateDummySchedule()
     {
-        // 아침 식사
-        AddScheduleItem(new ScheduleItem
-        {
-            ID = "breakfast",
-            ActionName = "eat",
-            LocationName = "house",
-            TargetName = "Apple",
-            StartHour = 6, StartMinute = 30, StartSecond = 0,
-            EndHour = 7, EndMinute = 00, EndSecond = 0,
-            Priority = 5,
-            IsFlexible = false,
-            Reason = "Dummy Schedule"
-        });
-        
-        // 오전 일과
-        // AddScheduleItem(new ScheduleItem
-        // {
-        //     ID = "morning_work",
-        //     ActionName = "오전 업무",
-        //     LocationName = "house",
-        //     TargetName = "Desk",
-        //     StartHour = 9, StartMinute = 0, StartSecond = 0,
-        //     EndHour = 9, EndMinute = 30, EndSecond = 0,
-        //     Priority = 8,
-        //     IsFlexible = false,
-        //     Reason = "Dummy Schedule"
-        // });
-        
-        // 점심 식사
-        AddScheduleItem(new ScheduleItem
-        {
-            ID = "lunch",
-            ActionName = "eat",
-            LocationName = "cafeteria",
-            TargetName = "Apple",
-            StartHour = 7, StartMinute = 30, StartSecond = 0,
-            EndHour = 8, EndMinute = 30, EndSecond = 0,
-            Priority = 5,
-            IsFlexible = true,
-            Reason = "Dummy Schedule"
-        });
-        
-        // 오후 일과
-        // AddScheduleItem(new ScheduleItem
-        // {
-        //     ID = "afternoon_work",
-        //     ActionName = "오후 업무",
-        //     LocationName = "house",
-        //     TargetName = "Desk",
-        //     StartHour = 11, StartMinute = 0, StartSecond = 0,
-        //     EndHour = 11, EndMinute = 30, EndSecond = 0,
-        //     Priority = 8,
-        //     IsFlexible = false,
-        //     Reason = "Dummy Schedule"
-        // });
-        
-        // 저녁 식사
-        // AddScheduleItem(new ScheduleItem
-        // {
-        //     ID = "dinner",
-        //     ActionName = "저녁 식사",
-        //     LocationName = "house",
-        //     TargetName = "Kitchen",
-        //     StartHour = 12, StartMinute = 0, StartSecond = 0,
-        //     EndHour = 12, EndMinute = 30, EndSecond = 0,
-        //     Priority = 5,
-        //     IsFlexible = true,
-        //     Reason = "Dummy Schedule"
-        // });
-        
-        // // 여가 시간
-        // AddScheduleItem(new ScheduleItem
-        // {
-        //     ID = "leisure",
-        //     ActionName = "여가 시간",
-        //     LocationName = "house",
-        //     TargetName = "LivingRoom",
-        //     StartHour = 13, StartMinute = 0, StartSecond = 0,
-        //     EndHour = 13, EndMinute = 30, EndSecond = 0,
-        //     Priority = 3,
-        //     IsFlexible = true,
-        //     Reason = "Dummy Schedule"
-        // });
-        
-        // 취침
-        AddScheduleItem(new ScheduleItem
-        {
-            ID = "sleep",
-            ActionName = "use",
-            LocationName = "house",
-            TargetName = "Bed",
-            StartHour = 14, StartMinute = 0, StartSecond = 0,
-            EndHour = 14, EndMinute = 30, EndSecond = 30,
-            Priority = 7,
-            IsFlexible = false,
-            Reason = "Dummy Schedule"
-        });
+        // 현재 게임 시간 가져오기
+        TimeSpan startTime = TimeManager.Instance.GetCurrentGameTime();
+        TimeSpan endTime = startTime.Add(new TimeSpan(0, 30, 0));   // 30분 뒤
+
+        // 더미 스케줄 추가
+        AddScheduleItem(new ScheduleItem(
+            "use",
+            "house",
+            "Bed",
+            startTime,
+            endTime,
+            2,
+            "Dummy Schedule"
+        ));
     }
 
     // UI에서 스케줄을 표시할 수 있도록 문자열로 반환하는 메서드 추가
