@@ -204,6 +204,7 @@ public class Interactable : MonoBehaviour
         {
             CurrentLocation = locationName;
             // 위치가 변경되면 이벤트 발생
+            LogManager.Log("Interact", $"[{gameObject.name}] 위치 변경: {locationName}", 2);
             OnLocationChanged?.Invoke(this, locationName);
         }
     }

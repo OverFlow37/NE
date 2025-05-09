@@ -5,7 +5,8 @@ using UnityEngine.Tilemaps;
 [ExecuteInEditMode]
 public class TileController : MonoBehaviour
 {
-    private string mLocationName;
+    [SerializeField] public string mLocationName = "";
+    [SerializeField] public string mDescription = "";
     private List<Interactable> mChildInteractables;
     private bool mIsInitialized = false;
     private Tilemap mTilemap;
@@ -13,7 +14,6 @@ public class TileController : MonoBehaviour
     private void Awake()
     {
         mTilemap = GetComponent<Tilemap>();
-        mLocationName = mTilemap.name;
         mChildInteractables = new List<Interactable>();
     }
 
