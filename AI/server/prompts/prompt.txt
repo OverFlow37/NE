@@ -15,6 +15,7 @@ ACTION OPTIONS:
 LOCATION OPTIONS:
 - house: a private residence where agents can live and rest
 - cafeteria: communal dining area where agents can eat and socialize
+- outdoor: outdoor
 
 OBJECT OPTIONS:
 - Bed: a private space for sleeping and personal activities (action: use)

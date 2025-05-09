@@ -159,14 +159,14 @@ public class AgentController : MonoBehaviour
         }
 
         // 이동 애니메이션 정지
-        animator.SetBool("isMoving", false);
-        mStateMachine.ChangeState(AgentState.INTERACTION); // 상태 INTERACTION으로 전환
+        //animator.SetBool("isMoving", false);
+        if (mStateMachine.CurrentStateType == AgentState.MOVE_TO_INTERACTABLE)
+            mStateMachine.ChangeState(AgentState.INTERACTION); // 상태 INTERACTION으로 전환
     }
 
     // 이동 불가능 이벤트 핸들러
     private void HandleMovementBlocked()
     {
-        Debug.Log($"{mName}: 이동 불가능 이벤트 발생");
         // 현재 상태에 따라 처리 (기본적으로 WAIT 상태로 전환)
         switch (CurrentState)
         {

@@ -106,6 +106,11 @@ public class TileManager : MonoBehaviour
         if (tileController != null)
         {
             string locationName = tileController.LocationName;
+
+            // 이미 같은 위치에 등록되어 있으면 무시
+            if (mInteractableLocations.ContainsKey(target) && mInteractableLocations[target] == locationName)
+                return;
+
             tileController.AddChildInteractable(target);
             
             // 위치 정보 업데이트

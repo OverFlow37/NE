@@ -7,6 +7,7 @@ public class TileController : MonoBehaviour
 {
     [SerializeField] public string mLocationName = "";
     [SerializeField] public string mDescription = "";
+    
     private List<Interactable> mChildInteractables;
     private bool mIsInitialized = false;
     private Tilemap mTilemap;
