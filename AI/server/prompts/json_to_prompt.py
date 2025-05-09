@@ -4,37 +4,67 @@ import time
 import re
 import random
 from pathlib import Path
+import requests
+import os
+
+# 전역 변수로 세션 관리
+session = requests.Session()
+MODEL_NAME = "gemma3"
+API_URL = 'http://localhost:11434/api/generate'
+
+# 현재 파일의 절대 경로를 기준으로 상위 디렉토리 찾기
+CURRENT_DIR = Path(__file__).parent
+ROOT_DIR = CURRENT_DIR.parent.parent  # AI 디렉토리
+
+# paths.json에서 경로 로드
+def load_paths():
+    """
+    paths.json 파일에서 경로 정보를 로드
+    """
+    try:
+        # 현재 파일의 절대 경로를 기준으로 상위 디렉토리 찾기
+        current_dir = Path(__file__).parent
+        root_dir = current_dir.parent.parent  # AI 디렉토리
+        config_path = root_dir / "agent" / "config" / "paths.json"
+        
+        with open(config_path, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except FileNotFoundError:
+        raise FileNotFoundError("paths.json 파일을 찾을 수 없습니다.")
+
+PATHS = load_paths()
 
 # ==============================
 #  서버 호출 함수
 # ==============================
-def get_response(prompt: str, api_url: str) -> str:
+def get_response(prompt: str, api_url: str = API_URL) -> str:
     """
     prompt 문자열을 LLM 서버에 보내고,
     JSON 응답에서 'response' 필드를 꺼내 출력 후 반환합니다.
+    세션을 재사용하여 모델 로딩 오버헤드를 방지합니다.
     """
     payload = {
-        "model": "gemma3",
+        "model": MODEL_NAME,
         "prompt": prompt,
         "stream": False  # 스트리밍 모드를 꺼서 단일 JSON 응답을 받습니다
     }
-    # HTTP 요청 준비
-    data = json.dumps(payload).encode('utf-8')
-    req = urllib.request.Request(
-        api_url,
-        data=data,
-        headers={'Content-Type': 'application/json'}
-    )
 
     # 요청-응답 시간 측정 시작
     start_time = time.time()
-    with urllib.request.urlopen(req) as resp:
-        raw = resp.read()
-    elapsed = time.time() - start_time
-
-    # 받은 바이트를 디코딩하고 JSON 파싱
-    result = json.loads(raw.decode('utf-8'))
+    
+    # 요청 전송 시간 측정
+    request_start = time.time()
+    response = session.post(api_url, json=payload)
+    request_time = time.time() - request_start
+    
+    # 응답 처리 시간 측정
+    process_start = time.time()
+    result = response.json()
     answer = result.get("response", "")
+    process_time = time.time() - process_start
+    
+    # 전체 시간
+    total_time = time.time() - start_time
 
     # 개행 문자 및 백슬래시 제거: 실제 newline, JSON 이스케이프된 "\n" 모두 처리
     answer = answer.replace("\\n", " ")
@@ -49,7 +79,11 @@ def get_response(prompt: str, api_url: str) -> str:
 
     # 결과 출력
     print("🧠 응답:", answer)
-    print(f"⏱ 응답시간: {elapsed:.3f}초")
+    print(f"⏱ 시간 측정:")
+    print(f"  - 요청 전송: {request_time:.3f}초")
+    print(f"  - 응답 처리: {process_time:.3f}초")
+    print(f"  - 전체 시간: {total_time:.3f}초")
+    print(f"  - 응답 헤더: {dict(response.headers)}")
 
     return answer
 
@@ -121,10 +155,11 @@ def load_prompt_template() -> str:
     prompt.txt 파일에서 프롬프트 템플릿을 읽어옵니다.
     """
     try:
-        with open('./prompts/prompt.txt', 'r', encoding='utf-8') as f:
+        prompt_path = ROOT_DIR / 'agent' / 'prompts' / 'prompt.txt'
+        with open(prompt_path, 'r', encoding='utf-8') as f:
             return f.read().strip()
     except FileNotFoundError:
-        raise FileNotFoundError("prompt.txt 파일을 찾을 수 없습니다.")
+        raise FileNotFoundError(f"prompt.txt 파일을 찾을 수 없습니다. 경로: {prompt_path}")
 
 def format_prompt(state_obj: dict) -> str:
     """

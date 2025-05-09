@@ -1,0 +1,5 @@
+{
+    "agent_data_path": "AI/agent/data/agent.json",
+    "modules_path": "AI/agent/modules",
+    "prompts_path": "AI/agent/prompts"
+} 

@@ -1,6 +1,7 @@
 import urllib.request
 import json
 import time
+import http.client
 
 # ==============================
 #  서버 호출 함수
@@ -10,23 +11,28 @@ def get_response(prompt: str) -> str:
     prompt 문자열을 LLM 서버에 보내고,
     JSON 응답에서 'response' 필드를 꺼내 출력 후 반환합니다.
     """
+    # 서버 주소 설정
+    PORT = 11434
+    HOST = 'localhost'
+    
+    # 매 요청마다 새로운 연결 생성
+    conn = http.client.HTTPConnection(HOST, PORT)
+    
     payload = {
         "model": "gemma3",
         "prompt": prompt,
-        "stream": False  # 스트리밍 모드를 꺼서 단일 JSON 응답을 받습니다
+        "stream": False
     }
+    
     # HTTP 요청 준비
     data = json.dumps(payload).encode('utf-8')
-    req = urllib.request.Request(
-        API_URL,
-        data=data,
-        headers={'Content-Type': 'application/json'}
-    )
+    headers = {'Content-Type': 'application/json'}
 
     # 요청-응답 시간 측정 시작
     start_time = time.time()
-    with urllib.request.urlopen(req) as resp:
-        raw = resp.read()
+    conn.request('POST', '/api/generate', data, headers)
+    resp = conn.getresponse()
+    raw = resp.read()
     elapsed = time.time() - start_time
 
     # 받은 바이트를 디코딩하고 JSON 파싱
@@ -37,6 +43,9 @@ def get_response(prompt: str) -> str:
     print("\n🧠 응답:")
     print(answer)
     print(f"\n⏱ 응답시간: {elapsed:.3f}초\n")
+
+    # 연결 종료
+    conn.close()
 
     return answer
 
@@ -94,18 +103,70 @@ def load_prompt(txt_path: str, json_path: str) -> str:
 #  스크립트 진입점
 # ==============================
 if __name__ == "__main__":
-    # 서버 주소 설정
-    PORT = 11434
-    HOST = 'localhost'
-    API_URL = f"http://{HOST}:{PORT}/api/generate"
+    try:
+        # 테스트용 프롬프트
+        test_prompt = """
+You are the AI controller for agents in a simulation game.
 
-    # prompt.txt 와 state.json 경로를 지정
-    prompt = load_prompt('./prompts/prompt.txt', 'state.json')
+AGENT DATA:
+Tom: hungry, not sleepy, not lonely, at House
+Visible: Kitchen located in House, Bedroom located in House, Desk located in House, Cafeteria located in Cafeteria
+Can interact with: Kitchen located in House, LivingRoom located in House, Bedroom located in House, Desk located in House, Cafeteria located in Cafeteria
 
-    # 프롬프트 찍어보기
-    print("===== SEND PROMPT =====")
-    print(prompt)
-    print("===== END PROMPT =====\n")
+TASK: For each agent, determine ONE NEXT ACTION based on their current state.
 
-    # LLM 호출
-    get_response(prompt)
+ACTION OPTIONS:
+- move: go to a new location
+- interact: use/manipulate an object
+- eat: consume food
+- talk: speak to another agent
+- wait: remain inactive briefly
+- think: internal thought process
+- idle: remain idle without taking any action
+- sleep: sleep to recover energy (agent becomes inactive for a longer period)
+- die: be removed from the simulation
+
+LOCATION OPTIONS:
+- house: a private residence where agents can live and rest
+- cafeteria: communal dining area where agents can eat and socialize
+
+OBJECT OPTIONS:
+- Kitchen: a space equipped for cooking and food preparation
+- Desk: a workspace for studying or working
+- Cafeteria: meeting friend, can relieve loneliness
+- LivingRoom: a common area for relaxation and social activities
+- Bedroom: a private space for sleeping and personal activities
+
+REASONING GUIDELINES:
+- Explain the reasons for your actions in 100 characters or less
+- Describe your thoughts and feeling
+- Describe it in the first person
+
+RESPONSE FORMAT (provide ONLY valid JSON):
+{
+  "agent": "agent_name",
+  "action": "action_type",
+  "details": {
+    "location": "location_name",
+    "target": "object_or_agent",
+    "using": "item_if_needed",
+    "message": "spoken_text_or_thought"
+  },
+  "reason": "reasoning_text"
+}
+
+IMPORTANT RULES:
+- location must be selected ONLY from LOCATION OPTIONS (house or cafeteria)
+- target must be selected ONLY from OBJECT OPTIONS (Kitchen, Desk, Cafeteria, LivingRoom, or Bedroom)
+- When parsing visible and interact descriptions, split "'object' located at 'location'" format into appropriate location and target values
+- IMPORTANT: Even if an object name sounds like a room (e.g., Bedroom, Kitchen), it should be treated as an object in the target field, not as a location
+- location represents the broader area where the agent is (house or cafeteria), while target represents specific objects or spaces within that location
+- CRITICAL: target field must ONLY contain the exact object name from OBJECT OPTIONS (e.g., "Bedroom", "Kitchen"), not the full "object located at location" format
+- If you see "object located at location" in the input, extract ONLY the object part for the target field
+- Provide EXACTLY ONE action per character. Respond ONLY with JSON"""
+        
+        print("테스트 프롬프트 전송 중...")
+        get_response(test_prompt)
+            
+    except KeyboardInterrupt:
+        print("\n프로그램을 종료합니다.")

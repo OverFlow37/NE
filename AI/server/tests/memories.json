@@ -4,453 +4,548 @@
       {
         "event": "watch squirrel Forest forest_entrance",
         "time": "2025.05.01.06:15",
-        "groupId": 1
+        "groupId": 1,
+        "importance": 3
       },
       {
         "event": "interact squirrel Forest forest_entrance",
         "time": "2025.05.01.06:20",
-        "groupId": 1
+        "groupId": 1,
+        "importance": 3
       },
       {
         "event": "move Village cafe",
         "time": "2025.05.01.07:00",
-        "groupId": 2
+        "groupId": 2,
+        "importance": 3
       },
       {
         "event": "interact coffee_machine Village cafe",
         "time": "2025.05.01.07:05",
-        "groupId": 2
+        "groupId": 2,
+        "importance": 3
       },
       {
         "event": "think Village cafe",
         "time": "2025.05.01.07:10",
-        "groupId": 3
+        "groupId": 3,
+        "importance": 3
       },
       {
         "event": "move Village park",
         "time": "2025.05.01.08:00",
-        "groupId": 4
+        "groupId": 4,
+        "importance": 3
       },
       {
         "event": "watch fountain Village park",
         "time": "2025.05.01.08:05",
-        "groupId": 4
+        "groupId": 4,
+        "importance": 3
       },
       {
         "event": "eat raspberry Forest stream_bank",
         "time": "2025.05.01.10:10",
-        "groupId": 5
+        "groupId": 5,
+        "importance": 4
       },
       {
         "event": "wait Village house",
         "time": "2025.05.01.12:00",
-        "groupId": 6
+        "groupId": 6,
+        "importance": 3
       },
       {
         "event": "interact bookshelf Village house",
         "time": "2025.05.01.12:15",
-        "groupId": 7
+        "groupId": 7,
+        "importance": 3
       },
       {
         "event": "groupIdle Village house",
         "time": "2025.05.01.13:00",
-        "groupId": 8
+        "groupId": 8,
+        "importance": 3
       },
       {
         "event": "sleep Village house",
         "time": "2025.05.01.22:00",
-        "groupId": 9
+        "groupId": 9,
+        "importance": 3
       },
       {
         "event": "move Desert oasis",
         "time": "2025.05.02.07:30",
-        "groupId": 10
+        "groupId": 10,
+        "importance": 3
       },
       {
         "event": "interact water_pool Desert oasis",
         "time": "2025.05.02.07:35",
-        "groupId": 10
+        "groupId": 10,
+        "importance": 5
       },
       {
         "event": "watch camel Desert oasis",
         "time": "2025.05.02.07:40",
-        "groupId": 11
+        "groupId": 11,
+        "importance": 7
       },
       {
         "event": "think Desert oasis",
         "time": "2025.05.02.07:45",
-        "groupId": 11
+        "groupId": 11,
+        "importance": 6
       },
       {
         "event": "move Village construction_site",
         "time": "2025.05.02.10:00",
-        "groupId": 12
+        "groupId": 12,
+        "importance": 3
       },
       {
         "event": "interact library_foundation Village construction_site",
         "time": "2025.05.02.10:10",
-        "groupId": 12
+        "groupId": 12,
+        "importance": 4
       },
       {
         "event": "eat crab Beach shoreline",
         "time": "2025.05.02.12:00",
-        "groupId": 13
+        "groupId": 13,
+        "importance": 6
       },
       {
         "event": "move Beach cliffsgroupIde",
         "time": "2025.05.02.12:30",
-        "groupId": 14
+        "groupId": 14,
+        "importance": 2
       },
       {
         "event": "watch seagull Beach cliffsgroupIde",
         "time": "2025.05.02.12:35",
-        "groupId": 14
+        "groupId": 14,
+        "importance": 2
       },
       {
         "event": "interact rain_collector Beach cliffsgroupIde",
         "time": "2025.05.02.12:50",
-        "groupId": 15
+        "groupId": 15,
+        "importance": 3
       },
       {
         "event": "wait Beach cliffsgroupIde",
         "time": "2025.05.02.13:00",
-        "groupId": 16
+        "groupId": 16,
+        "importance": 2
       },
       {
         "event": "sleep Village house",
         "time": "2025.05.02.22:00",
-        "groupId": 17
+        "groupId": 17,
+        "importance": 3
       },
       {
         "event": "move Forest orchard",
         "time": "2025.05.03.06:10",
-        "groupId": 18
+        "groupId": 18,
+        "importance": 3
       },
       {
         "event": "watch fruit_trees Forest orchard",
         "time": "2025.05.03.06:20",
-        "groupId": 18
+        "groupId": 18,
+        "importance": 4
       },
       {
         "event": "eat raspberry Forest stream_bank",
         "time": "2025.05.03.07:30",
-        "groupId": 19
+        "groupId": 19,
+        "importance": 4
       },
       {
         "event": "move Desert rocky_outcrop",
         "time": "2025.05.03.08:50",
-        "groupId": 20
+        "groupId": 20,
+        "importance": 2
       },
       {
         "event": "interact solar_panel_parts Desert rocky_outcrop",
         "time": "2025.05.03.09:00",
-        "groupId": 20
+        "groupId": 20,
+        "importance": 3
       },
       {
         "event": "think Desert rocky_outcrop",
         "time": "2025.05.03.09:10",
-        "groupId": 21
+        "groupId": 21,
+        "importance": 3
       },
       {
         "event": "move Village workshop",
         "time": "2025.05.03.11:00",
-        "groupId": 22
+        "groupId": 22,
+        "importance": 5
       },
       {
         "event": "interact solar_charger Village workshop",
         "time": "2025.05.03.11:05",
-        "groupId": 22
+        "groupId": 22,
+        "importance": 3
       },
       {
         "event": "wait Village workshop",
         "time": "2025.05.03.11:10",
-        "groupId": 23
+        "groupId": 23,
+        "importance": 3
       },
       {
         "event": "move Village garden",
         "time": "2025.05.03.14:00",
-        "groupId": 24
+        "groupId": 24,
+        "importance": 3
       },
       {
         "event": "interact irrigation_system Village garden",
         "time": "2025.05.03.14:05",
-        "groupId": 24
+        "groupId": 24,
+        "importance": 3
       },
       {
         "event": "groupIdle Village garden",
         "time": "2025.05.03.14:20",
-        "groupId": 25
+        "groupId": 25,
+        "importance": 3
       },
       {
         "event": "watch mushroom Forest deep_forest",
         "time": "2025.05.03.16:30",
-        "groupId": 26
+        "groupId": 26,
+        "importance": 4
       },
       {
         "event": "sleep Village house",
         "time": "2025.05.03.22:00",
-        "groupId": 27
+        "groupId": 27,
+        "importance": 3
       },
       {
         "event": "move Beach tgroupIdal_pool",
         "time": "2025.05.04.07:00",
-        "groupId": 28
+        "groupId": 28,
+        "importance": 2
       },
       {
         "event": "watch starfish Beach tgroupIdal_pool",
         "time": "2025.05.04.07:05",
-        "groupId": 28
+        "groupId": 28,
+        "importance": 3
       },
-      { "event": "move Beach dock", "time": "2025.05.04.08:00", "groupId": 29 },
+      {
+        "event": "move Beach dock",
+        "time": "2025.05.04.08:00",
+        "groupId": 29,
+        "importance": 3
+      },
       {
         "event": "interact fish Beach dock",
         "time": "2025.05.04.08:05",
-        "groupId": 29
+        "groupId": 29,
+        "importance": 3
       },
       {
         "event": "eat fish Beach dock",
         "time": "2025.05.04.08:20",
-        "groupId": 30
+        "groupId": 30,
+        "importance": 3
       },
       {
         "event": "move Village square",
         "time": "2025.05.04.10:00",
-        "groupId": 31
+        "groupId": 31,
+        "importance": 6
       },
       {
         "event": "watch broken_well Village square",
         "time": "2025.05.04.10:05",
-        "groupId": 31
+        "groupId": 31,
+        "importance": 3
       },
       {
         "event": "wait Village square",
         "time": "2025.05.04.10:10",
-        "groupId": 32
+        "groupId": 32,
+        "importance": 3
       },
       {
         "event": "move Village garden",
         "time": "2025.05.04.11:00",
-        "groupId": 33
+        "groupId": 33,
+        "importance": 5
       },
       {
         "event": "interact vegetable_seeds Village garden",
         "time": "2025.05.04.11:05",
-        "groupId": 33
+        "groupId": 33,
+        "importance": 3
       },
       {
         "event": "think Village garden",
         "time": "2025.05.04.11:15",
-        "groupId": 34
+        "groupId": 34,
+        "importance": 6
       },
       {
         "event": "sleep Village house",
         "time": "2025.05.04.22:00",
-        "groupId": 35
+        "groupId": 35,
+        "importance": 3
       },
       {
         "event": "move Forest deep_forest",
         "time": "2025.05.05.06:30",
-        "groupId": 36
+        "groupId": 36,
+        "importance": 2
       },
       {
         "event": "watch wild_boar Forest deep_forest",
         "time": "2025.05.05.06:35",
-        "groupId": 36
+        "groupId": 36,
+        "importance": 5
       },
       {
         "event": "wait Forest deep_forest",
         "time": "2025.05.05.06:40",
-        "groupId": 37
+        "groupId": 37,
+        "importance": 3
       },
       {
         "event": "move Forest stream_bank",
         "time": "2025.05.05.07:00",
-        "groupId": 38
+        "groupId": 38,
+        "importance": 3
       },
       {
         "event": "eat raspberry Forest stream_bank",
         "time": "2025.05.05.07:05",
-        "groupId": 38
+        "groupId": 38,
+        "importance": 4
       },
       {
         "event": "move Village town_hall",
         "time": "2025.05.05.08:30",
-        "groupId": 39
+        "groupId": 39,
+        "importance": 3
       },
       {
         "event": "interact bulletin_board Village town_hall",
         "time": "2025.05.05.08:35",
-        "groupId": 39
+        "groupId": 39,
+        "importance": 3
       },
       {
         "event": "think Village town_hall",
         "time": "2025.05.05.08:40",
-        "groupId": 40
+        "groupId": 40,
+        "importance": 3
       },
       {
         "event": "move Village storage",
         "time": "2025.05.05.09:30",
-        "groupId": 41
+        "groupId": 41,
+        "importance": 3
       },
       {
         "event": "interact old_blueprint Village storage",
         "time": "2025.05.05.09:35",
-        "groupId": 41
+        "groupId": 41,
+        "importance": 3
       },
       {
         "event": "move Village workshop",
         "time": "2025.05.05.11:00",
-        "groupId": 42
+        "groupId": 42,
+        "importance": 5
       },
       {
         "event": "interact handcrafted_tool Village workshop",
         "time": "2025.05.05.11:05",
-        "groupId": 42
+        "groupId": 42,
+        "importance": 7
       },
       {
         "event": "sleep Village house",
         "time": "2025.05.05.22:00",
-        "groupId": 43
+        "groupId": 43,
+        "importance": 3
       },
       {
         "event": "move Desert sand_dunes",
         "time": "2025.05.06.07:00",
-        "groupId": 44
+        "groupId": 44,
+        "importance": 2
       },
       {
         "event": "watch sandstorm Desert sand_dunes",
         "time": "2025.05.06.07:05",
-        "groupId": 44
+        "groupId": 44,
+        "importance": 7
       },
       {
         "event": "wait Desert sand_dunes",
         "time": "2025.05.06.07:10",
-        "groupId": 45
+        "groupId": 45,
+        "importance": 3
       },
       {
         "event": "move Desert rocky_outcrop",
         "time": "2025.05.06.08:00",
-        "groupId": 46
+        "groupId": 46,
+        "importance": 2
       },
       {
         "event": "interact scorpion Desert rocky_outcrop",
         "time": "2025.05.06.08:05",
-        "groupId": 46
+        "groupId": 46,
+        "importance": 3
       },
       {
         "event": "move Desert oasis",
         "time": "2025.05.06.09:00",
-        "groupId": 47
+        "groupId": 47,
+        "importance": 3
       },
       {
         "event": "interact water_pool Desert oasis",
         "time": "2025.05.06.09:05",
-        "groupId": 47
+        "groupId": 47,
+        "importance": 5
       },
       {
         "event": "move Village cafe",
         "time": "2025.05.06.11:00",
-        "groupId": 48
+        "groupId": 48,
+        "importance": 3
       },
       {
         "event": "interact pastry_display Village cafe",
         "time": "2025.05.06.11:05",
-        "groupId": 48
+        "groupId": 48,
+        "importance": 3
       },
       {
         "event": "eat pastry_display Village cafe",
         "time": "2025.05.06.11:15",
-        "groupId": 49
+        "groupId": 49,
+        "importance": 3
       },
       {
         "event": "think Village cafe",
         "time": "2025.05.06.11:20",
-        "groupId": 50
+        "groupId": 50,
+        "importance": 3
       },
       {
         "event": "sleep Village house",
         "time": "2025.05.06.22:00",
-        "groupId": 51
+        "groupId": 51,
+        "importance": 3
       },
       {
         "event": "move Beach shoreline",
         "time": "2025.05.07.06:00",
-        "groupId": 52
+        "groupId": 52,
+        "importance": 3
       },
       {
         "event": "interact crab Beach shoreline",
         "time": "2025.05.07.06:10",
-        "groupId": 52
+        "groupId": 52,
+        "importance": 4
       },
       {
         "event": "move Beach cliffsgroupIde",
         "time": "2025.05.07.08:00",
-        "groupId": 53
+        "groupId": 53,
+        "importance": 2
       },
       {
         "event": "watch seagull Beach cliffsgroupIde",
         "time": "2025.05.07.08:10",
-        "groupId": 53
+        "groupId": 53,
+        "importance": 2
       },
       {
         "event": "interact rain_collector Beach cliffsgroupIde",
         "time": "2025.05.07.10:00",
-        "groupId": 54
+        "groupId": 54,
+        "importance": 4
       },
       {
         "event": "eat crab Beach cliffsgroupIde",
         "time": "2025.05.07.12:00",
-        "groupId": 55
+        "groupId": 55,
+        "importance": 3
       },
       {
         "event": "move Village construction_site",
         "time": "2025.05.07.13:00",
-        "groupId": 56
+        "groupId": 56,
+        "importance": 4
       },
       {
         "event": "interact library_shelves Village construction_site",
         "time": "2025.05.07.13:20",
-        "groupId": 56
+        "groupId": 56,
+        "importance": 3
       },
       {
         "event": "move Village garden",
         "time": "2025.05.07.15:00",
-        "groupId": 57
+        "groupId": 57,
+        "importance": 4
       },
       {
         "event": "interact greenhouse_frame Village garden",
         "time": "2025.05.07.15:20",
-        "groupId": 57
+        "groupId": 57,
+        "importance": 3
       },
       {
         "event": "move Village cafe",
         "time": "2025.05.07.17:30",
-        "groupId": 58
+        "groupId": 58,
+        "importance": 3
       },
       {
         "event": "eat pastry_display Village cafe",
         "time": "2025.05.07.17:40",
-        "groupId": 58
+        "groupId": 58,
+        "importance": 3
       },
       {
         "event": "interact cozy_sofa Village cafe",
         "time": "2025.05.07.19:00",
-        "groupId": 59
+        "groupId": 59,
+        "importance": 3
       },
       {
         "event": "move Village house",
         "time": "2025.05.07.21:00",
-        "groupId": 60
+        "groupId": 60,
+        "importance": 8
       },
       {
         "event": "interact bookshelf Village house",
         "time": "2025.05.07.21:10",
-        "groupId": 60
+        "groupId": 60,
+        "importance": 3
       },
       {
         "event": "sleep Village house",
         "time": "2025.05.07.24:00",
-        "groupId": 61
+        "groupId": 61,
+        "importance": 3
       }
     ]
   }
