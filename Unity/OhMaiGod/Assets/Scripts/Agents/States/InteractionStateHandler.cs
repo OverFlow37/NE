@@ -8,13 +8,7 @@ namespace OhMAIGod.Agent
         public override void OnStateEnter(AgentController _controller)
         {
             base.OnStateEnter(_controller);
-
-            // 상호작용 UI 시작
-            if (_controller.mAgentUI != null)
-            {
-                string interactionText = _controller.CurrentAction != null ? _controller.CurrentAction.Reason : "";
-                _controller.mAgentUI.StartInteractionUI(interactionText);
-            }
+            
             // 상호작용 시작
             _controller.StartInteraction();
         }
