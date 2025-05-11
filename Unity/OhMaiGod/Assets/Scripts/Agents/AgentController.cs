@@ -46,7 +46,7 @@ public class AgentController : MonoBehaviour
     [SerializeField] private string mName;                          // 이름
     [SerializeField] private string mDescription;                   // 초기 설명    
     [SerializeField] private float mVisualRange;                    // 시야 범위
-    [SerializeField] private float mActionMinDuration = 1.0f;       // 활동 최소 지속 시간 (분)
+    // [SerializeField] private float mActionMinDuration = 1.0f;       // 활동 최소 지속 시간 (분)
     [SerializeField] private bool mAutoStart = true;                // 자동 시작 여부
     private AgentStateMachine mStateMachine;
 
@@ -55,7 +55,7 @@ public class AgentController : MonoBehaviour
     [SerializeField, ReadOnly] private AgentState mCurrentState; // 현재 상태 Inspector 디버그용
     [SerializeField, ReadOnly] private string mCurrentLocation;  // 현재 위치 Inspector 디버그용
     [SerializeField, ReadOnly] private Interactable mCurrentTargetInteractable;    // 현재 타겟 Inspector 디버그용
-    private float mCurrentActionTime = 0f;                          // 현재 활동 진행 시간
+    // private float mCurrentActionTime = 0f;                          // 현재 활동 진행 시간
     private ScheduleItem mCurrentAction = null;                     // 현재 활동 정보
     private float mWaitTime = 0f;                                   // 대기 시간 (다음 활동까지)
 
@@ -307,25 +307,16 @@ public class AgentController : MonoBehaviour
     {
         if (mCurrentAction == null)
         {
-            string actionName = mScheduler.GetCurrentActionName();
-            string destinationLocation = mScheduler.GetCurrentDestinationLocation();
-            string destinationTarget = mScheduler.GetCurrentDestinationTarget();
-            if (string.IsNullOrEmpty(destinationTarget))
+            mCurrentAction = mScheduler.CurrentAction;
+
+            if (string.IsNullOrEmpty(mCurrentAction.LocationName) || string.IsNullOrEmpty(mCurrentAction.TargetName))
             {
                 if (mShowDebugInfo)
                 {
-                    LogManager.Log("Agent", $"{mName}: 이동할 목적지 없음", 1);
+                    LogManager.Log("Agent", $"{mName}: 이동할 목적지 또는 타겟이 없음", 1);
                 }
                 return;
             }
-            
-            // 임시 활동 객체 생성
-            mCurrentAction = new ScheduleItem
-            {
-                ActionName = actionName,
-                LocationName = destinationLocation,
-                TargetName = destinationTarget
-            };
         }
 
         // 이동 시작

@@ -88,9 +88,7 @@ namespace OhMAIGod.Agent
         [Range(0,59)] public int EndMinute;
         [Range(0,59)] public int EndSecond;
         public int Priority;                // 우선순위 (높을수록 중요)
-        public bool IsFlexible;             // 시간이 유연한지 여부
         public bool IsCompleted;            // 완료 여부
-        public string ActionDetails;        // 활동에 대한 추가 정보 (JSON)
         public string Reason;               // 활동 선택 이유
 
         // 런타임 변환용 프로퍼티
@@ -111,6 +109,25 @@ namespace OhMAIGod.Agent
             return (StartTime >= other.StartTime && StartTime < other.EndTime) ||
                    (EndTime > other.StartTime && EndTime <= other.EndTime) ||
                    (StartTime <= other.StartTime && EndTime >= other.EndTime);
+        }
+
+        // 생성자
+        public ScheduleItem(string _actionName, string _locationName, string _targetName, TimeSpan _startTime, TimeSpan _endTime,
+                            int _priority, string _reason)
+        {
+            ID = System.Guid.NewGuid().ToString();
+            ActionName = _actionName;
+            LocationName = _locationName;
+            TargetName = _targetName;
+            StartHour = _startTime.Hours;
+            StartMinute = _startTime.Minutes;
+            StartSecond = _startTime.Seconds;
+            EndHour = _endTime.Hours;
+            EndMinute = _endTime.Minutes;
+            EndSecond = _endTime.Seconds;
+            Priority = _priority;
+            IsCompleted = false;
+            Reason = _reason;
         }
     }
 }
