@@ -4,12 +4,11 @@ from typing import List, Dict, Any
 import numpy as np
 from datetime import datetime
 from pathlib import Path
-import gensim.downloader as api
 from numpy import dot
 from numpy.linalg import norm
 
 class MemoryUtils:
-    def __init__(self):
+    def __init__(self, word2vec_model):
         # 현재 파일의 절대 경로를 기준으로 상위 디렉토리 찾기
         current_dir = Path(__file__).parent
         root_dir = current_dir.parent.parent  # AI 디렉토리
@@ -20,10 +19,8 @@ class MemoryUtils:
         self.plans_file = str(data_dir / "plans.json")
         self.reflections_file = str(data_dir / "reflections.json")
         
-        # Word2Vec 모델 초기화
-        print("🤖 Word2Vec 모델 로딩 중...")
-        self.model = api.load('word2vec-google-news-300')
-        print("✅ Word2Vec 모델 로딩 완료")
+        # Word2Vec 모델 설정
+        self.model = word2vec_model
         
         self._ensure_files_exist()
 
@@ -33,18 +30,23 @@ class MemoryUtils:
             if not os.path.exists(file_path):
                 os.makedirs(os.path.dirname(file_path), exist_ok=True)
                 with open(file_path, 'w', encoding='utf-8') as f:
-                    json.dump({"John": [], "Sarah": []}, f, ensure_ascii=False, indent=2)
+                    if file_path == self.memories_file:
+                        json.dump({"John": {"memories": []}, "Sarah": {"memories": []}}, f, ensure_ascii=False, indent=2)
+                    elif file_path == self.reflections_file:
+                        json.dump({"John": {"reflections": []}, "Sarah": {"reflections": []}}, f, ensure_ascii=False, indent=2)
+                    else:
+                        json.dump({"John": [], "Sarah": []}, f, ensure_ascii=False, indent=2)
 
-    def _load_memories(self) -> Dict[str, List[Dict[str, Any]]]:
+    def _load_memories(self) -> Dict[str, Dict[str, List[Dict[str, Any]]]]:
         """메모리 데이터 로드"""
         try:
             with open(self.memories_file, 'r', encoding='utf-8') as f:
                 return json.load(f)
         except Exception as e:
             print(f"메모리 로드 중 오류 발생: {e}")
-            return {"John": [], "Sarah": []}
+            return {"John": {"memories": []}, "Sarah": {"memories": []}}
 
-    def _save_memories(self, memories: Dict[str, List[Dict[str, Any]]]):
+    def _save_memories(self, memories: Dict[str, Dict[str, List[Dict[str, Any]]]]):
         """메모리 데이터 저장"""
         try:
             with open(self.memories_file, 'w', encoding='utf-8') as f:
@@ -52,21 +54,41 @@ class MemoryUtils:
         except Exception as e:
             print(f"메모리 저장 중 오류 발생: {e}")
 
+    def _load_reflections(self) -> Dict[str, Dict[str, List[Dict[str, Any]]]]:
+        """반성 데이터 로드"""
+        try:
+            with open(self.reflections_file, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except Exception as e:
+            print(f"반성 데이터 로드 중 오류 발생: {e}")
+            return {"John": {"reflections": []}, "Sarah": {"reflections": []}}
+
+    def _save_reflections(self, reflections: Dict[str, Dict[str, List[Dict[str, Any]]]]):
+        """반성 데이터 저장"""
+        try:
+            with open(self.reflections_file, 'w', encoding='utf-8') as f:
+                json.dump(reflections, f, ensure_ascii=False, indent=2)
+        except Exception as e:
+            print(f"반성 데이터 저장 중 오류 발생: {e}")
+
     def save_memory(self, event_sentence: str, embedding: List[float], event_time: str, agent_name: str):
         """새로운 메모리 저장"""
         memories = self._load_memories()
         
         if agent_name not in memories:
-            memories[agent_name] = []
+            memories[agent_name] = {"memories": []}
+            
+        # 현재 시간이 제공되지 않은 경우 현재 시간 사용
+        if not event_time:
+            event_time = datetime.now().strftime("%Y.%m.%d.%H:%M")
             
         memory = {
             "event": event_sentence,
             "time": event_time,
-            "importance": "normal",
             "embeddings": embedding
         }
         
-        memories[agent_name].append(memory)
+        memories[agent_name]["memories"].append(memory)
         self._save_memories(memories)
 
     def get_embedding(self, text: str) -> List[float]:
