@@ -9,11 +9,16 @@ public class AgentScheduler : MonoBehaviour
 {
     [Header("디버깅")]
     [SerializeField] private bool mShowDebugInfo = true; // 디버그 로그 출력 여부
+    [Header("테스트 옵션")]
+    [SerializeField] public bool mUseDummySchedule = false; // 더미 스케줄 등록 여부
+    private bool mPrevUseDummySchedule = false; // 더미 스케줄 등록 체크박스 이전 상태 저장
 
     // ==== 스케줄 관리 변수들 ====
     private List<ScheduleItem> mDailySchedule = new List<ScheduleItem>();   // 하루 전체 일정 목록
     private ScheduleItem mCurrentAction = null;                             // 현재 수행 중인 활동
     private ScheduleItem mNextAction = null;                                // 다음 예정된 활동
+
+    public ScheduleItem CurrentAction => mCurrentAction;
 
     private AgentController mAgentController;  // 에이전트 동작 제어를 위한 컨트롤러 참조
 
@@ -24,16 +29,20 @@ public class AgentScheduler : MonoBehaviour
         
         // 빈 일정으로 초기화
         ResetSchedule();
-
-        // Test 용으로 더미 스케줄 등록
-        CreateDummySchedule();
     }
 
     private void Update()
     {
         if (TimeManager.Instance.isPaused) return;
         
-        // 현재 활동 업데이트
+        // 인스펙터에서 더미 스케줄 등록 체크박스가 켜진 순간에만 실행
+        if (!mPrevUseDummySchedule && mUseDummySchedule)
+        {
+            CreateDummySchedule();
+            LogManager.Log("Scheduler", "더미 스케줄이 등록되었습니다.", 2);
+        }
+        mPrevUseDummySchedule = mUseDummySchedule;
+        
         UpdateAction();
     }
 
@@ -47,49 +56,43 @@ public class AgentScheduler : MonoBehaviour
             return false;
         }
         
-        //충돌 확인 (우선순위가 낮은 경우만 충돌 거부)
+        // 충돌 확인 (우선순위가 낮은 경우 추가 거부)
         var conflictingItems = mDailySchedule.Where(item => 
             !item.IsCompleted && 
-            item.ConflictsWith(_item) && 
-            item.Priority >= _item.Priority).ToList();
-        
+            item.ConflictsWith(_item)).ToList();
+
         if (conflictingItems.Count > 0)
         {
-            // 우선순위가 같은 경우: 시작시간이 더 나중인 경우만 추가 허용
-            bool canAdd = true;
-            List<ScheduleItem> toRemove = new List<ScheduleItem>();
-            foreach (var conflict in conflictingItems)
-            {
-                if (conflict.Priority == _item.Priority)
-                {
-                    if (_item.StartTime > conflict.StartTime)
-                    {
-                        // 새 스케줄이 더 나중이면 기존 스케줄 삭제 대상에 추가
-                        toRemove.Add(conflict);
-                    }
-                    else if (_item.StartTime <= conflict.StartTime)
-                    {
-                        canAdd = false;
-                        break;
-                    }
-                }
-            }
-            if (!canAdd)
+            // 1. 새 스케줄의 우선순위가 낮으면(Priority 값이 더 크면) 추가하지 않음
+            bool isLowerPriority = conflictingItems.Any(item => item.Priority < _item.Priority);
+            if (isLowerPriority)
             {
                 if (mShowDebugInfo)
                 {
-                    Debug.Log($"일정 충돌 발생: {_item.ActionName} @ {_item.StartTime}");
+                    LogManager.Log("Scheduler", $"일정 충돌: 우선순위가 낮아 추가 불가 - {_item.ActionName} (우선순위: {_item.Priority})", 1);
                     foreach (var conflict in conflictingItems)
                     {
-                        Debug.Log($" - 충돌 항목: {conflict.ActionName} @ {conflict.StartTime}");
+                        LogManager.Log("Scheduler", $" - 충돌 항목: {conflict.ActionName} (우선순위: {conflict.Priority}) @ {conflict.StartTime}", 1);
                     }
                 }
                 return false;
             }
-            // 충돌난 기존 스케줄 삭제
-            foreach (var removeItem in toRemove)
+
+            // 2. 새 스케줄의 우선순위가 높거나 같으면 추가
+            foreach (var conflict in conflictingItems)
             {
-                RemoveScheduleItem(removeItem.ID);
+                if (_item.Priority < conflict.Priority)
+                {
+                    // 우선순위가 더 높으면(Priority 값이 더 작으면), 기존 스케줄의 시작시간을 새 스케줄의 끝 시간 이후로 변경
+                    TimeSpan newStart = _item.EndTime.Add(new TimeSpan(0, 1, 0)); // 1분 뒤로 밀기
+                    TimeSpan duration = conflict.EndTime - conflict.StartTime;
+                    conflict.StartTime = newStart;
+                    conflict.EndTime = newStart.Add(duration);
+                    if (mShowDebugInfo)
+                    {
+                        LogManager.Log("Scheduler", $"충돌 스케줄 시작시간 조정: {conflict.ActionName} → {conflict.StartTime}", 2);
+                    }
+                }
             }
         }
         
@@ -121,7 +124,6 @@ public class AgentScheduler : MonoBehaviour
             if (mCurrentAction != null && mCurrentAction.ID == _itemID)
             {
                 mCurrentAction = null;
-                // UpdateAction();
             }
             
             if (mShowDebugInfo)
@@ -147,7 +149,7 @@ public class AgentScheduler : MonoBehaviour
         // 새 일정으로 교체 (우선순위 기준 정렬)
         mDailySchedule = _newSchedule
             .OrderBy(item => item.StartTime)
-            .ThenByDescending(item => item.Priority)
+            .ThenBy(item => item.Priority)
             .ToList();
         
         // 완료된 활동 상태 복원
@@ -160,9 +162,6 @@ public class AgentScheduler : MonoBehaviour
             }
         }
         
-        // 활동 재평가
-        // UpdateAction();
-        
         if (mShowDebugInfo)
         {
             LogManager.Log("Scheduler", $"전체 일정 갱신됨: {mDailySchedule.Count}개 항목", 2);
@@ -174,6 +173,7 @@ public class AgentScheduler : MonoBehaviour
     {
         if (mCurrentAction != null)
         {
+            mCurrentAction.EndTime = TimeManager.Instance.GetCurrentGameTime();
             mCurrentAction.IsCompleted = true;
             
             if (mShowDebugInfo)
@@ -183,20 +183,7 @@ public class AgentScheduler : MonoBehaviour
             
             // 다음 활동 평가
             mCurrentAction = null;
-            // UpdateAction();
         }
-    }
-
-    // 현재 활동의 목적지 반환하는 함수 (없으면 빈 문자열 반환)
-    public string GetCurrentDestinationLocation()
-    {
-        return mCurrentAction?.LocationName ?? string.Empty;
-    }
-
-    // 현재 활동의 목적지 이름 반환하는 함수 (없으면 빈 문자열 반환)
-    public string GetCurrentDestinationTarget()
-    {
-        return mCurrentAction?.TargetName ?? string.Empty;
     }
 
     // 현재 활동 이름 반환하는 함수 (없으면 "대기 중" 반환)
@@ -219,25 +206,36 @@ public class AgentScheduler : MonoBehaviour
         // 현재 활동이 있고 아직 유효한 경우
         if (mCurrentAction != null)
         {
-            if (TimeManager.Instance.GetCurrentGameTime() > mCurrentAction.EndTime)
+            // 현재 시간에 해당하는 미완료 활동 중 우선순위가 같거나 높은것 선택
+            var mustBeStarted = mDailySchedule
+                .Where(item => !item.IsCompleted &&
+                       TimeManager.Instance.GetCurrentGameTime() >= item.StartTime &&
+                       TimeManager.Instance.GetCurrentGameTime() < item.EndTime)
+                .OrderBy(item => item.Priority) // 우선순위 높은 것(숫자 작은 것) 우선
+                .ThenByDescending(item => item.StartTime)   // 시작시간이 늦은 것 우선 (이렇게 해야 현재 활동이 끝나고 바로 다음 활동이 시작됨)
+                .ToList();
+
+            var bestActivity = mustBeStarted.FirstOrDefault();
+
+            // 현재 활동 강제 완료
+            if (bestActivity != null && (mCurrentAction.ID != bestActivity.ID))
             {
                 if (!mCurrentAction.IsCompleted)
                 {
-                    // 자동으로 완료 처리
-                    mCurrentAction.IsCompleted = true;
-                    
-                    if (mShowDebugInfo)
-                    {
-                        LogManager.Log("Scheduler", $"활동 자동 완료 (시간 초과): {mCurrentAction.ActionName}", 2);
-                    }
+                    CompleteCurrentAction();
                 }
-                
-                // 활동 종료
-                mCurrentAction = null;
+            }
+            else if (bestActivity == null && TimeManager.Instance.GetCurrentGameTime() > mCurrentAction.EndTime)
+            {
+                // 기존 종료 조건도 유지
+                if (!mCurrentAction.IsCompleted)
+                {
+                    CompleteCurrentAction();
+                }
             }
             else
             {
-                // 현재 활동이 계속 유효함
+                // 현재 활동 계속
                 return;
             }
         }
@@ -251,7 +249,7 @@ public class AgentScheduler : MonoBehaviour
             .Where(item => !item.IsCompleted && 
                    TimeManager.Instance.GetCurrentGameTime() >= item.StartTime && 
                    TimeManager.Instance.GetCurrentGameTime() < item.EndTime)
-            .OrderByDescending(item => item.Priority)
+            .OrderBy(item => item.Priority)
             .ToList();
         
         if (currentTimeActivities.Count > 0)
@@ -296,7 +294,7 @@ public class AgentScheduler : MonoBehaviour
     {
         mDailySchedule = mDailySchedule
             .OrderBy(item => item.StartTime)
-            .ThenByDescending(item => item.Priority)
+            .ThenBy(item => item.Priority)
             .ToList();
     }
 
@@ -332,103 +330,45 @@ public class AgentScheduler : MonoBehaviour
     // 테스트용 더미 일정 생성
     private void CreateDummySchedule()
     {
-        // 아침 식사
-        AddScheduleItem(new ScheduleItem
-        {
-            ID = "breakfast",
-            ActionName = "eat",
-            LocationName = "house",
-            TargetName = "Apple",
-            StartHour = 6, StartMinute = 30, StartSecond = 0,
-            EndHour = 7, EndMinute = 00, EndSecond = 0,
-            Priority = 5,
-            IsFlexible = false,
-            Reason = "Dummy Schedule"
-        });
-        
-        // 오전 일과
-        // AddScheduleItem(new ScheduleItem
-        // {
-        //     ID = "morning_work",
-        //     ActionName = "오전 업무",
-        //     LocationName = "house",
-        //     TargetName = "Desk",
-        //     StartHour = 9, StartMinute = 0, StartSecond = 0,
-        //     EndHour = 9, EndMinute = 30, EndSecond = 0,
-        //     Priority = 8,
-        //     IsFlexible = false,
-        //     Reason = "Dummy Schedule"
-        // });
-        
-        // 점심 식사
-        AddScheduleItem(new ScheduleItem
-        {
-            ID = "lunch",
-            ActionName = "eat",
-            LocationName = "cafeteria",
-            TargetName = "Apple",
-            StartHour = 7, StartMinute = 30, StartSecond = 0,
-            EndHour = 8, EndMinute = 30, EndSecond = 0,
-            Priority = 5,
-            IsFlexible = true,
-            Reason = "Dummy Schedule"
-        });
-        
-        // 오후 일과
-        // AddScheduleItem(new ScheduleItem
-        // {
-        //     ID = "afternoon_work",
-        //     ActionName = "오후 업무",
-        //     LocationName = "house",
-        //     TargetName = "Desk",
-        //     StartHour = 11, StartMinute = 0, StartSecond = 0,
-        //     EndHour = 11, EndMinute = 30, EndSecond = 0,
-        //     Priority = 8,
-        //     IsFlexible = false,
-        //     Reason = "Dummy Schedule"
-        // });
-        
-        // 저녁 식사
-        // AddScheduleItem(new ScheduleItem
-        // {
-        //     ID = "dinner",
-        //     ActionName = "저녁 식사",
-        //     LocationName = "house",
-        //     TargetName = "Kitchen",
-        //     StartHour = 12, StartMinute = 0, StartSecond = 0,
-        //     EndHour = 12, EndMinute = 30, EndSecond = 0,
-        //     Priority = 5,
-        //     IsFlexible = true,
-        //     Reason = "Dummy Schedule"
-        // });
-        
-        // // 여가 시간
-        // AddScheduleItem(new ScheduleItem
-        // {
-        //     ID = "leisure",
-        //     ActionName = "여가 시간",
-        //     LocationName = "house",
-        //     TargetName = "LivingRoom",
-        //     StartHour = 13, StartMinute = 0, StartSecond = 0,
-        //     EndHour = 13, EndMinute = 30, EndSecond = 0,
-        //     Priority = 3,
-        //     IsFlexible = true,
-        //     Reason = "Dummy Schedule"
-        // });
-        
-        // 취침
-        AddScheduleItem(new ScheduleItem
-        {
-            ID = "sleep",
-            ActionName = "use",
-            LocationName = "house",
-            TargetName = "Bed",
-            StartHour = 14, StartMinute = 0, StartSecond = 0,
-            EndHour = 14, EndMinute = 30, EndSecond = 30,
-            Priority = 7,
-            IsFlexible = false,
-            Reason = "Dummy Schedule"
-        });
+        // 현재 게임 시간 가져오기
+        TimeSpan startTime = TimeManager.Instance.GetCurrentGameTime();
+        TimeSpan duration = new TimeSpan(0, 30, 0); // 30분 간격
+        TimeSpan actionDuration = new TimeSpan(0, 25, 0); // 각 일정 25분
+
+        // 첫 번째 스케줄: use, house, Bed
+        AddScheduleItem(new ScheduleItem(
+            "use",
+            "house",
+            "Bed",
+            startTime,
+            startTime.Add(actionDuration),
+            2,
+            "Dummy Schedule 1"
+        ));
+
+        // 두 번째 스케줄: eat, cafeteria, Apple (첫 스케줄 시작 30분 뒤)
+        TimeSpan secondStart = startTime.Add(duration);
+        AddScheduleItem(new ScheduleItem(
+            "eat",
+            "cafeteria",
+            "Apple",
+            secondStart,
+            secondStart.Add(actionDuration),
+            2,
+            "Dummy Schedule 2"
+        ));
+
+        // 세 번째 스케줄: use, house, Bed (두 번째 스케줄 시작 30분 뒤)
+        TimeSpan thirdStart = secondStart.Add(duration);
+        AddScheduleItem(new ScheduleItem(
+            "use",
+            "house",
+            "Bed",
+            thirdStart,
+            thirdStart.Add(actionDuration),
+            2,
+            "Dummy Schedule 3"
+        ));
     }
 
     // UI에서 스케줄을 표시할 수 있도록 문자열로 반환하는 메서드 추가
@@ -439,7 +379,10 @@ public class AgentScheduler : MonoBehaviour
         System.Text.StringBuilder sb = new System.Text.StringBuilder();
         foreach (var item in mDailySchedule)
         {
-            sb.AppendLine($"{item.ActionName} ({item.LocationName}/{item.TargetName}) : {item.StartHour:D2}:{item.StartMinute:D2} ~ {item.EndHour:D2}:{item.EndMinute:D2}");
+            // 완료여부 표시: [완료], [진행중], [대기] 중 하나
+            string status = item.IsCompleted ? "[완료]" :
+                (mCurrentAction != null && mCurrentAction.ID == item.ID ? "[진행중]" : "[대기]");
+            sb.AppendLine($"{status} {item.ActionName} ({item.LocationName}/{item.TargetName}) : {item.StartHour:D2}:{item.StartMinute:D2} ~ {item.EndHour:D2}:{item.EndMinute:D2} | 우선순위: {item.Priority}");
         }
         return sb.ToString();
     }

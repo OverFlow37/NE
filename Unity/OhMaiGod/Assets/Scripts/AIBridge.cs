@@ -87,12 +87,6 @@ public class AIBridge : MonoBehaviour
     {
         // 게임 시작시 자동으로 첫 요청 보내기
         SendAgent(mAgentControllers[0]);
-
-        // 목적지 도착 이벤트 구독
-        // if (mAgentControllers[0] != null)
-        // {
-        //     mAgentControllers[0].OnDestinationReached += HandleDestinationReached;
-        // }
     }
 
     // Interactable 목록을 ObjectGroup 배열로 변환
@@ -238,7 +232,7 @@ public class AIBridge : MonoBehaviour
             // 현재 시간 가져오기 및 활동 지속 시간 설정
             TimeSpan currentTime = TimeManager.Instance.GetCurrentGameTime();
             TimeSpan duration = TimeSpan.FromMinutes(30); // 기본 30분으로 설정
-            string location = action.details.location;
+            // string location = action.details.location;
             // if (!TileManager.Instance.GetLocationNames().Contains(location))
             // {
             //     SendAgent(agent);
@@ -247,21 +241,15 @@ public class AIBridge : MonoBehaviour
             // 새로운 일정 아이템 생성
             TimeSpan endTime = currentTime.Add(duration);
             ScheduleItem newScheduleItem = new ScheduleItem
-            {
-                ID = System.Guid.NewGuid().ToString(),
-                ActionName = action.action,
-                LocationName = location,
-                TargetName = action.details.target,
-                
-                // 시간 정보 변환 (정확하게 계산)
-                StartHour = currentTime.Hours, StartMinute = currentTime.Minutes, StartSecond = currentTime.Seconds,
-                EndHour = endTime.Hours, EndMinute = endTime.Minutes, EndSecond = endTime.Seconds,
-                Priority = 1, // 최우선순위로 설정
-                IsFlexible = true,
-                IsCompleted = false,
-                ActionDetails = JsonUtility.ToJson(action.details),
-                Reason = action.reason
-            };
+            (
+                action.action,
+                action.details.location,
+                action.details.target,
+                currentTime,
+                endTime,
+                1, 
+                action.reason
+            );
             // 스케줄러에 새 일정 추가
             bool success = agent.mScheduler.AddScheduleItem(newScheduleItem);
             // 일정 추가 결과 로깅
