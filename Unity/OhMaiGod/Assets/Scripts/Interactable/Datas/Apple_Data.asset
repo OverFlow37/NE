@@ -20,7 +20,7 @@ MonoBehaviour:
   mState: 0
   mActions:
   - mAction: {fileID: 11400000, guid: cbe91266aabd61348bd1864e9f7bac11, type: 2}
-    mDuration: 300
+    mDuration: 30
   mHungerEffect: -3
   mSleepinessEffect: 0
   mLonelinessEffect: 0

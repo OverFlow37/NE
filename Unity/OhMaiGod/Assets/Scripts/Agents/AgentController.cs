@@ -7,7 +7,7 @@ using OhMAIGod.Agent;
 
 public class AgentController : MonoBehaviour
 {
-    [SerializeField] private AgentUI mAgentUI;
+    [SerializeField] public AgentUI mAgentUI;
     [SerializeField] private AgentVision agentVision;  // AgentVision 컴포넌트 참조 추가
 
     [Header("Agent States")]
@@ -75,6 +75,9 @@ public class AgentController : MonoBehaviour
 
     // 시야 내의 오브젝트 목록
     public List<Interactable> mVisibleInteractables = new List<Interactable>();
+
+    private Coroutine mInteractionCoroutine;
+    public float mInteractionProgress = 0f; // 상호작용 진행도(0~1)
 
     private void Awake()
     {
@@ -292,8 +295,11 @@ public class AgentController : MonoBehaviour
             ChangeState(AgentState.MOVE_TO_INTERACTABLE);
         }
 
-        // 활동 시작 시 말풍선 표시
-        mAgentUI.StartSpeech(mCurrentAction.Reason);
+        // 속마음 표시
+        if (mCurrentAction != null)
+        {
+            mAgentUI.ShowThoughtInfo(mCurrentAction.Reason);
+        }
     }
 
     // 활동 위치로 이동 시작
@@ -358,61 +364,93 @@ public class AgentController : MonoBehaviour
         }
     }
 
-    // 활동 시작하는 함수
-    // public void StartAction()
-    // {
-    //     // 활동 정보 없으면 스케줄러에서 가져오기
-    //     if (mCurrentAction == null)
-    //     {
-    //         string actionName = mScheduler.GetCurrentActionName();
-    //         if (actionName == "대기 중")
-    //         {
-    //             // 활동 없음 - 대기 상태로
-    //             // mCurrentState = AgentState.IDLE;
-    //             mStateMachine.ChangeState(AgentState.IDLE);
-    //             return;
-    //         }
-            
-    //         // 임시 활동 객체 생성
-    //         mCurrentAction = new ScheduleItem
-    //         {
-    //             ActionName = actionName,
-    //             LocationName = mScheduler.GetCurrentDestinationLocation(),
-    //             TargetName = mScheduler.GetCurrentDestinationTarget()
-    //         };
-    //     }
-    // }
-
-    // // 상호작용 시작
-    // public void StartInteraction()
-    // {
-        
-    // }
-
-    // 상호작용 진행
-    public void ProcessInteraction()
-    {
-        //
-    }
-
-    // 상호작용 종료        
-    public void EndInteraction() 
-    {
-        //
-    }
-
-
     // 오브젝트와 상호작용 시작
-    // 일단 대기
     public void StartInteraction()
     {
-        if (mShowDebugInfo)
+        if (mInteractionCoroutine != null)
         {
-            LogManager.Log("Agent", $"{mName}: {CurrentTargetInteractable.name}와(과) 상호작용 시작", 2);
+            StopCoroutine(mInteractionCoroutine);
+            mInteractionCoroutine = null;
         }
-        LogManager.Log("Agent", "상호작용 시작: "+mCurrentAction.ActionName, 3);
-        CurrentTargetInteractable?.Interact(gameObject,mCurrentAction.ActionName);        
+        mInteractionCoroutine = StartCoroutine(InteractionRoutine());
+        // 상호작용 UI 시작
+        if (mAgentUI != null)
+        {
+            string interactionText = CurrentAction != null ? CurrentAction.ActionName : "";
+            mAgentUI.StartInteractionUI(interactionText);
+        }
+    }
+
+    private IEnumerator InteractionRoutine()
+    {
+        ScheduleItem action = mCurrentAction;
+        if (action == null) yield break;
+
+        TimeSpan scheduleEndTime = CurrentAction.EndTime;
+        TimeSpan interactionStartTime = TimeManager.Instance.GetCurrentGameTime();
+        double curDurationProgress = 0.0f;
+        float interactionDuration = CurrentTargetInteractable.GetActionDuration(mCurrentAction.ActionName);
+        if(interactionDuration <= 0)
+        {
+            LogManager.Log("Agent", $"{mName}: 상호작용 지속 시간이 0이하입니다, 상호작용 비정상 종료.", 1);
+            EndInteraction();
+            yield break;
+        }
+        TimeSpan lastTickTime = interactionStartTime;
+        
+        while (TimeManager.Instance.GetCurrentGameTime() < scheduleEndTime)
+        {
+            // 상호작용 대상 오브젝트가 사라졌는지 체크
+            if (mCurrentTargetInteractable == null || mCurrentTargetInteractable.gameObject == null || !mCurrentTargetInteractable.gameObject.activeInHierarchy)
+            {
+                LogManager.Log("Agent", $"{mName}: 상호작용 대상이 사라져 상호작용을 종료합니다.", 2);
+                EndInteraction();
+                yield break;
+            }
+
+            TimeSpan now = TimeManager.Instance.GetCurrentGameTime();
+            double delta = (now - lastTickTime).TotalSeconds;
+            curDurationProgress += delta;
+            mInteractionProgress = Mathf.Clamp01((float)(curDurationProgress / interactionDuration));
+
+            // 효과 발생 (주기마다)
+            if (curDurationProgress >= interactionDuration)
+            {
+                ApplyInteractionEffect();
+                curDurationProgress = 0.0f; // 주기 초기화
+                lastTickTime = now;
+            }
+            else
+            {
+                lastTickTime = now;
+            }
+
+            yield return null;
+        }
+
+        // 스케줄 시간이 끝나면 종료
+        mInteractionProgress = 0.0f;
+        LogManager.Log("Agent", $"{mName}: 스케줄 시간이 종료되어 상호작용을 종료합니다.", 2);
+        EndInteraction();
+        yield break;
+    }
+
+    // 상호작용 종료
+    public void EndInteraction() 
+    {
+        if (mInteractionCoroutine != null)
+        {
+            StopCoroutine(mInteractionCoroutine);
+            mInteractionCoroutine = null;
+        }
+        LogManager.Log("Agent", $"{mName}: 상호작용 완료 - {mCurrentAction.ActionName}", 2);
         CompleteAction();
+    }
+
+    private void ApplyInteractionEffect()
+    {
+        LogManager.Log("Agent", $"{mName}: 상호작용 효과 발생", 2);
+        CurrentTargetInteractable.Interact(gameObject, mCurrentAction.ActionName);
     }
 
     // 현재 활동 완료 처리하는 함수
@@ -431,30 +469,6 @@ public class AgentController : MonoBehaviour
             // 상태 초기화
             mCurrentAction = null;
             mStateMachine.ChangeState(AgentState.WAIT);
-        }
-    }
-
-    // 활동 시간 증가 함수
-    // public void UpdateActionTime()
-    // {
-    //     // 활동 시간 증가
-    //     mCurrentActionTime += Time.deltaTime;
-        
-    //     // 최소 지속 시간 이후 활동 완료
-    //     if (mCurrentActionTime >= mActionMinDuration * 60f)
-    //     {
-    //         CompleteAction();
-    //     }
-    // }
-
-    // 대기 상태로 전환하는 함수
-    private void EnterWaitingState(float _waitTimeMinutes)
-    {
-        mStateMachine.ChangeState(AgentState.WAIT);
-        mWaitTime = Mathf.Min(_waitTimeMinutes * 60f, 300f);
-        if (mShowDebugInfo)
-        {
-            LogManager.Log("Agent", $"{mName}: 대기 상태 시작 ({_waitTimeMinutes:F1}분)", 2);
         }
     }
 

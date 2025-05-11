@@ -83,7 +83,6 @@ public class Interactable : MonoBehaviour
     }
 
     // 상호작용 주체(Interactor)로부터 상호작용 요청을 받는 메서드
-    // 모든 액션을 순회? 후에 바꿔야함
     public void Interact(GameObject interactor, string actionName)
     {
         // InteractableData가 없거나 행동 목록이 없으면 상호작용 처리 불가
@@ -126,6 +125,21 @@ public class Interactable : MonoBehaviour
         {
             LogManager.Log("Interact", $"{mInteractableData.mName} 상호작용 실패.", 2);
         }
+    }
+
+    // actionName에 해당하는 action의 duration을 반환하는 함수
+    public float GetActionDuration(string _actionName)
+    {
+        if (mInteractableData == null || mInteractableData.mActions == null)
+            return -1f;
+        foreach (var action in mInteractableData.mActions)
+        {
+            if (action.mAction != null && action.mAction.mActionName == _actionName)
+            {
+                return action.mDuration;
+            }
+        }
+        return -1f;
     }
 
     // 오브젝트를 제거하는 공통 메서드
