@@ -3,11 +3,11 @@ using System.Collections;
 
 // InteractionAction을 상속받아 잠금 해제 행동을 구현합니다.
 // CreateAssetMenu 경로를 Interaction Actions로 변경
-[CreateAssetMenu(fileName = "UseAction", menuName = "Game/Interaction Actions/Use")]
-public class UseAction : InteractionAction
+[CreateAssetMenu(fileName = "GainAction", menuName = "Game/Interaction Actions/Gain")]
+public class GainAction : InteractionAction
 {
     // 프롬프트에 전달할 액션 이름
-    [SerializeField] private string _actionName = "Use";
+    [SerializeField] private string _actionName = "Gain";
     public override string mActionName
     {
         get => _actionName;
@@ -29,14 +29,21 @@ public class UseAction : InteractionAction
             return false;
         }
         
-        // 사용 효과 적용 (수면 및 외로움 수치 변화)
-        // TODO: 부가적인 이펙트 추가(낚시터 -> 물고기 획득, 제단 -> 기도 효과)
-        var agentController = interactor.GetComponent<AgentController>();
-        agentController.ModifyNeed(OhMAIGod.Agent.AgentNeedsType.Sleepiness, targetInteractable.mInteractableData.mSleepinessEffect);
+        // 아이템 획득(분기)
+        if(targetInteractable.mInteractableData.mType == InteractableData.Types.Resource)
+        {
+            // TODO: 자원일 경우 -> GameManager에서 처리
+        }
+        else if(targetInteractable.mInteractableData.mType == InteractableData.Types.Food)
+        {
+            // TODO: 음식일 경우 -> 인벤토리(또는 창고)에 추가
+        }
+        else
+        {
+            // TODO: 자원이나 음식이 아닌 경우 추후 구현
+            // ex) 소라, 조개 등 -> 공물로 소모
+        }
 
-        // 특정 시간동안 행동 수행
-
-        // 사용 후 내구도 감소?
 
         return true;
     }
