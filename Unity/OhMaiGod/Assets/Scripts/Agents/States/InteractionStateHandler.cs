@@ -9,6 +9,12 @@ namespace OhMAIGod.Agent
         {
             base.OnStateEnter(_controller);
 
+            // 상호작용 UI 시작
+            if (_controller.mAgentUI != null)
+            {
+                string interactionText = _controller.CurrentAction != null ? _controller.CurrentAction.Reason : "";
+                _controller.mAgentUI.StartInteractionUI(interactionText);
+            }
             // 상호작용 시작
             _controller.StartInteraction();
         }
@@ -22,6 +28,11 @@ namespace OhMAIGod.Agent
         public override void OnStateExit(AgentController _controller)
         {
             base.OnStateExit(_controller);
+            // 상호작용 UI 종료
+            if (_controller.mAgentUI != null)
+            {
+                _controller.mAgentUI.EndInteractionUI();
+            }
         }
 
         protected override string GetStateName()
