@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "NewInteractableData", menuName = "Game/Interactable Data")]
@@ -23,26 +24,20 @@ public class InteractableData : ScriptableObject
     {
         public InteractionAction mAction;
         public int mDuration;
+        [Header("상호작용 효과")]
+        [SerializeField, Range(-10, 10)] public int mHungerEffect;
+        [SerializeField, Range(-10, 10)] public int mSleepinessEffect;
+        [SerializeField, Range(-10, 10)] public int mLonelinessEffect;
     }
 
     [Tooltip("이 오브젝트와 상호작용했을 때 실행될 행동 및 소요 시간 목록")]
     [SerializeField] public InteractionActionInfo[] mActions;
-    
 
-    // 상호작용 효과
-    [Header("Interaction Effects")]
-    [Tooltip("상호작용으로 인한 배고픔 변화량")]
-    [SerializeField, Range(-10, 10)] public int mHungerEffect;
-    [Tooltip("상호작용으로 인한 졸림 변화량")]
-    [SerializeField, Range(-10, 10)] public int mSleepinessEffect;
-    [Tooltip("상호작용으로 인한 외로움 변화량")]
-    [SerializeField, Range(-10, 10)] public int mLonelinessEffect;
 
     // 오브젝트의 타입
     public enum Types{
         Agent,
         Food,
-        Tool,
         Resource,
         Furniture,
         Misc,
