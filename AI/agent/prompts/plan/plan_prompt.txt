@@ -129,7 +129,7 @@ use: interact with an object
 * Daily schedule must span the entire period from 06:00 to 24:00. (StartTime : 06:00 , EndTIme : 24:00)
 
 * You must generate a plan for the **next day** following the latest date in {AGENT_NAME}'s existing plans  
-  (e.g., if the last plan is for "2025.05.04", generate one for "2025.05.05")
+
 
 * DO NOT repeat the previous day's schedule. Create a **fresh, meaningful plan** that reflects variation in activities and priorities.
 
