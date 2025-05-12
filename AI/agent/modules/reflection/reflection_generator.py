@@ -127,7 +127,7 @@ class ReflectionGenerator:
         
         # 반성 데이터 로드
         reflection_data = self.load_reflections()
-        logger.info(f"로드된 반성 데이터: {reflection_data}")
+        # logger.info(f"로드된 반성 데이터: {reflection_data}")
         
         if not reflection_data:
             logger.warning("반성 데이터가 없습니다.")
