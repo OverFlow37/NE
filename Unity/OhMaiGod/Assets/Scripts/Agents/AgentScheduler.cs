@@ -219,6 +219,7 @@ public class AgentScheduler : MonoBehaviour
             
             // 다음 활동 평가
             mCurrentAction = null;
+            mAgentController.ChangeState(AgentState.WAITING);
         }
     }
 
