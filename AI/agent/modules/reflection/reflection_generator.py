@@ -28,9 +28,9 @@ class ReflectionGenerator:
         반성 생성기 초기화
         
         Args:
-            reflection_file_path: 반성 파일 경로
-            ollama_client: Ollama API 클라이언트
-            embedding_model: 임베딩 모델 (선택적)
+            reflection_file_path: 반성 데이터 파일 경로
+            ollama_client: Ollama API 클라이언트 인스턴스
+            embedding_model: 임베딩 모델 (word2vec 등)
         """
         self.reflection_file_path = reflection_file_path
         self.ollama_client = ollama_client

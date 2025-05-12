@@ -130,11 +130,7 @@ class PlanGenerator:
         # 이전 계획 포맷팅
         previous_plans_text = ""
         if isinstance(previous_plans, dict):
-            for plan_date, plans in previous_plans.items():
-                previous_plans_text += f"\n{plan_date}의 계획:\n"
-                if isinstance(plans, dict):
-                    for time, plan in plans.items():
-                        previous_plans_text += f"- {time}: {plan}\n"
+            previous_plans_text = json.dumps(previous_plans, ensure_ascii=False)
         
         # 프롬프트 생성
         prompt = template.format(
