@@ -2,7 +2,7 @@
 반성 처리 파이프라인
 
 이 모듈은 반성 처리의 전체 워크플로우를 관리합니다:
-1. 당일 메모리에 importance 추가
+1. 당일 메모리에 importance 추가 (배치 처리 방식으로 개선)
 2. 중요한 메모리 선택
 3. 이전 반성 참조
 4. 반성 생성 및 저장
@@ -20,7 +20,7 @@ from pathlib import Path
 
 # 각 단계별 처리 모듈 가져오기
 from .memory_processor import MemoryProcessor 
-from .importance_rater import ImportanceRater
+from .importance_rater import ImportanceRater  # 배치 처리 버전
 from .reflection_generator import ReflectionGenerator
 from ..ollama_client import OllamaClient
 
@@ -52,7 +52,7 @@ def _extract_date_from_time(time_str: str) -> str:
 
 async def process_reflection_request(request_data: Dict[str, Any], ollama_client: OllamaClient, word2vec_model=None) -> bool:
     """
-    AI 브릿지의 반성 요청 처리 파이프라인
+    AI 브릿지의 반성 요청 처리 파이프라인 (배치 처리 개선 버전)
     
     Parameters:
     - request_data: AI 브릿지로부터의 요청 데이터
@@ -95,6 +95,7 @@ async def process_reflection_request(request_data: Dict[str, Any], ollama_client
             return False
         
         # 2. 특정 날짜의 메모리 필터링 (날짜가 제공된 경우)
+        date_str = None
         if agent_date:
             # 날짜 부분만 추출
             date_str = _extract_date_from_time(agent_date)
@@ -118,8 +119,9 @@ async def process_reflection_request(request_data: Dict[str, Any], ollama_client
         
         logger.info(f"{len(filtered_memories)}개의 필터링된 메모리를 찾았습니다.")
         
-        # 3. 메모리 중요도 평가
+        # 3. 메모리 중요도 평가 (배치 처리)
         importance_rater = ImportanceRater(ollama_client)
+        logger.info("메모리 중요도 배치 평가 시작...")
         rated_memories = await importance_rater.add_importance_to_memories(memories, agent_name, filtered_memories)
         
         # 4. 업데이트된 메모리 저장
@@ -174,17 +176,28 @@ async def process_reflection_request(request_data: Dict[str, Any], ollama_client
 
 # 테스트용 코드
 if __name__ == "__main__":
-    # 테스트 요청 데이터
-    test_request = {
-        "agent": {
-            "name": "John"
+    import asyncio
+    from ..ollama_client import OllamaClient
+    
+    async def test_reflection_process():
+        # 테스트 요청 데이터
+        test_request = {
+            "agent": {
+                "name": "John",
+                "time": "2025.05.07"  # 특정 날짜 테스트
+            }
         }
-    }
+        
+        print("반성 파이프라인 테스트")
+        print(f"요청 데이터: {test_request}")
+        
+        # Ollama 클라이언트 초기화
+        ollama_client = OllamaClient()
+        
+        # 요청 처리
+        result = await process_reflection_request(test_request, ollama_client)
+        
+        print(f"처리 결과: {result}")
     
-    print("반성 파이프라인 테스트")
-    print(f"요청 데이터: {test_request}")
-    
-    # 요청 처리
-    result = process_reflection_request(test_request)
-    
-    print(f"처리 결과: {result}")
+    # 테스트 실행
+    asyncio.run(test_reflection_process())
