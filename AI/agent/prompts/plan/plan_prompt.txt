@@ -18,6 +18,7 @@ PREVIOUS_PLANS :
 
 
 ---
+
 **🗺 MAP INFORMATION:**
 
 1. **Village**
@@ -64,29 +65,52 @@ use: interact with an object
 
 **🕓 PLANNING RULES:**
 
-* Each `daily_plan` entry must follow the format:
-   "<action> <object> at <location>"  
 * The `eat` action may be scheduled **at most 3 times per day**, and only at the following time slots:
-  - Breakfast: around **08:00**
-  - Lunch: around **12:00**
-  - Dinner: around **18:00**
 
-* Avoid scheduling `eat` outside these periods unless strongly justified by reflections or special context.
+  * Breakfast: around **08:00**
+  * Lunch: around **12:00**
+  * Dinner: around **18:00**
+  * *Avoid scheduling `eat` outside these periods unless strongly justified by reflections or special context.*
 
-* ⛔️ No activities may be scheduled between 24:00 and 06:00 — this time is reserved for sleep.
-* Each entry in `time_slots` must match an entry in `daily_plan`
-* `time_slots` must follow this format:  
-  `["action", "location", "target", "start time", "end time", importance]`
-* `action` must be chosen from the AVAILABLE ACTIONS
 * Each `eat` action must last exactly **1 hour**.
+
 * Each `use` action must last at least **2 hours**.
-  - If no natural break occurs, longer `use` actions may be split into multiple related blocks.
-* Each plan must contain **at least 10 distinct activities** in the `daily_plan`.
-  - This ensures the full day (06:00–24:00) is meaningfully scheduled without excessive repetition or idle time.
-* The map is structured in three levels: Region → Location → Object.
-* The "location" field must refer only to a valid location within the given region. Do not use a region or object name in this field.
-* The "target" field (object) must exist within the specified location. Do not use an object from a different location.
+
+  * If no natural break occurs, longer `use` actions may be split into multiple related blocks.
+
+* ⛔️ No activities may be scheduled between **24:00 and 06:00** — this time is reserved for sleep.
+
+* All `time_slots` must be **sequential and continuous** from **06:00 to 24:00**.
+
+  * The `start time` of each slot must match the `end time` of the previous one.
+  * There must be **no gaps** between actions.
+  * ✅ Example:
+    `["use", "shoreline", "crab", "06:00", "08:00", 6]`
+    followed by
+    `["eat", "cafe", "pastry_display", "08:00", "09:00", 5]`
+  * ❌ Invalid: gaps (e.g., 11:00–12:00) or overlapping time slots.
+
+* Each entry in `time_slots` must:
+  * Follow the exact format:
+    `["action", "location", "target", "start time", "end time", importance]`
+
+* All `time_slots` must be **non-overlapping** — no two actions may share time intervals.
+
+* Each plan must contain **at least 10 distinct activities** in the `time_slots`.
+
+  * This ensures the full day (06:00–24:00) is meaningfully scheduled without excessive repetition or idle time.
+
+* The map is structured in three levels: **Region → Location → Object**.
+
+* The `"location"` field must refer only to a valid location within the given region.
+  Do **not** use a region or an object name in this field.
+
+* The `"target"` field (object) must **exist within the specified location**.
+  Do **not** reference objects from a different location.
+
 * All targets must match the object list defined for that specific location (see the map reference).
+
+---
 
 ** Importance Scoring Criteria:**
 
@@ -95,10 +119,14 @@ use: interact with an object
   * **7–8**: Significant personal realizations or reflections
   * **9–10**: Major life-changing actions or decisions
 
+  * Importance scores should be **realistically distributed** across the full range (1–10), based on the depth of insight or impact of the activity.
+  - Avoid assigning all activities high importance (7+), unless strongly supported by reflections.
+  - At least a few actions should fall into the **1–5** range to reflect routine or minor tasks.
+
 
 **IMPORTANT RULES**
 
-* Daily schedule must span the entire period from 06:00 to 24:00. (StartTime : 06:00 , EndTIme : 24:00
+* Daily schedule must span the entire period from 06:00 to 24:00. (StartTime : 06:00 , EndTIme : 24:00)
 
 * You must generate a plan for the **next day** following the latest date in {AGENT_NAME}'s existing plans  
   (e.g., if the last plan is for "2025.05.04", generate one for "2025.05.05")
@@ -118,11 +146,6 @@ use: interact with an object
     "plans": {{
       "{DATE}": {{
         "wake_up_time": "06:00",
-        "daily_plan": [
-          "action1",
-          "action2",
-          ...
-        ],
         "time_slots": [
           ["action", "location", "target", "start time", "end time"],
           ...
