@@ -7,8 +7,10 @@ import asyncio
 import sys
 from pathlib import Path
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 import time
+import gensim.downloader as api
+from typing import Dict, Any
 
 print("\n=== 서버 초기화 시작 ===")
 start_time = time.time()
@@ -39,13 +41,19 @@ except Exception as e:
     print(f"❌ MemoryUtils 임포트 실패: {e}")
 
 try:
-    from agent.modules.retrieve import Retrieve
-    print("✅ Retrieve 임포트 완료")
+    from agent.modules.retrieve import MemoryRetriever
+    print("✅ MemoryRetriever 임포트 완료")
 except Exception as e:
-    print(f"❌ Retrieve 임포트 실패: {e}")
+    print(f"❌ MemoryRetriever 임포트 실패: {e}")
 
 try:
-    import prompts.json_to_prompt as jp
+    from agent.modules.embedding_updater import EmbeddingUpdater
+    print("✅ EmbeddingUpdater 임포트 완료")
+except Exception as e:
+    print(f"❌ EmbeddingUpdater 임포트 실패: {e}")
+
+try:
+    from agent.prompts.json_to_prompt import format_prompt
     print("✅ json_to_prompt 임포트 완료")
 except Exception as e:
     print(f"❌ json_to_prompt 임포트 실패: {e}")
@@ -66,6 +74,11 @@ app.add_middleware(
 print("\n=== 모듈 인스턴스 생성 시작 ===")
 instance_start = time.time()
 
+# Word2Vec 모델 로드
+print("🤖 Word2Vec 모델 로딩 중...")
+word2vec_model = api.load('word2vec-google-news-300')
+print("✅ Word2Vec 모델 로딩 완료")
+
 try:
     client = OllamaClient()
     print("✅ OllamaClient 인스턴스 생성 완료")
@@ -73,16 +86,22 @@ except Exception as e:
     print(f"❌ OllamaClient 인스턴스 생성 실패: {e}")
 
 try:
-    memory_utils = MemoryUtils()
+    memory_utils = MemoryUtils(word2vec_model)
     print("✅ MemoryUtils 인스턴스 생성 완료")
 except Exception as e:
     print(f"❌ MemoryUtils 인스턴스 생성 실패: {e}")
 
 try:
-    retrieve = Retrieve()
-    print("✅ Retrieve 인스턴스 생성 완료")
+    retrieve = MemoryRetriever(memory_file_path="agent/data/memories.json", word2vec_model=word2vec_model)
+    print("✅ MemoryRetriever 인스턴스 생성 완료")
 except Exception as e:
-    print(f"❌ Retrieve 인스턴스 생성 실패: {e}")
+    print(f"❌ MemoryRetriever 인스턴스 생성 실패: {e}")
+
+try:
+    embedding_updater = EmbeddingUpdater(word2vec_model)
+    print("✅ EmbeddingUpdater 인스턴스 생성 완료")
+except Exception as e:
+    print(f"❌ EmbeddingUpdater 인스턴스 생성 실패: {e}")
 
 print(f"⏱ 인스턴스 생성 시간: {time.time() - instance_start:.2f}초")
 
@@ -150,7 +169,7 @@ async def receive_data(payload: dict):
     print("Unity로부터 받은 데이터:", payload)
 
     # 프롬프트 생성
-    prompt = jp.format_prompt(payload)
+    prompt = format_prompt(payload)
     
     # Future를 사용하여 응답 대기
     future = asyncio.Future()
@@ -204,6 +223,9 @@ async def receive_data(payload: dict):
 @app.post("/react")
 async def react_to_event(payload: dict):
     try:
+        # 전체 처리 시작 시간 기록
+        total_start_time = time.time()
+        
         # 요청 데이터 로깅
         print("\n=== /react 엔드포인트 호출 ===")
         print("📥 요청 데이터:", json.dumps(payload, indent=2, ensure_ascii=False))
@@ -224,9 +246,9 @@ async def react_to_event(payload: dict):
         object_name = event_data.get('object', '')
         
         # 에이전트의 현재 시간 추출
-        agent_time = agent_data.get('date_time', '')
+        agent_time = agent_data.get('time', '')
         if not agent_time:
-            agent_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            agent_time = datetime.now().strftime("%Y.%m.%d.%H:%M")
         
         print(f"👤 에이전트 이름: {agent_name}")
         print(f"🔍 이벤트 타입: {event_type}")
@@ -238,7 +260,8 @@ async def react_to_event(payload: dict):
         event = {
             "event_type": event_type,
             "event_location": event_location,
-            "object": object_name
+            "object": object_name,
+            "time": agent_time  # 시간 정보 추가
         }
         
         # 이벤트를 문장으로 변환
@@ -262,64 +285,71 @@ async def react_to_event(payload: dict):
         
         # Ollama API 호출
         print("🤖 Ollama API 호출 중...")
-        future = asyncio.Future()
         
-        async def handle_response(response):
-            try:
-                answer = response.get("response", "")
-                print(f"📥 Ollama 응답: {answer}")
-                
-                # 1) 펜스 제거
-                cleaned = answer.replace("```json", "").replace("```", "").strip()
-                print(f"🧹 정제된 응답: {cleaned}")
-                
-                # 2) JSON 텍스트 추출 (더 유연한 패턴)
-                match = re.search(r'\{[\s\S]*\}', cleaned)
-                if not match:
-                    print("❌ JSON 형식이 아닙니다.")
-                    future.set_exception(HTTPException(status_code=500, detail="응답에서 JSON을 찾을 수 없습니다."))
-                    return
-                json_text = match.group(0)
-                print(f"📄 추출된 JSON: {json_text}")
+        # Ollama 호출 시작 시간 기록
+        ollama_start_time = time.time()
+        
+        try:
+            # Ollama API 호출
+            response = await client.process_prompt(
+                prompt=prompt,
+                system_prompt=load_prompt_file(RETRIEVE_SYSTEM_PATH),
+                model_name="gemma3"
+            )
+            
+            # Ollama 응답 시간 계산
+            ollama_response_time = time.time() - ollama_start_time
+            
+            if response.get("status") != "success":
+                raise HTTPException(status_code=500, detail=f"Ollama API 호출 실패: {response.get('status')}")
+            
+            answer = response.get("response", "")
+            print(f"📥 Ollama 응답: {answer}")
+            
+            # 1) 펜스 제거
+            cleaned = answer.replace("```json", "").replace("```", "").strip()
+            print(f"🧹 정제된 응답: {cleaned}")
+            
+            # 2) JSON 텍스트 추출 (더 유연한 패턴)
+            match = re.search(r'\{[\s\S]*\}', cleaned)
+            if not match:
+                print("❌ JSON 형식이 아닙니다.")
+                raise HTTPException(status_code=500, detail="응답에서 JSON을 찾을 수 없습니다.")
+            
+            json_text = match.group(0)
+            print(f"📄 추출된 JSON: {json_text}")
 
-                # 3) 파싱
-                try:
-                    reaction_obj = json.loads(json_text)
-                    print(f"✅ JSON 파싱 성공: {reaction_obj}")
-                    
-                    # 메모리 저장 (프롬프트 생성 및 API 응답 이후)
-                    memory_utils.save_memory(
-                        event_sentence=event_sentence,
-                        embedding=embedding,
-                        event_time=agent_time,  # 에이전트의 시간 사용
-                        agent_name=agent_name
-                    )
-                    print(f"💾 메모리 저장 완료 (시간: {agent_time})")
-                    
-                    future.set_result(reaction_obj)
-                except json.JSONDecodeError as e:
-                    print(f"❌ JSON 파싱 실패: {e}")
-                    future.set_exception(HTTPException(status_code=500, detail=f"JSON 파싱 실패: {e}"))
-            except Exception as e:
-                print(f"❌ 응답 처리 중 오류: {e}")
-                future.set_exception(HTTPException(status_code=500, detail=str(e)))
-
-        async def handle_error(error):
-            future.set_exception(HTTPException(status_code=500, detail=str(error)))
-
-        await client.process_prompt(
-            prompt=prompt,
-            system_prompt=load_prompt_file(RETRIEVE_SYSTEM_PATH),
-            model_name="gemma3",
-            callback=handle_response,
-            error_callback=handle_error
-        )
-
-        # 응답 반환
-        reaction = await future
-        return {
-            "action": reaction
-        }
+            # 3) 파싱
+            reaction_obj = json.loads(json_text)
+            print(f"✅ JSON 파싱 성공: {reaction_obj}")
+            
+            # 메모리 저장 (프롬프트 생성 및 API 응답 이후)
+            memory_utils.save_memory(
+                event_sentence=event_sentence,
+                embedding=embedding,
+                event_time=agent_time,  # 에이전트의 시간 사용
+                agent_name=agent_name
+            )
+            print(f"💾 메모리 저장 완료 (시간: {agent_time})")
+            
+            # 전체 처리 시간 계산
+            total_response_time = time.time() - total_start_time
+            
+            # 시간 측정 결과 출력
+            print(f"\n⏱ 시간 측정 결과:")
+            print(f"  - Ollama 응답 시간: {ollama_response_time:.2f}초")
+            print(f"  - 전체 처리 시간: {total_response_time:.2f}초")
+            
+            return {
+                "action": reaction_obj
+            }
+            
+        except json.JSONDecodeError as e:
+            print(f"❌ JSON 파싱 실패: {e}")
+            raise HTTPException(status_code=500, detail=f"JSON 파싱 실패: {e}")
+        except Exception as e:
+            print(f"❌ 응답 처리 중 오류: {e}")
+            raise HTTPException(status_code=500, detail=str(e))
         
     except Exception as e:
         print(f"❌ 오류 발생: {str(e)}")
@@ -329,78 +359,100 @@ async def react_to_event(payload: dict):
 
 
 try:
-    from tests.reflection_pipeline import process_reflection_request
-    print("✅ reflection_pipeline 임포트 완료")
+    from agent.modules.reflection.importance_rater import ImportanceRater
+    from agent.modules.reflection.reflection_pipeline import process_reflection_request
+    from agent.modules.plan.plan_pipeline import process_plan_request
+    print("✅ reflection 및 plan 모듈 임포트 완료")
 except Exception as e:
-    print(f"❌ reflection_pipeline 임포트 실패: {e}")
+    print(f"❌ reflection 및 plan 모듈 임포트 실패: {e}")
 
-@app.post("/reflect")
-async def reflection_endpoint(payload: dict):
-    ######################################################################################
-    ###                                     반성                                       ###
-    ######################################################################################
-    """
-    반성 엔드포인트
-    
-    유니티에서 요청하면 당일 또는 지정된 날짜의 메모리에 importance를 추가하고 반성을 생성합니다.
-    성공 여부에 따라 true/false를 반환합니다.
-    
-    요청 형식:
-    {
-        "agent": {
-            "name": "에이전트 이름",
-            "time": "YYYY.MM.DD" (선택적)
-        }
-    }
-    """
+@app.post("/reflect-and-plan")
+async def reflection_and_plan(payload: Dict[str, Any]):
+    """반성 및 계획 생성 엔드포인트"""
     try:
-        # 요청 데이터 로깅
-        print("\n=== /reflect 엔드포인트 호출 ===")
-        print("📥 요청 데이터:", json.dumps(payload, indent=2, ensure_ascii=False))
+        # 전체 처리 시작 시간 기록
+        total_start_time = time.time()
+        print(f"\n=== /reflect-and-plan 엔드포인트 호출 ===")
+        print(f"📥 요청 데이터: {payload}")
         
         # 필수 필드 확인
-        if not payload or 'agent' not in payload or 'name' not in payload['agent']:
-            print("❌ 필수 필드 누락")
-            raise HTTPException(status_code=400, detail="agent.name is required")
+        if "agent" not in payload or "name" not in payload["agent"]:
+            return {"success": False, "error": "agent.name이 필요합니다."}
         
-        # 날짜 필드 확인 (제거 가능)
-        agent_time = payload.get('agent', {}).get('time', '')
-        if agent_time:
-            print(f"📅 요청된 날짜: {agent_time}")
-        else:
-            print("📅 날짜가 지정되지 않았습니다. 최신 메모리 날짜를 사용합니다.")
-
-        # 반성 처리 파이프라인 호출
-        print("🧠 반성 처리 시작...")
-        success = process_reflection_request(payload)
+        # 날짜 확인
+        agent_time = payload.get("agent", {}).get("time", "")
+        if not agent_time:
+            return {"success": False, "error": "agent.time이 필요합니다."}
         
-        # 결과 로깅
-        print(f"✅ 반성 처리 결과: {success}")
+        # # Ollama 클라이언트 초기화
+        # client = OllamaClient()
+        # 반성 처리 시작 시간
+        reflection_start_time = time.time()
+        reflection_success = await process_reflection_request(payload, client, word2vec_model=word2vec_model)
+        reflection_time = time.time() - reflection_start_time
+        print(f"⏱ 반성 처리 시간: {reflection_time:.2f}초")
         
-        # 결과 반환 (success: true/false)
+        # 계획 처리 시작 시간
+        plan_start_time = time.time()
+        plan_success = await process_plan_request(payload, client)
+        plan_time = time.time() - plan_start_time
+        print(f"⏱ 계획 처리 시간: {plan_time:.2f}초")
+        
+        # 다음날 계획 가져오기
+        next_day_plan = {}
+        if plan_success:
+            try:
+                plan_file_path = os.path.join(ROOT_DIR, "agent", "data", "plans.json")
+                with open(plan_file_path, "r", encoding="utf-8") as f:
+                    plan_data = json.load(f)
+                    agent_name = payload["agent"]["name"]
+                    current_date = datetime.strptime(agent_time, "%Y.%m.%d.%H:%M")
+                    next_day = (current_date + timedelta(days=1)).strftime("%Y.%m.%d")
+                    next_day_plan = plan_data.get(agent_name, {}).get("plans", {}).get(next_day, {})
+            except Exception as e:
+                print(f"다음날 계획 로드 실패: {str(e)}")
+        
+        # 전체 처리 시간 계산
+        total_time = time.time() - total_start_time
+        print(f"\n⏱ 시간 측정 결과:")
+        print(f"  - 반성 처리 시간: {reflection_time:.2f}초")
+        print(f"  - 계획 처리 시간: {plan_time:.2f}초")
+        print(f"  - 전체 처리 시간: {total_time:.2f}초")
+        
         return {
-            "success": success
+            "success": reflection_success and plan_success,
+            "next_day_plan": next_day_plan,
+            "performance_metrics": {
+                "total_time": total_time,
+                "reflection_time": reflection_time,
+                "plan_time": plan_time
+            }
         }
         
     except Exception as e:
-        print(f"❌ 반성 처리 중 오류 발생: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"반성 처리 중 오류 발생: {str(e)}")
-
-
-
-
-
-
-
+        print(f"❌ 반성 및 계획 처리 중 오류 발생: {str(e)}")
+        return {"success": False, "error": str(e)}
 
 ######################################################################################
 ###                                     계획                                       ###
 ######################################################################################
 
-
-
-
-
+@app.post("/update_embeddings")
+async def update_embeddings():
+    """
+    모든 메모리와 반성의 임베딩을 업데이트하는 엔드포인트
+    """
+    try:
+        print("\n=== 임베딩 업데이트 시작 ===")
+        update_counts = embedding_updater.update_embeddings()
+        print(f"✅ 임베딩 업데이트 완료: {update_counts}")
+        return {
+            "success": True,
+            "updated": update_counts
+        }
+    except Exception as e:
+        print(f"❌ 임베딩 업데이트 실패: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":
     print(f"\n=== 서버 초기화 완료 (총 소요시간: {time.time() - start_time:.2f}초) ===")

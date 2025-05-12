@@ -31,31 +31,20 @@ class OllamaClient:
                         response = self._send_request(
                             task['prompt'],
                             task['system_prompt'],
-                            task['model_name']
+                            task['model_name'],
+                            task.get('options', {})
                         )
-                        if task['callback']:
-                            # 비동기 콜백을 동기적으로 실행
-                            loop = asyncio.new_event_loop()
-                            asyncio.set_event_loop(loop)
-                            try:
-                                loop.run_until_complete(task['callback'](response))
-                            finally:
-                                loop.close()
+                        if task['future']:
+                            task['future'].set_result(response)
                     except Exception as e:
-                        if task['error_callback']:
-                            # 에러 콜백도 동기적으로 실행
-                            loop = asyncio.new_event_loop()
-                            asyncio.set_event_loop(loop)
-                            try:
-                                loop.run_until_complete(task['error_callback'](e))
-                            finally:
-                                loop.close()
+                        if task['future']:
+                            task['future'].set_exception(e)
                     
                     self.request_queue.task_done()
                     self.processing = False
-            time.sleep(0.1)  # CPU 사용량 감소를 위한 짧은 대기
+            time.sleep(0.1)
 
-    def _send_request(self, prompt: str, system_prompt: str, model_name: str) -> Dict[str, Any]:
+    def _send_request(self, prompt: str, system_prompt: str, model_name: str, options: Dict[str, Any] = None) -> Dict[str, Any]:
         """올라마 API에 실제 요청을 보내는 메서드"""
         payload = {
             "model": model_name,
@@ -63,6 +52,9 @@ class OllamaClient:
             "system": system_prompt,
             "stream": False
         }
+
+        if options:
+            payload["options"] = options
 
         data = json.dumps(payload).encode('utf-8')
         req = urllib.request.Request(
@@ -74,35 +66,43 @@ class OllamaClient:
         with urllib.request.urlopen(req) as resp:
             raw = resp.read()
             result = json.loads(raw.decode('utf-8'))
-            return result
+            return {
+                "response": result.get("response", ""),
+                "status": "success"
+            }
 
     async def process_prompt(
         self,
         prompt: str,
         system_prompt: str,
         model_name: str,
-        callback: Optional[callable] = None,
-        error_callback: Optional[callable] = None
-    ) -> None:
+        options: Optional[Dict[str, Any]] = None
+    ) -> Dict[str, Any]:
         """
-        프롬프트를 큐에 추가하고 처리합니다.
+        프롬프트를 처리하고 결과를 반환합니다.
         
         Args:
             prompt (str): 처리할 프롬프트
             system_prompt (str): 시스템 프롬프트
             model_name (str): 사용할 모델 이름
-            callback (callable, optional): 성공 시 호출될 콜백 함수
-            error_callback (callable, optional): 실패 시 호출될 콜백 함수
+            options (Dict[str, Any], optional): 모델 옵션
+            
+        Returns:
+            Dict[str, Any]: API 응답
         """
+        loop = asyncio.get_running_loop()
+        future = loop.create_future()
+        
         task = {
             'prompt': prompt,
             'system_prompt': system_prompt,
             'model_name': model_name,
-            'callback': callback,
-            'error_callback': error_callback
+            'options': options,
+            'future': future
         }
         
         self.request_queue.put(task)
+        return await future
 
 # 사용 예시:
 """
@@ -119,6 +119,12 @@ await client.process_prompt(
     prompt="What is the weather like?",
     system_prompt="You are a helpful assistant.",
     model_name="gemma3",
+    options={
+        "temperature": 0.7,
+        "top_p": 0.9,
+        "frequency_penalty": 0.1,
+        "presence_penalty": 0.1
+    },
     callback=handle_response,
     error_callback=handle_error
 )
