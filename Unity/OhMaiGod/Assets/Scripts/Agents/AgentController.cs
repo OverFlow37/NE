@@ -163,8 +163,8 @@ public class AgentController : MonoBehaviour
 
         // 이동 애니메이션 정지
         //animator.SetBool("isMoving", false);
-        if (mStateMachine.CurrentStateType == AgentState.MOVE_TO_INTERACTABLE)
-            mStateMachine.ChangeState(AgentState.INTERACTION); // 상태 INTERACTION으로 전환
+        if (mStateMachine.CurrentStateType == AgentState.MOVING_TO_INTERACTABLE)
+            mStateMachine.ChangeState(AgentState.INTERACTING); // 상태 INTERACTION으로 전환
     }
 
     // 이동 불가능 이벤트 핸들러
@@ -173,28 +173,28 @@ public class AgentController : MonoBehaviour
         // 현재 상태에 따라 처리 (기본적으로 WAIT 상태로 전환)
         switch (CurrentState)
         {
-            case AgentState.MOVE_TO_LOCATION:
+            case AgentState.MOVING_TO_LOCATION:
                 // TODO: 로케이션으로 이동할 수 없는 경우 반응
                 LogManager.Log("Agent", $"{mName}: 로케이션으로 이동할 수 없습니다.", 1);
-                ChangeState(AgentState.WAIT);
+                ChangeState(AgentState.WAITING);
                 break;
-            case AgentState.MOVE_TO_INTERACTABLE:
-                ChangeState(AgentState.WAIT);
+            case AgentState.MOVING_TO_INTERACTABLE:
+                ChangeState(AgentState.WAITING);
                 FindMovableInteractable(TileManager.Instance.GetTileController(mCurrentAction.LocationName));
                 if (mCurrentTargetInteractable == null)
                 {
                     // TODO: 이동 가능한 새로운 오브젝트를 찾을 수 없을 때
                     LogManager.Log("Agent", $"{mName}: 이동 가능한 오브젝트를 찾을 수 없습니다.", 1);
-                    ChangeState(AgentState.WAIT);
+                    ChangeState(AgentState.WAITING);
                 }
                 else
                 {
-                    ChangeState(AgentState.MOVE_TO_INTERACTABLE);  // 이동 재개
+                    ChangeState(AgentState.MOVING_TO_INTERACTABLE);  // 이동 재개
                 }
                 break;
             default:
                 // TODO: 기타 이동 불가능 상황 반응
-                ChangeState(AgentState.WAIT);
+                ChangeState(AgentState.WAITING);
                 break;
         }
     }
@@ -231,7 +231,7 @@ public class AgentController : MonoBehaviour
         // mCurrentAction이 null이 아니고, 새로운 위치가 목표 위치와 같으면 상태 전환
         if (mCurrentAction != null && _newLocation == mCurrentAction.LocationName)
         {
-            ChangeState(AgentState.MOVE_TO_INTERACTABLE);
+            ChangeState(AgentState.MOVING_TO_INTERACTABLE);
         }
     }
 
@@ -277,7 +277,7 @@ public class AgentController : MonoBehaviour
         {
             LogManager.Log("Agent", $"{mName}: 새 활동 수신 - {_action.ActionName} @ {_action.LocationName}", 2);
         }
-        if (mCurrentAction != null && mStateMachine.CurrentStateType == AgentState.INTERACTION)
+        if (mCurrentAction != null && mStateMachine.CurrentStateType == AgentState.INTERACTING)
         {
             CompleteAction();
         }
@@ -286,13 +286,13 @@ public class AgentController : MonoBehaviour
         // 현재 위치와 목표 위치가 다르면 MOVE_TO_LOCATION 상태로 전환
         if (mCurrentAction.LocationName != null && mCurrentAction.LocationName != mInteractable.CurrentLocation)
         {
-            ChangeState(AgentState.MOVE_TO_LOCATION);
+            ChangeState(AgentState.MOVING_TO_LOCATION);
         }
 
         // 현재 위치와 목표 위치가 같으면 오브젝트로 이동
         if (mCurrentAction.LocationName != null && mCurrentAction.LocationName == mInteractable.CurrentLocation)
         {
-            ChangeState(AgentState.MOVE_TO_INTERACTABLE);
+            ChangeState(AgentState.MOVING_TO_INTERACTABLE);
         }
 
         // 속마음 표시
@@ -325,13 +325,13 @@ public class AgentController : MonoBehaviour
         {
             // TODO: 잘못된 로케이션으로 가려고 할 때
             LogManager.Log("Agent", $"{mName}: {mCurrentAction.LocationName} 타일 컨트롤러를 찾을 수 없습니다.", 1);
-            ChangeState(AgentState.WAIT);
+            ChangeState(AgentState.WAITING);
             return;
         }
 
         switch (CurrentState)
         {
-            case AgentState.MOVE_TO_LOCATION:
+            case AgentState.MOVING_TO_LOCATION:
                 Vector2 availablePosition = tileController.AvailablePosition;
                 if (availablePosition != Vector2.zero)
                 {
@@ -342,11 +342,11 @@ public class AgentController : MonoBehaviour
                 {
                     // TODO: 로케이션이 꽉 차있어서 이동 불가능할 때
                     LogManager.Log("Agent", $"{mName}: {mCurrentAction.LocationName} 타일에 이동 가능한 위치가 없습니다.", 1);
-                    ChangeState(AgentState.WAIT);
+                    ChangeState(AgentState.WAITING);
                 }
                 break;
 
-            case AgentState.MOVE_TO_INTERACTABLE:
+            case AgentState.MOVING_TO_INTERACTABLE:
                 FindMovableInteractable(tileController);
                 if (mCurrentTargetInteractable != null)
                 {
@@ -358,7 +358,7 @@ public class AgentController : MonoBehaviour
                 {
                     // TODO: 상호작용 가능한 오브젝트를 찾을 수 없을 때
                     LogManager.Log("Agent", $"{mName}: {mCurrentAction.TargetName} 상호작용 가능한 오브젝트를 찾을 수 없습니다.", 1);
-                    ChangeState(AgentState.WAIT);
+                    ChangeState(AgentState.WAITING);
                 }
                 break;
         }
@@ -468,7 +468,7 @@ public class AgentController : MonoBehaviour
             
             // 상태 초기화
             mCurrentAction = null;
-            mStateMachine.ChangeState(AgentState.WAIT);
+            mStateMachine.ChangeState(AgentState.WAITING);
         }
     }
 
@@ -481,7 +481,7 @@ public class AgentController : MonoBehaviour
         // 대기 시간 종료 시 상태 변경
         if (mWaitTime <= 0f)
         {
-            mStateMachine.ChangeState(AgentState.WAIT);
+            mStateMachine.ChangeState(AgentState.WAITING);
             if (mShowDebugInfo)
             {
                 LogManager.Log("Agent", $"{mName}: 대기 상태 종료", 2);

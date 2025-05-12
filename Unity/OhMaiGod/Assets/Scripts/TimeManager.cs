@@ -102,7 +102,7 @@ public class TimeManager : MonoBehaviour
     // 현재 시간을 "HH:mm" 형식의 문자열로 반환
     public string GetTimeString()
     {
-        return $"{mCurrentGameTime.Hours:D2}:{mCurrentGameTime.Minutes:D2}";
+        return $"{mCurrentGameTime.Hours:D2}:{mCurrentGameTime.Minutes:D2}:{mCurrentGameTime.Seconds:D2}";
     }
 
     // 현재 날짜를 "MM월 dd일 (요일)" 형식의 문자열로 반환

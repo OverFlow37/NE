@@ -125,7 +125,7 @@ public class AIBridge : MonoBehaviour
             LogManager.Log("AI", $"요청 진행 중입니다. 기다려주세요. (에이전트: {agent.AgentName})", 1);
             return;
         }
-        agent.ChangeState(AgentState.WAIT_FOR_AI_RESPONSE);
+        agent.ChangeState(AgentState.WAITING_FOR_AI_RESPONSE);
         StartCoroutine(SendAgentData(agent));
     }
 
