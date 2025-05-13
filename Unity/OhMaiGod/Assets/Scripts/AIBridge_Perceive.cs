@@ -47,7 +47,9 @@ public class AIBridge_Perceive : MonoBehaviour
     // 관찰 이벤트 전송(응답없음)
     public void SendPerceiveEvent(AgentController agent, PerceiveEvent perceiveEvent)
     {
-        StartCoroutine(SendPerceiveEventData(agent, perceiveEvent));
+        LogManager.Log("AI", $"[AIBridge_Perceive] SendPerceiveEvent: {perceiveEvent.eventType}, {perceiveEvent.eventLocation}, {perceiveEvent.eventDescription}", 3);
+        // TODO: 관찰 이벤트 전송 엔드포인트 구현 후 주석 해제
+        //StartCoroutine(SendPerceiveEventData(agent, perceiveEvent));
     }
 
     IEnumerator SendPerceiveEventData(AgentController agent, PerceiveEvent perceiveEvent){

@@ -24,6 +24,9 @@ public class AgentVision : MonoBehaviour
     private CircleCollider2D mVisionCollider;                // 시야 범위 콜라이더
     private HashSet<Interactable> mVisibleInteractables;     // 현재 보이는 Interactable 목록
 
+    [SerializeField] private AgentController mAgentController;
+    private AIBridge_Perceive mAIBridgePerceive;
+
     // 시야 범위에 변화가 있을 때 발생하는 이벤트
     public delegate void VisionChangeHandler(Interactable interactable, bool entered);
     public event VisionChangeHandler OnVisionChanged;
@@ -46,6 +49,7 @@ public class AgentVision : MonoBehaviour
 
     private void Start()
     {
+        mAIBridgePerceive = GameObject.Find("AIBridge").GetComponent<AIBridge_Perceive>();
         // 초기 시야 범위 내의 오브젝트 검사
         CheckInitialVisionRange();
     }
@@ -131,13 +135,20 @@ public class AgentVision : MonoBehaviour
                 float randomWeight = UnityEngine.Random.Range(0.5f, 2.0f);
                 totalInterest *= randomWeight;
                 // 에이전트의 선호 오브젝트, 비선호 오브젝트 체크
+                // TODO: 반응과 관찰에 대한 임계치 분리, 호출 함수 분리
                 if (totalInterest >= threshold){
-                    // 이벤트 생성
-                PerceiveManager.Instance.SendEventToAIServer(PerceiveEventType.INTERACTABLE_DISCOVER, interactable.CurrentLocation, interactable.InteractableName);
-                }        
+                    // 이벤트 전송
+                    PerceiveEvent perceiveEvent = new PerceiveEvent();
+                    perceiveEvent.eventType = PerceiveEventType.INTERACTABLE_DISCOVER;
+                    perceiveEvent.eventLocation = interactable.CurrentLocation;
+                    // TODO: 오브젝트 이름이 아니라 이벤트 설명을 만든 뒤 설명을 전송해야함
+                    perceiveEvent.eventDescription = interactable.mInteractableData.mName;
+                    mAIBridgePerceive.SendPerceiveEvent(mAgentController, perceiveEvent);
+                }
             }
         }
         // 이벤트 감지
+        // TODO: 이벤트 레이어 감지가 우선?
         else if (other.gameObject.layer == LayerMask.NameToLayer("Event"))
         {
             EventController eventController = other.GetComponent<EventController>();
@@ -145,8 +156,14 @@ public class AgentVision : MonoBehaviour
             {
                 LogManager.Log("Vision", $"이벤트 감지: {eventController.mEventInfo.eventType}, {eventController.mEventInfo.eventLocation}, {eventController.mEventInfo.eventDescription}", 3);
                 //PerceiveManager.Instance.SendEventToAIServer(eventController.mEventInfo.eventType, eventController.mEventInfo.eventLocation, eventController.mEventInfo.eventDescription);
+                PerceiveEvent perceiveEvent = new PerceiveEvent();
+                perceiveEvent.eventType = eventController.mEventInfo.eventType;
+                // TODO: 이벤트 위치가 오브젝트 위치가 아니라 이벤트 위치를 전송해야함
+                perceiveEvent.eventLocation = mAgentController.CurrentLocation;
+                perceiveEvent.eventDescription = eventController.mEventInfo.eventDescription;
+                mAIBridgePerceive.SendPerceiveEvent(mAgentController, perceiveEvent);
             }
-        }  
+        }
     }
 
     // 시야 범위에서 나갔을 때
