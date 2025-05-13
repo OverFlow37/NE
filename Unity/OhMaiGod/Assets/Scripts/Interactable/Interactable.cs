@@ -136,6 +136,7 @@ public class Interactable : MonoBehaviour
         {
             if (action.mAction != null && action.mAction.mActionName == _actionName)
             {
+                Debug.Log("GetActionDuration: " + action.mDuration);
                 return action.mDuration;
             }
         }
