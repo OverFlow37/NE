@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using System.Linq;
 
 // InteractionAction을 상속받아 잠금 해제 행동을 구현합니다.
 // CreateAssetMenu 경로를 Interaction Actions로 변경
@@ -29,13 +30,19 @@ public class UseAction : InteractionAction
             return false;
         }
         
-        // 사용 효과 적용(현재는 수면만)
+        // 사용 효과 적용 (수면 및 외로움 수치 변화)
+        // TODO: 부가적인 이펙트 추가(낚시터 -> 물고기 획득, 제단 -> 기도 효과)
         var agentController = interactor.GetComponent<AgentController>();
-        agentController.ModifyNeed(OhMAIGod.Agent.AgentNeedsType.Sleepiness, targetInteractable.mInteractableData.mSleepinessEffect);
+        agentController.ModifyNeed(OhMAIGod.Agent.AgentNeedsType.Sleepiness, targetInteractable.mInteractableData.mActions.FirstOrDefault(action => action.mAction == this).mSleepinessEffect);
+        agentController.ModifyNeed(OhMAIGod.Agent.AgentNeedsType.Loneliness, targetInteractable.mInteractableData.mActions.FirstOrDefault(action => action.mAction == this).mLonelinessEffect);
+
 
         // 특정 시간동안 행동 수행
 
         // 사용 후 내구도 감소?
+
+        // 사용 후 오브젝트 제거
+        LogManager.Log("Interact", $"use {targetInteractable.InteractableName}", 1);
 
         return true;
     }

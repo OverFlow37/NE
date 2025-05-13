@@ -101,7 +101,7 @@ public class Interactable : MonoBehaviour
         foreach (var action in mInteractableData.mActions)
         {
             LogManager.Log("Interact", "action: "+action.mAction.mActionName+ "actionName: "+actionName, 3);
-            if (action.mAction != null && action.mAction.mActionName == actionName)
+            if (action.mAction != null && action.mAction.mActionName.ToLower() == actionName.ToLower())
             {
                 actionFound = true;
                 // InteractionAction의 Execute 메서드 호출
