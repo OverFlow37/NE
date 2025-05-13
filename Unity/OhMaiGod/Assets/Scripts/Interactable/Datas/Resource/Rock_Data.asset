@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mDescription: "\uC11D\uC7AC\uB97C \uD68D\uB4DD\uD560 \uC218 \uC788\uB294 \uBC14\uC704"
   mName: Rock
-  mDescriptionPrompt: 
+  mDescriptionPrompt: can get some stone resource
   mType: 2
   mState: 0
   mActions:

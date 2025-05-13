@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using System.Linq;
 
 // InteractionAction을 상속받아 잠금 해제 행동을 구현합니다.
 // CreateAssetMenu 경로를 Interaction Actions로 변경
@@ -28,9 +29,11 @@ public class BreakAction : InteractionAction
             LogManager.Log("Interact", $"상호작용 주체가 없습니다: {interactor.name}", 1);
             return false;
         }
-        
-        // 아이템 부서짐
 
+        // 특정 시간동안 행동 수행
+
+        // 행동 완료 후 오브젝트 제거
+        targetInteractable.RemoveObject();
 
         return true;
     }

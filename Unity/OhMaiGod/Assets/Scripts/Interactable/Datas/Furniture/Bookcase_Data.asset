@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mDescription: "\uC11C\uC7AC"
   mName: Bookcase
-  mDescriptionPrompt: 
+  mDescriptionPrompt: can read some books
   mType: 3
   mState: 0
   mActions:

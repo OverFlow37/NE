@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mDescription: "\uC2E0\uC5D0\uAC8C \uAE30\uB3C4\uD560 \uC218 \uC788\uB294 \uCD1B\uBD88"
   mName: Candle
-  mDescriptionPrompt: 
+  mDescriptionPrompt: can pray what you want to god
   mType: 3
   mState: 0
   mActions:

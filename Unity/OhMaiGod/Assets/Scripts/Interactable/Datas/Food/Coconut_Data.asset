@@ -15,7 +15,8 @@ MonoBehaviour:
   mDescription: "\uD574\uBCC0\uC5D0\uC11C \uD68D\uB4DD\uD560 \uC218 \uC788\uB294
     \uCF54\uCF54\uB11B"
   mName: Coconut
-  mDescriptionPrompt: 
+  mDescriptionPrompt: It is sweet and delicious, and you can get a little (3) fullness
+    when you eat it.
   mType: 1
   mState: 0
   mActions:

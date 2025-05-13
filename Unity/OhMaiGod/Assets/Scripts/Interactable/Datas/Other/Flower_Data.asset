@@ -15,7 +15,7 @@ MonoBehaviour:
   mDescription: "\uC0B0, \uC232, \uD3C9\uC9C0\uC5D0\uC11C \uBCFC \uC218 \uC788\uB294
     \uAF43"
   mName: Flower
-  mDescriptionPrompt: 
+  mDescriptionPrompt: it is beautiful and can offet to god
   mType: 4
   mState: 0
   mActions:

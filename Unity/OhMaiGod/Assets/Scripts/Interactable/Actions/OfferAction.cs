@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using System.Linq;
 
 // InteractionAction을 상속받아 잠금 해제 행동을 구현합니다.
 // CreateAssetMenu 경로를 Interaction Actions로 변경
@@ -29,8 +30,13 @@ public class OfferAction : InteractionAction
             return false;
         }
         
-        // 아이템 조공
+        // 특정 시간동안 행동 수행
 
+        // 행동 완료 후 음식 오브젝트 제거
+        LogManager.Log("Interact", $"offer {targetInteractable.InteractableName}", 1);
+        targetInteractable.RemoveObject();
+
+        // TODO: 신앙심 변화
 
         return true;
     }

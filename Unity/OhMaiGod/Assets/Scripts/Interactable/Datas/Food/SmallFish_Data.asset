@@ -15,7 +15,8 @@ MonoBehaviour:
   mDescription: "\uD574\uBCC0\uC5D0\uC11C \uC5BB\uC744 \uC218 \uC788\uB294 \uC791\uC740
     \uBB3C\uACE0\uAE30"
   mName: SmallFish
-  mDescriptionPrompt: 
+  mDescriptionPrompt: It is delicious, and you can get a more (5) fullness when you
+    eat it.
   mType: 1
   mState: 0
   mActions:

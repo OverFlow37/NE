@@ -15,7 +15,8 @@ MonoBehaviour:
   mDescription: "\uD3C9\uC9C0\uC5D0\uC11C \uD68D\uB4DD\uD560 \uC218 \uC788\uB294
     \uBC14\uB098\uB098"
   mName: Banana
-  mDescriptionPrompt: 
+  mDescriptionPrompt: It is sweet and delicious, and you can get a little (3) fullness
+    when you eat it.
   mType: 1
   mState: 0
   mActions:

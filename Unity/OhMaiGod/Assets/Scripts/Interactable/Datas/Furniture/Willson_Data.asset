@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mDescription: "\uBC30\uAD6C\uACF5 \uC70C\uC2A8"
   mName: Willson
-  mDescriptionPrompt: 
+  mDescriptionPrompt: it is not just ball, but also be your good friend
   mType: 3
   mState: 0
   mActions:

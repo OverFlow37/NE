@@ -14,7 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mDescription: "\uC5B4\uB514\uC11C\uB4E0 \uC5BB\uC744 \uC218 \uC788\uB294 \uB2EC\uAC40"
   mName: Egg
-  mDescriptionPrompt: 
+  mDescriptionPrompt: It is delicious, and you can get a more (7) fullness when you
+    eat it.
   mType: 1
   mState: 0
   mActions:

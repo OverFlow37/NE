@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mDescription: "\uBAA9\uC7AC\uB97C \uD68D\uB4DD\uD560 \uC218 \uC788\uB294 \uB098\uBB34"
   mName: Tree
-  mDescriptionPrompt: 
+  mDescriptionPrompt: can get some wooden resource
   mType: 2
   mState: 0
   mActions:

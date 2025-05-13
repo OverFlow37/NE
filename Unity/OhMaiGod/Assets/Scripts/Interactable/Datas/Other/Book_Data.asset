@@ -15,7 +15,7 @@ MonoBehaviour:
   mDescription: "\uC5B4\uB514\uC11C\uB4E0 \uBC1C\uACAC\uD560 \uC218 \uC788\uB294
     \uCC45"
   mName: Book
-  mDescriptionPrompt: 
+  mDescriptionPrompt: can read something, or offer to god
   mType: 4
   mState: 0
   mActions:

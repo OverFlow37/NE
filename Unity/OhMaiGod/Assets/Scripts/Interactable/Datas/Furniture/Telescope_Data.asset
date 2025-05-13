@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mDescription: "\uB9DD\uC6D0\uACBD"
   mName: Telescope
-  mDescriptionPrompt: 
+  mDescriptionPrompt: can look universe closer
   mType: 3
   mState: 0
   mActions:

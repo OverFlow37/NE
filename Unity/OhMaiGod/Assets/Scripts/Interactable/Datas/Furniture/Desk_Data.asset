@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mDescription: "\uCC45\uC0C1"
   mName: Desk
-  mDescriptionPrompt: 
+  mDescriptionPrompt: can read, draw, writing and etc...
   mType: 3
   mState: 0
   mActions:

@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using System.Linq;
 
 // InteractionAction을 상속받아 잠금 해제 행동을 구현합니다.
 // CreateAssetMenu 경로를 Interaction Actions로 변경
@@ -37,11 +38,12 @@ public class EatAction : InteractionAction
         
         // 음식을 먹은 후 배고픔 감소 (음식 특성에 따른 추가 효과는 Interactable에서 처리)
         var agentController = interactor.GetComponent<AgentController>();
-        agentController.ModifyNeed(OhMAIGod.Agent.AgentNeedsType.Hunger, targetInteractable.mInteractableData.mHungerEffect);
+        agentController.ModifyNeed(OhMAIGod.Agent.AgentNeedsType.Hunger, targetInteractable.mInteractableData.mActions.FirstOrDefault(action => action.mAction == this).mHungerEffect);
 
         // 특정 시간동안 행동 수행
 
         // 행동 완료 후 음식 오브젝트 제거
+        LogManager.Log("Interact", $"eat {targetInteractable.InteractableName}", 1);
         targetInteractable.RemoveObject();
 
         return true;

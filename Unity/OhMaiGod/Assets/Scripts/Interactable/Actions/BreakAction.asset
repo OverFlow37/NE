@@ -12,4 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e83ee7560dd5bb84ab677b0222aca548, type: 3}
   m_Name: BreakAction
   m_EditorClassIdentifier: 
-  _actionName: Break
+  _actionName: break

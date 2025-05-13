@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mDescription: "\uD53C\uC544\uB178"
   mName: Piano
-  mDescriptionPrompt: 
+  mDescriptionPrompt: can playing some music
   mType: 3
   mState: 0
   mActions:
