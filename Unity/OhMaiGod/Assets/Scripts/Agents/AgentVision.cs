@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using OhMAIGod.Perceive;
 
 [RequireComponent(typeof(CircleCollider2D))]
 public class AgentVision : MonoBehaviour
@@ -92,40 +93,75 @@ public class AgentVision : MonoBehaviour
             LogManager.Log("Vision", $"[AgentVision] Skipping self: {other.gameObject.name}", 3);
             return;
         }
-
-        if (!IsInTargetLayer(other.gameObject.layer))
+        // 레이어 체크
+        // 오브젝트 감지
+        if (other.gameObject.layer == LayerMask.NameToLayer("Obstacles") || other.gameObject.layer == LayerMask.NameToLayer("NPC"))
         {
-            LogManager.Log("Vision", $"[AgentVision] Object {other.gameObject.name} is not in target layers", 3);
-            return;
+            Interactable interactable = other.GetComponent<Interactable>();
+            if (interactable != null)
+            {
+                AddVisibleInteractable(interactable);
+                // 흥미도 계산
+                float threshold = 100.0f;
+                float interestBase = interactable.mInteractableData.mInterest; // 오브젝트별 베이스 흥미도
+                float totalInterest = interestBase;
+                const float BROKEN_REPO = 20.0f; //베이스 흥미도가 20 이상이면 BROKEN이 추가 흥미도 발생
+                bool isFirst = true;
+                // 처음 보는 물체인지 체크
+                // 반응이 이미 이루어진 물체인지 체크
+                // 현재 오브젝트의 상태 체크
+                switch (interactable.mInteractableData.mState)
+                {
+                    case InteractableData.States.Broken:
+                        totalInterest += (interestBase - BROKEN_REPO) * 2.0f;
+                        break;
+                    case InteractableData.States.Installed:
+                        // 설치된 물체이면서 처음 보는 오브젝트가 아닐 때
+                        if (!isFirst)
+                            totalInterest *= 0.5f;
+                        break;
+                    case InteractableData.States.Burn:
+                        totalInterest += 50.0f + interestBase * 0.5f;
+                        break;
+                    case InteractableData.States.Rotten:
+                        totalInterest += (interestBase - BROKEN_REPO) * 2.0f;
+                        break;
+                }
+                // 랜덤 가중치 적용 (0.5f ~ 2.0f)
+                float randomWeight = UnityEngine.Random.Range(0.5f, 2.0f);
+                totalInterest *= randomWeight;
+                // 에이전트의 선호 오브젝트, 비선호 오브젝트 체크
+                if (totalInterest >= threshold){
+                    // 이벤트 생성
+                PerceiveManager.Instance.SendEventToAIServer(PerceiveEventType.INTERACTABLE_DISCOVER, interactable.CurrentLocation, interactable.InteractableName);
+                }        
+            }
         }
-
-        Interactable interactable = other.GetComponent<Interactable>();
-        if (interactable != null)
+        // 이벤트 감지
+        else if (other.gameObject.layer == LayerMask.NameToLayer("Event"))
         {
-            AddVisibleInteractable(interactable);
-        }
+            EventController eventController = other.GetComponent<EventController>();
+            if (eventController != null)
+            {
+                LogManager.Log("Vision", $"이벤트 감지: {eventController.mEventInfo.eventType}, {eventController.mEventInfo.eventLocation}, {eventController.mEventInfo.eventDescription}", 3);
+                //PerceiveManager.Instance.SendEventToAIServer(eventController.mEventInfo.eventType, eventController.mEventInfo.eventLocation, eventController.mEventInfo.eventDescription);
+            }
+        }  
     }
 
     // 시야 범위에서 나갔을 때
     private void OnTriggerExit2D(Collider2D other)
     {
-        if (!IsInTargetLayer(other.gameObject.layer)) return;
-
-        Interactable interactable = other.GetComponent<Interactable>();
-        if (interactable != null)
+        if (other.gameObject.layer == LayerMask.NameToLayer("Obstacles") || other.gameObject.layer == LayerMask.NameToLayer("NPC"))
         {
-            RemoveVisibleInteractable(interactable);
+            Interactable interactable = other.GetComponent<Interactable>();
+            if (interactable != null)
+            {
+                RemoveVisibleInteractable(interactable);
+            }
         }
     }
 
-    // 레이어 마스크 체크
-    private bool IsInTargetLayer(int layer)
-    {
-        bool isInObstacles = ((1 << layer) & mObstaclesLayer) != 0;
-        bool isInNPC = ((1 << layer) & mNPCLayer) != 0;
-        LogManager.Log("Vision", $"[AgentVision] Layer Check - Layer: {layer}, IsInObstacles: {isInObstacles}, IsInNPC: {isInNPC}", 3);
-        return isInObstacles || isInNPC;
-    }
 
     // Interactable 추가
     private void AddVisibleInteractable(Interactable interactable)

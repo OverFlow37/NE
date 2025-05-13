@@ -18,9 +18,10 @@ MonoBehaviour:
     when you eat it.
   mType: 1
   mState: 0
+  mInterest: 0
   mActions:
   - mAction: {fileID: 11400000, guid: cbe91266aabd61348bd1864e9f7bac11, type: 2}
-    mDuration: 30
+    mDuration: 300
   mHungerEffect: -3
   mSleepinessEffect: 0
   mLonelinessEffect: 0

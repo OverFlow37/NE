@@ -17,9 +17,10 @@ MonoBehaviour:
   mDescriptionPrompt: Can sleep comfortably.
   mType: 4
   mState: 0
+  mInterest: 0
   mActions:
   - mAction: {fileID: 11400000, guid: 8c8333f0289df39458a7a343f81ce4f3, type: 2}
-    mDuration: 60
+    mDuration: 120
   mHungerEffect: 0
   mSleepinessEffect: -1
   mLonelinessEffect: 0

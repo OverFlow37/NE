@@ -2,8 +2,10 @@ using UnityEngine;
 
 public class CreatePower : MonoBehaviour
 {
-    [Header("생성할 프리팹")]
+    [Header("생성할 아이템")]
     public GameObject mSelectedPrefab; // UI에서 할당
+    [Header("생성할 이벤트")]
+    public GameObject mSelectedEvent; // UI에서 할당
 
     private bool mIsPlacementMode = false;
     private GameObject mPreviewObject;
@@ -109,6 +111,10 @@ public class CreatePower : MonoBehaviour
             Debug.LogWarning("해당 타일에 벽, 장애물 또는 NPC가 있어 설치할 수 없습니다.");
             return;
         }
+
+        // 이벤트 생성
+        GameObject eventObject = Instantiate(mSelectedEvent, cellCenter, Quaternion.identity);
+        eventObject.GetComponent<EventController>().mEventInfo = mSelectedEvent.GetComponent<EventController>().mEventInfo;
 
         Instantiate(_prefab, cellCenter, Quaternion.identity);
         // 프리뷰는 계속 유지, mSelectedPrefab도 null로 만들지 않음
