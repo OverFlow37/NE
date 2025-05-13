@@ -143,4 +143,17 @@ class MemoryUtils:
         elif event_type == "new_object":
             return f"discover {object} at {location}"
         else:
-            return f"{object} at {location}" 
+            return f"{object} at {location}"
+
+    def save_perception(self, event: Dict[str, Any], agent_name: str) -> bool:
+        """관찰 정보를 메모리에 저장"""
+        try:
+            event_sentence = self.event_to_sentence(event)
+            embedding = self.get_embedding(event_sentence)
+            event_time = event.get("time", datetime.now().strftime("%Y.%m.%d.%H:%M"))
+            
+            self.save_memory(event_sentence, embedding, event_time, agent_name)
+            return True
+        except Exception as e:
+            print(f"관찰 정보 저장 실패: {e}")
+            return False
