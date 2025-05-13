@@ -220,14 +220,56 @@ async def receive_data(payload: dict):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.post("/perceive")
+async def perceive_event(payload: dict):
+    """관찰 정보를 저장하는 엔드포인트"""
+    try:
+        if not payload or 'agent' not in payload:
+            return {"success": False, "error": "agent field is required"}
+            
+        agent_data = payload.get('agent', {})
+        agent_name = agent_data.get('name', 'John')
+        event_data = agent_data.get('event', {})
+        
+        success = memory_utils.save_perception(event_data, agent_name)
+        return {"success": success}
+        
+    except Exception as e:
+        print(f"❌ 관찰 정보 저장 중 오류 발생: {str(e)}")
+        return {"success": False, "error": str(e)}
+
 @app.post("/react")
+async def should_react(payload: dict):
+    """관찰된 이벤트에 반응할지 여부를 결정하는 엔드포인트"""
+    try:
+        if not payload or 'agent' not in payload:
+            return {"success": False, "error": "agent field is required"}
+            
+        agent_data = payload.get('agent', {})
+        agent_name = agent_data.get('name', 'John')
+        event_data = agent_data.get('event', {})
+        
+        # 현재는 모든 이벤트에 대해 반응하도록 설정
+        success = memory_utils.save_perception(event_data, agent_name)
+        if success:
+            # 임시로 고유 ID 생성 (실제로는 데이터베이스에서 관리해야 함)
+            event_id = f"{agent_name}_{datetime.now().strftime('%Y%m%d%H%M%S')}"
+            return {"success": True, "should_react": True, "event_id": event_id}
+        return {"success": False, "error": "Failed to save perception"}
+        
+    except Exception as e:
+        print(f"❌ 반응 결정 중 오류 발생: {str(e)}")
+        return {"success": False, "error": str(e)}
+
+@app.post("/make_reaction")
 async def react_to_event(payload: dict):
+    """이벤트에 대한 반응을 생성하는 엔드포인트"""
     try:
         # 전체 처리 시작 시간 기록
         total_start_time = time.time()
         
         # 요청 데이터 로깅
-        print("\n=== /react 엔드포인트 호출 ===")
+        print("\n=== /make_reaction 엔드포인트 호출 ===")
         print("📥 요청 데이터:", json.dumps(payload, indent=2, ensure_ascii=False))
         
         # 필수 필드 확인
@@ -352,7 +394,8 @@ async def react_to_event(payload: dict):
             print(f"  - 전체 처리 시간: {total_response_time:.2f}초")
             
             return {
-                "action": reaction_obj
+                "success": True,
+                "data": reaction_obj
             }
             
         except json.JSONDecodeError as e:
@@ -364,10 +407,44 @@ async def react_to_event(payload: dict):
         
     except Exception as e:
         print(f"❌ 오류 발생: {str(e)}")
-        return {"error": str(e)}, 500
-    
- 
 
+        return {"success": False,"error": str(e)}, 500
+
+@app.post("/agent_action")
+async def save_agent_action(payload: dict):
+    """에이전트의 행동을 저장하는 엔드포인트"""
+    try:
+        if not payload or 'agent' not in payload:
+            return {"success": False, "error": "agent field is required"}
+            
+        agent_data = payload.get('agent', {})
+        agent_name = agent_data.get('name', 'John')
+        action_data = payload.get('event', {})
+        
+        success = memory_utils.save_perception(action_data, agent_name)
+        return {"success": success}
+        
+    except Exception as e:
+        print(f"❌ 에이전트 행동 저장 중 오류 발생: {str(e)}")
+        return {"success": False, "error": str(e)}
+
+@app.post("/action_feedback")
+async def save_action_feedback(payload: dict):
+    """행동에 대한 피드백을 저장하는 엔드포인트"""
+    try:
+        if not payload or 'agent' not in payload:
+            return {"success": False, "error": "agent field is required"}
+            
+        agent_data = payload.get('agent', {})
+        agent_name = agent_data.get('name', 'John')
+        feedback_data = payload.get('event', {})
+        
+        success = memory_utils.save_perception(feedback_data, agent_name)
+        return {"success": success}
+        
+    except Exception as e:
+        print(f"❌ 피드백 저장 중 오류 발생: {str(e)}")
+        return {"success": False, "error": str(e)}
 
 try:
     from agent.modules.reflection.importance_rater import ImportanceRater
