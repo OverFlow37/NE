@@ -14,11 +14,11 @@ public class AgentController : MonoBehaviour
     [SerializeField] private AgentNeeds mAgentNeeds;                // 현재 Agent의 욕구 수치
     
     // Needs 수정을 위한 메서드들
-    public void ModifyNeed(OhMAIGod.Agent.AgentNeedsType _needType, int _amount)
+    public void ModifyNeed(AgentNeedsType _needType, int _amount)
     {
         switch (_needType)
         {
-            case OhMAIGod.Agent.AgentNeedsType.Hunger:
+            case AgentNeedsType.Hunger:
                 mAgentNeeds.Hunger = Mathf.Clamp(mAgentNeeds.Hunger + _amount, -99, 99);
                 if (mShowDebugInfo)
                 {
@@ -26,7 +26,7 @@ public class AgentController : MonoBehaviour
                 }
                 break;
             
-            case OhMAIGod.Agent.AgentNeedsType.Sleepiness:
+            case AgentNeedsType.Sleepiness:
                 mAgentNeeds.Sleepiness = Mathf.Clamp(mAgentNeeds.Sleepiness + _amount, -99, 99);
                 if (mShowDebugInfo)
                 {
@@ -34,7 +34,7 @@ public class AgentController : MonoBehaviour
                 }
                 break;
             
-            case OhMAIGod.Agent.AgentNeedsType.Loneliness:
+            case AgentNeedsType.Loneliness:
                 mAgentNeeds.Loneliness = Mathf.Clamp(mAgentNeeds.Loneliness + _amount, -99, 99);
                 if (mShowDebugInfo)
                 {
@@ -42,7 +42,7 @@ public class AgentController : MonoBehaviour
                 }
                 break;
             
-            case OhMAIGod.Agent.AgentNeedsType.Stress:
+            case AgentNeedsType.Stress:
                 mAgentNeeds.Stress = Mathf.Clamp(mAgentNeeds.Stress + _amount, -99, 99);
                 if (mShowDebugInfo)
                 {
@@ -57,8 +57,9 @@ public class AgentController : MonoBehaviour
     [SerializeField] private string mName;                          // 이름
     [SerializeField] private string mDescription;                   // 초기 설명    
     [SerializeField] private float mVisualRange;                    // 시야 범위
-    // [SerializeField] private float mActionMinDuration = 1.0f;       // 활동 최소 지속 시간 (분)
     [SerializeField] private bool mAutoStart = true;                // 자동 시작 여부
+    [SerializeField] [Tooltip("감정 상태 자동 증가 간격 (분)")] private int mNeedIntervalMinutes = 30;
+    private TimeSpan mLastNeedsIncreaseTime; // 마지막 감정 상태 자동 증가 시각
     private AgentStateMachine mStateMachine;
 
     [Header("디버깅")]
@@ -66,7 +67,6 @@ public class AgentController : MonoBehaviour
     [SerializeField, ReadOnly] private AgentState mCurrentState; // 현재 상태 Inspector 디버그용
     [SerializeField, ReadOnly] private string mCurrentLocation;  // 현재 위치 Inspector 디버그용
     [SerializeField, ReadOnly] private Interactable mCurrentTargetInteractable;    // 현재 타겟 Inspector 디버그용
-    // private float mCurrentActionTime = 0f;                          // 현재 활동 진행 시간
     private ScheduleItem mCurrentAction = null;                     // 현재 활동 정보
     private float mWaitTime = 0f;                                   // 대기 시간 (다음 활동까지)
 
@@ -122,9 +122,13 @@ public class AgentController : MonoBehaviour
         }
 
         // 감정 상태 초기화
-        mAgentNeeds.Hunger = 1;
-        mAgentNeeds.Sleepiness = 1;
-        mAgentNeeds.Loneliness = 1;
+        mAgentNeeds.Hunger = 0;
+        mAgentNeeds.Sleepiness = 0;
+        mAgentNeeds.Loneliness = 0;
+        mAgentNeeds.Stress = 0;
+
+        // 감정 상태 자동 증가 시간 초기화 (분 단위까지만 저장)
+        mLastNeedsIncreaseTime = TimeSpan.FromMinutes(TimeManager.Instance.GetCurrentGameTime().TotalMinutes);
 
         // 애니메이션 참조
         animator = GetComponent<Animator>();
@@ -250,16 +254,7 @@ public class AgentController : MonoBehaviour
     {
         if (mAutoStart)
         {
-            // 현재 상태 평가 시작
-            // 수정필요
-            // StartCoroutine(EvaluateStateRoutine());
-
-            // 상태 머신 초기화 (현재 상태 지정) 
-            // (AI 서버에서 호출먼저 받는 테스트하느라 주석처리)
-            // mStateMachine.Initialize(AgentState.WAIT);
-
-            // 감정 상태 자동 증가 시작
-            StartCoroutine(AutoIncreaseAgentNeeds());
+            mStateMachine.Initialize(AgentState.WAITING);
         }
     }
 
@@ -267,6 +262,9 @@ public class AgentController : MonoBehaviour
     {
         // 상태 머신 업데이트 호출
         mStateMachine.ProcessStateUpdate();
+
+        // 상태 자동 증가 함수 호출
+        AutoIncreaseAgentNeeds();
     }
 
     // 상태 전환 메서드
@@ -501,32 +499,24 @@ public class AgentController : MonoBehaviour
         }
     }
 
-    // 감정 상태 자동 증가 코루틴
-    private IEnumerator AutoIncreaseAgentNeeds()
+    // 감정 상태 자동 증가 함수
+    private void AutoIncreaseAgentNeeds()
     {
-        TimeSpan lastIncreaseTime = TimeManager.Instance.GetCurrentGameTime();
-        while (true)
+        TimeSpan currentTime = TimeManager.Instance.GetCurrentGameTime();
+        int lastMinutes = (int)mLastNeedsIncreaseTime.TotalMinutes;
+        int currentMinutes = (int)currentTime.TotalMinutes;
+        int minutesDiff = currentMinutes - lastMinutes;
+
+        // 분 단위로 mNeedIntervalMinutes 이상 지났는지 확인
+        if (minutesDiff >= mNeedIntervalMinutes)
         {
-            yield return new WaitForSeconds(1f);
-            TimeSpan currentTime = TimeManager.Instance.GetCurrentGameTime();
-            TimeSpan timeDifference = currentTime - lastIncreaseTime;
-
-            // 게임 시간으로 30분이 지났는지 확인
-            if (timeDifference.TotalMinutes >= 3)
-            {
-                // 각 감정 상태 증가
-                ModifyNeed(OhMAIGod.Agent.AgentNeedsType.Hunger, 1);
-                ModifyNeed(OhMAIGod.Agent.AgentNeedsType.Sleepiness, 1);
-                ModifyNeed(OhMAIGod.Agent.AgentNeedsType.Loneliness, 1);
-                ModifyNeed(OhMAIGod.Agent.AgentNeedsType.Stress, 1);
-                if (mShowDebugInfo)
-                {
-                    //LogManager.Log("Agent", $"[게임시간 {currentTime:hh\\:mm}] {mName}의 감정 상태 자동 증가", 3);
-                }
-
-                // 마지막 증가 시간 업데이트
-                lastIncreaseTime = currentTime;
-            }
+            // 각 감정 상태 증가
+            ModifyNeed(AgentNeedsType.Hunger, 1);
+            ModifyNeed(AgentNeedsType.Sleepiness, 1);
+            ModifyNeed(AgentNeedsType.Loneliness, 1);
+            ModifyNeed(AgentNeedsType.Stress, 1);
+            // 마지막 증가 시간 업데이트 (항상 분 단위까지만 저장)
+            mLastNeedsIncreaseTime = TimeSpan.FromMinutes(currentMinutes);
         }
     }
 

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "NewInteractableData", menuName = "Game/Interactable Data")]
@@ -42,7 +43,6 @@ public class InteractableData : ScriptableObject
     public enum Types{
         Agent,
         Food,
-        Tool,
         Resource,
         Furniture,
         Misc,

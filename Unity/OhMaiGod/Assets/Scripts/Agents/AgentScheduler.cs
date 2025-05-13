@@ -383,28 +383,52 @@ public class AgentScheduler : MonoBehaviour
             "Dummy Schedule 1 : use, house, Bed"
         ));
 
-        // 두 번째 스케줄: eat, cafeteria, Apple (첫 스케줄 시작 30분 뒤)
+        // 두 번째 스케줄: eat, cafeteria, Grape (첫 스케줄 시작 30분 뒤)
         TimeSpan secondStart = startTime.Add(duration);
         AddScheduleItem(new ScheduleItem(
             "eat",
             "cafeteria",
-            "Apple",
+            "Grape",
             secondStart,
             secondStart.Add(actionDuration),
             2,
-            "Dummy Schedule 2 : eat, cafeteria, Apple"
+            "Dummy Schedule 2 : eat, cafeteria, Grape"
         ));
 
-        // 세 번째 스케줄: use, house, Bed (두 번째 스케줄 시작 30분 뒤)
+        // 세 번째 스케줄: break, outdoor, Tree (두 번째 스케줄 시작 30분 뒤)
         TimeSpan thirdStart = secondStart.Add(duration);
         AddScheduleItem(new ScheduleItem(
-            "use",
-            "house",
-            "Bed",
+            "break",
+            "outdoor",
+            "Tree",
             thirdStart,
             thirdStart.Add(actionDuration),
             2,
-            "Dummy Schedule 3 : use, house, Bed"
+            "Dummy Schedule 3 : break, outdoor, Tree"
+        ));
+
+        // 네 번째 스케줄: get, outdoor, Jewel (세 번째 스케줄 시작 30분 뒤)
+        TimeSpan fourthStart = thirdStart.Add(duration);
+        AddScheduleItem(new ScheduleItem(
+            "get",
+            "outdoor",
+            "Jewel",
+            fourthStart,
+            fourthStart.Add(actionDuration),
+            2,
+            "Dummy Schedule 4 : get, outdoor, Jewel"
+        ));
+
+        // 다섯 번째 스케줄: offer, outdoor, Flower (네 번째 스케줄 시작 30분 뒤)
+        TimeSpan fifthStart = fourthStart.Add(duration);
+        AddScheduleItem(new ScheduleItem(
+            "offer",
+            "outdoor",
+            "Flower",
+            fifthStart,
+            fifthStart.Add(actionDuration),
+            2,
+            "Dummy Schedule 5 : offer, outdoor, Flower"
         ));
     }
 

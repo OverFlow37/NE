@@ -63,6 +63,7 @@ public class EatAction : InteractionAction
         }
 
         // 행동 완료 후 음식 오브젝트 제거
+        LogManager.Log("Interact", $"eat {targetInteractable.InteractableName}", 1);
         targetInteractable.RemoveObject();
 
         return true;
