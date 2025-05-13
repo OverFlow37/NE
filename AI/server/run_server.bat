@@ -23,7 +23,7 @@ if exist "%~dp0requirements.txt" (
 REM --------------------------------------------------------
 REM  Launch Flask server in a new command window
 REM --------------------------------------------------------
-start "Flask Server" cmd /k "cd /d %~dp0 && python -u server.py && pause"
+start "Server" cmd /k "cd /d %~dp0 && python -u server.py && pause"
 
 REM Wait for server to initialize
 timeout /t 2 >nul

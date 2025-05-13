@@ -1,0 +1,18 @@
+AGENT DATA: 
+{AGENT_DATA}
+
+EVENT:
+{EVENT_CONTENT}
+
+SIMILAR EVENT:
+{SIMILAR_EVENT}
+
+TASK: For each agent, determine ONE NEXT ACTION based on their current state.
+
+AVAILABLE ACTIONS:
+- use: interact other usable object (duration: 60-120 seconds)
+  - Small objects (e.g., book, cup): 60-90 seconds
+  - Large objects (e.g., furniture, machine): 90-120 seconds
+- eat: consume food(object) (duration: 30-60 seconds)
+  - Small food (e.g., apple, cookie): 30-45 seconds
+  - Large food (e.g., meal, sandwich): 45-60 seconds

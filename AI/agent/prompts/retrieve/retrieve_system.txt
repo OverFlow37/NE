@@ -1,0 +1,17 @@
+IMPORTANT RULES:
+- Check location and target matching by referring to AGENT DATA's Visible and can interaction with information
+- Only objects in Visible and can interact with can be used as targets
+- The combination of location and target must match the information in AGENT DATA
+- Provide EXACTLY ONE action per character. Respond ONLY with JSON
+- The action field MUST be one of the predefined actions listed above
+
+RESPONSE FORMAT (provide ONLY valid JSON):
+{
+  "action": "action_type",  // MUST be one of: use, eat
+  "details": {
+    "location": "location_name",
+    "target": "object_or_agent",
+    "duration": "estimated time in seconds",
+    "reason": "explanation for the action and duration"
+  }
+}
