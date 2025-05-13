@@ -1,591 +1,270 @@
-using System;
+using UnityEngine;
+using UnityEngine.Networking;
+using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
-using UnityEngine;
-using UnityEngine.Networking;
-using Newtonsoft.Json;
+using System;
+using System.Linq;
+using OhMAIGod.Agent;
+
+// ========== AI에게 전송하는 데이터 구조체들 ==========
+// 에이전트가 인식할 수 있는 오브젝트 그룹 정의
+[System.Serializable]
+public struct ObjectGroup
+{
+    public string location;        // 오브젝트가 있는 위치
+    public List<string> objects;   // 해당 위치의 오브젝트 목록
+}
+
+// AI에게 전송할 에이전트 정보 구조체
+[System.Serializable]
+public struct Agent
+{
+    public string name;                         // 에이전트 이름
+    public AgentNeeds state;                    // 에이전트의 욕구
+    public string section;                      // 현재 구역
+    public string location;                     // 현재 위치
+    public string personality;                  // 성격 특성
+    public ObjectGroup[] visible_objects;       // 볼 수 있는 오브젝트들
+}
+
+// AI 서버에 보낼 요청 데이터 구조체
+[System.Serializable]
+public struct AgentRequest
+{
+    public Agent agent;  // 에이전트 정보
+}
+
+// AI가 결정한 행동의 세부 정보
+[System.Serializable]
+public struct ActionDetails
+{
+    public string location;    // 행동을 수행할 위치
+    public string target;      // 행동의 대상
+}
+
+// AI가 결정한 행동 정보
+[System.Serializable]
+public struct Action
+{
+    public string action;               // 수행할 행동
+    public string agent;                // 행동을 수행할 에이전트
+    public ActionDetails details;       // 행동의 세부 정보
+    public string reason;               // 행동의 이유
+}
+
+// AI 응답 데이터를 감싸는 래퍼 구조체
+[System.Serializable]
+public struct DataWrapper
+{
+    public Action action;  // AI가 결정한 행동
+}
+
+// AI 서버로부터의 응답 구조체
+[System.Serializable]
+public struct AgentResponse
+{
+    public DataWrapper data;    // 응답 데이터 (행동 정보)
+    public string status;       // 응답 상태 ("OK" 등)
+}
 
 public class AIBridge : MonoBehaviour
 {
-    private static AIBridge mInstance;
+    [Header("에이전트 참조")]
+    [SerializeField] private AgentController[] mAgentControllers;
 
-    // 싱글톤
-    public static AIBridge Instance
-    {
-        get
+    private bool mIsRequesting = false;  // AI에게 응답 보내고 있는지 확인하는 변수
+
+    private void Update(){
+        if (Input.GetKeyDown(KeyCode.D))
         {
-            if (mInstance == null)
-            {
-                GameObject go = new GameObject("AIBridge");
-                mInstance = go.AddComponent<AIBridge>();
-                DontDestroyOnLoad(go);
-            }
-            return mInstance;
+            send_test();
         }
     }
-
-    private void Awake()
+    // 게임 시작시 자동으로 첫 요청 보내기(임시)
+    public void send_test()
     {
-        if (mInstance == null)
+        // 게임 시작시 자동으로 첫 요청 보내기
+        SendAgent(mAgentControllers[0]);
+    }
+
+    // Interactable 목록을 ObjectGroup 배열로 변환
+    private ObjectGroup[] ConvertToObjectGroups(List<Interactable> interactables)
+    {
+        // 위치별로 오브젝트들을 그룹화
+        Dictionary<string, List<string>> locationGroups = new Dictionary<string, List<string>>();
+
+        foreach (Interactable interactable in interactables)
         {
-            mInstance = this;
-            DontDestroyOnLoad(gameObject);
+            if (interactable == null || interactable.mInteractableData == null) continue;
+
+            string location = interactable.CurrentLocation;
+            if (string.IsNullOrEmpty(location)) continue;
+
+            if (!locationGroups.ContainsKey(location))
+            {
+                locationGroups[location] = new List<string>();
+            }
+            locationGroups[location].Add(interactable.InteractableName);
         }
-        else if (mInstance != this)
+
+        // Dictionary를 ObjectGroup 배열로 변환
+        return locationGroups.Select(group => new ObjectGroup
         {
-            Destroy(gameObject);
+            location = group.Key,
+            objects = group.Value
+        }).ToArray();
+    }
+
+    // AI 서버에게 특정 에이전트의 Agent Data 보내는 함수
+    public void SendAgent(AgentController agent)
+    {
+        if (mIsRequesting)
+        {
+            LogManager.Log("AI", $"요청 진행 중입니다. 기다려주세요. (에이전트: {agent.AgentName})", 1);
             return;
         }
-
-        // 초기화
-        InitializeRequestQueue();
+        agent.ChangeState(AgentState.WAITING_FOR_AI_RESPONSE);
+        StartCoroutine(SendAgentData(agent));
     }
 
-    public enum RequestType
+    // AI 서버와 통신하는 코루틴 (에이전트별)
+    IEnumerator SendAgentData(AgentController agent)
     {
-        GetSchedule,     // 일정 요청
-        GetActionPlan,   // 행동 계획 요청
-        ProcessEvent,    // 이벤트 처리 요청
-        GetDialogue      // 대화 내용 요청
-    }
+        mIsRequesting = true;
 
-    private class AIRequest
-    {
-        public RequestType Type;
-        public string AgentId;
-        public string Data;
-        public float Timestamp;
-        public Action<string> Callback;
-    }
+        // 현재 에이전트의 상태 정보 가져오기
+        AgentNeeds currentNeeds = agent.AgnetNeeds;
+        var movement = agent.mMovement;
+        var scheduler = agent.mScheduler;
 
-    // AI에 전송할 에이전트 상태 데이터
-    [Serializable]
-    public class AgentStateData
-    {
-        public string AgentId;
-        public string AgentName;
-        public string CurrentState;
-        public string CurrentActivity;
-        public string CurrentLocation;
-        public string GameDate;
-        public string GameTime;
-        public List<MemoryData> RecentMemories;
-    }
-
-    // 메모리 데이터
-    [Serializable]
-    public class MemoryData
-    {
-        public string Description;
-        public string Timestamp;
-        public int Importance;
-    }
-
-    // AI로부터 받은 스케줄 데이터
-    [Serializable]
-    public class ScheduleData
-    {
-        public List<ScheduleItemData> Items;
-    }
-
-    // 스케줄 항목 데이터
-    [Serializable]
-    public class ScheduleItemData
-    {
-        public string Id;
-        public string ActivityName;
-        public string LocationName;
-        public string StartTime;
-        public string EndTime;
-        public int Priority;
-        public bool IsFlexible;
-        public string ActivityDetails;
-    }
-
-    [Header("서버 설정")]
-    [SerializeField] private string mApiUrl = "http://localhost:5000/api/agent"; // API 엔드포인트
-    [SerializeField] private float mRequestInterval = 5.0f; // 요청 간격 (초)
-    [SerializeField] private int mMaxQueueSize = 10; // 최대 큐 크기
-
-    [Header("인증")]
-    [SerializeField] private string mApiKey = ""; // API 키
-
-    [Header("디버깅")]
-    [SerializeField] private bool mUseLocalFallback = true; // 로컬 폴백 사용 여부
-    [SerializeField] private bool mShowDebugInfo = true; // 디버그 정보 표시 여부
-
-    // 요청 큐
-    private Queue<AIRequest> mRequestQueue;
-    private bool mIsProcessingQueue = false;
-
-    // 등록된 에이전트
-    private Dictionary<string, AgentController> mRegisteredAgents = new Dictionary<string, AgentController>();
-
-    public void RegisterAgent(string _agentId, AgentController _controller)
-    {
-        if (!mRegisteredAgents.ContainsKey(_agentId))
-        {
-            mRegisteredAgents.Add(_agentId, _controller);
-            
-            if (mShowDebugInfo)
-            {
-                Debug.Log($"AIBridge: 에이전트 등록됨 - {_agentId} ({_controller.AgentName})");
-            }
-        }
-    }
-
-    public void UnregisterAgent(string _agentId)
-    {
-        if (mRegisteredAgents.ContainsKey(_agentId))
-        {
-            mRegisteredAgents.Remove(_agentId);
-            
-            if (mShowDebugInfo)
-            {
-                Debug.Log($"AIBridge: 에이전트 등록 해제됨 - {_agentId}");
-            }
-        }
-    }
-
-    public void RequestSchedule(string _agentId, Action<List<AgentScheduler.ScheduleItem>> _callback)
-    {
-        if (!mRegisteredAgents.ContainsKey(_agentId))
-        {
-            Debug.LogWarning($"AIBridge: 등록되지 않은 에이전트의 스케줄 요청 - {_agentId}");
-            return;
-        }
+        // AI 서버에 보낼 요청 데이터 생성
+        var visibleObjectGroups = ConvertToObjectGroups(agent.mVisibleInteractables);
         
-        // 에이전트 상태 데이터 수집
-        AgentStateData stateData = CollectAgentState(_agentId);
-        string jsonData = JsonConvert.SerializeObject(stateData);
-        
-        // 콜백 래핑
-        Action<string> wrappedCallback = (response) => 
+        // 에이전트의 현재 위치 가져오기 (CurrentAction이 null일 경우 대비)
+        string agentLocation = "Unknown"; // 기본값
+        Interactable agentInteractable = agent.GetComponent<Interactable>();
+        if (agentInteractable != null && !string.IsNullOrEmpty(agentInteractable.CurrentLocation))
         {
-            var scheduleItems = ParseScheduleResponse(response);
-            _callback?.Invoke(scheduleItems);
+            agentLocation = agentInteractable.CurrentLocation;
+        }
+        else if (agent.CurrentAction != null && !string.IsNullOrEmpty(agent.CurrentAction.LocationName))
+        {
+            // CurrentAction이 있고 LocationName이 유효하면 해당 위치 사용
+            agentLocation = agent.CurrentAction.LocationName;
+        }
+
+        for (int i = 0; i < visibleObjectGroups.Length; i++)
+        {
+            LogManager.Log("AI", $"[AIBridge] ObjectGroup {i}: location={visibleObjectGroups[i].location}, objects=[{string.Join(",", visibleObjectGroups[i].objects)}]", 3);
+        }
+
+        AgentRequest requestData = new AgentRequest
+        {
+            agent = new Agent
+            {
+                name = agent.AgentName,
+                state = currentNeeds,
+                location = agentLocation,
+                personality = "friendly, helpful", // TODO: 에이전트별 성격 구현 필요
+                visible_objects = visibleObjectGroups
+            }
         };
-        
-        // 요청 큐에 추가
-        EnqueueRequest(new AIRequest
-        {
-            Type = RequestType.GetSchedule,
-            AgentId = _agentId,
-            Data = jsonData,
-            Timestamp = Time.time,
-            Callback = wrappedCallback
-        });
-    }
 
-    public void RequestActionPlan(string _agentId, string _activityName, Action<string> _callback)
-    {
-        if (!mRegisteredAgents.ContainsKey(_agentId))
-        {
-            Debug.LogWarning($"AIBridge: 등록되지 않은 에이전트의 행동 계획 요청 - {_agentId}");
-            return;
-        }
-        
-        // 에이전트 상태와 활동 정보 결합
-        AgentStateData stateData = CollectAgentState(_agentId);
-        stateData.CurrentActivity = _activityName;
-        string jsonData = JsonConvert.SerializeObject(stateData);
-        
-        // 요청 큐에 추가
-        EnqueueRequest(new AIRequest
-        {
-            Type = RequestType.GetActionPlan,
-            AgentId = _agentId,
-            Data = jsonData,
-            Timestamp = Time.time,
-            Callback = _callback
-        });
-    }
+        // requestData 전체 구조를 JSON으로 출력
+        LogManager.Log("AI", $"[AIBridge] requestData 전체: {JsonUtility.ToJson(requestData, true)}", 3);
 
-    public void ProcessEvent(string _agentId, string _eventDescription, Action<string> _callback)
-    {
-        if (!mRegisteredAgents.ContainsKey(_agentId))
-        {
-            Debug.LogWarning($"AIBridge: 등록되지 않은 에이전트의 이벤트 처리 요청 - {_agentId}");
-            return;
-        }
-        
-        // 에이전트 상태와 이벤트 정보 결합
-        var requestData = new Dictionary<string, object>
-        {
-            ["agentState"] = CollectAgentState(_agentId),
-            ["eventDescription"] = _eventDescription
-        };
-        
-        string jsonData = JsonConvert.SerializeObject(requestData);
-        
-        // 요청 큐에 추가
-        EnqueueRequest(new AIRequest
-        {
-            Type = RequestType.ProcessEvent,
-            AgentId = _agentId,
-            Data = jsonData,
-            Timestamp = Time.time,
-            Callback = _callback
-        });
-    }
+        // 요청 데이터를 JSON으로 변환
+        string jsonData = JsonUtility.ToJson(requestData, true);
+        LogManager.Log("AI", $"보낼 JSON (에이전트: {agent.AgentName}):\n" + jsonData, 3);
 
-    public void RequestDialogue(string _agentId, string _targetAgentId, string _context, Action<string> _callback)
-    {
-        if (!mRegisteredAgents.ContainsKey(_agentId))
-        {
-            Debug.LogWarning($"AIBridge: 등록되지 않은 에이전트의 대화 요청 - {_agentId}");
-            return;
-        }
-        
-        // 두 에이전트 상태와 대화 컨텍스트 결합
-        var requestData = new Dictionary<string, object>
-        {
-            ["speakerState"] = CollectAgentState(_agentId),
-            ["listenerState"] = mRegisteredAgents.ContainsKey(_targetAgentId) 
-                ? CollectAgentState(_targetAgentId) 
-                : null,
-            ["context"] = _context
-        };
-        
-        string jsonData = JsonConvert.SerializeObject(requestData);
-        
-        // 요청 큐에 추가
-        EnqueueRequest(new AIRequest
-        {
-            Type = RequestType.GetDialogue,
-            AgentId = _agentId,
-            Data = jsonData,
-            Timestamp = Time.time,
-            Callback = _callback
-        });
-    }
+        // HTTP 요청 설정
+        UnityWebRequest request = new UnityWebRequest("http://127.0.0.1:5000/action", "POST");
+        byte[] bodyRaw = Encoding.UTF8.GetBytes(jsonData);
+        request.uploadHandler = new UploadHandlerRaw(bodyRaw);
+        request.downloadHandler = new DownloadHandlerBuffer();
+        request.SetRequestHeader("Content-Type", "application/json");
 
-    private void InitializeRequestQueue()
-    {
-        mRequestQueue = new Queue<AIRequest>();
-        mIsProcessingQueue = false;
-    }
+        // 요청 시간 측정 시작
+        var stopwatch = new System.Diagnostics.Stopwatch();
+        stopwatch.Start();
 
-    private void EnqueueRequest(AIRequest _request)
-    {
-        // 큐 크기 제한 확인
-        if (mRequestQueue.Count >= mMaxQueueSize)
+        // 요청 전송 및 응답 대기
+        yield return request.SendWebRequest();
+
+        // 요청 시간 측정 종료
+        stopwatch.Stop();
+        long elapsedMs = stopwatch.ElapsedMilliseconds;
+
+        mIsRequesting = false;
+
+        // 응답 처리
+        if (request.result == UnityWebRequest.Result.Success)
         {
-            Debug.LogWarning($"AIBridge: 요청 큐가 가득 참 (크기: {mRequestQueue.Count})");
-            return;
+            LogManager.Log("AI", $"✅ 응답 (에이전트: {agent.AgentName}): " + request.downloadHandler.text, 2);
+            LogManager.Log("AI", $"⏱️ 요청 소요 시간: {elapsedMs} ms", 2);
+
+            // AI 응답 처리
+            ProcessResponse(request.downloadHandler.text, agent);
         }
-        
-        // 요청 큐에 추가
-        mRequestQueue.Enqueue(_request);
-        
-        if (mShowDebugInfo)
+        else
         {
-            Debug.Log($"AIBridge: 요청 큐에 추가됨 - {_request.Type} for {_request.AgentId} (큐 크기: {mRequestQueue.Count})");
-        }
-        
-        // 큐 처리 시작 (아직 처리 중이 아니면)
-        if (!mIsProcessingQueue)
-        {
-            StartCoroutine(ProcessRequestQueue());
+            LogManager.Log("AI", $"❌ 실패 (에이전트: {agent.AgentName}): " + request.error, 0);
         }
     }
 
-    private IEnumerator ProcessRequestQueue()
+    // AI 서버로부터 받은 응답을 처리하는 함수 (에이전트별)
+    private void ProcessResponse(string response, AgentController agent)
     {
-        mIsProcessingQueue = true;
-        
-        while (mRequestQueue.Count > 0)
+        try
         {
-            // 큐에서 다음 요청 가져오기
-            AIRequest request = mRequestQueue.Dequeue();
-            
-            if (mShowDebugInfo)
+            // JSON 응답을 객체로 변환
+            AgentResponse agentResponse = JsonUtility.FromJson<AgentResponse>(response);
+            LogManager.Log("AI", $"응답: {agentResponse}", 3);
+            // 응답 유효성 검사
+            if (agentResponse.status != "OK" || string.IsNullOrEmpty(agentResponse.data.action.action))
             {
-                Debug.Log($"AIBridge: 요청 처리 중 - {request.Type} for {request.AgentId}");
+                LogManager.Log("AI", $"Invalid response format or status is not OK (에이전트: {agent.AgentName})", 0);
+                return;
             }
-            
-            // 요청 처리
-            yield return StartCoroutine(SendRequest(request));
-            
-            // 요청 간격 대기
-            yield return new WaitForSeconds(mRequestInterval);
-        }
-        
-        mIsProcessingQueue = false;
-    }
-
-    private IEnumerator SendRequest(AIRequest _request)
-    {
-        // API 엔드포인트 생성
-        string endpoint = $"{mApiUrl}/{GetEndpointForRequestType(_request.Type)}";
-        
-        if (mUseLocalFallback)
-        {
-            // 로컬 폴백 사용 시
-            string response = GenerateLocalFallbackResponse(_request);
-            _request.Callback?.Invoke(response);
-            yield break;
-        }
-        
-        // UnityWebRequest 생성
-        using (UnityWebRequest webRequest = new UnityWebRequest(endpoint, "POST"))
-        {
-            // 요청 데이터 설정
-            byte[] jsonToSend = new UTF8Encoding().GetBytes(_request.Data);
-            webRequest.uploadHandler = new UploadHandlerRaw(jsonToSend);
-            webRequest.downloadHandler = new DownloadHandlerBuffer();
-            webRequest.SetRequestHeader("Content-Type", "application/json");
-            
-            // API 키가 있으면 인증 헤더 추가
-            if (!string.IsNullOrEmpty(mApiKey))
+            Action action = agentResponse.data.action;
+            // 현재 시간 가져오기 및 활동 지속 시간 설정
+            TimeSpan currentTime = TimeManager.Instance.GetCurrentGameTime();
+            TimeSpan duration = TimeSpan.FromMinutes(30); // 기본 30분으로 설정
+            // string location = action.details.location;
+            // if (!TileManager.Instance.GetLocationNames().Contains(location))
+            // {
+            //     SendAgent(agent);
+            //     return;
+            // }
+            // 새로운 일정 아이템 생성
+            TimeSpan endTime = currentTime.Add(duration);
+            ScheduleItem newScheduleItem = new ScheduleItem
+            (
+                action.action,
+                action.details.location,
+                action.details.target,
+                currentTime,
+                endTime,
+                1, 
+                action.reason
+            );
+            // 스케줄러에 새 일정 추가
+            bool success = agent.mScheduler.AddScheduleItem(newScheduleItem);
+            // 일정 추가 결과 로깅
+            if (!success)
             {
-                webRequest.SetRequestHeader("Authorization", $"Bearer {mApiKey}");
-            }
-            
-            // 요청 전송
-            yield return webRequest.SendWebRequest();
-            
-            // 응답 처리
-            if (webRequest.result == UnityWebRequest.Result.Success)
-            {
-                string response = webRequest.downloadHandler.text;
-                
-                if (mShowDebugInfo)
-                {
-                    Debug.Log($"AIBridge: 응답 수신 완료 - {_request.Type} for {_request.AgentId}");
-                }
-                
-                // 콜백 호출
-                _request.Callback?.Invoke(response);
+                LogManager.Log("AI", $"Failed to add schedule item: {newScheduleItem.ActionName} @ {newScheduleItem.LocationName} (에이전트: {agent.AgentName})", 0);
             }
             else
             {
-                Debug.LogError($"AIBridge: 요청 실패 - {webRequest.error}\n" +
-                               $"URL: {endpoint}\n" +
-                               $"Request Type: {_request.Type}\n" +
-                               $"Agent ID: {_request.AgentId}");
-                
-                // 오류 시 로컬 폴백 사용
-                string fallbackResponse = GenerateLocalFallbackResponse(_request);
-                _request.Callback?.Invoke(fallbackResponse);
-            }
-        }
-    }
-
-    private string GetEndpointForRequestType(RequestType _type)
-    {
-        switch (_type)
-        {
-            case RequestType.GetSchedule:
-                return "schedule";
-            case RequestType.GetActionPlan:
-                return "action";
-            case RequestType.ProcessEvent:
-                return "event";
-            case RequestType.GetDialogue:
-                return "dialogue";
-            default:
-                return string.Empty;
-        }
-    }
-
-    private AgentStateData CollectAgentState(string _agentId)
-    {
-        if (!mRegisteredAgents.TryGetValue(_agentId, out AgentController agent))
-        {
-            Debug.LogWarning($"AIBridge: 등록되지 않은 에이전트 상태 수집 시도 - {_agentId}");
-            return new AgentStateData { AgentId = _agentId };
-        }
-        
-        // 에이전트 컴포넌트 참조 가져오기
-        AgentScheduler scheduler = agent.GetComponent<AgentScheduler>();
-        
-        // 상태 데이터 생성
-        AgentStateData stateData = new AgentStateData
-        {
-            AgentId = _agentId,
-            AgentName = agent.AgentName,
-            CurrentState = agent.CurrentState.ToString(),
-            CurrentActivity = scheduler != null ? scheduler.GetCurrentActivityName() : "Unknown",
-            CurrentLocation = agent.GetComponent<MovementController>()?.CurrentDestination ?? "Unknown",
-            GameDate = scheduler != null ? scheduler.GetCurrentGameDate().ToString("yyyy-MM-dd") : DateTime.Now.ToString("yyyy-MM-dd"),
-            GameTime = scheduler != null ? scheduler.GetCurrentGameTime().ToString() : "00:00:00",
-            RecentMemories = new List<MemoryData>() // TODO: 메모리 시스템 연동
-        };
-        
-        return stateData;
-    }
-
-    private string GenerateLocalFallbackResponse(AIRequest _request)
-    {
-        switch (_request.Type)
-        {
-            case RequestType.GetSchedule:
-                return GenerateDummySchedule(_request.AgentId);
-                
-            case RequestType.GetActionPlan:
-                return "{ \"action\": \"NPC는 책상에 앉아 컴퓨터 작업을 하고 있습니다.\" }";
-                
-            case RequestType.ProcessEvent:
-                return "{ \"reaction\": \"놀란 표정으로 주변을 둘러봅니다.\" }";
-                
-            case RequestType.GetDialogue:
-                return "{ \"dialogue\": \"안녕하세요, 오늘 날씨가 정말 좋네요.\" }";
-                
-            default:
-                return "{ \"error\": \"Unknown request type\" }";
-        }
-    }
-
-    private string GenerateDummySchedule(string _agentId)
-    {
-        // 현재 시간 기준으로 더미 스케줄 생성 (에이전트 ID에 따라 다르게)
-        int agentSeed = _agentId.GetHashCode(); // ID로부터 시드 생성
-        System.Random random = new System.Random(agentSeed);
-        
-        List<ScheduleItemData> items = new List<ScheduleItemData>();
-        
-        // 아침 활동
-        items.Add(new ScheduleItemData
-        {
-            Id = "morning_1",
-            ActivityName = "아침 식사",
-            LocationName = "Kitchen",
-            StartTime = "08:00:00",
-            EndTime = "08:30:00",
-            Priority = 5,
-            IsFlexible = false
-        });
-        
-        // 업무 활동
-        items.Add(new ScheduleItemData
-        {
-            Id = "work_1",
-            ActivityName = "업무 처리",
-            LocationName = "Desk",
-            StartTime = "09:00:00",
-            EndTime = "12:00:00",
-            Priority = 8,
-            IsFlexible = false
-        });
-        
-        // 점심 활동
-        items.Add(new ScheduleItemData
-        {
-            Id = "lunch",
-            ActivityName = "점심 식사",
-            LocationName = random.Next(2) == 0 ? "Kitchen" : "Cafeteria",
-            StartTime = "12:00:00",
-            EndTime = "13:00:00",
-            Priority = 5,
-            IsFlexible = true
-        });
-        
-        // 오후 활동
-        items.Add(new ScheduleItemData
-        {
-            Id = "afternoon_1",
-            ActivityName = random.Next(3) == 0 ? "회의 참석" : "업무 처리",
-            LocationName = random.Next(3) == 0 ? "MeetingRoom" : "Desk",
-            StartTime = "13:00:00",
-            EndTime = "17:00:00",
-            Priority = 8,
-            IsFlexible = false
-        });
-        
-        // 저녁 활동
-        items.Add(new ScheduleItemData
-        {
-            Id = "evening_1",
-            ActivityName = "저녁 식사",
-            LocationName = "Kitchen",
-            StartTime = "18:00:00",
-            EndTime = "19:00:00",
-            Priority = 5,
-            IsFlexible = true
-        });
-        
-        // 휴식 활동
-        items.Add(new ScheduleItemData
-        {
-            Id = "leisure",
-            ActivityName = random.Next(3) == 0 ? "TV 시청" : (random.Next(2) == 0 ? "독서" : "휴식"),
-            LocationName = "LivingRoom",
-            StartTime = "19:30:00",
-            EndTime = "21:30:00",
-            Priority = 3,
-            IsFlexible = true
-        });
-        
-        // 취침 전 활동
-        items.Add(new ScheduleItemData
-        {
-            Id = "bedtime",
-            ActivityName = "취침 준비",
-            LocationName = "Bedroom",
-            StartTime = "22:00:00",
-            EndTime = "23:00:00",
-            Priority = 4,
-            IsFlexible = true
-        });
-        
-        // JSON 생성
-        ScheduleData scheduleData = new ScheduleData { Items = items };
-        return JsonConvert.SerializeObject(scheduleData);
-    }
-
-    private List<AgentScheduler.ScheduleItem> ParseScheduleResponse(string _response)
-    {
-        List<AgentScheduler.ScheduleItem> result = new List<AgentScheduler.ScheduleItem>();
-        
-        try
-        {
-            // JSON 파싱
-            ScheduleData scheduleData = JsonConvert.DeserializeObject<ScheduleData>(_response);
-            
-            if (scheduleData == null || scheduleData.Items == null)
-            {
-                Debug.LogError($"AIBridge: 잘못된 스케줄 응답 - {_response}");
-                return result;
-            }
-            
-            // 각 항목 변환
-            foreach (var item in scheduleData.Items)
-            {
-                try
-                {
-                    // 시간 파싱
-                    TimeSpan startTime = TimeSpan.Parse(item.StartTime);
-                    TimeSpan endTime = TimeSpan.Parse(item.EndTime);
-                    
-                    // 스케줄 항목 생성
-                    AgentScheduler.ScheduleItem scheduleItem = new AgentScheduler.ScheduleItem
-                    {
-                        Id = item.Id,
-                        ActivityName = item.ActivityName,
-                        LocationName = item.LocationName,
-                        StartTime = startTime,
-                        EndTime = endTime,
-                        Priority = item.Priority,
-                        IsFlexible = item.IsFlexible,
-                        ActivityDetails = item.ActivityDetails,
-                        IsCompleted = false
-                    };
-                    
-                    result.Add(scheduleItem);
-                }
-                catch (Exception ex)
-                {
-                    Debug.LogError($"AIBridge: 스케줄 항목 파싱 오류 - {ex.Message}");
-                }
+                LogManager.Log("AI", $"Successfully added and started new Action: {newScheduleItem.ActionName} @ {newScheduleItem.LocationName} (에이전트: {agent.AgentName})", 2);
             }
         }
         catch (Exception ex)
         {
-            Debug.LogError($"AIBridge: 스케줄 응답 파싱 오류 - {ex.Message}");
+            LogManager.Log("AI", $"Error processing response (에이전트: {agent.AgentName}): {ex.Message}\n{ex.StackTrace}", 0);
         }
-        
-        return result;
     }
-}
+} 
