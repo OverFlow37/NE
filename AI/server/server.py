@@ -255,7 +255,17 @@ async def react_to_event(payload: dict):
         print(f"📍 이벤트 위치: {event_location}")
         print(f"🎯 이벤트 대상: {object_name}")
         print(f"⏰ 에이전트 시간: {agent_time}")
+        print(f"🧩 성격: {agent_data.get('personality', 'None')}")
+        print(f"📍 현재 위치: {agent_data.get('current_location', 'None')}")
         
+        visible_interactables = agent_data.get('visible_interactables', [])
+        if visible_interactables:
+            print("👁️ 상호작용 가능한 객체:")
+            for loc_data in visible_interactables:
+                loc = loc_data.get('location', '')
+                objects = loc_data.get('interactable', [])
+                print(f"  - {loc}: {', '.join(objects)}")
+
         # 이벤트 객체 생성
         event = {
             "event_type": event_type,
@@ -278,6 +288,7 @@ async def react_to_event(payload: dict):
             event_embedding=embedding,
             agent_name=agent_name,
             prompt_template=load_prompt_file(RETRIEVE_PROMPT_PATH),
+            agent_data=agent_data,
             similar_data_cnt=3,  # 유사한 이벤트 3개 포함
             similarity_threshold=0.5  # 유사도 0.5 이상인 이벤트만 포함
         )

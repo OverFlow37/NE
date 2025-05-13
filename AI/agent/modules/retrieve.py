@@ -218,13 +218,38 @@ class MemoryRetriever:
             cause_str += f"\n  thought: {cause_thought}"
             
         return f"- {effect_str} because {cause_str}"
-
+    
+    def _format_visible_interactables(self, visible_interactables: List[Dict[str, Any]]) -> str:
+        """
+        상호작용 가능한 객체 목록을 문자열로 변환
+        
+        Args:
+            visible_interactables: 상호작용 가능한 객체 목록
+            
+        Returns:
+            str: 포맷된 객체 목록 문자열
+        """
+        if not visible_interactables:
+            return "Nothing visible nearby."
+        
+        interactable_strings = []
+        for location_data in visible_interactables:
+            location = location_data.get("location", "")
+            interactables = location_data.get("interactable", [])
+            
+            if location and interactables:
+                interactable_str = ", ".join(interactables)
+                interactable_strings.append(f"In {location}: {interactable_str}")
+        
+        return "\n".join(interactable_strings) if interactable_strings else "Nothing visible nearby."
+    
     def create_reaction_prompt(
         self,
         event_sentence: str,
         event_embedding: List[float],
         agent_name: str,
         prompt_template: str,
+        agent_data: Dict[str, Any] = None,
         similar_data_cnt: int = 3,
         similarity_threshold: float = 0.5
     ) -> Optional[str]:
@@ -236,6 +261,7 @@ class MemoryRetriever:
             event_embedding: 현재 이벤트의 임베딩
             agent_name: 에이전트 이름
             prompt_template: 프롬프트 템플릿
+            agent_data: 에이전트 데이터 (성격, 위치, 상호작용 가능한 객체 등)
             similar_data_cnt: 유사한 이벤트 개수
             similarity_threshold: 유사도 임계값
             
@@ -300,10 +326,55 @@ class MemoryRetriever:
         
         similar_event_str = "\n".join(similar_events) if similar_events else "No similar past events found."
         
+        # 에이전트 정보 처리
+        agent_info = "Name: " + agent_name
+        personality = ""
+        current_location = ""
+        visible_objects = []
+        
+        if agent_data:
+            if "personality" in agent_data:
+                personality = agent_data["personality"]
+            
+            if "current_location" in agent_data:
+                current_location = agent_data["current_location"]
+            
+            # 상호작용 가능한 객체 정보 추출
+            if "visible_interactables" in agent_data:
+                for location_data in agent_data["visible_interactables"]:
+                    location = location_data.get("location", "")
+                    interactables = location_data.get("interactable", [])
+                    
+                    if location and interactables:
+                        visible_objects.append({
+                            "location": location,
+                            "objects": interactables
+                        })
+        
+        # 상호작용 가능한 객체 문자열 생성
+        visible_objects_str = ""
+        if visible_objects:
+            visible_objects_str = "Visible and can interact with:\n"
+            for loc_obj in visible_objects:
+                location = loc_obj["location"]
+                objects = ", ".join(loc_obj["objects"])
+                visible_objects_str += f"- Location: {location}, Objects: {objects}\n"
+        
+        # 에이전트 정보 문자열 생성
+        agent_data_str = f"Name: {agent_name}\n"
+        if personality:
+            agent_data_str += f"Personality: {personality}\n"
+        if current_location:
+            agent_data_str += f"Current Location: {current_location}\n"
+        if visible_objects_str:
+            agent_data_str += visible_objects_str
+        
+
         # 프롬프트 생성
         try:
             prompt = prompt_template.format(
                 AGENT_NAME=agent_name,
+                AGENT_DATA=agent_data_str,
                 EVENT_CONTENT=event_sentence,
                 SIMILAR_EVENT=similar_event_str
             )
