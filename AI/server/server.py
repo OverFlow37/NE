@@ -11,6 +11,7 @@ from datetime import datetime, timedelta
 import time
 import gensim.downloader as api
 from typing import Dict, Any
+import numpy as np
 
 print("\n=== 서버 초기화 시작 ===")
 start_time = time.time()
@@ -347,7 +348,13 @@ async def react_to_event(payload: dict):
             response = await client.process_prompt(
                 prompt=prompt,
                 system_prompt=load_prompt_file(RETRIEVE_SYSTEM_PATH),
-                model_name="gemma3"
+                model_name="gemma3",
+                options={
+                    "temperature": 0.7,
+                    "top_p": 0.9,
+                    "frequency_penalty": 0.1,
+                    "presence_penalty": 0.1
+                }
             )
             
             # Ollama 응답 시간 계산
@@ -419,9 +426,26 @@ async def save_agent_action(payload: dict):
             
         agent_data = payload.get('agent', {})
         agent_name = agent_data.get('name', 'John')
-        action_data = payload.get('event', {})
+        action_data = agent_data.get('action', {})
         
-        success = memory_utils.save_perception(action_data, agent_name)
+        # 행동 데이터에 시간 정보 추가
+        action_data['time'] = agent_data.get('time', datetime.now().strftime("%Y.%m.%d.%H:%M"))
+        
+        # 행동 데이터를 영어 문장으로 변환
+        action_sentence = f"{action_data.get('action', '')} {action_data.get('target', '')} at {agent_data.get('current_location', '')}"
+        
+        # 임베딩 생성
+        embedding = memory_utils.get_embedding(action_sentence)
+        
+        # 메모리 저장 (event_id 포함)
+        success = memory_utils.save_memory(
+            event_sentence=action_sentence,
+            embedding=embedding,
+            event_time=action_data['time'],
+            agent_name=agent_name,
+            event_id=action_data.get('event_id', '')  # event_id 추가
+        )
+        
         return {"success": success}
         
     except Exception as e:
@@ -437,9 +461,26 @@ async def save_action_feedback(payload: dict):
             
         agent_data = payload.get('agent', {})
         agent_name = agent_data.get('name', 'John')
-        feedback_data = payload.get('event', {})
+        feedback_data = agent_data.get('feedback', {})
         
-        success = memory_utils.save_perception(feedback_data, agent_name)
+        # 피드백 데이터에 시간 정보 추가
+        feedback_data['time'] = agent_data.get('time', datetime.now().strftime("%Y.%m.%d.%H:%M"))
+        
+        # 피드백 문장 추출
+        feedback_sentence = feedback_data.get('feedback_description', '')
+        
+        # 임베딩 생성
+        embedding = memory_utils.get_embedding(feedback_sentence)
+        
+        # 메모리 저장 (event_id 포함)
+        success = memory_utils.save_memory(
+            event_sentence=feedback_sentence,
+            embedding=embedding,
+            event_time=feedback_data['time'],
+            agent_name=agent_name,
+            event_id=feedback_data.get('event_id', '')  # event_id 추가
+        )
+        
         return {"success": success}
         
     except Exception as e:
