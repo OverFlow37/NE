@@ -439,21 +439,22 @@ public class AgentController : MonoBehaviour
         }
 
         // 스케줄 시간이 끝나면 종료
-        mInteractionProgress = 0.0f;
         LogManager.Log("Agent", $"{mName}: 스케줄 시간이 종료되어 상호작용을 종료합니다.", 2);
         EndInteraction();
         yield break;
     }
 
     // 상호작용 종료
+    // 주의: 상호작용 scheduler에서 종료시 ScheduleItem이 없어진 후 이 함수를 호출하게됨
     public void EndInteraction() 
     {
+        mInteractionProgress = 0.0f;
         if (mInteractionCoroutine != null)
         {
             StopCoroutine(mInteractionCoroutine);
             mInteractionCoroutine = null;
         }
-        LogManager.Log("Agent", $"{mName}: 상호작용 완료 - {mCurrentAction.ActionName}", 2);
+        LogManager.Log("Agent", $"{mName}: 상호작용 완료", 2);
         CompleteAction();
     }
 

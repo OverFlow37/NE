@@ -30,14 +30,32 @@ public class UseAction : InteractionAction
             return false;
         }
         
-        // 사용 효과 적용 (수면 및 외로움 수치 변화)
-        // TODO: 부가적인 이펙트 추가(낚시터 -> 물고기 획득, 제단 -> 기도 효과)
-        var agentController = interactor.GetComponent<AgentController>();
-        agentController.ModifyNeed(OhMAIGod.Agent.AgentNeedsType.Sleepiness, targetInteractable.mInteractableData.mActions.FirstOrDefault(action => action.mAction == this).mSleepinessEffect);
-        agentController.ModifyNeed(OhMAIGod.Agent.AgentNeedsType.Loneliness, targetInteractable.mInteractableData.mActions.FirstOrDefault(action => action.mAction == this).mLonelinessEffect);
+        // 1. 현재 액션에 해당하는 효과 정보 찾기 (mActions 배열 직접 순회)
+        InteractableData.InteractionActionInfo actionInfo = default;
+        foreach (var info in targetInteractable.mInteractableData.mActions)
+        {
+            if (info.mAction != null && info.mAction.mActionName == mActionName)
+            {
+                actionInfo = info;
+                break;
+            }
+        }
 
+        if (actionInfo.mAction == null)
+        {
+            LogManager.Log("Interact", $"해당 액션에 대한 정보를 찾을 수 없습니다: {mActionName}", 1);
+            return false;
+        }
 
-        // 특정 시간동안 행동 수행
+        // 2. 효과값 반영
+        AgentController agentController = interactor.GetComponent<AgentController>();
+        if (agentController != null)
+        {
+            agentController.ModifyNeed(OhMAIGod.Agent.AgentNeedsType.Hunger, actionInfo.mHungerEffect);
+            agentController.ModifyNeed(OhMAIGod.Agent.AgentNeedsType.Sleepiness, actionInfo.mSleepinessEffect);
+            agentController.ModifyNeed(OhMAIGod.Agent.AgentNeedsType.Loneliness, actionInfo.mLonelinessEffect);
+            agentController.ModifyNeed(OhMAIGod.Agent.AgentNeedsType.Stress, actionInfo.mStressEffect);
+        }
 
         // 사용 후 내구도 감소?
 

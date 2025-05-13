@@ -24,4 +24,4 @@ MonoBehaviour:
     mHungerEffect: 0
     mSleepinessEffect: -5
     mLonelinessEffect: 0
-    mStressEffect: -2
+    mStressEffect: -5
