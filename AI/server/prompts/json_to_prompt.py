@@ -90,7 +90,7 @@ def preprocess_agent_data(state_obj: dict) -> dict:
     phrases = []
     for k, v in agent.get("state", {}).items():
         base = state_map.get(k, k)
-        prefix = "not " if v <= 30 else "very " if v > 60 else ""
+        prefix = "not " if v <= 3 else "very " if v > 6 else ""
         phrases.append(f"{prefix}{base}")
     state_obj["state_desc"] = ", ".join(phrases)
 

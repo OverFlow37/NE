@@ -24,20 +24,15 @@ public class InteractableData : ScriptableObject
     {
         public InteractionAction mAction;
         public int mDuration;
-        [Header("Interaction Effects")]
-        [Tooltip("상호작용으로 인한 배고픔 변화량")]
-        [SerializeField, Range(-99, 99)] public int mHungerEffect;
-        [Tooltip("상호작용으로 인한 졸림 변화량")]
-        [SerializeField, Range(-99, 99)] public int mSleepinessEffect;
-        [Tooltip("상호작용으로 인한 외로움 변화량")]
-        [SerializeField, Range(-99, 99)] public int mLonelinessEffect;
-        [Tooltip("상호작용으로 인한 스트레스 변화량")]
-        [SerializeField, Range(-99, 99)] public int mStressEffect;
+        [Header("상호작용 효과")]
+        [SerializeField, Range(-10, 10)] public int mHungerEffect;
+        [SerializeField, Range(-10, 10)] public int mSleepinessEffect;
+        [SerializeField, Range(-10, 10)] public int mLonelinessEffect;
     }
 
     [Tooltip("이 오브젝트와 상호작용했을 때 실행될 행동 및 소요 시간 목록")]
     [SerializeField] public InteractionActionInfo[] mActions;
-    
+
 
     // 오브젝트의 타입
     public enum Types{
