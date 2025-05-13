@@ -20,7 +20,7 @@ namespace OhMAIGod.Agent
         public AgentStateMachine(AgentController _controller)
         {
             mController = _controller;
-            mCurrentStateType = AgentState.WAIT;
+            mCurrentStateType = AgentState.WAITING;
             mStates = new Dictionary<AgentState, AgentStateHandler>();
             InitializeStates();
         }
@@ -28,11 +28,11 @@ namespace OhMAIGod.Agent
         private void InitializeStates()
         {
             // 모든 상태 등록
-            RegisterState(AgentState.WAIT_FOR_AI_RESPONSE, new WaitForAIResponseStateHandler());
-            RegisterState(AgentState.WAIT, new WaitStateHandler());
-            RegisterState(AgentState.MOVE_TO_LOCATION, new MoveToLocationStateHandler());
-            RegisterState(AgentState.MOVE_TO_INTERACTABLE, new MoveToInteractableStateHandler());
-            RegisterState(AgentState.INTERACTION, new InteractionStateHandler());
+            RegisterState(AgentState.WAITING_FOR_AI_RESPONSE, new WaitForAIResponseStateHandler());
+            RegisterState(AgentState.WAITING, new WaitStateHandler());
+            RegisterState(AgentState.MOVING_TO_LOCATION, new MoveToLocationStateHandler());
+            RegisterState(AgentState.MOVING_TO_INTERACTABLE, new MoveToInteractableStateHandler());
+            RegisterState(AgentState.INTERACTING, new InteractionStateHandler());
         }
 
         private void RegisterState(AgentState _stateType, AgentStateHandler _state)

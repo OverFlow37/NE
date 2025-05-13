@@ -81,16 +81,52 @@ public class AgentScheduler : MonoBehaviour
             // 2. 새 스케줄의 우선순위가 높거나 같으면 추가
             foreach (var conflict in conflictingItems)
             {
+                // 충돌 스케줄이 현재 진행 중인 활동이라면 완료 처리
+                if (mCurrentAction != null && conflict.ID == mCurrentAction.ID)
+                {
+                    LogManager.Log("Scheduler", $"현재 활동({mCurrentAction.ActionName})이 새 스케줄로 인해 완료 처리됩니다.", 2);
+                    CompleteCurrentAction();
+                    continue;
+                }
+
                 if (_item.Priority < conflict.Priority)
                 {
+                    // 충돌난 스케줄이 새 스케줄의 시간 범위 안에 완전히 포함되는 경우 삭제
+                    if (conflict.StartTime >= _item.StartTime && conflict.EndTime <= _item.EndTime)
+                    {
+                        RemoveScheduleItem(conflict.ID);
+                        LogManager.Log("Scheduler", $"우선순위가 높은 새 스케줄의 시간 범위에 포함되어 삭제: {conflict.ActionName}", 2);
+                        continue;
+                    }
                     // 우선순위가 더 높으면(Priority 값이 더 작으면), 기존 스케줄의 시작시간을 새 스케줄의 끝 시간 이후로 변경
                     TimeSpan newStart = _item.EndTime.Add(new TimeSpan(0, 1, 0)); // 1분 뒤로 밀기
                     TimeSpan duration = conflict.EndTime - conflict.StartTime;
+                    LogManager.Log("Scheduler", $"충돌 스케줄 duration: {duration}", 2);
                     conflict.StartTime = newStart;
                     conflict.EndTime = newStart.Add(duration);
                     if (mShowDebugInfo)
                     {
                         LogManager.Log("Scheduler", $"충돌 스케줄 시작시간 조정: {conflict.ActionName} → {conflict.StartTime}", 2);
+                    }
+                }
+                // 우선순위가 같을 때
+                else if (_item.Priority == conflict.Priority)
+                {
+                    // 시작/끝 시간이 모두 동일한 경우 기존 스케줄을 삭제하고 새 스케줄로 대체
+                    if (_item.StartTime == conflict.StartTime && _item.EndTime == conflict.EndTime)
+                    {
+                        RemoveScheduleItem(conflict.ID);
+                        LogManager.Log("Scheduler", $"동일 시간/우선순위 스케줄 대체: {conflict.ActionName} → {_item.ActionName}", 2);
+                    }
+                    // 시간만 겹치는 경우 기존 스케줄의 끝 시간을 새 스케줄 시작 1분 전으로 조정
+                    else if (conflict.EndTime > _item.StartTime)
+                    {
+                        TimeSpan newEnd = _item.StartTime.Add(new TimeSpan(0, -1, 0));
+                        if (newEnd > conflict.StartTime)
+                        {
+                            conflict.EndTime = newEnd;
+                            LogManager.Log("Scheduler", $"동일 우선순위 충돌: {conflict.ActionName}의 종료 시간을 {_item.ActionName} 시작 1분 전({newEnd})으로 조정", 2);
+                        }
                     }
                 }
             }
@@ -183,6 +219,7 @@ public class AgentScheduler : MonoBehaviour
             
             // 다음 활동 평가
             mCurrentAction = null;
+            mAgentController.ChangeState(AgentState.WAITING);
         }
     }
 
@@ -331,7 +368,7 @@ public class AgentScheduler : MonoBehaviour
     private void CreateDummySchedule()
     {
         // 현재 게임 시간 가져오기
-        TimeSpan startTime = TimeManager.Instance.GetCurrentGameTime();
+        TimeSpan startTime = TimeManager.Instance.GetCurrentGameTime().Add(new TimeSpan(0, 1, 0)); // 1분 뒤로 시작
         TimeSpan duration = new TimeSpan(0, 30, 0); // 30분 간격
         TimeSpan actionDuration = new TimeSpan(0, 25, 0); // 각 일정 25분
 
@@ -343,7 +380,7 @@ public class AgentScheduler : MonoBehaviour
             startTime,
             startTime.Add(actionDuration),
             2,
-            "Dummy Schedule 1"
+            "Dummy Schedule 1 : use, house, Bed"
         ));
 
         // 두 번째 스케줄: eat, cafeteria, Apple (첫 스케줄 시작 30분 뒤)
@@ -355,7 +392,7 @@ public class AgentScheduler : MonoBehaviour
             secondStart,
             secondStart.Add(actionDuration),
             2,
-            "Dummy Schedule 2"
+            "Dummy Schedule 2 : eat, cafeteria, Apple"
         ));
 
         // 세 번째 스케줄: use, house, Bed (두 번째 스케줄 시작 30분 뒤)
@@ -367,7 +404,7 @@ public class AgentScheduler : MonoBehaviour
             thirdStart,
             thirdStart.Add(actionDuration),
             2,
-            "Dummy Schedule 3"
+            "Dummy Schedule 3 : use, house, Bed"
         ));
     }
 
@@ -382,7 +419,7 @@ public class AgentScheduler : MonoBehaviour
             // 완료여부 표시: [완료], [진행중], [대기] 중 하나
             string status = item.IsCompleted ? "[완료]" :
                 (mCurrentAction != null && mCurrentAction.ID == item.ID ? "[진행중]" : "[대기]");
-            sb.AppendLine($"{status} {item.ActionName} ({item.LocationName}/{item.TargetName}) : {item.StartHour:D2}:{item.StartMinute:D2} ~ {item.EndHour:D2}:{item.EndMinute:D2} | 우선순위: {item.Priority}");
+            sb.AppendLine($"{status} {item.ActionName} ({item.LocationName}/{item.TargetName}) : {item.StartTime.ToString(@"hh\:mm\:ss")} ~ {item.EndTime.ToString(@"hh\:mm\:ss")} | 우선순위: {item.Priority}");
         }
         return sb.ToString();
     }
