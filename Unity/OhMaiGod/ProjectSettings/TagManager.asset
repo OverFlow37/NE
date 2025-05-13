@@ -7,6 +7,9 @@ TagManager:
   - Wall
   - NPC
   - Target
+  - StandingPoint
+  - Location
+  - Vision
   layers:
   - Default
   - TransparentFX
@@ -18,9 +21,9 @@ TagManager:
   - Wall
   - Obstacles
   - NPC
-  - 
-  - 
-  - 
+  - Location
+  - Vision
+  - Event
   - 
   - 
   - 

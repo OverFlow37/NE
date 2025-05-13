@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1e12e118ca0cb8a4cb384edbbf9233dd, type: 3}
+  m_Name: Rock_Data
+  m_EditorClassIdentifier: 
+  mDescription: "\uC11D\uC7AC\uB97C \uD68D\uB4DD\uD560 \uC218 \uC788\uB294 \uBC14\uC704"
+  mName: Rock
+  mDescriptionPrompt: can get some stone resource
+  mType: 2
+  mState: 0
+  mActions:
+  - mAction: {fileID: 11400000, guid: 33d6293489547874a9c32c79ca9e5915, type: 2}
+    mDuration: 600
+    mHungerEffect: 0
+    mSleepinessEffect: 0
+    mLonelinessEffect: 0
