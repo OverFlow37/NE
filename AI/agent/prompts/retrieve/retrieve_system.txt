@@ -11,7 +11,6 @@ RESPONSE FORMAT (provide ONLY valid JSON):
   "details": {
     "location": "location_name",
     "target": "object_or_agent",
-    "duration": "estimated time in seconds",
-    "reason": "explanation for the action and duration"
+    "duration": "estimated time in seconds"
   }
 }
