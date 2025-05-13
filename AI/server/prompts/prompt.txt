@@ -9,6 +9,7 @@ TASK: For each agent, determine ONE NEXT ACTION based on their current state.
 
 ACTION OPTIONS:
 - use: use this object
+- interact: use/manipulate an object
 - eat: consume food
 
 LOCATION OPTIONS:
