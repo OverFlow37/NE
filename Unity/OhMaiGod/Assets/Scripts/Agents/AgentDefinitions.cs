@@ -34,30 +34,43 @@ namespace OhMAIGod.Agent
         // 상태 이름 변환 함수 (디버깅용)
         protected abstract string GetStateName();
     }
-
+    [System.Serializable]
+    public enum AgentNeedsType
+    {
+        Hunger,
+        Sleepiness,
+        Loneliness,
+        Stress
+    }
     [System.Serializable]
     public struct AgentNeeds
     {
-        [SerializeField] private int hunger;      // 1-10 범위의 배고픔 수치
-        [SerializeField] private int sleepiness;  // 1-10 범위의 졸림 수치
-        [SerializeField] private int loneliness;  // 1-10 범위의 외로움 수치
+        [SerializeField] private int hunger;      // 배고픔 수치
+        [SerializeField] private int sleepiness;  // 졸림 수치
+        [SerializeField] private int loneliness;  // 외로움 수치
+        [SerializeField] private int stress;      // 스트레스 수치
 
         public int Hunger 
         { 
             get => hunger;
-            set => hunger = Mathf.Clamp(value, 1, 10);
+            set => hunger = Mathf.Clamp(value, -100, 100);
         }
 
         public int Sleepiness
         {
             get => sleepiness;
-            set => sleepiness = Mathf.Clamp(value, 1, 10);
+            set => sleepiness = Mathf.Clamp(value, -100, 100);
         }
 
         public int Loneliness
         {
             get => loneliness;
-            set => loneliness = Mathf.Clamp(value, 1, 10);
+            set => loneliness = Mathf.Clamp(value, -100, 100);
+        }
+
+        public int Stress{
+            get => stress;
+            set => stress = Mathf.Clamp(value, -100, 100);
         }
     }
 

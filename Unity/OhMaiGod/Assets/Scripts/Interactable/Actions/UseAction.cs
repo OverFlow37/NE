@@ -31,7 +31,7 @@ public class UseAction : InteractionAction
         
         // 사용 효과 적용(현재는 수면만)
         var agentController = interactor.GetComponent<AgentController>();
-        agentController.ModifySleepiness(targetInteractable.mInteractableData.mSleepinessEffect);
+        agentController.ModifyNeed(OhMAIGod.Agent.AgentNeedsType.Sleepiness, targetInteractable.mInteractableData.mSleepinessEffect);
 
         // 특정 시간동안 행동 수행
 

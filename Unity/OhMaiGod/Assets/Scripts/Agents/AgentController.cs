@@ -14,30 +14,41 @@ public class AgentController : MonoBehaviour
     [SerializeField] private AgentNeeds mAgentNeeds;                // 현재 Agent의 욕구 수치
     
     // Needs 수정을 위한 메서드들
-    public void ModifyHunger(int _amount)
+    public void ModifyNeed(OhMAIGod.Agent.AgentNeedsType _needType, int _amount)
     {
-        mAgentNeeds.Hunger = Mathf.Clamp(mAgentNeeds.Hunger + _amount, 0, 10);
-        if (mShowDebugInfo)
+        switch (_needType)
         {
-            LogManager.Log("Agent", $"{mName}의 배고픔 변화: {_amount} (현재: {mAgentNeeds.Hunger})", 3);
-        }
-    }
-    
-    public void ModifySleepiness(int _amount)
-    {
-        mAgentNeeds.Sleepiness = Mathf.Clamp(mAgentNeeds.Sleepiness + _amount, 0, 10);
-        if (mShowDebugInfo)
-        {
-            LogManager.Log("Agent", $"{mName}의 졸림 변화: {_amount} (현재: {mAgentNeeds.Sleepiness})", 3);
-        }
-    }
-    
-    public void ModifyLoneliness(int _amount)
-    {
-        mAgentNeeds.Loneliness = Mathf.Clamp(mAgentNeeds.Loneliness + _amount, 0, 10);
-        if (mShowDebugInfo)
-        {
-            LogManager.Log("Agent", $"{mName}의 외로움 변화: {_amount} (현재: {mAgentNeeds.Loneliness})", 3);
+            case OhMAIGod.Agent.AgentNeedsType.Hunger:
+                mAgentNeeds.Hunger = Mathf.Clamp(mAgentNeeds.Hunger + _amount, -100, 100);
+                if (mShowDebugInfo)
+                {
+                    LogManager.Log("Agent", $"{mName}의 배고픔 변화: {_amount} (현재: {mAgentNeeds.Hunger})", 3);
+                }
+                break;
+            
+            case OhMAIGod.Agent.AgentNeedsType.Sleepiness:
+                mAgentNeeds.Sleepiness = Mathf.Clamp(mAgentNeeds.Sleepiness + _amount, -100, 100);
+                if (mShowDebugInfo)
+                {
+                    LogManager.Log("Agent", $"{mName}의 졸림 변화: {_amount} (현재: {mAgentNeeds.Sleepiness})", 3);
+                }
+                break;
+            
+            case OhMAIGod.Agent.AgentNeedsType.Loneliness:
+                mAgentNeeds.Loneliness = Mathf.Clamp(mAgentNeeds.Loneliness + _amount, -100, 100);
+                if (mShowDebugInfo)
+                {
+                    LogManager.Log("Agent", $"{mName}의 외로움 변화: {_amount} (현재: {mAgentNeeds.Loneliness})", 3);
+                }
+                break;
+            
+            case OhMAIGod.Agent.AgentNeedsType.Stress:
+                mAgentNeeds.Stress = Mathf.Clamp(mAgentNeeds.Stress + _amount, -100, 100);
+                if (mShowDebugInfo)
+                {
+                    LogManager.Log("Agent", $"{mName}의 스트레스 변화: {_amount} (현재: {mAgentNeeds.Stress})", 3);
+                }
+                break;
         }
     }
 
@@ -390,6 +401,7 @@ public class AgentController : MonoBehaviour
         TimeSpan interactionStartTime = TimeManager.Instance.GetCurrentGameTime();
         double curDurationProgress = 0.0f;
         float interactionDuration = CurrentTargetInteractable.GetActionDuration(mCurrentAction.ActionName);
+        // TODO: 인터랙션 종류에 따른 예외처리 추가
         if(interactionDuration <= 0)
         {
             LogManager.Log("Agent", $"{mName}: 상호작용 지속 시간이 0이하입니다, 상호작용 비정상 종료.", 1);
@@ -500,12 +512,13 @@ public class AgentController : MonoBehaviour
             TimeSpan timeDifference = currentTime - lastIncreaseTime;
 
             // 게임 시간으로 30분이 지났는지 확인
-            if (timeDifference.TotalMinutes >= 30)
+            if (timeDifference.TotalMinutes >= 3)
             {
                 // 각 감정 상태 증가
-                ModifyHunger(1);
-                ModifySleepiness(1);
-                ModifyLoneliness(1);
+                ModifyNeed(OhMAIGod.Agent.AgentNeedsType.Hunger, 1);
+                ModifyNeed(OhMAIGod.Agent.AgentNeedsType.Sleepiness, 1);
+                ModifyNeed(OhMAIGod.Agent.AgentNeedsType.Loneliness, 1);
+                ModifyNeed(OhMAIGod.Agent.AgentNeedsType.Stress, 1);
                 if (mShowDebugInfo)
                 {
                     LogManager.Log("Agent", $"[게임시간 {currentTime:hh\\:mm}] {mName}의 감정 상태 자동 증가", 2);

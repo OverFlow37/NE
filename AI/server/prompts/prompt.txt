@@ -13,8 +13,8 @@ ACTION OPTIONS:
 - eat: consume food
 
 LOCATION OPTIONS:
-- house: a private residence where agents can live and rest
-- cafeteria: communal dining area where agents can eat and socialize
+- house: house
+- cafeteria: cafeteria
 - outdoor: outdoor
 
 OBJECT OPTIONS:

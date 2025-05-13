@@ -37,7 +37,7 @@ public class EatAction : InteractionAction
         
         // 음식을 먹은 후 배고픔 감소 (음식 특성에 따른 추가 효과는 Interactable에서 처리)
         var agentController = interactor.GetComponent<AgentController>();
-        agentController.ModifyHunger(targetInteractable.mInteractableData.mHungerEffect);
+        agentController.ModifyNeed(OhMAIGod.Agent.AgentNeedsType.Hunger, targetInteractable.mInteractableData.mHungerEffect);
 
         // 특정 시간동안 행동 수행
 
