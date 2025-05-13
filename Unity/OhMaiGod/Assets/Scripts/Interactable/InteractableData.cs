@@ -25,9 +25,10 @@ public class InteractableData : ScriptableObject
         public InteractionAction mAction;
         public int mDuration;
         [Header("상호작용 효과")]
-        [SerializeField, Range(-10, 10)] public int mHungerEffect;
-        [SerializeField, Range(-10, 10)] public int mSleepinessEffect;
-        [SerializeField, Range(-10, 10)] public int mLonelinessEffect;
+        [SerializeField, Range(-99, 99)] public int mHungerEffect;
+        [SerializeField, Range(-99, 99)] public int mSleepinessEffect;
+        [SerializeField, Range(-99, 99)] public int mLonelinessEffect;
+        [SerializeField, Range(-99, 99)] public int mStressEffect;
     }
 
     [Tooltip("이 오브젝트와 상호작용했을 때 실행될 행동 및 소요 시간 목록")]

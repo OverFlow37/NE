@@ -26,6 +26,7 @@ public class AgentUI : MonoBehaviour
         public Text mHungerText;
         public Text mSleepinessText;
         public Text mLonelinessText;
+        public Text mStressText;
     }
 
     [SerializeField]
@@ -99,6 +100,7 @@ public class AgentUI : MonoBehaviour
         mEmoteUI.mHungerText.text = "HUNGER    : " + string.Format("{0}", (int)mAgentController.AgnetNeeds.Hunger);
         mEmoteUI.mSleepinessText.text = "SLEEPINESS: " + string.Format("{0}", (int)mAgentController.AgnetNeeds.Sleepiness);
         mEmoteUI.mLonelinessText.text = "LONELINESS: " + string.Format("{0}", (int)mAgentController.AgnetNeeds.Loneliness);
+        mEmoteUI.mStressText.text = "STRESS    : " + string.Format("{0}", (int)mAgentController.AgnetNeeds.Stress);
     }
 
     // 상호작용 정보 표시
