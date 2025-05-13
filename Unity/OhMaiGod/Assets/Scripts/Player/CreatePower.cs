@@ -2,8 +2,12 @@ using UnityEngine;
 
 public class CreatePower : MonoBehaviour
 {
-    [Header("생성할 프리팹")]
+    [Header("생성할 아이템")]
     public GameObject mSelectedPrefab; // UI에서 할당
+    [Header("생성할 이벤트")]
+    public GameObject mSelectedEvent;
+    [Header("생성할 이펙트")]
+    public GameObject mSelectedEffect;
 
     private bool mIsPlacementMode = false;
     private GameObject mPreviewObject;
@@ -110,6 +114,12 @@ public class CreatePower : MonoBehaviour
             return;
         }
 
+        // 이벤트 생성
+        GameObject eventObject = Instantiate(mSelectedEvent, cellCenter, Quaternion.identity);
+        eventObject.GetComponent<EventController>().mEventInfo = mSelectedEvent.GetComponent<EventController>().mEventInfo;
+        // 이펙트 생성
+        Instantiate(mSelectedEffect, cellCenter, Quaternion.identity);
+        
         Instantiate(_prefab, cellCenter, Quaternion.identity);
         // 프리뷰는 계속 유지, mSelectedPrefab도 null로 만들지 않음
     }

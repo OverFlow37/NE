@@ -145,4 +145,10 @@ public class TimeManager : MonoBehaviour
     {
         return mCurrentGameTime >= _startTime && mCurrentGameTime <= _endTime;
     }
+
+    // 게임 시간 배속 반환
+    public float GetGameMinutesPerRealSecond()
+    {
+        return mGameMinutesPerRealSecond;
+    }
 }

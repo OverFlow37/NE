@@ -116,7 +116,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a97e4c6bc2bd52f43a6994688e8d15a3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mStandingPointPrefab: {fileID: 5162747586443987424, guid: 60310a76d4e467a4f830deaae28bd1a8, type: 3}
   mCheckRadius: 0.4
   mShowDebug: 1
 --- !u!61 &2274756304486782180
