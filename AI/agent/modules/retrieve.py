@@ -235,7 +235,7 @@ class MemoryRetriever:
         interactable_strings = []
         for location_data in visible_interactables:
             location = location_data.get("location", "")
-            interactables = location_data.get("interactable", [])
+            interactables = location_data.get("interactables", [])
             
             if location and interactables:
                 interactable_str = ", ".join(interactables)
@@ -343,7 +343,7 @@ class MemoryRetriever:
             if "visible_interactables" in agent_data:
                 for location_data in agent_data["visible_interactables"]:
                     location = location_data.get("location", "")
-                    interactables = location_data.get("interactable", [])
+                    interactables = location_data.get("interactables", [])
                     
                     if location and interactables:
                         visible_interactables.append({

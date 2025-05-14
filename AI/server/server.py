@@ -322,7 +322,7 @@ async def react_to_event(payload: dict):
             print("👁️ 상호작용 가능한 객체:")
             for loc_data in visible_interactables:
                 loc = loc_data.get('location', '')
-                objects = loc_data.get('interactable', [])
+                objects = loc_data.get('interactables', [])
                 print(f"  - {loc}: {', '.join(objects)}")
 
         # 이벤트 ID 할당 (게임 시간 전달)
