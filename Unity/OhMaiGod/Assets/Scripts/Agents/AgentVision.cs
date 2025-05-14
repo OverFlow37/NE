@@ -2,6 +2,9 @@ using UnityEngine;
 using System.Collections.Generic;
 using OhMAIGod.Perceive;
 
+// 에이전트 시야 관리
+// 에이전트 현재 보이는 오브젝트 관리
+// 에이전트 이벤트 확인, 반응 서버에 전송
 [RequireComponent(typeof(CircleCollider2D))]
 public class AgentVision : MonoBehaviour
 {
@@ -139,10 +142,10 @@ public class AgentVision : MonoBehaviour
                 if (totalInterest >= threshold){
                     // 이벤트 전송
                     PerceiveEvent perceiveEvent = new PerceiveEvent();
-                    perceiveEvent.eventType = PerceiveEventType.INTERACTABLE_DISCOVER;
-                    perceiveEvent.eventLocation = interactable.CurrentLocation;
+                    perceiveEvent.event_type = PerceiveEventType.INTERACTABLE_DISCOVER;
+                    perceiveEvent.event_location = interactable.CurrentLocation;
                     // TODO: 오브젝트 이름이 아니라 이벤트 설명을 만든 뒤 설명을 전송해야함
-                    perceiveEvent.eventDescription = interactable.mInteractableData.mName;
+                    perceiveEvent.event_description = interactable.mInteractableData.mName;
                     mAIBridgePerceive.SendPerceiveEvent(mAgentController, perceiveEvent);
                 }
             }
@@ -154,14 +157,14 @@ public class AgentVision : MonoBehaviour
             EventController eventController = other.GetComponent<EventController>();
             if (eventController != null)
             {
-                LogManager.Log("Vision", $"이벤트 감지: {eventController.mEventInfo.eventType}, {eventController.mEventInfo.eventLocation}, {eventController.mEventInfo.eventDescription}", 3);
+                LogManager.Log("Vision", $"이벤트 감지: {eventController.mEventInfo.event_type}, {eventController.mEventInfo.event_location}, {eventController.mEventInfo.event_description}", 3);
                 //PerceiveManager.Instance.SendEventToAIServer(eventController.mEventInfo.eventType, eventController.mEventInfo.eventLocation, eventController.mEventInfo.eventDescription);
                 PerceiveEvent perceiveEvent = new PerceiveEvent();
-                perceiveEvent.eventType = eventController.mEventInfo.eventType;
+                perceiveEvent.event_type = eventController.mEventInfo.event_type;
                 // TODO: 이벤트 위치가 오브젝트 위치가 아니라 이벤트 위치를 전송해야함
-                perceiveEvent.eventLocation = mAgentController.CurrentLocation;
-                perceiveEvent.eventDescription = eventController.mEventInfo.eventDescription;
-                mAIBridgePerceive.SendPerceiveEvent(mAgentController, perceiveEvent);
+                perceiveEvent.event_location = " ";
+                perceiveEvent.event_description = eventController.mEventInfo.event_description;
+                mAIBridgePerceive.SendReactJudgeEvent(mAgentController, perceiveEvent);
             }
         }
     }

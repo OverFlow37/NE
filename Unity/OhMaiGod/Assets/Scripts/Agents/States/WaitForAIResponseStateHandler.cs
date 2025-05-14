@@ -4,6 +4,12 @@ namespace OhMAIGod.Agent
 {
     public class WaitForAIResponseStateHandler : AgentStateHandler
     {
+        public override void OnStateEnter(AgentController _controller)
+        {
+            base.OnStateEnter(_controller);
+            _controller.AllowStateChange = false;
+        }
+
          public override void OnStateExecute(AgentController _controller)
          {
             // Debug.Log("WaitForAIResponseStateHandler Update Calling");

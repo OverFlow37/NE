@@ -14,4 +14,4 @@ AVAILABLE ACTIONS:
 - "use": "Interact with an object or item.",
 - "get": "Obtain a food item, resource, or trinket.",
 - "break": "Destroy breakable items or harvest resources.",
-- "offer": "Present an offering during prayer at the temple."
+- "offer": "offering target to God."

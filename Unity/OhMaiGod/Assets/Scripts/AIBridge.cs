@@ -23,7 +23,6 @@ public struct Agent
 {
     public string name;                         // 에이전트 이름
     public AgentNeeds state;                    // 에이전트의 욕구
-    public string section;                      // 현재 구역
     public string location;                     // 현재 위치
     public string personality;                  // 성격 특성
     public ObjectGroup[] visible_objects;       // 볼 수 있는 오브젝트들
@@ -51,7 +50,7 @@ public struct Action
     public string action;               // 수행할 행동
     public string agent;                // 행동을 수행할 에이전트
     public ActionDetails details;       // 행동의 세부 정보
-    public string reason;               // 행동의 이유
+    public string thought;              // 속마음
 }
 
 // AI 응답 데이터를 감싸는 래퍼 구조체
@@ -248,10 +247,15 @@ public class AIBridge : MonoBehaviour
                 currentTime,
                 endTime,
                 1, 
-                action.reason
+                action.thought
             );
             // 스케줄러에 새 일정 추가
             bool success = agent.mScheduler.AddScheduleItem(newScheduleItem);
+
+            // AI 응답 대기 상태 해제
+            agent.AllowStateChange = true;
+            agent.ChangeState(AgentState.WAITING);
+
             // 일정 추가 결과 로깅
             if (!success)
             {
