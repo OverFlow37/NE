@@ -251,6 +251,11 @@ public class AIBridge : MonoBehaviour
             );
             // 스케줄러에 새 일정 추가
             bool success = agent.mScheduler.AddScheduleItem(newScheduleItem);
+
+            // AI 응답 대기 상태 해제
+            agent.AllowStateChange = true;
+            agent.ChangeState(AgentState.WAITING);
+
             // 일정 추가 결과 로깅
             if (!success)
             {
