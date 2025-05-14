@@ -1,6 +1,5 @@
 using UnityEngine;
-using System.Collections;
-using System.Linq;
+using OhMAIGod.Agent;
 
 // InteractionAction을 상속받아 잠금 해제 행동을 구현합니다.
 // CreateAssetMenu 경로를 Interaction Actions로 변경
@@ -51,17 +50,27 @@ public class GetAction : InteractionAction
         AgentController agentController = interactor.GetComponent<AgentController>();
         if (agentController != null)
         {
-            agentController.ModifyNeed(OhMAIGod.Agent.AgentNeedsType.Hunger, actionInfo.mHungerEffect);
-            agentController.ModifyNeed(OhMAIGod.Agent.AgentNeedsType.Sleepiness, actionInfo.mSleepinessEffect);
-            agentController.ModifyNeed(OhMAIGod.Agent.AgentNeedsType.Loneliness, actionInfo.mLonelinessEffect);
-            agentController.ModifyNeed(OhMAIGod.Agent.AgentNeedsType.Stress, actionInfo.mStressEffect);
+            agentController.ModifyNeed(AgentNeedsType.Hunger, actionInfo.mHungerEffect);
+            agentController.ModifyNeed(AgentNeedsType.Sleepiness, actionInfo.mSleepinessEffect);
+            agentController.ModifyNeed(AgentNeedsType.Loneliness, actionInfo.mLonelinessEffect);
+            agentController.ModifyNeed(AgentNeedsType.Stress, actionInfo.mStressEffect);
         }
 
-        // 행동 완료 후 오브젝트 제거
-        LogManager.Log("Interact", $"get {targetInteractable.InteractableName}", 1);
-        targetInteractable.RemoveObject();
 
-        // TODO: 인벤토리로 이동
+        // Furniture나 Resource가 아니라면 인벤토리로 이동
+        if (targetInteractable.InteractableType != InteractableData.Types.Furniture && targetInteractable.InteractableType != InteractableData.Types.Resource)
+        {
+            // 행동 완료 후 오브젝트 제거
+            LogManager.Log("Interact", $"get {targetInteractable.InteractableName}");
+            targetInteractable.RemoveObject();
+            Inventory.Instance.AddItem(targetObject);
+        }
+        else
+        {
+            // TODO: Furniture나 Resource라면 피드백
+            LogManager.Log("Interact", $"{targetInteractable.InteractableName} 는 가지고 갈 수 없습니다.", 1);
+            return false;
+        }
 
         return true;
     }

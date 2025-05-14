@@ -1,6 +1,5 @@
 using UnityEngine;
-using System.Collections;
-using System.Linq;
+using OhMAIGod.Agent;
 
 // InteractionAction을 상속받아 잠금 해제 행동을 구현합니다.
 // CreateAssetMenu 경로를 Interaction Actions로 변경
@@ -51,17 +50,23 @@ public class OfferAction : InteractionAction
         AgentController agentController = interactor.GetComponent<AgentController>();
         if (agentController != null)
         {
-            agentController.ModifyNeed(OhMAIGod.Agent.AgentNeedsType.Hunger, actionInfo.mHungerEffect);
-            agentController.ModifyNeed(OhMAIGod.Agent.AgentNeedsType.Sleepiness, actionInfo.mSleepinessEffect);
-            agentController.ModifyNeed(OhMAIGod.Agent.AgentNeedsType.Loneliness, actionInfo.mLonelinessEffect);
-            agentController.ModifyNeed(OhMAIGod.Agent.AgentNeedsType.Stress, actionInfo.mStressEffect);
+            agentController.ModifyNeed(AgentNeedsType.Hunger, actionInfo.mHungerEffect);
+            agentController.ModifyNeed(AgentNeedsType.Sleepiness, actionInfo.mSleepinessEffect);
+            agentController.ModifyNeed(AgentNeedsType.Loneliness, actionInfo.mLonelinessEffect);
+            agentController.ModifyNeed(AgentNeedsType.Stress, actionInfo.mStressEffect);
+
         }
 
-        // 행동 완료 후 음식 오브젝트 제거
-        LogManager.Log("Interact", $"offer {targetInteractable.InteractableName}", 1);
+        // 행동 완료 후 오브젝트 제거
+        LogManager.Log("Interact", $"offer {targetInteractable.InteractableName}");
         targetInteractable.RemoveObject();
 
-        // TODO: 신앙심 변화
+        Inventory.Instance.AddResource(Inventory.ResourceType.Power, targetInteractable.mInteractableData.mFaith);
+
+        if (targetInteractable.mInteractableData.mFaith <= 0)
+        {
+            LogManager.Log("Interact", $"{targetInteractable.InteractableName} 는 신이 원하지 않습니다.", 1);
+        }
 
         return true;
     }

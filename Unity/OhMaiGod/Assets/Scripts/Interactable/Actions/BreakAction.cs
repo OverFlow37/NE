@@ -1,6 +1,5 @@
 using UnityEngine;
-using System.Collections;
-using System.Linq;
+using OhMAIGod.Agent;
 
 // InteractionAction을 상속받아 잠금 해제 행동을 구현합니다.
 // CreateAssetMenu 경로를 Interaction Actions로 변경
@@ -51,14 +50,25 @@ public class BreakAction : InteractionAction
         AgentController agentController = interactor.GetComponent<AgentController>();
         if (agentController != null)
         {
-            agentController.ModifyNeed(OhMAIGod.Agent.AgentNeedsType.Hunger, actionInfo.mHungerEffect);
-            agentController.ModifyNeed(OhMAIGod.Agent.AgentNeedsType.Sleepiness, actionInfo.mSleepinessEffect);
-            agentController.ModifyNeed(OhMAIGod.Agent.AgentNeedsType.Loneliness, actionInfo.mLonelinessEffect);
-            agentController.ModifyNeed(OhMAIGod.Agent.AgentNeedsType.Stress, actionInfo.mStressEffect);
+            agentController.ModifyNeed(AgentNeedsType.Hunger, actionInfo.mHungerEffect);
+            agentController.ModifyNeed(AgentNeedsType.Sleepiness, actionInfo.mSleepinessEffect);
+            agentController.ModifyNeed(AgentNeedsType.Loneliness, actionInfo.mLonelinessEffect);
+            agentController.ModifyNeed(AgentNeedsType.Stress, actionInfo.mStressEffect);
         }
 
         // 행동 완료 후 오브젝트 제거
+        LogManager.Log("Interact", $"break {targetInteractable.InteractableName}");
         targetInteractable.RemoveObject();
+
+        // 나무나 돌을 부수면 1개에서 5개 사이의 자원을 얻는다.
+        if (targetInteractable.InteractableName == "Tree")
+        {
+            Inventory.Instance.AddResource(Inventory.ResourceType.Wood, Random.Range(1, 5));
+        }
+        else if (targetInteractable.InteractableName == "Rock")
+        {
+            Inventory.Instance.AddResource(Inventory.ResourceType.Stone, Random.Range(1, 5));
+        }
 
         return true;
     }

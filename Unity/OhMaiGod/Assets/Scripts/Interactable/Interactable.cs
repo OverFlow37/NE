@@ -1,7 +1,5 @@
 using UnityEngine;
-using System.Collections.Generic; // List를 사용하기 위해 필요
 using System.Collections;
-using UnityEngine.Tilemaps;
 
 // 씬의 상호작용 가능한 게임 오브젝트에 붙는 컴포넌트 (MonoBehaviour)
 public class Interactable : MonoBehaviour
@@ -13,6 +11,9 @@ public class Interactable : MonoBehaviour
 
     // 오브젝트 이름 (InteractableData와 동기화)
     public string InteractableName { get; private set; }
+    // 오브젝트 타입 (InteractableData와 동기화)
+    public InteractableData.Types InteractableType { get; private set; }
+
 
     // 현재 위치 정보
     public string CurrentLocation { get; private set; }
@@ -40,8 +41,9 @@ public class Interactable : MonoBehaviour
         }
         else
         {
-            // InteractableData와 이름 동기화
+            // InteractableData와 동기화
             InteractableName = mInteractableData.mName;
+            InteractableType = mInteractableData.mType;
         }
 
         mTargetController = GetComponent<TargetController>();
@@ -83,13 +85,13 @@ public class Interactable : MonoBehaviour
     }
 
     // 상호작용 주체(Interactor)로부터 상호작용 요청을 받는 메서드
-    public void Interact(GameObject interactor, string actionName)
+    public bool Interact(GameObject interactor, string actionName)
     {
         // InteractableData가 없거나 행동 목록이 없으면 상호작용 처리 불가
         if (mInteractableData == null || mInteractableData.mActions == null || mInteractableData.mActions.Length == 0)
         {
             LogManager.Log("Interact", $"Interactable 오브젝트에 정의된 행동이 없어 상호작용 처리 불가: {gameObject.name}", 1);
-            return;
+            return false;
         }
 
         LogManager.Log("Interact", $"{interactor.name}가 {mInteractableData.mName}와 상호작용 시도.", 2);
@@ -97,7 +99,6 @@ public class Interactable : MonoBehaviour
         // === 상호작용 처리 로직 ===
         // actionName과 일치하는 mAction만 실행
         bool actionFound = false;
-        bool actionSuccess = false;
         foreach (var action in mInteractableData.mActions)
         {
             LogManager.Log("Interact", "action: "+action.mAction.mActionName+ "actionName: "+actionName, 3);
@@ -107,7 +108,8 @@ public class Interactable : MonoBehaviour
                 // InteractionAction의 Execute 메서드 호출
                 if (action.mAction.Execute(interactor, this.gameObject))
                 {
-                    actionSuccess = true;
+                    LogManager.Log("Interact", $"{mInteractableData.mName} 상호작용 성공.", 2);
+                    return true;
                 }
                 break; // 일치하는 것만 실행하고 종료
             }
@@ -117,14 +119,11 @@ public class Interactable : MonoBehaviour
         {
             LogManager.Log("Interact", $"{mInteractableData.mName}에 해당하는 행동({actionName})이 정의되어 있지 않음.", 1);
         }
-        else if (actionSuccess)
-        {
-            LogManager.Log("Interact", $"{mInteractableData.mName} 상호작용 성공.", 2);
-        }
         else
         {
             LogManager.Log("Interact", $"{mInteractableData.mName} 상호작용 실패.", 2);
         }
+        return false;
     }
 
     // actionName에 해당하는 action의 duration을 반환하는 함수

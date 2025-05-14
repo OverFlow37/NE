@@ -18,6 +18,8 @@ public class InteractableData : ScriptableObject
     [SerializeField] public States mState;
     [Tooltip("오브젝트의 흥미도")]
     [SerializeField, Range(0, 100)] public float mInterest;
+    [Tooltip("Offer로 얻을 수 있는 신앙심 효과")]
+    [SerializeField, Range(-99, 99)] public int mFaith;
 
     [System.Serializable]
     public struct InteractionActionInfo
@@ -53,6 +55,7 @@ public class InteractableData : ScriptableObject
         Installed,
         Burn,
     }
+
     // 오브젝트의 상호작용 목록
     public enum Actions{
         Eat,
