@@ -216,7 +216,7 @@ public class AIBridge_Perceive : MonoBehaviour
     // 반응 판단 이벤트 전송(반환값 true, false)
     public void SendReactJudgeEvent(AgentController _agent, PerceiveEvent _perceiveEvent)
     {
-        if(_agent.mIsReactJudge) {
+        if(_agent.mIsReactJudge || _agent.CurrentState == AgentState.WAITING_FOR_AI_RESPONSE) {
             LogManager.Log("AI", $"[AIBridge_Perceive] 이미 반응 판단 중입니다.", 2);
             return;
         }
@@ -380,6 +380,7 @@ public class AIBridge_Perceive : MonoBehaviour
         if (request.result == UnityWebRequest.Result.Success)
         {
             LogManager.Log("AI", $"✅ 반응 행동 응답받음: " + request.downloadHandler.text, 2);
+            _agent.AllowStateChange = true;
             ProcessResponseScheduleItem(request.downloadHandler.text, _agent);
         }
         else
