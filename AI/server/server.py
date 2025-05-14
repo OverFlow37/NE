@@ -300,6 +300,7 @@ async def react_to_event(payload: dict):
         event_data = agent_data.get('perceive_event', {})
         event_type = event_data.get('event_type', '')
         event_location = event_data.get('event_location', '')
+        event_description = event_data.get('event_description', '')
         
         # 에이전트의 현재 시간 추출
         agent_time = agent_data.get('time', '')
@@ -336,7 +337,8 @@ async def react_to_event(payload: dict):
             "event_type": event_type,
             "event_location": event_location,
             "time": agent_time,  # 시간 정보 추가
-            "event_id": event_id  # 이벤트 ID 추가
+            "event_id": event_id,  # 이벤트 ID 추가
+            "event_description": event_description,
         }
         
         # 이벤트를 문장으로 변환
@@ -412,10 +414,10 @@ async def react_to_event(payload: dict):
                     reaction_obj["action"] = "use"
                 if "details" not in reaction_obj:
                     reaction_obj["details"] = {
-                        "location": event_location,
+                        "location": " ",
                         "target": " ",
-                        "duration": "60",
-                        "reason": "Default action due to incomplete response"
+                        "duration": " ",
+                        "reason": " "
                     }
                 
             # 메모리 저장 (프롬프트 생성 및 API 응답 이후)
