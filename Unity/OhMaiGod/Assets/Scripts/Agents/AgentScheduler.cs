@@ -240,6 +240,9 @@ public class AgentScheduler : MonoBehaviour
     // 현재 시간에 맞는 활동 시작하게 업데이트 하는 함수
     private void UpdateAction()
     {
+        // 상태 변경 불가한 상태(AI 응답 대기 중)인 경우 처리 안함
+        if(!mAgentController.AllowStateChange) return;
+
         // 현재 활동이 있고 아직 유효한 경우
         if (mCurrentAction != null)
         {

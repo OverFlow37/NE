@@ -101,7 +101,7 @@ namespace OhMAIGod.Agent
         [Range(0,59)] public int EndSecond;
         public int Priority;                // 우선순위 (높을수록 중요)
         public bool IsCompleted;            // 완료 여부
-        public string Reason;               // 활동 선택 이유
+        public string Thought;               // 활동 선택 이유
 
         // 런타임 변환용 프로퍼티
         public TimeSpan StartTime
@@ -125,7 +125,7 @@ namespace OhMAIGod.Agent
 
         // 생성자
         public ScheduleItem(string _actionName, string _locationName, string _targetName, TimeSpan _startTime, TimeSpan _endTime,
-                            int _priority, string _reason)
+                            int _priority, string _thought)
         {
             ID = System.Guid.NewGuid().ToString();
             ActionName = _actionName;
@@ -139,7 +139,7 @@ namespace OhMAIGod.Agent
             EndSecond = 0;
             Priority = _priority;
             IsCompleted = false;
-            Reason = _reason;
+            Thought = _thought;
         }
     }
 }

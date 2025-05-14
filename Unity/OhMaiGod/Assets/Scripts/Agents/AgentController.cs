@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 using OhMAIGod.Agent;
-
+using OhMAIGod.Perceive;
 public class AgentController : MonoBehaviour
 {
     [SerializeField] public AgentUI mAgentUI;
@@ -22,7 +22,7 @@ public class AgentController : MonoBehaviour
                 mAgentNeeds.Hunger = Mathf.Clamp(mAgentNeeds.Hunger + _amount, -100, 100);
                 if (mShowDebugInfo)
                 {
-                    LogManager.Log("Agent", $"{mName}의 배고픔 변화: {_amount} (현재: {mAgentNeeds.Hunger})", 3);
+                    //LogManager.Log("Agent", $"{mName}의 배고픔 변화: {_amount} (현재: {mAgentNeeds.Hunger})", 3);
                 }
                 break;
             
@@ -30,7 +30,7 @@ public class AgentController : MonoBehaviour
                 mAgentNeeds.Sleepiness = Mathf.Clamp(mAgentNeeds.Sleepiness + _amount, -100, 100);
                 if (mShowDebugInfo)
                 {
-                    LogManager.Log("Agent", $"{mName}의 졸림 변화: {_amount} (현재: {mAgentNeeds.Sleepiness})", 3);
+                    //LogManager.Log("Agent", $"{mName}의 졸림 변화: {_amount} (현재: {mAgentNeeds.Sleepiness})", 3);
                 }
                 break;
             
@@ -38,7 +38,7 @@ public class AgentController : MonoBehaviour
                 mAgentNeeds.Loneliness = Mathf.Clamp(mAgentNeeds.Loneliness + _amount, -100, 100);
                 if (mShowDebugInfo)
                 {
-                    LogManager.Log("Agent", $"{mName}의 외로움 변화: {_amount} (현재: {mAgentNeeds.Loneliness})", 3);
+                    //LogManager.Log("Agent", $"{mName}의 외로움 변화: {_amount} (현재: {mAgentNeeds.Loneliness})", 3);
                 }
                 break;
             
@@ -46,7 +46,7 @@ public class AgentController : MonoBehaviour
                 mAgentNeeds.Stress = Mathf.Clamp(mAgentNeeds.Stress + _amount, -100, 100);
                 if (mShowDebugInfo)
                 {
-                    LogManager.Log("Agent", $"{mName}의 스트레스 변화: {_amount} (현재: {mAgentNeeds.Stress})", 3);
+                    //LogManager.Log("Agent", $"{mName}의 스트레스 변화: {_amount} (현재: {mAgentNeeds.Stress})", 3);
                 }
                 break;
         }
@@ -60,7 +60,6 @@ public class AgentController : MonoBehaviour
     [SerializeField] private bool mAutoStart = true;                // 자동 시작 여부
     [SerializeField] [Tooltip("감정 상태 자동 증가 간격 (분)")] private int mNeedIntervalMinutes = 30;
     private TimeSpan mLastNeedsIncreaseTime; // 마지막 감정 상태 자동 증가 시각
-    private AgentStateMachine mStateMachine;
 
     [Header("디버깅")]
     [SerializeField] private bool mShowDebugInfo = true;            // 디버그 정보 표시 여부
@@ -77,18 +76,22 @@ public class AgentController : MonoBehaviour
     public ScheduleItem CurrentAction => mCurrentAction;
     public string CurrentLocation => mCurrentLocation;
     public Interactable CurrentTargetInteractable => mCurrentTargetInteractable;
+    public bool AllowStateChange {get {return mStateMachine.AllowStateChange;} set {mStateMachine.AllowStateChange = value;}}
+    
     public Animator animator;  // 애니메이터
     // AIBridge에서 Agent만 가져오면 나머지도 가져올 수 있게 public으로 변경
     [SerializeField] public AgentScheduler mScheduler;
     [SerializeField] public MovementController mMovement;
     [SerializeField] public Interactable mInteractable;
-
+    private AgentStateMachine mStateMachine;
 
     // 시야 내의 오브젝트 목록
     public List<Interactable> mVisibleInteractables = new List<Interactable>();
 
     private Coroutine mInteractionCoroutine;
     public float mInteractionProgress = 0f; // 상호작용 진행도(0~1)
+
+    public bool mIsReactJudge = false;
 
     private void Awake()
     {
@@ -307,7 +310,7 @@ public class AgentController : MonoBehaviour
         // 속마음 표시
         if (mCurrentAction != null)
         {
-            mAgentUI.ShowThoughtInfo(mCurrentAction.Reason);
+            mAgentUI.ShowThoughtInfo(mCurrentAction.Thought);
         }
     }
 
@@ -518,7 +521,7 @@ public class AgentController : MonoBehaviour
             ModifyNeed(AgentNeedsType.Stress, 1);
             if (mShowDebugInfo)
             {
-                LogManager.Log("Agent", $"[게임시간 {currentTime:hh\\:mm}] {mName}의 감정 상태 자동 증가", 2);
+                //LogManager.Log("Agent", $"[게임시간 {currentTime:hh\\:mm}] {mName}의 감정 상태 자동 증가", 2);
             }
             // 마지막 증가 시간 업데이트 (항상 분 단위까지만 저장)
             mLastNeedsIncreaseTime = TimeSpan.FromMinutes(currentMinutes);
@@ -540,6 +543,22 @@ public class AgentController : MonoBehaviour
                     return;
                 }
             }
+        }
+    }
+
+    // 반응 판단 받았을 때, AIBridge에서 이 함수를 호출
+    public void ReactToResponse(bool _response, PerceiveEvent _perceiveEvent){
+        LogManager.Log("Agent", $"{mName}: 반응 판단 결과 받음: {_response}", 2);
+        mIsReactJudge = false;
+        // TODO: 반응 UI 종료 처리
+        if(_response){            
+            // AIBridge_perceive에 반응 행동 요청하기
+            AIBridge_Perceive.Instance.SendReactActionEvent(this, _perceiveEvent);
+            // state를 WAITING FOR AI RESPONSE로 변경
+            mStateMachine.ChangeState(AgentState.WAITING_FOR_AI_RESPONSE);
+        }
+        else{
+            // 반응 판단 결과 처리
         }
     }
 }
