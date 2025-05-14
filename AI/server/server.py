@@ -330,13 +330,7 @@ async def should_react(payload: dict):
         return {
             "success": success,
             "should_react": should_react,  # True 또는 False
-            "reason": reason,
             "event_id": event_id,
-            "performance": {
-                "decision_time": decision_time,
-                "memory_time": memory_time,
-                "total_time": total_time
-            }
         }
         
     except Exception as e:
