@@ -4,8 +4,8 @@ AGENT DATA:
 EVENT:
 {EVENT_CONTENT}
 
-SIMILAR EVENT:
-{SIMILAR_EVENT}
+RELEVANT MEMORIES:
+{RELEVANT_MEMORIES}
 
 TASK: For each agent, determine ONE NEXT ACTION based on their current state.
 
