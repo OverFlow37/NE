@@ -7,9 +7,31 @@ EVENT:
 RELEVANT MEMORIES:
 {RELEVANT_MEMORIES}
 
+
 TASK: For each agent, determine ONE NEXT ACTION based on their current state.
 
-AVAILABLE ACTIONS:
+Location :
+
+1. Town
+   A place to rest, access amenities, and visit the temple for prayer and reflection.
+
+   * House: A private space for resting and sleeping.
+   * Square: A social space with facilities and interactions with other assistants.
+   * Temple: A place for raising faith and offering prayers for personal wishes.
+
+2. Mountain
+   Rich in resources and ingredients unique to this area.
+
+3. Forest
+   A dense area filled with natural resources and food ingredients.
+
+4. Plain
+   A peaceful region where players can gather food and resources.
+
+5. Beach
+   A coastal area for fishing and gathering various items and resources.
+
+AVAILABLE ACTIONS :
 - "eat": "Consume food to reduce hunger.",
 - "use": "Interact with an object or item.",
 - "get": "Obtain a food item, resource, or trinket.",
