@@ -5,6 +5,9 @@ import asyncio
 from typing import Dict, Any, Optional
 from queue import Queue
 import threading
+import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
 class OllamaClient:
     def __init__(self, api_url: str = "http://localhost:11434/api/generate"):
@@ -12,6 +15,22 @@ class OllamaClient:
         self.request_queue = Queue()
         self.processing = False
         self.lock = threading.Lock()
+        
+        # 세션 설정
+        self.session = requests.Session()
+        
+        # 재시도 전략 설정
+        retry_strategy = Retry(
+            total=3,  # 최대 3번 재시도
+            backoff_factor=0.5,  # 재시도 간격
+            status_forcelist=[500, 502, 503, 504]  # 재시도할 HTTP 상태 코드
+        )
+        
+        # 어댑터 설정
+        adapter = HTTPAdapter(max_retries=retry_strategy, pool_connections=10, pool_maxsize=10)
+        self.session.mount("http://", adapter)
+        self.session.mount("https://", adapter)
+        
         self._start_processing_thread()
 
     def _start_processing_thread(self):
@@ -46,36 +65,63 @@ class OllamaClient:
 
     def _send_request(self, prompt: str, system_prompt: str, model_name: str, options: Dict[str, Any] = None) -> Dict[str, Any]:
         """올라마 API에 실제 요청을 보내는 메서드"""
-        payload = {
-            "model": model_name,
-            "prompt": prompt,
-            "system": system_prompt,
-            "stream": False
-        }
+        try:
+            # 기본 옵션 설정
+            default_options = {
+                "temperature": 0.7,
+                "top_p": 0.9,
+                "frequency_penalty": 0.1,
+                "presence_penalty": 0.1
+            }
 
-        if options:
-            payload["options"] = options
+            # 사용자 옵션과 기본 옵션 병합
+            if options:
+                default_options.update(options)
 
-        data = json.dumps(payload).encode('utf-8')
-        req = urllib.request.Request(
-            self.api_url,
-            data=data,
-            headers={'Content-Type': 'application/json'}
-        )
+            payload = {
+                "model": model_name,
+                "prompt": prompt,
+                "system": system_prompt,
+                "stream": False,
+                "options": default_options
+            }
 
-        with urllib.request.urlopen(req) as resp:
-            raw = resp.read()
-            result = json.loads(raw.decode('utf-8'))
+            # 세션을 사용하여 요청 전송
+            response = self.session.post(
+                self.api_url,
+                json=payload,
+                headers={'Content-Type': 'application/json'},
+                timeout=120  # 120초 타임아웃 설정
+            )
+            
+            # 응답 확인
+            response.raise_for_status()
+            result = response.json()
+            
             return {
                 "response": result.get("response", ""),
                 "status": "success"
+            }
+            
+        except requests.exceptions.RequestException as e:
+            return {
+                "response": "",
+                "status": "error",
+                "error": str(e)
+            }
+        except Exception as e:
+            return {
+                "response": "",
+                "status": "error",
+                "error": str(e)
             }
 
     async def process_prompt(
         self,
         prompt: str,
-        system_prompt: str,
-        model_name: str,
+        system_prompt: str = None,
+        model_name: str = None,
+        temperature: float = None,
         options: Optional[Dict[str, Any]] = None
     ) -> Dict[str, Any]:
         """
@@ -83,9 +129,16 @@ class OllamaClient:
         
         Args:
             prompt (str): 처리할 프롬프트
-            system_prompt (str): 시스템 프롬프트
-            model_name (str): 사용할 모델 이름
+            system_prompt (str, optional): 시스템 프롬프트. options에서도 지정 가능
+            model_name (str, optional): 사용할 모델 이름. options에서도 지정 가능
+            temperature (float, optional): 응답의 무작위성 (0.0 ~ 1.0). options에서도 지정 가능
             options (Dict[str, Any], optional): 모델 옵션
+                - system_prompt (str): 시스템 프롬프트
+                - model (str): 사용할 모델 이름
+                - temperature (float): 응답의 무작위성 (0.0 ~ 1.0)
+                - top_p (float): 토큰 선택 확률 임계값 (0.0 ~ 1.0)
+                - frequency_penalty (float): 반복 패널티
+                - presence_penalty (float): 존재 패널티
             
         Returns:
             Dict[str, Any]: API 응답
@@ -93,16 +146,43 @@ class OllamaClient:
         loop = asyncio.get_running_loop()
         future = loop.create_future()
         
+        # 옵션에서 system_prompt, model_name, temperature 추출
+        if options:
+            system_prompt = options.pop('system_prompt', system_prompt)
+            model_name = options.pop('model', model_name)
+            temperature = options.pop('temperature', temperature)
+        
+        # 필수 값 확인
+        if not model_name:
+            raise ValueError("model_name must be provided either directly or in options")
+        
+        # 기본 옵션 설정
+        default_options = {
+            "temperature": temperature if temperature is not None else 0.7,
+            "top_p": 0.9,
+            "frequency_penalty": 0.1,
+            "presence_penalty": 0.1
+        }
+
+        # 사용자 옵션과 기본 옵션 병합
+        if options:
+            default_options.update(options)
+        
         task = {
             'prompt': prompt,
             'system_prompt': system_prompt,
             'model_name': model_name,
-            'options': options,
+            'options': default_options,
             'future': future
         }
         
         self.request_queue.put(task)
         return await future
+
+    def __del__(self):
+        """소멸자: 세션 정리"""
+        if hasattr(self, 'session'):
+            self.session.close()
 
 # 사용 예시:
 """

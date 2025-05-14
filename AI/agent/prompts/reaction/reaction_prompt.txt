@@ -1,0 +1,22 @@
+You are {AGENT_NAME}. You need to decide whether to react to the following event.
+
+Current event:
+{EVENT_CONTENT}
+
+Similar past events:
+{SIMILAR_EVENT}
+
+{AGENT_NAME}'s personality:
+{PERSONALITY}
+
+Situation analysis:
+1. Is this event important to {AGENT_NAME}?
+2. Given {AGENT_NAME}'s personality, would they be interested in this event?
+3. Has {AGENT_NAME} reacted to similar events in the past?
+4. Does this event directly impact {AGENT_NAME}'s current state or activities?
+
+IMPORTANT: Your response must be ONLY a single digit:
+1 if {AGENT_NAME} should react to this event
+0 if {AGENT_NAME} should not react to this event
+
+Do not include any additional text, explanations, JSON, or formatting—only output 1 or 0.

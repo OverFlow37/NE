@@ -71,7 +71,7 @@ class MemoryUtils:
         except Exception as e:
             print(f"반성 데이터 저장 중 오류 발생: {e}")
 
-    def save_memory(self, event_sentence: str, embedding: List[float], event_time: str, agent_name: str):
+    def save_memory(self, event_sentence: str, embedding: List[float], event_time: str, agent_name: str, event_id: int = None):
         """새로운 메모리 저장"""
         memories = self._load_memories()
         
@@ -85,8 +85,22 @@ class MemoryUtils:
         memory = {
             "event": event_sentence,
             "time": event_time,
-            "embeddings": embedding
+            "embeddings": embedding,
+            "created": event_time  # 게임 시간으로 수정 (실제 시간 대신)
         }
+        
+        # 이벤트 ID가 제공된 경우 추가
+        if event_id is not None:
+            memory["event_id"] = event_id
+            
+            # 동일한 이벤트 ID를 가진 기존 메모리의 importance 복사
+            for existing_memory in memories[agent_name]["memories"]:
+                if existing_memory.get("event_id") == event_id:
+                    memory["importance"] = existing_memory.get("importance", 5)
+                    break
+            else:
+                # 기존 메모리가 없으면 기본값 설정
+                memory["importance"] = 3
         
         memories[agent_name]["memories"].append(memory)
         self._save_memories(memories)
@@ -122,28 +136,31 @@ class MemoryUtils:
         """이벤트를 문장으로 변환"""
         event_type = event.get("event_type", "")
         location = event.get("event_location", "")
-        object = event.get("object", "")
+        object_name = event.get("object", "")
+        
+        if "event_description" in event:
+            return f"{event.get('event_description')} at {location}"
         
         if event_type == "witness":
-            return f"witness {object} at {location}"
+            return f"witness {object_name} at {location}"
         elif event_type == "request":
-            return f"request {object} at {location}"
+            return f"request {object_name} at {location}"
         elif event_type == "feel":
-            return f"feel {object} at {location}"
+            return f"feel {object_name} at {location}"
         elif event_type == "discover":
-            return f"discover {object} at {location}"
+            return f"discover {object_name} at {location}"
         elif event_type == "new_object_type":
-            return f"discover new {object} at {location}"
+            return f"discover new {object_name} at {location}"
         elif event_type == "new_area":
             return f"discover new {location} area"
         elif event_type == "preferred_object":
-            return f"observe favorite {object} at {location}"
+            return f"observe favorite {object_name} at {location}"
         elif event_type == "agent_observation":
-            return f"observe {object} at {location}"
+            return f"observe {object_name} at {location}"
         elif event_type == "new_object":
-            return f"discover {object} at {location}"
+            return f"discover {object_name} at {location}"
         else:
-            return f"{object} at {location}"
+            return f"{object_name} at {location}"
 
     def save_perception(self, event: Dict[str, Any], agent_name: str) -> bool:
         """관찰 정보를 메모리에 저장"""
@@ -152,8 +169,9 @@ class MemoryUtils:
             event_sentence = f'{event.get("event_description", "")} at {event.get("event_location", "")}'
             embedding = self.get_embedding(event_sentence)
             event_time = event.get("time", datetime.now().strftime("%Y.%m.%d.%H:%M"))
+            event_id = event.get("event_id")  # 이벤트 ID 추출
             
-            self.save_memory(event_sentence, embedding, event_time, agent_name)
+            self.save_memory(event_sentence, embedding, event_time, agent_name, event_id)
             return True
         except Exception as e:
             print(f"관찰 정보 저장 실패: {e}")
