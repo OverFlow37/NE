@@ -134,33 +134,8 @@ class MemoryUtils:
 
     def event_to_sentence(self, event: Dict[str, Any]) -> str:
         """이벤트를 문장으로 변환"""
-        event_type = event.get("event_type", "")
-        location = event.get("event_location", "")
-        object_name = event.get("object", "")
-        
-        if "event_description" in event:
-            return f"{event.get('event_description')} at {location}"
-        
-        if event_type == "witness":
-            return f"witness {object_name} at {location}"
-        elif event_type == "request":
-            return f"request {object_name} at {location}"
-        elif event_type == "feel":
-            return f"feel {object_name} at {location}"
-        elif event_type == "discover":
-            return f"discover {object_name} at {location}"
-        elif event_type == "new_object_type":
-            return f"discover new {object_name} at {location}"
-        elif event_type == "new_area":
-            return f"discover new {location} area"
-        elif event_type == "preferred_object":
-            return f"observe favorite {object_name} at {location}"
-        elif event_type == "agent_observation":
-            return f"observe {object_name} at {location}"
-        elif event_type == "new_object":
-            return f"discover {object_name} at {location}"
-        else:
-            return f"{object_name} at {location}"
+
+        return f"{event.get('event_description', '')} at {event.get('event_location', '')}"
 
     def save_perception(self, event: Dict[str, Any], agent_name: str) -> bool:
         """관찰 정보를 메모리에 저장"""
