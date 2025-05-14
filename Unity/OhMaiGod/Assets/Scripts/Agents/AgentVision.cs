@@ -2,6 +2,9 @@ using UnityEngine;
 using System.Collections.Generic;
 using OhMAIGod.Perceive;
 
+// 에이전트 시야 관리
+// 에이전트 현재 보이는 오브젝트 관리
+// 에이전트 이벤트 확인, 반응 서버에 전송
 [RequireComponent(typeof(CircleCollider2D))]
 public class AgentVision : MonoBehaviour
 {
@@ -161,7 +164,7 @@ public class AgentVision : MonoBehaviour
                 // TODO: 이벤트 위치가 오브젝트 위치가 아니라 이벤트 위치를 전송해야함
                 perceiveEvent.eventLocation = mAgentController.CurrentLocation;
                 perceiveEvent.eventDescription = eventController.mEventInfo.eventDescription;
-                mAIBridgePerceive.SendPerceiveEvent(mAgentController, perceiveEvent);
+                mAIBridgePerceive.SendReactJudgeEvent(mAgentController, perceiveEvent);
             }
         }
     }

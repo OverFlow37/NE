@@ -22,7 +22,7 @@ public class AgentController : MonoBehaviour
                 mAgentNeeds.Hunger = Mathf.Clamp(mAgentNeeds.Hunger + _amount, -100, 100);
                 if (mShowDebugInfo)
                 {
-                    LogManager.Log("Agent", $"{mName}의 배고픔 변화: {_amount} (현재: {mAgentNeeds.Hunger})", 3);
+                    //LogManager.Log("Agent", $"{mName}의 배고픔 변화: {_amount} (현재: {mAgentNeeds.Hunger})", 3);
                 }
                 break;
             
@@ -30,7 +30,7 @@ public class AgentController : MonoBehaviour
                 mAgentNeeds.Sleepiness = Mathf.Clamp(mAgentNeeds.Sleepiness + _amount, -100, 100);
                 if (mShowDebugInfo)
                 {
-                    LogManager.Log("Agent", $"{mName}의 졸림 변화: {_amount} (현재: {mAgentNeeds.Sleepiness})", 3);
+                    //LogManager.Log("Agent", $"{mName}의 졸림 변화: {_amount} (현재: {mAgentNeeds.Sleepiness})", 3);
                 }
                 break;
             
@@ -38,7 +38,7 @@ public class AgentController : MonoBehaviour
                 mAgentNeeds.Loneliness = Mathf.Clamp(mAgentNeeds.Loneliness + _amount, -100, 100);
                 if (mShowDebugInfo)
                 {
-                    LogManager.Log("Agent", $"{mName}의 외로움 변화: {_amount} (현재: {mAgentNeeds.Loneliness})", 3);
+                    //LogManager.Log("Agent", $"{mName}의 외로움 변화: {_amount} (현재: {mAgentNeeds.Loneliness})", 3);
                 }
                 break;
             
@@ -46,7 +46,7 @@ public class AgentController : MonoBehaviour
                 mAgentNeeds.Stress = Mathf.Clamp(mAgentNeeds.Stress + _amount, -100, 100);
                 if (mShowDebugInfo)
                 {
-                    LogManager.Log("Agent", $"{mName}의 스트레스 변화: {_amount} (현재: {mAgentNeeds.Stress})", 3);
+                    //LogManager.Log("Agent", $"{mName}의 스트레스 변화: {_amount} (현재: {mAgentNeeds.Stress})", 3);
                 }
                 break;
         }
@@ -518,7 +518,7 @@ public class AgentController : MonoBehaviour
             ModifyNeed(AgentNeedsType.Stress, 1);
             if (mShowDebugInfo)
             {
-                LogManager.Log("Agent", $"[게임시간 {currentTime:hh\\:mm}] {mName}의 감정 상태 자동 증가", 2);
+                //LogManager.Log("Agent", $"[게임시간 {currentTime:hh\\:mm}] {mName}의 감정 상태 자동 증가", 2);
             }
             // 마지막 증가 시간 업데이트 (항상 분 단위까지만 저장)
             mLastNeedsIncreaseTime = TimeSpan.FromMinutes(currentMinutes);
@@ -541,5 +541,10 @@ public class AgentController : MonoBehaviour
                 }
             }
         }
+    }
+
+    // 반응 판단 받았을 때, AIBridge에서 이 함수를 호출
+    public void ReactToResponse(string _response){
+
     }
 }

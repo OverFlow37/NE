@@ -14,15 +14,44 @@ using OhMAIGod.Perceive;
 // find로 시작할때 agentController에서 연결할것
 public class AIBridge_Perceive : MonoBehaviour
 {    
+    // ========== AI에게 전송하는 데이터 구조체들 ==========
+    // 에이전트가 인식할 수 있는 오브젝트 그룹 정의
+    [System.Serializable]
+    public struct ObjectGroup
+    {
+        public string location;        // 오브젝트가 있는 위치
+        public List<string> objects;   // 해당 위치의 오브젝트 목록
+    }
+
+    // AI에게 전송할 에이전트 정보 구조체
+    [System.Serializable]
+    public struct Agent
+    {
+        public string name;                         // 에이전트 이름
+        public AgentNeeds state;                    // 에이전트의 욕구
+        public string current_location;             // 현재 위치
+        public string personality;                  // 성격 특성
+        public TimeSpan time;                       // 요청 보낸 시각
+        public ObjectGroup[] visible_objects;       // 볼 수 있는 오브젝트들
+        public PerceiveEvent perceiveEvent;         // 관찰 이벤트
+    }
+
+    // AI 서버에 보낼 요청 데이터 구조체
+    [System.Serializable]
+    public struct AgentRequest
+    {
+        public Agent agent;  // 에이전트 정보
+    }
+
     private bool mIsRequesting = false;
 
     // Interactable 목록을 ObjectGroup 배열로 변환
-    private ObjectGroup[] ConvertToObjectGroups(List<Interactable> interactables)
+    private ObjectGroup[] ConvertToObjectGroups(List<Interactable> _interactables)
     {
         // 위치별로 오브젝트들을 그룹화
         Dictionary<string, List<string>> locationGroups = new Dictionary<string, List<string>>();
 
-        foreach (Interactable interactable in interactables)
+        foreach (Interactable interactable in _interactables)
         {
             if (interactable == null || interactable.mInteractableData == null) continue;
 
@@ -45,36 +74,36 @@ public class AIBridge_Perceive : MonoBehaviour
     }
     
     // 관찰 이벤트 전송(응답없음)
-    public void SendPerceiveEvent(AgentController agent, PerceiveEvent perceiveEvent)
+    public void SendPerceiveEvent(AgentController _agent, PerceiveEvent _perceiveEvent)
     {
-        LogManager.Log("AI", $"[AIBridge_Perceive] SendPerceiveEvent: {perceiveEvent.eventType}, {perceiveEvent.eventLocation}, {perceiveEvent.eventDescription}", 3);
+        LogManager.Log("AI", $"[AIBridge_Perceive] SendPerceiveEvent: {_perceiveEvent.eventType}, {_perceiveEvent.eventLocation}, {_perceiveEvent.eventDescription}", 3);
         // TODO: 관찰 이벤트 전송 엔드포인트 구현 후 주석 해제
-        //StartCoroutine(SendPerceiveEventData(agent, perceiveEvent));
+        StartCoroutine(SendPerceiveEventData(_agent, _perceiveEvent));
     }
 
-    IEnumerator SendPerceiveEventData(AgentController agent, PerceiveEvent perceiveEvent){
+    IEnumerator SendPerceiveEventData(AgentController _agent, PerceiveEvent _perceiveEvent){
         mIsRequesting = true;
 
         // ---- 에이전트 정보 ----
         // 현재 에이전트의 상태 정보 가져오기
-        AgentNeeds currentNeeds = agent.AgnetNeeds;
-        var movement = agent.mMovement;
-        var scheduler = agent.mScheduler;
+        AgentNeeds currentNeeds = _agent.AgnetNeeds;
+        var movement = _agent.mMovement;
+        var scheduler = _agent.mScheduler;
 
         // AI 서버에 보낼 요청 데이터 생성
-        var visibleObjectGroups = ConvertToObjectGroups(agent.mVisibleInteractables);
+        var visibleObjectGroups = ConvertToObjectGroups(_agent.mVisibleInteractables);
 
         // 에이전트의 현재 위치 가져오기 (CurrentAction이 null일 경우 대비)
         string agentLocation = "Unknown"; // 기본값
-        Interactable agentInteractable = agent.GetComponent<Interactable>();
+        Interactable agentInteractable = _agent.GetComponent<Interactable>();
         if (agentInteractable != null && !string.IsNullOrEmpty(agentInteractable.CurrentLocation))
         {
             agentLocation = agentInteractable.CurrentLocation;
         }
-        else if (agent.CurrentAction != null && !string.IsNullOrEmpty(agent.CurrentAction.LocationName))
+        else if (_agent.CurrentAction != null && !string.IsNullOrEmpty(_agent.CurrentAction.LocationName))
         {
             // CurrentAction이 있고 LocationName이 유효하면 해당 위치 사용
-            agentLocation = agent.CurrentAction.LocationName;
+            agentLocation = _agent.CurrentAction.LocationName;
         }
 
         for (int i = 0; i < visibleObjectGroups.Length; i++)
@@ -86,21 +115,100 @@ public class AIBridge_Perceive : MonoBehaviour
         {
             agent = new Agent
             {
-                name = agent.AgentName,
+                name = _agent.AgentName,
                 state = currentNeeds,
-                location = agentLocation,
+                current_location = agentLocation,
                 personality = "friendly, helpful", // TODO: 에이전트별 성격 구현 필요
-                visible_objects = visibleObjectGroups
+                time = TimeManager.Instance.GetCurrentGameTime(),
+                visible_objects = visibleObjectGroups,
+                perceiveEvent = _perceiveEvent,          
             }
         };
         // ---- 이벤트 정보 ----
         // perceiveEvent를 JSON으로 변환
-        string eventJson = JsonUtility.ToJson(perceiveEvent);
-        LogManager.Log("AI", $"[AIBridge_Perceive] perceiveEvent JSON: {eventJson}", 3);
+        string requestJson = JsonUtility.ToJson(requestData);
+        LogManager.Log("AI", $"[AIBridge_Perceive] perceiveEvent JSON: {requestData}", 3);
 
         // HTTP 요청 설정 (임시 주소)
         UnityWebRequest request = new UnityWebRequest("http://127.0.0.1:5000/perceive", "POST");
-        byte[] bodyRaw = Encoding.UTF8.GetBytes(eventJson);
+        byte[] bodyRaw = Encoding.UTF8.GetBytes(requestJson);
+        request.uploadHandler = new UploadHandlerRaw(bodyRaw);
+        request.downloadHandler = new DownloadHandlerBuffer();
+        request.SetRequestHeader("Content-Type", "application/json");
+
+        yield return request.SendWebRequest();
+
+        mIsRequesting = false;
+
+        if (request.result == UnityWebRequest.Result.Success)
+        {
+            LogManager.Log("AI", $"✅ perceiveEvent 전송 성공: " + request.downloadHandler.text, 2);
+        }
+        else
+        {
+            LogManager.Log("AI", $"❌ perceiveEvent 전송 실패: " + request.error, 0);
+        }
+    }
+
+    // 반응 판단 이벤트 전송(반환값 true, false)
+    public void SendReactJudgeEvent(AgentController _agent, PerceiveEvent _perceiveEvent)
+    {
+        LogManager.Log("AI", $"[AIBridge_Perceive] SendReactJudgeEvent: {_perceiveEvent.eventType}, {_perceiveEvent.eventLocation}, {_perceiveEvent.eventDescription}", 3);
+        // TODO: 관찰 이벤트 전송 엔드포인트 구현 후 주석 해제
+        StartCoroutine(SendReactJudgeEventData(_agent, _perceiveEvent));
+    }
+
+    IEnumerator SendReactJudgeEventData(AgentController _agent, PerceiveEvent _perceiveEvent){
+        mIsRequesting = true;
+
+        // ---- 에이전트 정보 ----
+        // 현재 에이전트의 상태 정보 가져오기
+        AgentNeeds currentNeeds = _agent.AgnetNeeds;
+        var movement = _agent.mMovement;
+        var scheduler = _agent.mScheduler;
+
+        // AI 서버에 보낼 요청 데이터 생성
+        var visibleObjectGroups = ConvertToObjectGroups(_agent.mVisibleInteractables);
+
+        // 에이전트의 현재 위치 가져오기 (CurrentAction이 null일 경우 대비)
+        string agentLocation = "Unknown"; // 기본값
+        Interactable agentInteractable = _agent.GetComponent<Interactable>();
+        if (agentInteractable != null && !string.IsNullOrEmpty(agentInteractable.CurrentLocation))
+        {
+            agentLocation = agentInteractable.CurrentLocation;
+        }
+        else if (_agent.CurrentAction != null && !string.IsNullOrEmpty(_agent.CurrentAction.LocationName))
+        {
+            // CurrentAction이 있고 LocationName이 유효하면 해당 위치 사용
+            agentLocation = _agent.CurrentAction.LocationName;
+        }
+
+        for (int i = 0; i < visibleObjectGroups.Length; i++)
+        {
+            LogManager.Log("AI", $"[AIBridge_Perceive] ObjectGroup {i}: location={visibleObjectGroups[i].location}, objects=[{string.Join(",", visibleObjectGroups[i].objects)}]", 3);
+        }
+
+        AgentRequest requestData = new AgentRequest
+        {
+            agent = new Agent
+            {
+                name = _agent.AgentName,
+                state = currentNeeds,
+                current_location = agentLocation,
+                personality = "friendly, helpful", // TODO: 에이전트별 성격 구현 필요
+                time = TimeManager.Instance.GetCurrentGameTime(),
+                visible_objects = visibleObjectGroups,
+                perceiveEvent = _perceiveEvent,          
+            }
+        };
+        // ---- 이벤트 정보 ----
+        // perceiveEvent를 JSON으로 변환
+        string requestJson = JsonUtility.ToJson(requestData);
+        LogManager.Log("AI", $"[AIBridge_Perceive] perceiveEvent JSON: {requestData}", 3);
+
+        // HTTP 요청 설정 (임시 주소)
+        UnityWebRequest request = new UnityWebRequest("http://127.0.0.1:5000/react", "POST");
+        byte[] bodyRaw = Encoding.UTF8.GetBytes(requestJson);
         request.uploadHandler = new UploadHandlerRaw(bodyRaw);
         request.downloadHandler = new DownloadHandlerBuffer();
         request.SetRequestHeader("Content-Type", "application/json");
