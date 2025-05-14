@@ -1,7 +1,5 @@
-// AgentStateMachine.cs - 상태 관리 클래스 (개선된 메서드명)
 using System.Collections.Generic;
 using UnityEngine;
-using OhMAIGod.Agent;
 
 namespace OhMAIGod.Agent
 {
@@ -13,9 +11,11 @@ namespace OhMAIGod.Agent
         private AgentStateHandler mPreviousState;
         private AgentState mCurrentStateType;
         private AgentState mPreviousStateType;
+        private bool mAllowStateChange = true;
 
         public AgentState CurrentStateType {get {return mCurrentStateType;} }
         public AgentState PreviousStateType { get {return mPreviousStateType;} }
+        public bool AllowStateChange { get {return mAllowStateChange;} set {mAllowStateChange = value;} }
 
         public AgentStateMachine(AgentController _controller)
         {
@@ -43,7 +43,7 @@ namespace OhMAIGod.Agent
         public void ChangeState(AgentState _newStateType)
         {
             if (mCurrentStateType == _newStateType)  return;
-
+            if (!mAllowStateChange && mCurrentStateType == AgentState.WAITING_FOR_AI_RESPONSE) return;
             // 디버깅용
             LogManager.Log("Agent", $"{mController.AgentName}: 상태 변경 {mCurrentStateType} -> {_newStateType}", 2);
 

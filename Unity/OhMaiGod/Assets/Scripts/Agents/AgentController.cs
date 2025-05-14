@@ -60,7 +60,6 @@ public class AgentController : MonoBehaviour
     [SerializeField] private bool mAutoStart = true;                // 자동 시작 여부
     [SerializeField] [Tooltip("감정 상태 자동 증가 간격 (분)")] private int mNeedIntervalMinutes = 30;
     private TimeSpan mLastNeedsIncreaseTime; // 마지막 감정 상태 자동 증가 시각
-    private AgentStateMachine mStateMachine;
 
     [Header("디버깅")]
     [SerializeField] private bool mShowDebugInfo = true;            // 디버그 정보 표시 여부
@@ -77,12 +76,14 @@ public class AgentController : MonoBehaviour
     public ScheduleItem CurrentAction => mCurrentAction;
     public string CurrentLocation => mCurrentLocation;
     public Interactable CurrentTargetInteractable => mCurrentTargetInteractable;
+    public bool AllowStateChange {get {return mStateMachine.AllowStateChange;} set {mStateMachine.AllowStateChange = value;}}
+    
     public Animator animator;  // 애니메이터
     // AIBridge에서 Agent만 가져오면 나머지도 가져올 수 있게 public으로 변경
     [SerializeField] public AgentScheduler mScheduler;
     [SerializeField] public MovementController mMovement;
     [SerializeField] public Interactable mInteractable;
-
+    private AgentStateMachine mStateMachine;
 
     // 시야 내의 오브젝트 목록
     public List<Interactable> mVisibleInteractables = new List<Interactable>();
