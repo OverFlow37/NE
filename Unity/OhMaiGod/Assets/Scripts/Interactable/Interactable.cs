@@ -31,6 +31,8 @@ public class Interactable : MonoBehaviour
     // 타겟컨트롤러
     private TargetController mTargetController;
     public TargetController TargetController { get { return mTargetController; } }
+    // 스프라이트 렌더러
+    private SpriteRenderer mSpriteRenderer;
 
     void Awake()
     {
@@ -44,6 +46,12 @@ public class Interactable : MonoBehaviour
             // InteractableData와 동기화
             InteractableName = mInteractableData.mName;
             InteractableType = mInteractableData.mType;
+
+            mSpriteRenderer = GetComponent<SpriteRenderer>();
+            if (mSpriteRenderer != null)
+            {
+                mInteractableData.mIcon = mSpriteRenderer.sprite;
+            }
         }
 
         mTargetController = GetComponent<TargetController>();

@@ -57,9 +57,15 @@ public class GetAction : InteractionAction
         }
 
 
-        // Furniture나 Resource가 아니라면 인벤토리로 이동
+        // Furniture나 Resource가 아니라면 인벤토리로 이동 시도
         if (targetInteractable.InteractableType != InteractableData.Types.Furniture && targetInteractable.InteractableType != InteractableData.Types.Resource)
         {
+            // 인벤토리가 가득 찼으면 피드백
+            if (Inventory.Instance.Items.Count >= Inventory.Instance.MaxSlotCount)
+            {
+                LogManager.Log("Interact", $"인벤토리가 가득 찼습니다.", 1);
+                return false;
+            }
             // 행동 완료 후 오브젝트 제거
             LogManager.Log("Interact", $"get {targetInteractable.InteractableName}");
             targetInteractable.RemoveObject();

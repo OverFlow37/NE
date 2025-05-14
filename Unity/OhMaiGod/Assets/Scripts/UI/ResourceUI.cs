@@ -16,13 +16,13 @@ public class ResourceUI : MonoBehaviour
         switch (mResourceType)
         {
             case Inventory.ResourceType.Wood:
-                mText.text = "WOOD  : " + string.Format("{0}", Inventory.Instance.mResourceItems.wood);
+                mText.text = "WOOD  : " + string.Format("{0}", Inventory.Instance.ResourceItems.wood);
                 break;
             case Inventory.ResourceType.Stone:
-                mText.text = "STONE : " + string.Format("{0}", Inventory.Instance.mResourceItems.stone);
+                mText.text = "STONE : " + string.Format("{0}", Inventory.Instance.ResourceItems.stone);
                 break;
             case Inventory.ResourceType.Power:
-                mText.text = "POWER : " + string.Format("{0}", Inventory.Instance.mResourceItems.power);
+                mText.text = "POWER : " + string.Format("{0}", Inventory.Instance.ResourceItems.power);
                 break;
         }
     }

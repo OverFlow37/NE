@@ -6,7 +6,7 @@ public class Inventory : MonoBehaviour
     // 싱글톤 인스턴스
     public static Inventory Instance { get; private set; }
 
-    public class ResourceItems
+    public class ResourceItemsCount
     {
         public int wood = 0;
         public int stone = 0;
@@ -14,8 +14,12 @@ public class Inventory : MonoBehaviour
     }
 
     [SerializeField, ReadOnly] private List<GameObject> mItems = new List<GameObject>();
-    [SerializeField, ReadOnly] public ResourceItems mResourceItems { get; private set; } = new ResourceItems();
+    [SerializeField, ReadOnly] public ResourceItemsCount mResourceItems = new ResourceItemsCount();
+    [SerializeField] public int mMaxSlotCount = 20;
+    public ResourceItemsCount ResourceItems => mResourceItems;
+    public int MaxSlotCount => mMaxSlotCount;
 
+    public List<GameObject> Items => mItems;
 
     private void Awake()
     {
@@ -31,11 +35,13 @@ public class Inventory : MonoBehaviour
     public void AddItem(GameObject _item)
     {
         mItems.Add(_item);
+        InventoryUI.Instance.UpdateInventoryUI();
     }
 
     public void RemoveItem(GameObject _item)
     {
         mItems.Remove(_item);
+        InventoryUI.Instance.UpdateInventoryUI();
     }
 
     public void AddResource(ResourceType _resourceType, int _amount)
@@ -75,20 +81,6 @@ public class Inventory : MonoBehaviour
                 break;
         }
     }
-
-    // UI에서 인벤토리를 표시할 수 있도록 임시로 문자열로 반환하는 메서드 추가
-    public string GetInventoryString()
-    {
-        if (mItems == null || mItems.Count == 0)
-            return "인벤토리 비어있음";
-        System.Text.StringBuilder sb = new System.Text.StringBuilder();
-        foreach (var item in mItems)
-        {
-            sb.AppendLine($"{item.GetComponent<Interactable>().InteractableName} : {item.name}");
-        }
-        return sb.ToString();
-    }
-
     
     public enum ResourceType
     {
