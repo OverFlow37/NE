@@ -238,11 +238,74 @@ class MemoryRetriever:
             interactables = location_data.get("interactables", [])
             
             if location and interactables:
-                interactable_str = ", ".join(interactables)
-                interactable_strings.append(f"In {location}: {interactable_str}")
+                for target in interactables:
+                    interactable_strings.append(f"{target} in {location}")
         
         return "\n".join(interactable_strings) if interactable_strings else "Nothing visible nearby."
-    
+
+    def _format_state(self, state: Dict[str, int]) -> str:
+        """
+        상태 정보를 문자열로 변환
+        
+        Args:
+            state: 상태 정보 딕셔너리
+            
+        Returns:
+            str: 포맷된 상태 문자열
+        """
+        if not state:
+            return ""
+            
+        state_strings = []
+        
+        # hunger와 loneliness는 양수일 때 해당 욕구가 높음
+        if "hunger" in state:
+            hunger = state["hunger"]
+            if hunger >= 70:
+                state_strings.append("very hungry")
+            elif hunger >= 40:
+                state_strings.append("hungry")
+            elif hunger >= 10:
+                state_strings.append("slightly hungry")
+            elif hunger >= -10:
+                state_strings.append("not hungry")
+            else:
+                state_strings.append("not hungry at all")
+                
+        if "loneliness" in state:
+            loneliness = state["loneliness"]
+            if loneliness >= 70:
+                state_strings.append("very lonely")
+            elif loneliness >= 40:
+                state_strings.append("lonely")
+            elif loneliness >= 10:
+                state_strings.append("slightly lonely")
+            elif loneliness >= -10:
+                state_strings.append("not lonely")
+            else:
+                state_strings.append("want to be alone")
+                
+        # sleepiness와 stress는 0 이하일 때 표시하지 않음
+        if "sleepiness" in state and state["sleepiness"] > 0:
+            sleepiness = state["sleepiness"]
+            if sleepiness >= 70:
+                state_strings.append("very sleepy")
+            elif sleepiness >= 40:
+                state_strings.append("sleepy")
+            elif sleepiness >= 1:
+                state_strings.append("slightly sleepy")
+                
+        if "stress" in state and state["stress"] > 0:
+            stress = state["stress"]
+            if stress >= 70:
+                state_strings.append("very stressed")
+            elif stress >= 40:
+                state_strings.append("stressed")
+            elif stress >= 1:
+                state_strings.append("slightly stressed")
+        
+        return ", ".join(state_strings) if state_strings else ""
+
     def create_reaction_prompt(
         self,
         event_sentence: str,
@@ -327,48 +390,32 @@ class MemoryRetriever:
         similar_event_str = "\n".join(similar_events) if similar_events else "No similar past events found."
         
         # 에이전트 정보 처리
-        agent_info = "Name: " + agent_name
-        personality = ""
-        current_location = ""
-        visible_interactables = []
+        agent_info = f"{agent_name} in {agent_data.get('current_location', '')}" if agent_data else agent_name
         
-        if agent_data:
-            if "personality" in agent_data:
-                personality = agent_data["personality"]
-            
-            if "current_location" in agent_data:
-                current_location = agent_data["current_location"]
-            
-            # 상호작용 가능한 객체 정보 추출
-            if "visible_interactables" in agent_data:
-                for location_data in agent_data["visible_interactables"]:
-                    location = location_data.get("location", "")
-                    interactables = location_data.get("interactables", [])
-                    
-                    if location and interactables:
-                        visible_interactables.append({
-                            "location": location,
-                            "interactables": interactables
-                        })
+        # 상태 정보 처리
+        state_str = ""
+        if agent_data and "state" in agent_data:
+            state_str = self._format_state(agent_data["state"])
         
-        # 상호작용 가능한 객체 문자열 생성
+        # 상호작용 가능한 객체 정보 처리
         visible_interactables_str = ""
-        if visible_interactables:
-            visible_interactables_str = "Visible and can interact with:\n"
-            for loc_obj in visible_interactables:
-                location = loc_obj["location"]
-                interactables = ", ".join(loc_obj["interactables"])
-                visible_interactables_str += f"- Location: {location}, Interactables: {interactables}\n"
+        if agent_data and "visible_interactables" in agent_data:
+            visible_interactables_str = self._format_visible_interactables(agent_data["visible_interactables"])
         
         # 에이전트 정보 문자열 생성
-        agent_data_str = f"Name: {agent_name}\n"
-        if personality:
-            agent_data_str += f"Personality: {personality}\n"
-        if current_location:
-            agent_data_str += f"Current Location: {current_location}\n"
-        if visible_interactables_str:
-            agent_data_str += visible_interactables_str
+        agent_data_str = f"Name and Location: {agent_info}\n"
         
+        # 성격 정보 추가
+        if agent_data and "personality" in agent_data:
+            agent_data_str += f"Personality: {agent_data['personality']}\n"
+            
+        # 상태 정보 추가
+        if state_str:
+            agent_data_str += f"Current State: {state_str}\n"
+            
+        # 상호작용 가능한 객체 정보 추가
+        if visible_interactables_str:
+            agent_data_str += f"Visible and can interact with:\n{visible_interactables_str}\n"
 
         # 프롬프트 생성
         try:
