@@ -423,7 +423,7 @@ class MemoryRetriever:
                 AGENT_NAME=agent_name,
                 AGENT_DATA=agent_data_str,
                 EVENT_CONTENT=event_sentence,
-                SIMILAR_EVENT=similar_event_str
+                RELEVANT_MEMORIES=similar_event_str
             )
             return prompt
         except Exception as e:
