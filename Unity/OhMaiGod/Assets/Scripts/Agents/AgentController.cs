@@ -307,7 +307,7 @@ public class AgentController : MonoBehaviour
         // 속마음 표시
         if (mCurrentAction != null)
         {
-            mAgentUI.ShowThoughtInfo(mCurrentAction.Reason);
+            mAgentUI.ShowThoughtInfo(mCurrentAction.Thought);
         }
     }
 

@@ -47,7 +47,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mEventInfo:
-    event_type: 0
+    event_type: 2
     event_location: 
     event_description: I saw great power of god
   mLifeDuration: 10

@@ -54,6 +54,28 @@ public class AIBridge_Perceive : MonoBehaviour
         public int event_id;
     }
 
+    [System.Serializable]
+    public struct ResponseActionDetails
+    {
+        public string location;
+        public string target;
+        public string duration;
+        public string thought;
+    }
+
+    [System.Serializable]
+    public struct ResponseActionData
+    {
+        public string action;
+        public ResponseActionDetails details;
+    }
+
+    [System.Serializable]
+    public struct ResponseActionRoot
+    {
+        public bool success;
+        public ResponseActionData data;
+    }
 
      // 싱글톤
     private static AIBridge_Perceive mInstance;
@@ -350,10 +372,62 @@ public class AIBridge_Perceive : MonoBehaviour
         if (request.result == UnityWebRequest.Result.Success)
         {
             LogManager.Log("AI", $"✅ 반응 행동 응답받음: " + request.downloadHandler.text, 2);
+            ProcessResponseScheduleItem(request.downloadHandler.text, _agent);
         }
         else
         {
             LogManager.Log("AI", $"❌ 반응 행동 응답실패: " + request.error, 0);
+        }
+    }
+
+    // AI 서버로부터 받은 응답을 처리하는 함수 (에이전트별)
+    private void ProcessResponseScheduleItem(string _response, AgentController _agent)
+    {
+        try
+        {
+            // JSON 응답을 객체로 변환
+            ResponseActionRoot responseRoot = JsonUtility.FromJson<ResponseActionRoot>(_response);
+            LogManager.Log("AI", $"응답: {_response}", 3);
+            // 응답 유효성 검사
+            if (!responseRoot.success || string.IsNullOrEmpty(responseRoot.data.action))
+            {
+                LogManager.Log("AI", $"Invalid response format or success is false (에이전트: {_agent.AgentName})", 0);
+                return;
+            }
+            ResponseActionData actionData = responseRoot.data;
+            ResponseActionDetails details = actionData.details;
+            // 현재 시간 가져오기 및 활동 지속 시간 설정
+            TimeSpan currentTime = TimeManager.Instance.GetCurrentGameTime();
+            int durationMinutes = 30;
+            //int.TryParse(details.duration, out durationMinutes);
+            TimeSpan duration = TimeSpan.FromMinutes(durationMinutes);
+            TimeSpan endTime = currentTime.Add(duration);
+            // 새로운 일정 아이템 생성
+            ScheduleItem newScheduleItem = new ScheduleItem
+            (
+                actionData.action,
+                details.location,
+                details.target,
+                currentTime,
+                endTime,
+                1, 
+                details.thought
+            );
+            // 스케줄러에 새 일정 추가
+            bool success = _agent.mScheduler.AddScheduleItem(newScheduleItem);
+            // 일정 추가 결과 로깅
+            if (!success)
+            {
+                LogManager.Log("AI", $"Failed to add schedule item: {newScheduleItem.ActionName} @ {newScheduleItem.LocationName} (에이전트: {_agent.AgentName})", 0);
+            }
+            else
+            {
+                LogManager.Log("AI", $"Successfully added and started new Action: {newScheduleItem.ActionName} @ {newScheduleItem.LocationName} (에이전트: {_agent.AgentName})", 2);
+            }
+        }
+        catch (Exception ex)
+        {
+            LogManager.Log("AI", $"Error processing response (에이전트: {_agent.AgentName}): {ex.Message}\n{ex.StackTrace}", 0);
         }
     }
 

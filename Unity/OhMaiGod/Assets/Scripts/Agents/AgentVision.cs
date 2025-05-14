@@ -162,7 +162,7 @@ public class AgentVision : MonoBehaviour
                 PerceiveEvent perceiveEvent = new PerceiveEvent();
                 perceiveEvent.event_type = eventController.mEventInfo.event_type;
                 // TODO: 이벤트 위치가 오브젝트 위치가 아니라 이벤트 위치를 전송해야함
-                perceiveEvent.event_location = mAgentController.CurrentLocation;
+                perceiveEvent.event_location = " ";
                 perceiveEvent.event_description = eventController.mEventInfo.event_description;
                 mAIBridgePerceive.SendReactJudgeEvent(mAgentController, perceiveEvent);
             }

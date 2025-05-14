@@ -50,7 +50,7 @@ public struct Action
     public string action;               // 수행할 행동
     public string agent;                // 행동을 수행할 에이전트
     public ActionDetails details;       // 행동의 세부 정보
-    public string reason;               // 행동의 이유
+    public string thought;              // 속마음
 }
 
 // AI 응답 데이터를 감싸는 래퍼 구조체
@@ -247,7 +247,7 @@ public class AIBridge : MonoBehaviour
                 currentTime,
                 endTime,
                 1, 
-                action.reason
+                action.thought
             );
             // 스케줄러에 새 일정 추가
             bool success = agent.mScheduler.AddScheduleItem(newScheduleItem);
