@@ -47,9 +47,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mEventInfo:
-    eventType: 2
-    eventLocation: 
-    eventDescription: I saw great power!
+    event_type: 0
+    event_location: 
+    event_description: I saw great power of god
   mLifeDuration: 10
 --- !u!50 &2803138962325272710
 Rigidbody2D:
