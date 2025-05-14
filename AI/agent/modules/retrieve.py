@@ -232,14 +232,39 @@ class MemoryRetriever:
         if not visible_interactables:
             return "Nothing visible nearby."
         
-        interactable_strings = []
+        # 각 위치별로 객체 개수를 세기 위한 딕셔너리
+        location_object_counts = {}
+        
+        # 각 위치별로 객체 개수 세기
         for location_data in visible_interactables:
             location = location_data.get("location", "")
             interactables = location_data.get("interactables", [])
             
             if location and interactables:
+                if location not in location_object_counts:
+                    location_object_counts[location] = {}
+                
+                # 각 객체별로 개수 세기
                 for target in interactables:
-                    interactable_strings.append(f"{target} in {location}")
+                    if target not in location_object_counts[location]:
+                        location_object_counts[location][target] = 0
+                    location_object_counts[location][target] += 1
+        
+        # 결과 문자열 생성
+        interactable_strings = []
+        for location, objects in location_object_counts.items():
+            for target, count in objects.items():
+                # 개수에 따른 표현 결정
+                if count == 1:
+                    quantity = ""
+                elif count < 3:
+                    quantity = "a few "
+                elif count < 5:
+                    quantity = "several "
+                else:
+                    quantity = "many "
+                
+                interactable_strings.append(f"{quantity}{target} in {location}")
         
         return "\n".join(interactable_strings) if interactable_strings else "Nothing visible nearby."
 
