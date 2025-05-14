@@ -26,8 +26,8 @@ namespace OhMAIGod.Perceive{
     [System.Serializable]
     public struct PerceiveEvent
     {
-        public PerceiveEventType eventType; // 이벤트 타입
-        public string eventLocation;        // 이벤트 발생 위치
-        public string eventDescription;     // 이벤트 설명
+        public PerceiveEventType event_type; // 이벤트 타입
+        public string event_location;        // 이벤트 발생 위치
+        public string event_description;     // 이벤트 설명
     }
 }

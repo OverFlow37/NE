@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 using OhMAIGod.Agent;
-
+using OhMAIGod.Perceive;
 public class AgentController : MonoBehaviour
 {
     [SerializeField] public AgentUI mAgentUI;
@@ -544,7 +544,17 @@ public class AgentController : MonoBehaviour
     }
 
     // 반응 판단 받았을 때, AIBridge에서 이 함수를 호출
-    public void ReactToResponse(string _response){
-
+    public void ReactToResponse(bool _response, PerceiveEvent _perceiveEvent){
+        LogManager.Log("Agent", $"{mName}: 반응 판단 결과 받음: {_response}", 2);
+        // TODO: 반응 UI 종료 처리
+        if(_response){
+            // state를 WAITING FOR AI RESPONSE로 변경
+            mStateMachine.ChangeState(AgentState.WAITING_FOR_AI_RESPONSE);
+            // AIBridge_perceive에 반응 행동 요청하기
+            AIBridge_Perceive.Instance.SendReactActionEvent(this, _perceiveEvent);
+        }
+        else{
+            // 반응 판단 결과 처리
+        }
     }
 }
