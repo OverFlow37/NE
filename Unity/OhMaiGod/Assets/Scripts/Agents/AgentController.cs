@@ -90,6 +90,8 @@ public class AgentController : MonoBehaviour
     private Coroutine mInteractionCoroutine;
     public float mInteractionProgress = 0f; // 상호작용 진행도(0~1)
 
+    public bool mIsReactJudge = false;
+
     private void Awake()
     {
         // 참조 가져오기
@@ -546,12 +548,13 @@ public class AgentController : MonoBehaviour
     // 반응 판단 받았을 때, AIBridge에서 이 함수를 호출
     public void ReactToResponse(bool _response, PerceiveEvent _perceiveEvent){
         LogManager.Log("Agent", $"{mName}: 반응 판단 결과 받음: {_response}", 2);
+        mIsReactJudge = false;
         // TODO: 반응 UI 종료 처리
-        if(_response){
-            // state를 WAITING FOR AI RESPONSE로 변경
-            mStateMachine.ChangeState(AgentState.WAITING_FOR_AI_RESPONSE);
+        if(_response){            
             // AIBridge_perceive에 반응 행동 요청하기
             AIBridge_Perceive.Instance.SendReactActionEvent(this, _perceiveEvent);
+            // state를 WAITING FOR AI RESPONSE로 변경
+            mStateMachine.ChangeState(AgentState.WAITING_FOR_AI_RESPONSE);
         }
         else{
             // 반응 판단 결과 처리

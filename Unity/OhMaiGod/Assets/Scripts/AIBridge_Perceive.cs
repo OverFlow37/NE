@@ -57,8 +57,8 @@ public class AIBridge_Perceive : MonoBehaviour
     [System.Serializable]
     public struct ResponseActionDetails
     {
-        public string location;
-        public string target;
+        public string target_location;
+        public string target_interactable;
         public string duration;
         public string thought;
     }
@@ -216,8 +216,12 @@ public class AIBridge_Perceive : MonoBehaviour
     // 반응 판단 이벤트 전송(반환값 true, false)
     public void SendReactJudgeEvent(AgentController _agent, PerceiveEvent _perceiveEvent)
     {
+        if(_agent.mIsReactJudge) {
+            LogManager.Log("AI", $"[AIBridge_Perceive] 이미 반응 판단 중입니다.", 2);
+            return;
+        }
         LogManager.Log("AI", $"[AIBridge_Perceive] SendReactJudgeEvent: {_perceiveEvent.event_type}, {_perceiveEvent.event_location}, {_perceiveEvent.event_description}", 3);
-        // TODO: 관찰 이벤트 전송 엔드포인트 구현 후 주석 해제
+        _agent.mIsReactJudge = true;
         StartCoroutine(SendReactJudgeEventData(_agent, _perceiveEvent));
     }
 
@@ -305,6 +309,10 @@ public class AIBridge_Perceive : MonoBehaviour
     // 반응 행동 이벤트 전송(반환값 true, false)
     public void SendReactActionEvent(AgentController _agent, PerceiveEvent _perceiveEvent)
     {
+        if(_agent.CurrentState == AgentState.WAITING_FOR_AI_RESPONSE) {
+            LogManager.Log("AI", $"[AIBridge_Perceive] 반응행동 응답 대기중입니다.", 2);
+            return;
+        }
         LogManager.Log("AI", $"[AIBridge_Perceive] SendReactActionEvent: {_perceiveEvent.event_type}, {_perceiveEvent.event_location}, {_perceiveEvent.event_description}", 3);
         // TODO: 관찰 이벤트 전송 엔드포인트 구현 후 주석 해제
         StartCoroutine(SendReactActionEventData(_agent, _perceiveEvent));
@@ -406,8 +414,8 @@ public class AIBridge_Perceive : MonoBehaviour
             ScheduleItem newScheduleItem = new ScheduleItem
             (
                 actionData.action,
-                details.location,
-                details.target,
+                details.target_location,
+                details.target_interactable,
                 currentTime,
                 endTime,
                 1, 
