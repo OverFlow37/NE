@@ -53,12 +53,6 @@ try:
 except Exception as e:
     print(f"❌ EmbeddingUpdater 임포트 실패: {e}")
 
-try:
-    from agent.prompts.json_to_prompt import format_prompt
-    print("✅ json_to_prompt 임포트 완료")
-except Exception as e:
-    print(f"❌ json_to_prompt 임포트 실패: {e}")
-
 from agent.modules.event_id_manager import EventIdManager
 from agent.modules.reaction_decider import ReactionDecider
 
@@ -184,62 +178,6 @@ def load_prompt_file(file_path: Path) -> str:
 @app.get("/hello")
 async def hello():
     return "Hello from Python!"
-
-@app.post("/action")
-async def receive_data(payload: dict):
-    print("Unity로부터 받은 데이터:", payload)
-
-    # 프롬프트 생성
-    prompt = format_prompt(payload)
-    
-    # Future를 사용하여 응답 대기
-    future = asyncio.Future()
-    
-    async def handle_response(response):
-        try:
-            answer = response.get("response", "")
-            
-            # 1) 펜스 제거
-            cleaned = answer.replace("```json", "").replace("```", "").strip()
-
-            # 2) JSON 텍스트만 추출 (가장 바깥 중괄호 영역)
-            match = re.search(r'\{.*\}', cleaned, flags=re.DOTALL)
-            if not match:
-                future.set_exception(HTTPException(status_code=500, detail="응답에서 JSON을 찾을 수 없습니다."))
-                return
-            json_text = match.group(0)
-
-            # 3) 파싱
-            try:
-                action_obj = json.loads(json_text)
-                future.set_result(action_obj)
-            except json.JSONDecodeError as e:
-                future.set_exception(HTTPException(status_code=500, detail=f"JSON 파싱 실패: {e}"))
-        except Exception as e:
-            future.set_exception(HTTPException(status_code=500, detail=str(e)))
-
-    async def handle_error(error):
-        future.set_exception(HTTPException(status_code=500, detail=str(error)))
-
-    # 프롬프트 처리 요청
-    await client.process_prompt(
-        prompt=prompt,
-        system_prompt="You are a helpful AI assistant that responds in JSON format.",
-        model_name="gemma3",
-        callback=handle_response,
-        error_callback=handle_error
-    )
-
-    try:
-        # 응답 대기
-        action_obj = await future
-        return {
-            "action": action_obj
-        }
-    except HTTPException as e:
-        raise e
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/perceive")
 async def perceive_event(payload: dict):
