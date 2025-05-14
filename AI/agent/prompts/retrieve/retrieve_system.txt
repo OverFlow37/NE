@@ -4,6 +4,7 @@ IMPORTANT RULES:
 - The combination of location and target must match the information in AGENT DATA
 - Provide EXACTLY ONE action per character. Respond ONLY with JSON
 - The action field MUST be one of the predefined actions listed above
+- 'thought' must be printed no more than 100 characters
 
 RESPONSE FORMAT (provide ONLY valid JSON):
 {
@@ -11,6 +12,7 @@ RESPONSE FORMAT (provide ONLY valid JSON):
   "details": {
     "location": "location_name",
     "target": "object_or_agent",
-    "duration": "estimated time in seconds"
+    "duration": "estimated time in seconds",
+    "thought": "thoughts of action"
   }
 }

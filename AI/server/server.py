@@ -229,7 +229,7 @@ async def should_react(payload: dict):
             
         agent_data = payload.get('agent', {})
         agent_name = agent_data.get('name', 'John')
-        event_data = agent_data.get('event', {})
+        event_data = agent_data.get('perceive_event', {})
         
         # 게임 시간 가져오기
         game_time = agent_data.get('time', None)
@@ -297,10 +297,9 @@ async def react_to_event(payload: dict):
         agent_name = agent_data.get('name', 'John')
         
         # 이벤트 데이터 추출
-        event_data = agent_data.get('event', {})
+        event_data = agent_data.get('perceive_event', {})
         event_type = event_data.get('event_type', '')
         event_location = event_data.get('event_location', '')
-        object_name = event_data.get('object', '')
         
         # 에이전트의 현재 시간 추출
         agent_time = agent_data.get('time', '')
@@ -314,7 +313,6 @@ async def react_to_event(payload: dict):
         print(f"👤 에이전트 이름: {agent_name}")
         print(f"🔍 이벤트 타입: {event_type}")
         print(f"📍 이벤트 위치: {event_location}")
-        print(f"🎯 이벤트 대상: {object_name}")
         print(f"⏰ 에이전트 시간: {agent_time}")
         print(f"🧩 성격: {agent_data.get('personality', 'None')}")
         print(f"📍 현재 위치: {agent_data.get('current_location', 'None')}")
@@ -337,7 +335,6 @@ async def react_to_event(payload: dict):
         event = {
             "event_type": event_type,
             "event_location": event_location,
-            "object": object_name,
             "time": agent_time,  # 시간 정보 추가
             "event_id": event_id  # 이벤트 ID 추가
         }
@@ -416,7 +413,7 @@ async def react_to_event(payload: dict):
                 if "details" not in reaction_obj:
                     reaction_obj["details"] = {
                         "location": event_location,
-                        "target": object_name,
+                        "target": " ",
                         "duration": "60",
                         "reason": "Default action due to incomplete response"
                     }
