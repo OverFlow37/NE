@@ -330,7 +330,7 @@ class MemoryRetriever:
         agent_info = "Name: " + agent_name
         personality = ""
         current_location = ""
-        visible_objects = []
+        visible_interactables = []
         
         if agent_data:
             if "personality" in agent_data:
@@ -346,19 +346,19 @@ class MemoryRetriever:
                     interactables = location_data.get("interactable", [])
                     
                     if location and interactables:
-                        visible_objects.append({
+                        visible_interactables.append({
                             "location": location,
-                            "objects": interactables
+                            "interactables": interactables
                         })
         
         # 상호작용 가능한 객체 문자열 생성
-        visible_objects_str = ""
-        if visible_objects:
-            visible_objects_str = "Visible and can interact with:\n"
-            for loc_obj in visible_objects:
+        visible_interactables_str = ""
+        if visible_interactables:
+            visible_interactables_str = "Visible and can interact with:\n"
+            for loc_obj in visible_interactables:
                 location = loc_obj["location"]
-                objects = ", ".join(loc_obj["objects"])
-                visible_objects_str += f"- Location: {location}, Objects: {objects}\n"
+                interactables = ", ".join(loc_obj["interactables"])
+                visible_interactables_str += f"- Location: {location}, Interactables: {interactables}\n"
         
         # 에이전트 정보 문자열 생성
         agent_data_str = f"Name: {agent_name}\n"
@@ -366,8 +366,8 @@ class MemoryRetriever:
             agent_data_str += f"Personality: {personality}\n"
         if current_location:
             agent_data_str += f"Current Location: {current_location}\n"
-        if visible_objects_str:
-            agent_data_str += visible_objects_str
+        if visible_interactables_str:
+            agent_data_str += visible_interactables_str
         
 
         # 프롬프트 생성
