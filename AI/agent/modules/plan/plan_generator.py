@@ -43,6 +43,7 @@ class PlanGenerator:
         self.prompt_dir = os.path.join(root_dir, "agent", "prompts", "plan")
         self.prompt_path = os.path.join(self.prompt_dir, "plan_prompt.txt")
         self.system_path = os.path.join(self.prompt_dir, "plan_system.txt")
+        self.timeslot_prompt_path = os.path.join(self.prompt_dir, "plan_timeslot_prompt.txt")
         
         # 폴더 생성
         os.makedirs(os.path.dirname(self.plan_file_path), exist_ok=True)
@@ -273,71 +274,18 @@ class PlanGenerator:
                 logger.error("계획 JSON이 제공되지 않았습니다.")
                 return {}
 
-            # Timeslot 객체 생성 
-            prompt = f"""
-            The following is the agent's daily plan:
-            {json.dumps(plan_json, ensure_ascii=False, indent=2)}
+            # 프롬프트 템플릿 로드
+            try:
+                with open(self.timeslot_prompt_path, 'r', encoding='utf-8') as f:
+                    prompt_template = f.read().strip()
+            except Exception as e:
+                logger.error(f"타임슬롯 프롬프트 템플릿 로드 실패: {e}")
+                return {}
 
-            Based on this plan, generate a valid `time_slots` array that assigns appropriate time blocks to each activity.
-
-            **🕓 PLANNING RULES:**
-
-            * `eat` schedule:
-
-                * Breakfast: around **08:00**
-                * Lunch: around **12:00**
-                * Dinner: around **18:00**
-                * *Avoid scheduling `eat` outside these periods unless strongly justified by reflections or special context.*
-
-            * Each `eat` action must last exactly **1 hour**.
-
-            * Each `use` action must last **at least 2 hours**.
-
-            * ⛔️ No activities may be scheduled between **00:00 and 06:00** — this time is reserved for sleep.
-
-            * All time slots must be **sequential and continuous** from **06:00 to 24:00**:
-                * The start time of each slot must match the end time of the previous one.
-                * There must be **no gaps** or overlapping intervals.
-
-            * ✅ Example:
-                `["use", "shoreline", "crab", "06:00", "08:00", 6]`  
-                followed by  
-                `["eat", "cafe", "pastry_display", "08:00", "09:00", 5]`
-
-            * ❌ Invalid: gaps (e.g., 11:00–12:00) or overlapping time slots.
-
-            * The **final activity must end at or after 23:00** to ensure the full day is meaningfully utilized.  
-            Do not end the schedule early unless strictly required by constraints.
-
-
-            ---
-
-            ** Importance Scoring Criteria:**
-
-                * **1–3**: Minor everyday actions
-                * **4–6**: Moderate insights from regular experiences
-                * **7–8**: Significant personal realizations or reflections
-                * **9–10**: Major life-changing actions or decisions
-
-                * Importance scores should be **realistically distributed** across the full range (1–10), based on the depth of insight or impact of the activity.
-                - Avoid assigning all activities high importance (7+), unless strongly supported by reflections.
-                - At least a few actions should fall into the **1–5** range to reflect routine or minor tasks.
-
-            ---
-
-            **IMPORTANT RULES**
-
-            * All `time_slots` must be **sequential and continuous** from **06:00 to 24:00**.
-
-            **📤 OUTPUT FORMAT (strictly JSON):**
-            {{ 
-                "time_slots": [
-                    ["action", "location", "target", "start time", "end time", "importance"],
-                    ...
-                ]
-            }}
-
-            """
+            # 프롬프트 생성
+            prompt = prompt_template.format(
+                PLAN_JSON=json.dumps(plan_json, ensure_ascii=False, indent=2)
+            )
 
             # 시스템 프롬프트
             system_prompt = "You are a helpful AI assistant that converts daily plans into Unity-compatible format."

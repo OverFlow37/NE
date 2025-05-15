@@ -587,7 +587,7 @@ async def reflection_and_plan(payload: Dict[str, Any]):
         
         return {
             "success": reflection_success and plan_success,
-            "unity_plan": unity_plan,
+            "next_day_plan": unity_plan,
             "performance_metrics": {
                 "total_time": total_time,
                 "reflection_time": reflection_time,
