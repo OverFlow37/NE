@@ -32,6 +32,6 @@ Location :
    A coastal area for fishing and gathering various items and resources.
 
 
-INTERACTABLE OBJECT :
-{INTERACTABLE_OBJECT}
+RELEVANT OBJECTS :
+{RELEVANT_OBJECTS}
 

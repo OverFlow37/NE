@@ -59,30 +59,22 @@ class MemoryRetriever:
         Returns:
             List[Tuple[str, float]]: (오브젝트 이름, 유사도) 튜플 리스트
         """
-        print(f"🔍 ##이벤트 임베딩##: {event_embedding}")
-        print(f"🔍 ##오브젝트 임베딩 개수##: {len(object_embeddings)}")
         
         event_embedding = np.array(event_embedding)
         object_similarities = []
         
         for obj_name, obj_data in object_embeddings.items():
-            print(f"🔍 ##오브젝트##: {obj_name}")
             obj_embedding = np.array(obj_data.get("name_only", []))
-            print(f"🔍 ##오브젝트 임베딩##: {obj_embedding}")
-            print(f"🔍 ##오브젝트 임베딩 shape##: {obj_embedding.shape}")
-            print(f"🔍 ##이벤트 임베딩 shape##: {event_embedding.shape}")
             
             if obj_embedding.shape == event_embedding.shape:
                 similarity = np.dot(event_embedding, obj_embedding) / (
                     np.linalg.norm(event_embedding) * np.linalg.norm(obj_embedding)
                 )
-                print(f"🔍 ##유사도##: {similarity}")
                 if similarity >= similarity_threshold:
                     object_similarities.append((obj_name, float(similarity)))
         
         # 유사도 기준으로 정렬하고 상위 k개 반환
         object_similarities.sort(key=lambda x: x[1], reverse=True)
-        print(f"🔍 ##최종 유사도 리스트##: {object_similarities}")
         return object_similarities[:top_k]
 
     def _get_object_description(self, object_name: str) -> str:
@@ -293,7 +285,6 @@ class MemoryRetriever:
         feedback = memory.get("feedback", "")
         thought = memory.get("thought", "")  # 반성 데이터 호환성
         event_role = memory.get("event_role", "")
-        print(f"🔍 ##이벤트 주체##: {event_role}")
         
         content = ""
         if event:
@@ -484,7 +475,6 @@ class MemoryRetriever:
         interactable_objects_str = json.dumps({"interactable_objects": []})  # 기본값으로 빈 객체 리스트
         if object_embeddings:
             interactable_objects_str = self._create_interactable_objects_string(event_embedding, object_embeddings)
-        print(f"🔍 ##관련 오브젝트##: {interactable_objects_str}")
         # 에이전트 정보 문자열 생성
         agent_data_str = f"Name and Location: {agent_info}\n"
         
@@ -507,7 +497,7 @@ class MemoryRetriever:
                 AGENT_DATA=agent_data_str,
                 EVENT_CONTENT=f"{'God say: ' if event_role == 'God say' else ''}{event_sentence}",
                 RELEVANT_MEMORIES=similar_event_str,
-                INTERACTABLE_OBJECT=interactable_objects_str  # 키 이름을 INTERACTABLE_OBJECT로 수정
+                RELEVANT_OBJECTS=interactable_objects_str  # 키 이름을 INTERACTABLE_OBJECT로 수정
             )
             return prompt
         except Exception as e:
