@@ -15,13 +15,40 @@ MonoBehaviour:
   mDescription: "\uD574\uBCC0\uC5D0\uC11C \uC5BB\uC744 \uC218 \uC788\uB294 \uD070
     \uBB3C\uACE0\uAE30"
   mName: BigFish
-  mDescriptionPrompt: It is delicious, and you can get a great (10) fullness when
+  mDescriptionPrompt: It is delicious, and you can get a great (9) fullness when
     you eat it.
   mType: 1
   mState: 0
+  mInterest: 0
+  mFaith: 0
   mActions:
   - mAction: {fileID: 11400000, guid: cbe91266aabd61348bd1864e9f7bac11, type: 2}
-    mDuration: 300
-    mHungerEffect: -10
+    mDuration: 120
+    mHungerEffect: -90
+    mSleepinessEffect: 0
+    mLonelinessEffect: -10
+    mStressEffect: -10
+  - mAction: {fileID: 11400000, guid: 834d1a928a543d444b3abefbce640270, type: 2}
+    mDuration: 120
+    mHungerEffect: 0
     mSleepinessEffect: 0
     mLonelinessEffect: 0
+    mStressEffect: -5
+  - mAction: {fileID: 11400000, guid: 33d6293489547874a9c32c79ca9e5915, type: 2}
+    mDuration: 120
+    mHungerEffect: 0
+    mSleepinessEffect: 0
+    mLonelinessEffect: 0
+    mStressEffect: -5
+  - mAction: {fileID: 11400000, guid: 14924b0885f59384c89fbab8a8367982, type: 2}
+    mDuration: 120
+    mHungerEffect: 0
+    mSleepinessEffect: 0
+    mLonelinessEffect: 0
+    mStressEffect: -5
+  - mAction: {fileID: 11400000, guid: 8c8333f0289df39458a7a343f81ce4f3, type: 2}
+    mDuration: 60
+    mHungerEffect: 0
+    mSleepinessEffect: 0
+    mLonelinessEffect: 0
+    mStressEffect: -1

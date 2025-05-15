@@ -372,9 +372,11 @@ public class AgentController : MonoBehaviour
                 }
                 else
                 {
-                    // TODO: 상호작용 가능한 오브젝트를 찾을 수 없을 때
                     LogManager.Log("Agent", $"{mName}: {mCurrentAction.TargetName} 상호작용 가능한 오브젝트를 찾을 수 없습니다.", 1);
+                    
+                    mMovement.ClearMovement();
                     ChangeState(AgentState.WAITING);
+                    // TODO: 상호작용 가능한 오브젝트를 찾을 수 없을 때
                 }
                 break;
         }
@@ -433,9 +435,15 @@ public class AgentController : MonoBehaviour
             // 효과 발생 (주기마다)
             if (curDurationProgress >= interactionDuration)
             {
-                ApplyInteractionEffect();
+                bool tryInteract = ApplyInteractionEffect();
                 curDurationProgress = 0.0f; // 주기 초기화
                 lastTickTime = now;
+                if (!tryInteract)
+                {
+                    LogManager.Log("Agent", "상호작용을 할 수 없어 종료합니다.");
+                    EndInteraction();
+                    yield break;
+                }
             }
             else
             {
@@ -465,10 +473,10 @@ public class AgentController : MonoBehaviour
         CompleteAction();
     }
 
-    private void ApplyInteractionEffect()
+    private bool ApplyInteractionEffect()
     {
         LogManager.Log("Agent", $"{mName}: 상호작용 효과 발생", 2);
-        CurrentTargetInteractable.Interact(gameObject, mCurrentAction.ActionName);
+        return CurrentTargetInteractable.Interact(gameObject, mCurrentAction.ActionName);
     }
 
     // 현재 활동 완료 처리하는 함수

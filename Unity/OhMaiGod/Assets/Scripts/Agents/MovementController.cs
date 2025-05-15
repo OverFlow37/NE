@@ -177,6 +177,17 @@ public class MovementController : MonoBehaviour
         LogManager.Log("Movement", $"{gameObject.name}의 이동이 재개됨", 2);
     }
 
+    // 이동 초기화
+    public void ClearMovement()
+    {
+        mIsMoving = false;
+        mCurrentPath = null;
+        mCurrentPathIndex = 0;
+        mCurrentPoint = Vector2.zero;
+        mTargetPosition = Vector2.zero;
+        mTargetController = null;
+    }
+
     // 이동 중인지 여부 반환
     public bool IsMoving => mIsMoving;
 
