@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 5329527153890398938}
   - component: {fileID: 122472205201291659}
   - component: {fileID: 2749976861834501695}
-  m_Layer: 8
+  m_Layer: 13
   m_Name: Conch
   m_TagString: Target
   m_Icon: {fileID: 0}

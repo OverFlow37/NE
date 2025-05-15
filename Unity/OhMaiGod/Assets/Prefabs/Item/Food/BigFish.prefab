@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 3271464814379133929}
   - component: {fileID: 4200064002901552368}
   - component: {fileID: 3979514121460099247}
-  m_Layer: 8
+  m_Layer: 13
   m_Name: BigFish
   m_TagString: Target
   m_Icon: {fileID: 0}
