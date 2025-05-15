@@ -148,12 +148,12 @@ class PlanGenerator:
     
     async def generate_plans(self, agent_name: str, time: str) -> Dict:
         """
-        계획 생성
+        계획 생성 (1단계)
         Parameters:
         - agent_name: 에이전트 이름
         - time: 서버에서 받은 시간 (YYYY.MM.DD.HH:MM 형식)
         Returns:
-        - 생성된 계획
+        - 생성된 계획 JSON
         """
         try:
             if not time:
@@ -255,4 +255,94 @@ class PlanGenerator:
             
         except Exception as e:
             logger.error(f"계획 생성 중 오류 발생: {str(e)}")
+            return {}
+        
+########################################################
+######### 유니티로 반환할 계획(타임슬롯)생성 ##############
+########################################################
+    async def generate_unity_plan(self, plan_json: Dict) -> Dict:
+        """
+        Unity용 계획 객체 생성 (2단계)
+        Parameters:
+        - plan_json: 1단계에서 생성된 계획 JSON
+        Returns:
+        - Unity용 계획 객체
+        """
+        try:
+            if not plan_json:
+                logger.error("계획 JSON이 제공되지 않았습니다.")
+                return {}
+
+            # Unity용 프롬프트 생성
+            prompt = f"""
+            다음은 에이전트의 일일 계획입니다:
+            {json.dumps(plan_json, ensure_ascii=False, indent=2)}
+
+            이 계획을 Unity에서 사용할 수 있는 형식으로 변환해주세요.
+            다음과 같은 형식으로 JSON 응답을 해주세요:
+            {{
+                "daily_goals": [
+                    {{
+                        "goal": "목표 설명",
+                        "priority": 1-5,
+                        "estimated_time": "예상 소요 시간",
+                        "location": "목표 장소"
+                    }}
+                ],
+                "schedule": [
+                    {{
+                        "time": "시간",
+                        "activity": "활동",
+                        "location": "장소"
+                    }}
+                ]
+            }}
+            """
+
+            # 시스템 프롬프트
+            system_prompt = "You are a helpful AI assistant that converts daily plans into Unity-compatible format."
+
+            # Ollama API 호출
+            response = await self.ollama_client.process_prompt(
+                prompt=prompt,
+                system_prompt=system_prompt,
+                model_name="gemma3"
+            )
+
+            if response.get("status") != "success":
+                logger.error(f"Unity 계획 생성 API 호출 실패: {response.get('status')}")
+                return {}
+
+            # API 응답 로깅
+            logger.info(f"Unity API 응답: {response.get('response')}")
+
+            # JSON 파싱
+            try:
+                response_text = response["response"]
+                json_pattern = r'```(?:json)?\s*([\s\S]*?)```'
+                matches = re.findall(json_pattern, response_text)
+
+                if matches:
+                    json_str = matches[0].strip()
+                    unity_plan = json.loads(json_str)
+                else:
+                    json_pattern = r'({[\s\S]*})'
+                    matches = re.findall(json_pattern, response_text)
+                    
+                    if matches:
+                        json_str = max(matches, key=len)
+                        unity_plan = json.loads(json_str)
+                    else:
+                        logger.error("응답에서 JSON을 찾을 수 없습니다.")
+                        return {}
+
+                logger.info(f"생성된 Unity 계획: {unity_plan}")
+                return unity_plan
+
+            except json.JSONDecodeError as e:
+                logger.error(f"JSON 파싱 실패: {e}")
+                return {}
+
+        except Exception as e:
+            logger.error(f"Unity 계획 생성 중 오류 발생: {str(e)}")
             return {} 
