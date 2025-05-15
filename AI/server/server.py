@@ -661,8 +661,144 @@ async def handle_conversation(payload: dict):
     except Exception as e:
         print(f"❌ 대화 처리 중 오류 발생: {str(e)}")
         return {"success": False, "error": str(e)}
+    
+
+@app.post("/data/clear")
+async def clear_all_data():
+    """
+    모든 데이터 파일을 빈 상태로 초기화하는 엔드포인트
+    
+    memories.json, plans.json, reflections.json 파일을 완전히 초기화합니다.
+    주의: 이 작업은 되돌릴 수 없습니다.
+    """
+    try:
+        results = {}
+        data_dir = os.path.dirname(memory_utils.memories_file)
+        
+        # 초기화할 파일 목록
+        files_to_clear = [
+            {"name": "memories", "path": memory_utils.memories_file},
+            {"name": "plans", "path": memory_utils.plans_file},
+            {"name": "reflections", "path": memory_utils.reflections_file}
+        ]
+        
+        # 각 파일 초기화
+        for file_info in files_to_clear:
+            file_name = file_info["name"]
+            file_path = file_info["path"]
+            
+            try:
+                # 파일 존재 확인
+                if not os.path.exists(file_path):
+                    print(f"⚠️ {file_name}.json 파일이 존재하지 않습니다. 빈 파일을 생성합니다.")
+                    os.makedirs(os.path.dirname(file_path), exist_ok=True)
+                
+                # 빈 데이터 구조 생성
+                empty_data = {}
+                
+                # 파일에 저장
+                with open(file_path, 'w', encoding='utf-8') as f:
+                    json.dump(empty_data, f, ensure_ascii=False, indent=2)
+                
+                print(f"🧹 {file_name}.json 파일이 완전히 초기화되었습니다.")
+                
+                # 결과 기록
+                results[file_name] = {
+                    "success": True,
+                    "message": f"{file_name}.json file cleared successfully",
+                }
+                
+            except Exception as e:
+                print(f"❌ {file_name}.json 초기화 중 오류 발생: {str(e)}")
+                results[file_name] = {
+                    "success": False,
+                    "error": str(e)
+                }
+        
+        # 전체 성공 여부 확인
+        overall_success = all(result["success"] for result in results.values())
+        
+        return {
+            "success": overall_success,
+            "message": "All data files have been cleared" if overall_success else "Some files could not be cleared",
+            "results": results
+        }
+        
+    except Exception as e:
+        print(f"❌ 데이터 초기화 중 오류 발생: {str(e)}")
+        return {"success": False, "error": str(e)}
+
+
+@app.post("/data/reset")
+async def reset_all_data_from_backup():
+    """
+    모든 데이터 파일을 각각의 백업 파일로부터 초기화하는 엔드포인트
+    
+    backup_memories.json, backup_plans.json, backup_reflections.json 파일의 내용으로
+    각각 memories.json, plans.json, reflections.json 파일을 초기화합니다.
+    """
+    try:
+        results = {}
+        data_dir = os.path.dirname(memory_utils.memories_file)
+        
+        # 초기화할 파일 목록
+        files_to_reset = [
+            {"name": "memories", "path": memory_utils.memories_file},
+            {"name": "plans", "path": memory_utils.plans_file},
+            {"name": "reflections", "path": memory_utils.reflections_file}
+        ]
+        
+        # 각 파일 초기화
+        for file_info in files_to_reset:
+            file_name = file_info["name"]
+            file_path = file_info["path"]
+            backup_path = os.path.join(data_dir, f"backup_{file_name}.json")
+            
+            try:
+                # 백업 파일 존재 확인
+                if not os.path.exists(backup_path):
+                    print(f"⚠️ backup_{file_name}.json 파일이 존재하지 않습니다.")
+                    results[file_name] = {
+                        "success": False,
+                        "error": f"Backup file backup_{file_name}.json not found"
+                    }
+                    continue
+                
+                # 백업 파일로부터 초기화
+                import shutil
+                shutil.copy2(backup_path, file_path)
+                
+                print(f"🔄 {file_name}.json 파일이 backup_{file_name}.json의 내용으로 초기화되었습니다.")
+                
+                # 결과 기록
+                results[file_name] = {
+                    "success": True,
+                    "message": f"{file_name}.json reset from backup_{file_name}.json",
+                }
+                
+            except Exception as e:
+                print(f"❌ {file_name}.json 초기화 중 오류 발생: {str(e)}")
+                results[file_name] = {
+                    "success": False,
+                    "error": str(e)
+                }
+        
+        # 전체 성공 여부 확인
+        overall_success = all(result.get("success", False) for result in results.values())
+        
+        return {
+            "success": overall_success,
+            "message": "All data files have been reset from backup" if overall_success else "Some files could not be reset",
+            "results": results
+        }
+        
+    except Exception as e:
+        print(f"❌ 데이터 초기화 중 오류 발생: {str(e)}")
+        return {"success": False, "error": str(e)}
+
 
 if __name__ == "__main__":
     print(f"\n=== 서버 초기화 완료 (총 소요시간: {time.time() - start_time:.2f}초) ===")
     import uvicorn
     uvicorn.run(app, host="127.0.0.1", port=5000)
+
