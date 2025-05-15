@@ -43,6 +43,9 @@ public class AgentUI : MonoBehaviour
     private Image mInteractionFillImage; // 상호작용 진행도 표시용 fill 이미지
     [SerializeField]
     private TextMeshProUGUI mSpeechText;     // [text] 속마음 정보
+    [SerializeField]
+    private TextMeshProUGUI mReactText;     // [text] 반응 판단 정보
+
 
     private Coroutine mThoughtCoroutine;
 
@@ -165,7 +168,8 @@ public class AgentUI : MonoBehaviour
         if (mSpeechBubble != null)
         {
             bool isActive = (mInteractionInfo != null && mInteractionInfo.activeSelf) ||
-                            (mSpeechText != null && mSpeechText.gameObject.activeSelf);
+                            (mSpeechText != null && mSpeechText.gameObject.activeSelf) ||
+                            (mReactText != null && mReactText.gameObject.activeSelf);
             mSpeechBubble.SetActive(isActive);
         }
     }
@@ -196,5 +200,23 @@ public class AgentUI : MonoBehaviour
         if (mInteractionInfo != null)
             mInteractionInfo.SetActive(false);
         UpdateSpeechBubbleActive();
+    }
+
+    // 반응 판단 여부를 텍스트로 표시
+    public void ShowReact(string _text, bool _isReact){
+        if(_isReact){
+            if(mReactText != null){
+            mReactText.gameObject.SetActive(true);
+            mReactText.text = _text;
+            UpdateSpeechBubbleActive();
+            }
+        }
+        else{
+            // 반응 텍스트 비활성화
+            if(mReactText != null){
+            mReactText.gameObject.SetActive(false);
+            UpdateSpeechBubbleActive();
+            }
+        }
     }
 }
