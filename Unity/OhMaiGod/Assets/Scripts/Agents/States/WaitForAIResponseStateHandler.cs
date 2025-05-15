@@ -18,6 +18,13 @@ namespace OhMAIGod.Agent
             // _controller.UpdateWaitTime();
          }
 
+         public override void OnStateExit(AgentController _controller)
+         {
+            base.OnStateExit(_controller);
+            _controller.AllowStateChange = true;
+            _controller.mAgentUI.ShowReact("", false);
+         }
+
         protected override string GetStateName()
         {
             return "AI 응답 대기";

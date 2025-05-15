@@ -11,7 +11,7 @@ TASK: For each agent, determine ONE NEXT ACTION based on their current state.
 
 AVAILABLE ACTIONS:
 - "eat": "Consume food to reduce hunger.",
-- "use": "Interact with an object or item.",
+- "use": "to use, observe, or play with tools or item",
 - "get": "Obtain a food item, resource, or trinket.",
 - "break": "Destroy breakable items or harvest resources.",
 - "offer": "offering target to God."
