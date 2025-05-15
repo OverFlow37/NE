@@ -56,6 +56,7 @@ except Exception as e:
 from agent.modules.event_id_manager import EventIdManager
 from agent.modules.reaction_decider import ReactionDecider
 
+from agent.modules.npc_conversation import NPCConversationManager
 
 print(f"⏱ 모듈 임포트 시간: {time.time() - import_start:.2f}초")
 
@@ -117,6 +118,18 @@ try:
     print("✅ ReactionDecider 인스턴스 생성 완료")
 except Exception as e:
     print(f"❌ ReactionDecider 인스턴스 생성 실패: {e}")
+
+try:
+    conversation_manager = NPCConversationManager(
+        ollama_client=client,
+        memory_utils=memory_utils,
+        word2vec_model=word2vec_model,
+        max_turns=4  # 모듈 내부에서 최대 턴 수 설정 (필요에 따라 변경 가능)
+    )
+    print("✅ NPCConversationManager 인스턴스 생성 완료")
+except Exception as e:
+    print(f"❌ NPCConversationManager 인스턴스 생성 실패: {e}")
+
 
 print(f"⏱ 인스턴스 생성 시간: {time.time() - instance_start:.2f}초")
 
@@ -622,6 +635,48 @@ async def update_embeddings():
     except Exception as e:
         print(f"❌ 임베딩 업데이트 실패: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/conversation")
+async def handle_conversation(payload: dict):
+    """
+    NPC 간 대화를 처리하는 엔드포인트
+    
+    새 대화 시작, 대화 진행, 대화 종료 및 메모리 저장을 모두 처리합니다.
+    최대 대화 턴 수는 NPCConversationManager 내부에서 설정됩니다.
+    """
+    try:
+        # 전체 처리 시작 시간 기록
+        start_time = time.time()
+        print("\n=== /conversation 엔드포인트 호출 ===")
+        print("📥 요청 데이터:", json.dumps(payload, indent=2, ensure_ascii=False))
+        
+        # 대화 처리
+        result = await conversation_manager.process_conversation(payload)
+        
+        # 처리 시간 계산
+        total_time = time.time() - start_time
+        print(f"⏱ 대화 처리 시간: {total_time:.2f}초")
+        
+        # 현재 턴 수 출력
+        if result.get("success"):
+            current_turns = result.get("turns", 0)
+            max_turns = result.get("max_turns", 10)
+            print(f"🔄 현재 대화 턴: {current_turns}/{max_turns}")
+        
+        # 결과에 대화가 종료되었는지 여부 출력
+        if result.get("success") and not result.get("should_continue", True):
+            print("🔚 대화가 종료되었습니다. 이유:", result.get("conversation", {}).get("end_reason", ""))
+            
+            # 메모리 ID 출력
+            memory_ids = result.get("memory_ids", [])
+            if memory_ids:
+                print(f"💾 메모리 저장 완료: {memory_ids}")
+        
+        return result
+        
+    except Exception as e:
+        print(f"❌ 대화 처리 중 오류 발생: {str(e)}")
+        return {"success": False, "error": str(e)}
 
 if __name__ == "__main__":
     print(f"\n=== 서버 초기화 완료 (총 소요시간: {time.time() - start_time:.2f}초) ===")
