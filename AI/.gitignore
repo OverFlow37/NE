@@ -1,8 +1,5 @@
 
 
-# ollama model folder
-models/
-
 # result files
 action_results/
 ollama_results/
@@ -188,3 +185,8 @@ poetry.toml
 pyrightconfig.json
 
 # End of https://www.toptal.com/developers/gitignore/api/python
+
+
+# agent/data folder
+agent/data/
+agent/data/**
