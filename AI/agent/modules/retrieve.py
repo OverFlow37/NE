@@ -164,18 +164,27 @@ class MemoryRetriever:
         action = memory.get("action", "")
         feedback = memory.get("feedback", "")
         thought = memory.get("thought", "")  # 반성 데이터 호환성
+        event_role = memory.get("event_role", "")
+        print(f"🔍 ##이벤트 주체##: {event_role}")
         
         content = ""
         if event:
-            content = f"Event: {event}"
+            if event_role == "God say":
+                content = f"Event: God said, {event}"
+            else:
+                content = f"Event: {event}"
         elif action:
             content = f"Action: {action}"
         elif feedback:
             content = f"Feedback: {feedback}"
         
+        # if thought:
+        #     return f"- {content} (time: {time}, id: {memory_id})\n  thought: {thought}"
+        # return f"- {content} (time: {time}, id: {memory_id})"
         if thought:
-            return f"- {content} (time: {time}, id: {memory_id})\n  thought: {thought}"
-        return f"- {content} (time: {time}, id: {memory_id})"
+            return f"- {content}\n  thought: {thought}"
+        return f"- {content}"
+        
 
     def _format_visible_interactables(self, visible_interactables: List[Dict[str, Any]]) -> str:
         """
@@ -281,6 +290,7 @@ class MemoryRetriever:
         self,
         event_sentence: str,
         event_embedding: List[float],
+        event_role: str,
         agent_name: str,
         prompt_template: str,
         agent_data: Dict[str, Any] = None,
@@ -360,7 +370,7 @@ class MemoryRetriever:
             prompt = prompt_template.format(
                 AGENT_NAME=agent_name,
                 AGENT_DATA=agent_data_str,
-                EVENT_CONTENT=event_sentence,
+                EVENT_CONTENT=f"{'God say: ' if event_role == 'God say' else ''}{event_sentence}",
                 RELEVANT_MEMORIES=similar_event_str
             )
             return prompt

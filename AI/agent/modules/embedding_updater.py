@@ -40,8 +40,6 @@ class EmbeddingUpdater:
                     current_time = datetime.now().strftime("%Y.%m.%d.%H:%M")
                     if "time" not in memory:
                         memory["time"] = current_time
-                    if "created" not in memory:
-                        memory["created"] = current_time
                     memory["embeddings"] = self.memory_utils.get_embedding(event)
                     update_counts["memories"] += 1
         

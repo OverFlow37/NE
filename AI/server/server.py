@@ -264,7 +264,7 @@ async def should_react(payload: dict):
         
         # 응답 - 단순 형식으로 반환
         return {
-            "success": success,
+            "success": True,
             "should_react": should_react  # True 또는 False
         }
         
@@ -298,6 +298,8 @@ async def react_to_event(payload: dict):
         event_type = event_data.get('event_type', '')
         event_location = event_data.get('event_location', '')
         event_description = event_data.get('event_description', '')
+        event_role = event_data.get('event_role', '')
+        event_is_save = event_data.get("event_is_save", True)
         
         # 에이전트의 현재 시간 추출
         agent_time = agent_data.get('time', '')
@@ -314,6 +316,8 @@ async def react_to_event(payload: dict):
         print(f"⏰ 에이전트 시간: {agent_time}")
         print(f"🧩 성격: {agent_data.get('personality', 'None')}")
         print(f"📍 현재 위치: {agent_data.get('current_location', 'None')}")
+        print(f"🔍 이벤트 저장 여부: {event_is_save}")
+        print(f"🔍 이벤트 주체: {event_role}")
         
         visible_interactables = agent_data.get('visible_interactables', [])
         if visible_interactables:
@@ -329,6 +333,7 @@ async def react_to_event(payload: dict):
             "event_location": event_location,
             "time": agent_time,  # 시간 정보 추가
             "event_description": event_description,
+            "event_role": event_role
         }
         
         # 이벤트를 문장으로 변환
@@ -342,6 +347,7 @@ async def react_to_event(payload: dict):
         # 프롬프트 생성
         prompt = retrieve.create_reaction_prompt(
             event_sentence=event_sentence,
+            event_role=event_role,
             event_embedding=embedding,
             agent_name=agent_name,
             prompt_template=load_prompt_file(RETRIEVE_PROMPT_PATH),
@@ -412,13 +418,15 @@ async def react_to_event(payload: dict):
                 
             # 메모리 저장 (프롬프트 생성 및 API 응답 이후)
             ## memory_is_save 파라미터를 통해 저장 여부를 결정
-            memory_id = memory_utils.save_memory(
-                event_sentence=event_sentence,
-                embedding=embedding,
-                event_time=agent_time,  # 에이전트의 시간 사용
-                agent_name=agent_name
-            )
-            print(f"💾 메모리 저장 완료 (시간: {agent_time}, 메모리 ID: {memory_id})")
+            if event_is_save == True:
+                memory_id = memory_utils.save_memory(
+                    event_sentence=event_sentence,
+                    embedding=embedding,
+                    event_time=agent_time,  # 에이전트의 시간 사용
+                    agent_name=agent_name,
+                    event_role=event_role
+                )
+                print(f"💾 메모리 저장 완료 (시간: {agent_time}, 메모리 ID: {memory_id})")
             
             # 전체 처리 시간 계산
             total_response_time = time.time() - total_start_time
@@ -429,7 +437,7 @@ async def react_to_event(payload: dict):
             print(f"  - 전체 처리 시간: {total_response_time:.2f}초")
             
             # 메모리 ID를 응답에 포함
-            reaction_obj["memory_id"] = memory_id
+            reaction_obj["memory_id"] = memory_id if event_is_save == True else ""
             
             return {
                 "success": True,

@@ -90,7 +90,7 @@ class MemoryUtils:
         except ValueError:
             return "1"
 
-    def save_memory(self, event_sentence: str, embedding: List[float], event_time: str, agent_name: str, event_id: int = None):
+    def save_memory(self, event_sentence: str, embedding: List[float], event_time: str, agent_name: str, event_id: int = None,  event_role: str = ""):
         """새로운 메모리 저장"""
         memories = self._load_memories()
         
@@ -105,18 +105,18 @@ class MemoryUtils:
         memory_id = self._get_next_memory_id(agent_name)
             
         # 이벤트 종류 판단
-        is_environment_event = "suddenly appeared" in event_sentence
         
         memory = {
-            "event_role": "environment" if is_environment_event else "",
-            "event": event_sentence if is_environment_event else "",
-            "action": "" if is_environment_event else event_sentence,
+            "event_role": event_role,
+            "event": event_sentence,
+            "action": "",
             "feedback": "",
             "conversation_detail": "",
             "time": event_time,
-            "embeddings": embedding,
-            "importance": 7 if is_environment_event else 3  # 환경 이벤트는 중요도 높게 설정
+            "embeddings": embedding,  
         }
+        if event_role != "":
+            memory["importance"] = 8
         
         memories[agent_name]["memories"][memory_id] = memory
         self._save_memories(memories)
@@ -152,7 +152,12 @@ class MemoryUtils:
 
     def event_to_sentence(self, event: Dict[str, Any]) -> str:
         """이벤트를 문장으로 변환"""
-        return f"{event.get('event_description', '')} at {event.get('event_location', '')}"
+        event_description = event.get('event_description', '')
+        event_location = event.get('event_location', '')
+        
+        if event_location:
+            return f"{event_description} at {event_location}"
+        return event_description
 
     def save_perception(self, event: Dict[str, Any], agent_name: str) -> bool:
         """관찰 정보를 메모리에 저장"""
