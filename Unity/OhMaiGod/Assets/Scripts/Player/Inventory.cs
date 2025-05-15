@@ -34,10 +34,10 @@ public class Inventory : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.E))
-        {
-            InventoryUI.Instance.ToggleInventoryUI();
-        }
+        // if (Input.GetKeyDown(KeyCode.E))
+        // {
+        //     InventoryUI.Instance.ToggleInventoryUI();
+        // }
     }
 
     public void AddItem(GameObject _item)
