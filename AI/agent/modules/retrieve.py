@@ -83,7 +83,7 @@ class MemoryRetriever:
         유사한 메모리 검색
         
         Args:
-            event_embedding: 현재 이벤트의 임베딩
+            event_embedding: 현재 이벤트의 임베딩 (단일 벡터)
             agent_name: 에이전트 이름
             top_k: 반환할 메모리 개수
             similarity_threshold: 유사도 임계값
@@ -100,29 +100,46 @@ class MemoryRetriever:
         # 모든 메모리와 반성을 하나의 리스트로 합치기
         all_items = []
         
+        # event_embedding을 numpy 배열로 변환
+        event_embedding = np.array(event_embedding)
+        
         # 메모리 추가
         for memory_id, memory in memories[agent_name]["memories"].items():
-            memory_embedding = memory.get("embeddings", [])
-            if memory_embedding:
-                similarity = np.dot(event_embedding, memory_embedding) / (
-                    np.linalg.norm(event_embedding) * np.linalg.norm(memory_embedding)
-                )
-                if similarity >= similarity_threshold:
+            memory_embeddings = memory.get("embeddings", [])
+            if memory_embeddings:
+                # 여러 임베딩 중 가장 높은 유사도 계산
+                max_similarity = 0
+                for memory_embedding in memory_embeddings:
+                    memory_embedding = np.array(memory_embedding)
+                    if memory_embedding.shape == event_embedding.shape:
+                        similarity = np.dot(event_embedding, memory_embedding) / (
+                            np.linalg.norm(event_embedding) * np.linalg.norm(memory_embedding)
+                        )
+                        max_similarity = max(max_similarity, float(similarity))
+                
+                if max_similarity >= similarity_threshold:
                     # memory_id 추가
                     memory_with_id = memory.copy()
                     memory_with_id["memory_id"] = memory_id
-                    all_items.append((memory_with_id, similarity, False))  # False는 메모리임을 나타냄
+                    all_items.append((memory_with_id, max_similarity, False))  # False는 메모리임을 나타냄
         
         # 반성 추가 (반성 데이터는 기존 구조 유지)
         if agent_name in reflections:
             for reflection in reflections[agent_name]["reflections"]:
-                reflection_embedding = reflection.get("embeddings", [])
-                if reflection_embedding:
-                    similarity = np.dot(event_embedding, reflection_embedding) / (
-                        np.linalg.norm(event_embedding) * np.linalg.norm(reflection_embedding)
-                    )
-                    if similarity >= similarity_threshold:
-                        all_items.append((reflection, similarity, True))  # True는 반성임을 나타냄
+                reflection_embeddings = reflection.get("embeddings", [])
+                if reflection_embeddings:
+                    # 여러 임베딩 중 가장 높은 유사도 계산
+                    max_similarity = 0
+                    for reflection_embedding in reflection_embeddings:
+                        reflection_embedding = np.array(reflection_embedding)
+                        if reflection_embedding.shape == event_embedding.shape:
+                            similarity = np.dot(event_embedding, reflection_embedding) / (
+                                np.linalg.norm(event_embedding) * np.linalg.norm(reflection_embedding)
+                            )
+                            max_similarity = max(max_similarity, float(similarity))
+                    
+                    if max_similarity >= similarity_threshold:
+                        all_items.append((reflection, max_similarity, True))  # True는 반성임을 나타냄
         
         # 시간순으로 정렬하여 가중치 계산
         def get_time(item):
@@ -156,8 +173,8 @@ class MemoryRetriever:
         Returns:
             str: 포맷된 이벤트 문자열
         """
-        memory_id = memory.get("memory_id", "")
-        time = memory.get("time", "")
+        # memory_id = memory.get("memory_id", "")
+        # time = memory.get("time", "")
         
         # 새 구조에서 어떤 필드에 내용이 있는지 확인
         event = memory.get("event", "")
@@ -170,20 +187,20 @@ class MemoryRetriever:
         content = ""
         if event:
             if event_role == "God say":
-                content = f"Event: God said, {event}"
+                content = f"Event: God said, {event}\n"
             else:
-                content = f"Event: {event}"
-        elif action:
-            content = f"Action: {action}"
-        elif feedback:
-            content = f"Feedback: {feedback}"
+                content = f"Event: {event}\n"
+        if action:
+            content += f"Action: {action}\n"
+        if feedback:
+            content += f"Feedback: {feedback}\n"
         
         # if thought:
         #     return f"- {content} (time: {time}, id: {memory_id})\n  thought: {thought}"
         # return f"- {content} (time: {time}, id: {memory_id})"
         if thought:
-            return f"- {content}\n  thought: {thought}"
-        return f"- {content}"
+            return f"- {content}\n  thought: {thought}\n"
+        return f"- {content}\n"
         
 
     def _format_visible_interactables(self, visible_interactables: List[Dict[str, Any]]) -> str:

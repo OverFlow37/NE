@@ -110,7 +110,7 @@ Keep your explanation concise and provide ONLY this JSON with NO additional text
         유사한 메모리 검색
         
         Args:
-            event_embedding: 현재 이벤트의 임베딩
+            event_embedding: 현재 이벤트의 임베딩 (단일 벡터)
             agent_name: 에이전트 이름
             top_k: 반환할 메모리 개수
             
@@ -124,21 +124,30 @@ Keep your explanation concise and provide ONLY this JSON with NO additional text
         
         agent_memories = memories[agent_name]["memories"]
         
+        # event_embedding을 numpy 배열로 변환
+        event_embedding = np.array(event_embedding)
+        
         # 유사도 계산 및 정렬
         memory_similarities = []
         for memory_id, memory in agent_memories.items():
-            memory_embedding = memory.get("embeddings", [])
-            if not memory_embedding:
+            memory_embeddings = memory.get("embeddings", [])
+            if not memory_embeddings:
                 continue
                 
-            # 코사인 유사도 계산
-            similarity = np.dot(event_embedding, memory_embedding) / (
-                np.linalg.norm(event_embedding) * np.linalg.norm(memory_embedding)
-            )
+            # 여러 임베딩 중 가장 높은 유사도 계산
+            max_similarity = 0
+            for memory_embedding in memory_embeddings:
+                memory_embedding = np.array(memory_embedding)
+                if memory_embedding.shape == event_embedding.shape:
+                    # 코사인 유사도 계산
+                    similarity = np.dot(event_embedding, memory_embedding) / (
+                        np.linalg.norm(event_embedding) * np.linalg.norm(memory_embedding)
+                    )
+                    max_similarity = max(max_similarity, float(similarity))
             
-            if similarity >= self.similarity_threshold:
+            if max_similarity >= self.similarity_threshold:
                 memory['memory_id'] = memory_id
-                memory_similarities.append((memory, similarity))
+                memory_similarities.append((memory, max_similarity))
         
         # 유사도 기준으로 정렬
         memory_similarities.sort(key=lambda x: x[1], reverse=True)
