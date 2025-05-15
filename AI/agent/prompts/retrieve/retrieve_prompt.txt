@@ -32,8 +32,8 @@ Location :
    A coastal area for fishing and gathering various items and resources.
 
 AVAILABLE ACTIONS :
-- "eat": "Consume food to reduce hunger.",
-- "use": "to use, observe, or play with tools or item",
-- "get": "Obtain a food item, resource, or trinket.",
-- "break": "Destroy breakable items or harvest resources.",
-- "offer": "offering target to God."
+- "eat": "eat this interactable to reduce hunger.",
+- "use": "to use, observe, or play with this interactable",
+- "get": "Pick up this interactable and store them.",
+- "break": "Destroy break this interactable and harvest resources.",
+- "offer": "offering this interactable to God."

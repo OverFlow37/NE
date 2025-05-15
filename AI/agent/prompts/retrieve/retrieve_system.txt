@@ -1,15 +1,14 @@
 IMPORTANT RULES:
-- The `target_interactable` must be selected **only** from the objects listed in `visible_interactables`.
-- The pair (`target_location`, `target_interactable`) must **exactly match** one entry in `visible_interactables`.
+
 - The combination of location and target must match the information in AGENT DATA.
 - Provide **EXACTLY ONE** action per character. Respond **ONLY** with JSON.
-- The `action` field **MUST** be one of the predefined actions: `use`, `eat`.
+- The `action` field **MUST** be one of the predefined available actions
 - `"duration"` must be an **integer greater than 30 and less than 120**.
 - `"thought"` must be **no more than 100 characters** and reflect what the agent thinks.
 
 RESPONSE FORMAT (provide ONLY valid JSON):
 {
-  "action": "action_type",  // MUST be one of: use, eat
+  "action": "action_type",
   "details": {
     "target_location": "location_name_where_target_interactable_located",
     "target_interactable": "object_or_agent",
