@@ -165,6 +165,7 @@ Keep your explanation concise and provide ONLY this JSON with NO additional text
             event = memory.get("event", "")
             action = memory.get("action", "")
             feedback = memory.get("feedback", "")
+            event_role = memory.get("event_role", "")
             time = memory.get("time", "")
             importance = memory.get("importance", "N/A")
             memory_id = memory.get("memory_id", "")
@@ -172,6 +173,8 @@ Keep your explanation concise and provide ONLY this JSON with NO additional text
             # 어떤 필드에 내용이 있는지 확인하고 표시
             content = ""
             if event:
+                if event_role == "God say":
+                    content = f"Event: God said, {event}"
                 content = f"Event: {event}"
             elif action:
                 content = f"Action: {action}"
