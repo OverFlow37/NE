@@ -31,9 +31,7 @@ Location :
 5. Beach
    A coastal area for fishing and gathering various items and resources.
 
-AVAILABLE ACTIONS :
-- "eat": "eat this interactable to reduce hunger.",
-- "use": "to use, observe, or play with this interactable",
-- "get": "Pick up this interactable and store them.",
-- "break": "Destroy break this interactable and harvest resources.",
-- "offer": "offering this interactable to God."
+
+INTERACTABLE OBJECT :
+{INTERACTABLE_OBJECT}
+

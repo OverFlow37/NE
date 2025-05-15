@@ -77,6 +77,17 @@ print("🤖 Word2Vec 모델 로딩 중...")
 word2vec_model = api.load('word2vec-google-news-300')
 print("✅ Word2Vec 모델 로딩 완료")
 
+# object_embeddings.json 파일 로드
+print("📚 object_embeddings.json 파일 로딩 중...")
+object_embeddings_path = ROOT_DIR / "agent" / "data" / "object_dict" / "object_embeddings.json"
+try:
+    with open(object_embeddings_path, 'r', encoding='utf-8') as f:
+        object_embeddings = json.load(f)
+    print("✅ object_embeddings.json 파일 로딩 완료")
+except Exception as e:
+    print(f"❌ object_embeddings.json 파일 로딩 실패: {e}")
+    object_embeddings = {}
+
 try:
     client = OllamaClient()
     print("✅ OllamaClient 인스턴스 생성 완료")
@@ -344,6 +355,7 @@ async def react_to_event(payload: dict):
         embedding = memory_utils.get_embedding(event_sentence)
         print(f"🔢 임베딩 생성 완료 (차원: {len(embedding)})")
         
+
         # 프롬프트 생성
         prompt = retrieve.create_reaction_prompt(
             event_sentence=event_sentence,
@@ -353,7 +365,8 @@ async def react_to_event(payload: dict):
             prompt_template=load_prompt_file(RETRIEVE_PROMPT_PATH),
             agent_data=agent_data,
             similar_data_cnt=3,  # 유사한 이벤트 3개 포함
-            similarity_threshold=0.5  # 유사도 0.5 이상인 이벤트만 포함
+            similarity_threshold=0.5,  # 유사도 0.5 이상인 이벤트만 포함
+            object_embeddings=object_embeddings
         )
         print(f"📋 생성된 프롬프트:\n{prompt}")
         

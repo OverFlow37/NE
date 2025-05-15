@@ -1,0 +1,69 @@
+{
+  "locations": {
+    "Town": {
+      "description": "A place to rest, access amenities, and visit the temple for prayer and reflection.",
+      "places": {
+        "House": "A private space for resting and sleeping.",
+        "Square": "A social space with facilities and interactions with other assistants.",
+        "Temple": "A place for raising faith and offering prayers for personal wishes."
+      }
+    },
+    "Mountain": {
+      "description": "Rich in resources and ingredients unique to this area."
+    },
+    "Forest": {
+      "description": "A dense area filled with natural resources and food ingredients."
+    },
+    "Plain": {
+      "description": "A peaceful region where players can gather food and resources."
+    },
+    "Beach": {
+      "description": "A coastal area for fishing and gathering various items and resources."
+    }
+  },
+  "actions": {
+    "eat": "Consume food to reduce hunger.",
+    "use": "Interact with an object or item.",
+    "get": "Obtain a food item, resource, or trinket.",
+    "break": "Destroy breakable items or harvest resources.",
+    "offer": "Present an offering during prayer at the temple."
+  },
+  "objects": {
+    "foods": {
+      "plants": {
+        "Banana": "Found in the plain.",
+        "Apple": "Found in the forest.",
+        "Grape": "Found in the forest.",
+        "Coconut": "Found on the beach.",
+        "Raspberry": "Found in the mountain.",
+        "Mushroom": "Found in the forest and mountain."
+      },
+      "meats": {
+        "Big Fish": "Obtained via fishing at the beach.",
+        "Small Fish": "Obtained via fishing at the beach.",
+        "Egg": "Occasionally found in any region."
+      }
+    },
+    "furniture": {
+      "Bed": "Recovers fatigue. (Located in the house)",
+      "Bookshelf": "Increases knowledge and reduces loneliness. (Located in the house)",
+      "Desk": "Allows thinking, writing, or reading. (Located in the house)",
+      "Telescope": "Enables stargazing at night. (Located in the house)",
+      "Piano": "Reduces loneliness and increases cultural level. (Located in the house)",
+      "Fishing Rod": "Used for catching fish. (Located at the beach)",
+      "Wilson": "A volleyball-shaped friend that reduces loneliness. (Located in the square)"
+    },
+    "resources": {
+      "Wood": "A useful material found in the mountain, forest, and plain.",
+      "Rock": "A solid material found in the mountain and beach."
+    },
+    "trinkets": {
+      "Flower": "Provides a calming effect. (Found in town, forest, mountain)",
+      "Shell": "Might be edible. (Found on the beach)",
+      "Conch": "Beautiful as a decoration. (Found on the beach)",
+      "Jewel": "Can be offered at the temple. (Rarely found across all regions)",
+      "Letter": "A message left by someone. (Found in all regions)",
+      "Book": "Increases knowledge when read. (Found in all regions)"
+    }
+  }
+}

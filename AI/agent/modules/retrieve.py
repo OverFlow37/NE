@@ -23,6 +23,117 @@ class MemoryRetriever:
         """
         self.memory_utils = MemoryUtils(word2vec_model)
         self.memory_file_path = memory_file_path
+        self.object_dictionary = self._load_object_dictionary()
+
+    def _load_object_dictionary(self) -> Dict[str, Any]:
+        """
+        오브젝트 사전을 로드합니다.
+        
+        Returns:
+            Dict[str, Any]: 오브젝트 사전 데이터
+        """
+        dictionary_path = os.path.join(os.path.dirname(__file__), "../data/object_dict/object_dictionary.json")
+        try:
+            with open(dictionary_path, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except Exception as e:
+            print(f"오브젝트 사전 로드 중 오류 발생: {e}")
+            return {}
+
+    def _find_relevant_objects(
+        self,
+        event_embedding: List[float],
+        object_embeddings: Dict[str, Dict[str, List[float]]],
+        top_k: int = 10,
+        similarity_threshold: float = 0.1
+    ) -> List[Tuple[str, float]]:
+        """
+        이벤트와 관련된 상위 k개의 오브젝트를 찾습니다.
+        
+        Args:
+            event_embedding: 이벤트 임베딩
+            object_embeddings: 오브젝트 임베딩 딕셔너리
+            top_k: 반환할 오브젝트 개수
+            similarity_threshold: 유사도 임계값
+            
+        Returns:
+            List[Tuple[str, float]]: (오브젝트 이름, 유사도) 튜플 리스트
+        """
+        print(f"🔍 ##이벤트 임베딩##: {event_embedding}")
+        print(f"🔍 ##오브젝트 임베딩 개수##: {len(object_embeddings)}")
+        
+        event_embedding = np.array(event_embedding)
+        object_similarities = []
+        
+        for obj_name, obj_data in object_embeddings.items():
+            print(f"🔍 ##오브젝트##: {obj_name}")
+            obj_embedding = np.array(obj_data.get("name_only", []))
+            print(f"🔍 ##오브젝트 임베딩##: {obj_embedding}")
+            print(f"🔍 ##오브젝트 임베딩 shape##: {obj_embedding.shape}")
+            print(f"🔍 ##이벤트 임베딩 shape##: {event_embedding.shape}")
+            
+            if obj_embedding.shape == event_embedding.shape:
+                similarity = np.dot(event_embedding, obj_embedding) / (
+                    np.linalg.norm(event_embedding) * np.linalg.norm(obj_embedding)
+                )
+                print(f"🔍 ##유사도##: {similarity}")
+                if similarity >= similarity_threshold:
+                    object_similarities.append((obj_name, float(similarity)))
+        
+        # 유사도 기준으로 정렬하고 상위 k개 반환
+        object_similarities.sort(key=lambda x: x[1], reverse=True)
+        print(f"🔍 ##최종 유사도 리스트##: {object_similarities}")
+        return object_similarities[:top_k]
+
+    def _get_object_description(self, object_name: str) -> str:
+        """
+        오브젝트의 설명을 찾습니다.
+        
+        Args:
+            object_name: 오브젝트 이름
+            
+        Returns:
+            str: 오브젝트 설명
+        """
+        objects = self.object_dictionary.get("objects", {})
+        
+        # 각 카테고리에서 오브젝트 검색
+        for category in objects.values():
+            if isinstance(category, dict):
+                for subcategory in category.values():
+                    if isinstance(subcategory, dict) and object_name in subcategory:
+                        return subcategory[object_name]
+        
+        return f"Description not found for {object_name}"
+
+    def _create_interactable_objects_string(
+        self,
+        event_embedding: List[float],
+        object_embeddings: Dict[str, Dict[str, List[float]]]
+    ) -> str:
+        """
+        상호작용 가능한 오브젝트 문자열을 생성합니다.
+        
+        Args:
+            event_embedding: 이벤트 임베딩
+            object_embeddings: 오브젝트 임베딩 딕셔너리
+            
+        Returns:
+            str: 오브젝트 문자열
+        """
+        relevant_objects = self._find_relevant_objects(event_embedding, object_embeddings)
+        
+        if not relevant_objects:
+            return "No interactable objects found."
+        
+        object_strings = []
+        for obj_name, similarity in relevant_objects:
+            # object_dictionary에서 오브젝트 설명 찾기
+            description = self._get_object_description(obj_name)
+            if description:
+                object_strings.append(f"- {obj_name}: {description}")
+        
+        return "\n".join(object_strings)
 
     def should_react(self, event: Dict[str, Any]) -> bool:
         """
@@ -312,7 +423,8 @@ class MemoryRetriever:
         prompt_template: str,
         agent_data: Dict[str, Any] = None,
         similar_data_cnt: int = 3,
-        similarity_threshold: float = 0.5
+        similarity_threshold: float = 0.5,
+        object_embeddings: List[Dict[str, Any]] = None
     ) -> Optional[str]:
         """
         이벤트에 대한 반응을 결정하기 위한 프롬프트 생성
@@ -325,6 +437,7 @@ class MemoryRetriever:
             agent_data: 에이전트 데이터 (성격, 위치, 상호작용 가능한 객체 등)
             similar_data_cnt: 유사한 이벤트 개수
             similarity_threshold: 유사도 임계값
+            object_embeddings: 오브젝트 임베딩 리스트
             
         Returns:
             Optional[str]: 생성된 프롬프트
@@ -367,6 +480,11 @@ class MemoryRetriever:
         if agent_data and "visible_interactables" in agent_data:
             visible_interactables_str = self._format_visible_interactables(agent_data["visible_interactables"])
         
+        # 관련 오브젝트 문자열 생성
+        interactable_objects_str = json.dumps({"interactable_objects": []})  # 기본값으로 빈 객체 리스트
+        if object_embeddings:
+            interactable_objects_str = self._create_interactable_objects_string(event_embedding, object_embeddings)
+        print(f"🔍 ##관련 오브젝트##: {interactable_objects_str}")
         # 에이전트 정보 문자열 생성
         agent_data_str = f"Name and Location: {agent_info}\n"
         
@@ -381,14 +499,15 @@ class MemoryRetriever:
         # 상호작용 가능한 객체 정보 추가
         if visible_interactables_str:
             agent_data_str += f"Visible and can interact with:\n{visible_interactables_str}\n"
-
+        
         # 프롬프트 생성
         try:
             prompt = prompt_template.format(
                 AGENT_NAME=agent_name,
                 AGENT_DATA=agent_data_str,
                 EVENT_CONTENT=f"{'God say: ' if event_role == 'God say' else ''}{event_sentence}",
-                RELEVANT_MEMORIES=similar_event_str
+                RELEVANT_MEMORIES=similar_event_str,
+                INTERACTABLE_OBJECT=interactable_objects_str  # 키 이름을 INTERACTABLE_OBJECT로 수정
             )
             return prompt
         except Exception as e:
