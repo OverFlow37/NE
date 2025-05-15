@@ -247,12 +247,16 @@ async def should_react(payload: dict):
         should_react = reaction_decision.get("should_react", True)
         reason = reaction_decision.get("reason", "")
         
-        # 메모리 저장 (판단 결과와 무관하게 저장)
-        print("💾 메모리 저장 중...")
-        memory_start = time.time()
-        success = memory_utils.save_perception(event_data, agent_name)
-        memory_time = time.time() - memory_start
-        print(f"⏱ 메모리 저장 시간: {memory_time:.2f}초")
+        # 메모리 저장 (실패했을 경우만 저장)
+        ## 실패시에만 저장하는 이유는 성공했을 때 make_reaction에서 저장하기 때문
+        ### event_is_save 파라미터를 통해 저장 여부를 결정하는 것도 추가
+        event_is_save = event_data.get("event_is_save", True)
+        if should_react == False and event_is_save == True:
+            print("💾 메모리 저장 중...")
+            memory_start = time.time()
+            success = memory_utils.save_perception(event_data, agent_name)
+            memory_time = time.time() - memory_start
+            print(f"⏱ 메모리 저장 시간: {memory_time:.2f}초")
         
         # 전체 처리 시간 계산
         total_time = time.time() - react_start_time
@@ -407,6 +411,7 @@ async def react_to_event(payload: dict):
                     }
                 
             # 메모리 저장 (프롬프트 생성 및 API 응답 이후)
+            ## memory_is_save 파라미터를 통해 저장 여부를 결정
             memory_id = memory_utils.save_memory(
                 event_sentence=event_sentence,
                 embedding=embedding,
