@@ -368,9 +368,11 @@ public class AgentController : MonoBehaviour
                 }
                 else
                 {
-                    // TODO: 상호작용 가능한 오브젝트를 찾을 수 없을 때
                     LogManager.Log("Agent", $"{mName}: {mCurrentAction.TargetName} 상호작용 가능한 오브젝트를 찾을 수 없습니다.", 1);
+                    
+                    mMovement.ClearMovement();
                     ChangeState(AgentState.WAITING);
+                    // TODO: 상호작용 가능한 오브젝트를 찾을 수 없을 때
                 }
                 break;
         }

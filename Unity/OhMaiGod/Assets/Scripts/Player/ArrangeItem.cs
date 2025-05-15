@@ -117,8 +117,12 @@ public class ArrangeItem : MonoBehaviour
         // 이벤트 생성
         GameObject eventObject = Instantiate(mSelectedEvent, cellCenter, Quaternion.identity);
         eventObject.GetComponent<EventController>().mEventInfo = mSelectedEvent.GetComponent<EventController>().mEventInfo;
-        // 이펙트 생성
-        Instantiate(mSelectedEffect, cellCenter, Quaternion.identity);
+        // 이펙트 생성 및 자동 파괴
+        if (mSelectedEffect != null)
+        {
+            GameObject effect = Instantiate(mSelectedEffect, cellCenter, Quaternion.identity);
+            Destroy(effect, 1.5f); // 1.5초 뒤에 이펙트 오브젝트 삭제
+        }
         
         _item.transform.position = cellCenter;
         _item.SetActive(true);

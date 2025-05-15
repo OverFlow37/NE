@@ -13,8 +13,8 @@ public class Inventory : MonoBehaviour
         public int power = 0;
     }
 
-    [SerializeField, ReadOnly] private List<GameObject> mItems = new List<GameObject>();
-    [SerializeField, ReadOnly] public ResourceItemsCount mResourceItems = new ResourceItemsCount();
+    [SerializeField] private List<GameObject> mItems = new List<GameObject>();
+    [SerializeField] private ResourceItemsCount mResourceItems = new ResourceItemsCount();
     [SerializeField] public int mMaxSlotCount = 20;
     public ResourceItemsCount ResourceItems => mResourceItems;
     public int MaxSlotCount => mMaxSlotCount;
@@ -30,6 +30,14 @@ public class Inventory : MonoBehaviour
         }
         Instance = this;
         DontDestroyOnLoad(gameObject);
+    }
+
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.E))
+        {
+            InventoryUI.Instance.ToggleInventoryUI();
+        }
     }
 
     public void AddItem(GameObject _item)
