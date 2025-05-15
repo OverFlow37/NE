@@ -3,6 +3,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 using System.Collections;
+using UnityEngine.SceneManagement;
 
 public class TileManager : MonoBehaviour
 {
@@ -48,14 +49,38 @@ public class TileManager : MonoBehaviour
         mLocationTilemaps = new List<Tilemap>();
         mTileTree = new List<TileController>();
         
+        // 씬 로드 이벤트 등록
+        SceneManager.sceneLoaded += OnSceneLoaded;
+        
         // Awake에서는 초기화하지 않음
         StartCoroutine(InitializeManager());
+    }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        mIsInitialized = false;
+
+        if (scene.name == "LoadScene")
+        {
+            LogManager.Log("Env", $"TileManager: 씬 로드 완료", 3);
+            StartCoroutine(InitializeManager());
+        }
     }
 
     private IEnumerator InitializeManager()
     {
         // 한 프레임 대기하여 다른 오브젝트들의 Awake가 실행되도록 함
         yield return null;
+
+        // ground tilemap 설정
+        if(mGroundTilemap == null || mGroundTilemap.gameObject == null)
+        {
+            GameObject landBaseObj = GameObject.Find("Tilemap_land_base");
+            if (landBaseObj != null)
+            {
+                mGroundTilemap = landBaseObj.GetComponent<Tilemap>();
+            }
+        }
 
         // 씬의 모든 TileController 찾아서 등록
         var tileControllers = FindObjectsByType<TileController>(FindObjectsSortMode.None);
@@ -270,5 +295,11 @@ public class TileManager : MonoBehaviour
             mTileTree.Remove(tileController);
             mLocationTilemaps.Remove(tileController.Tilemap);
         }
+    }
+
+    private void OnDestroy()
+    {
+        // 오브젝트가 파괴될 때 씬 로드 이벤트 해제
+        SceneManager.sceneLoaded -= OnSceneLoaded;
     }
 }

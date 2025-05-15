@@ -57,16 +57,51 @@ public class AgentUI : MonoBehaviour
             LogManager.Log("AgentUI", $"SpeechBubble 오브젝트를 Inspector에서 할당해 주세요.", 1);
             return;
         }
-        //mSpeechText = mSpeechBubble.GetComponentInChildren<TextMeshProUGUI>();
         if (mSpeechText == null)
         {
             LogManager.Log("AgentUI", $"SpeechBubble에 TextMeshProUGUI 컴포넌트가 없습니다.", 1);
         }
-        // Canvas로 이동
+
+        // Emote UI 연결
         Canvas mainCanvas = FindFirstObjectByType<Canvas>();
-        if (mainCanvas != null && mSpeechBubble.transform.parent != mainCanvas.transform)
+        if (mainCanvas != null)
         {
-            mSpeechBubble.transform.SetParent(mainCanvas.transform, false);
+            Transform hungerObj = mainCanvas.transform.Find("EmoteHUNGER");
+            Transform sleepinessObj = mainCanvas.transform.Find("EmoteSLEEPINESS");
+            Transform lonelinessObj = mainCanvas.transform.Find("EmoteLONELINESS");
+            Transform stressObj = mainCanvas.transform.Find("EmoteSTRESS");
+
+            if (hungerObj != null)
+                mEmoteUI.mHungerText = hungerObj.GetComponentInChildren<Text>();
+
+            if (sleepinessObj != null)
+                mEmoteUI.mSleepinessText = sleepinessObj.GetComponentInChildren<Text>();
+
+            if (lonelinessObj != null)
+                mEmoteUI.mLonelinessText = lonelinessObj.GetComponentInChildren<Text>();
+
+            if (stressObj != null)
+                mEmoteUI.mStressText = stressObj.GetComponentInChildren<Text>();
+        }
+
+        // Canvas에 이미 SpeechBubble이 있는지 확인
+        if (mainCanvas != null)
+        {
+            // Canvas 하위에서 이름이 "SpeechBubble"인 오브젝트 탐색
+            Transform existSpeech = mainCanvas.transform.Find("SpeechBubble");
+            if (existSpeech != null)
+            {
+                // 이미 존재하면 해당 오브젝트 삭제
+                LogManager.Log("Agent", $"Canvas에 이미 SpeechBubble이 있어 기존 오브젝트를 삭제합니다.", 2);
+                Destroy(existSpeech.gameObject);
+            }
+            if (mSpeechBubble != null && mSpeechBubble.transform.parent != mainCanvas.transform)
+            {
+                // mSpeechBubble을 Canvas로 이동
+                HideInteractionInfo();
+                mSpeechBubble.transform.SetParent(mainCanvas.transform, false);
+                LogManager.Log("Agent", $"SpeechBubble을 Canvas로 이동시켰습니다.", 2);
+            }
         }
         StartCoroutine(UpdateSpeechLate());
         UpdateEmote();
