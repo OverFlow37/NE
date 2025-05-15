@@ -103,16 +103,13 @@ class ImportanceRater:
                         # 각 메모리에 중요도 적용
                         for i, memory_to_rate in enumerate(batch):
                             if i < len(importance_ratings):
-                                event = memory_to_rate.get("event", "")
-                                time_str = memory_to_rate.get("time", "")
+                                memory_id = memory_to_rate.get("memory_id")
                                 importance = importance_ratings[i]
                                 
                                 # 원본 메모리에 중요도 추가
-                                for j, memory in enumerate(updated_memories[agent_name]["memories"]):
-                                    if memory.get("time", "") == time_str and memory.get("event", "") == event:
-                                        updated_memories[agent_name]["memories"][j]["importance"] = importance
-                                        logger.info(f"메모리 '{event}'에 중요도 {importance} 추가됨")
-                                        break
+                                if memory_id and memory_id in updated_memories[agent_name]["memories"]:
+                                    updated_memories[agent_name]["memories"][memory_id]["importance"] = importance
+                                    logger.info(f"메모리 ID {memory_id}에 중요도 {importance} 추가됨")
                     else:
                         logger.warning(f"배치 {batch_index+1}의 중요도 목록을 추출할 수 없습니다. 개별 평가로 전환합니다.")
                         await self._rate_memories_individually(updated_memories, agent_name, batch)
@@ -145,11 +142,14 @@ class ImportanceRater:
         logger.info(f"{len(target_memories)}개 메모리에 대한 개별 평가로 전환")
         
         for target_memory in target_memories:
-            # 메모리 이벤트 및 시간
-            event = target_memory.get("event", "")
-            time_str = target_memory.get("time", "")
+            # 메모리 ID 가져오기
+            memory_id = target_memory.get("memory_id")
             
-            logger.info(f"메모리 '{event}'의 중요도 개별 평가 중...")
+            if not memory_id:
+                logger.warning("메모리 ID가 없어 평가를 건너뜁니다.")
+                continue
+            
+            logger.info(f"메모리 ID {memory_id}의 중요도 개별 평가 중...")
             
             # 중요도 평가 프롬프트 생성
             prompt = self._create_single_importance_rating_prompt(target_memory)
@@ -172,27 +172,21 @@ class ImportanceRater:
                     importance = self._extract_importance_rating(response["response"])
                     
                     # 원본 메모리에 중요도 추가
-                    for i, memory in enumerate(memories[agent_name]["memories"]):
-                        if memory.get("time", "") == time_str and memory.get("event", "") == event:
-                            memories[agent_name]["memories"][i]["importance"] = importance
-                            logger.info(f"메모리 '{event}'에 중요도 {importance} 추가됨")
-                            break
+                    if memory_id in memories[agent_name]["memories"]:
+                        memories[agent_name]["memories"][memory_id]["importance"] = importance
+                        logger.info(f"메모리 ID {memory_id}에 중요도 {importance} 추가됨")
                 else:
-                    logger.warning(f"메모리 '{event}'의 중요도 개별 평가 실패 - 기본값 적용")
+                    logger.warning(f"메모리 ID {memory_id}의 중요도 개별 평가 실패 - 기본값 적용")
                     # 기본 중요도 설정
-                    for i, memory in enumerate(memories[agent_name]["memories"]):
-                        if memory.get("time", "") == time_str and memory.get("event", "") == event:
-                            memories[agent_name]["memories"][i]["importance"] = 5
-                            logger.info(f"메모리 '{event}'에 기본 중요도 5 추가됨")
-                            break
+                    if memory_id in memories[agent_name]["memories"]:
+                        memories[agent_name]["memories"][memory_id]["importance"] = 5
+                        logger.info(f"메모리 ID {memory_id}에 기본 중요도 5 추가됨")
             except Exception as e:
-                logger.error(f"메모리 '{event}'의 중요도 개별 평가 중 오류 발생: {str(e)}")
+                logger.error(f"메모리 ID {memory_id}의 중요도 개별 평가 중 오류 발생: {str(e)}")
                 # 기본 중요도 설정
-                for i, memory in enumerate(memories[agent_name]["memories"]):
-                    if memory.get("time", "") == time_str and memory.get("event", "") == event:
-                        memories[agent_name]["memories"][i]["importance"] = 5
-                        logger.info(f"메모리 '{event}'에 기본 중요도 5 추가됨")
-                        break
+                if memory_id in memories[agent_name]["memories"]:
+                    memories[agent_name]["memories"][memory_id]["importance"] = 5
+                    logger.info(f"메모리 ID {memory_id}에 기본 중요도 5 추가됨")
                         
             # 연속 API 호출 사이에 짧은 지연 추가
             await asyncio.sleep(0.2)
@@ -211,8 +205,21 @@ class ImportanceRater:
         memory_list = ""
         for i, memory in enumerate(memories):
             event = memory.get("event", "")
+            action = memory.get("action", "")
+            feedback = memory.get("feedback", "")
             time_str = memory.get("time", "")
-            memory_list += f"MEMORY #{i+1}: \"{event}\" at time {time_str}\n"
+            
+            # 메모리 내용 구성
+            memory_content = []
+            if event:
+                memory_content.append(f"Event: {event}")
+            if action:
+                memory_content.append(f"Action: {action}")
+            if feedback:
+                memory_content.append(f"Feedback: {feedback}")
+            
+            memory_str = "\n".join(memory_content)
+            memory_list += f"MEMORY #{i+1}:\n{memory_str}\nat time {time_str}\n\n"
         
         # JSON 출력 형식 구성
         json_format = "{\n  \"ratings\": [\n"
@@ -240,6 +247,7 @@ On a scale of 1 to 10, where:
   10 = extremely poignant (e.g., a breakup, college acceptance)
 
 For each memory, consider:
+- All aspects of the memory (event, action, and feedback)
 - The significance of the activity to daily life
 - The emotional impact of this type of event
 - The potential long-term impact of this type of event
@@ -264,13 +272,28 @@ IMPORTANT: Only provide the JSON object with no additional text.
         - 프롬프트 텍스트
         """
         event = memory.get("event", "")
+        action = memory.get("action", "")
+        feedback = memory.get("feedback", "")
         time_str = memory.get("time", "")
+        
+        # 메모리 내용 구성
+        memory_content = []
+        if event:
+            memory_content.append(f"Event: {event}")
+        if action:
+            memory_content.append(f"Action: {action}")
+        if feedback:
+            memory_content.append(f"Feedback: {feedback}")
+        
+        memory_str = "\n".join(memory_content)
         
         prompt = f"""
 TASK:
 Rate the importance/poignancy of the following memory event on a scale of 1 to 10.
 
-MEMORY: "{event}" at time {time_str}
+MEMORY: 
+{memory_str}
+at time {time_str}
 
 MEMORY RATING RULES:
 On a scale of 1 to 10, where 
@@ -282,7 +305,7 @@ On a scale of 1 to 10, where
 rate the poignancy/importance of this memory.
 
 Please analyze exactly what is happening in the memory:
-- The event is: "{event}"
+- Consider all aspects of the memory (event, action, and feedback)
 - Consider the significance of the activity to daily life
 - Consider the emotional impact of this type of event
 - Consider the potential long-term impact of this type of event
