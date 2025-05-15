@@ -53,9 +53,7 @@ try:
 except Exception as e:
     print(f"❌ EmbeddingUpdater 임포트 실패: {e}")
 
-from agent.modules.event_id_manager import EventIdManager
 from agent.modules.reaction_decider import ReactionDecider
-
 from agent.modules.npc_conversation import NPCConversationManager
 
 print(f"⏱ 모듈 임포트 시간: {time.time() - import_start:.2f}초")
@@ -102,12 +100,6 @@ try:
     print("✅ EmbeddingUpdater 인스턴스 생성 완료")
 except Exception as e:
     print(f"❌ EmbeddingUpdater 인스턴스 생성 실패: {e}")
-
-try:
-    event_id_manager = EventIdManager(memory_utils=memory_utils)
-    print("✅ EventIdManager 인스턴스 생성 완료")
-except Exception as e:
-    print(f"❌ EventIdManager 인스턴스 생성 실패: {e}")
 
 try:
     reaction_decider = ReactionDecider(
@@ -210,17 +202,10 @@ async def perceive_event(payload: dict):
         if game_time and "time" not in event_data:
             event_data["time"] = game_time
         
-        # 이벤트 ID 할당 (게임 시간 전달)
-        event_id = event_id_manager.get_event_id(event_data, agent_name, game_time)
-        
-        # 이벤트 데이터에 event_id 추가
-        event_data["event_id"] = event_id
-        
         # 메모리 저장
         success = memory_utils.save_perception(event_data, agent_name)
         return {
-            "success": success,
-            "event_id": event_id
+            "success": success
         }
         
     except Exception as e:
@@ -247,11 +232,7 @@ async def should_react(payload: dict):
         # 게임 시간 가져오기
         game_time = agent_data.get('time', None)
         
-        # 이벤트 ID 할당 (게임 시간 전달)
-        event_id = event_id_manager.get_event_id(event_data, agent_name, game_time)
-        
-        # 이벤트 데이터에 event_id와 time 추가
-        event_data["event_id"] = event_id
+        # 이벤트 데이터에 time 추가
         if game_time and "time" not in event_data:
             event_data["time"] = game_time
         
@@ -280,8 +261,7 @@ async def should_react(payload: dict):
         # 응답 - 단순 형식으로 반환
         return {
             "success": success,
-            "should_react": should_react,  # True 또는 False
-            "event_id": event_id,
+            "should_react": should_react  # True 또는 False
         }
         
     except Exception as e:
@@ -338,19 +318,12 @@ async def react_to_event(payload: dict):
                 loc = loc_data.get('location', '')
                 objects = loc_data.get('interactables', [])
                 print(f"  - {loc}: {', '.join(objects)}")
-
-        # 이벤트 ID 할당 (게임 시간 전달)
-        event_id = event_id_manager.get_event_id(event_data, agent_name, agent_time)
-        
-        # 이벤트 데이터에 event_id 추가
-        event_data["event_id"] = event_id
         
         # 이벤트 객체 생성
         event = {
             "event_type": event_type,
             "event_location": event_location,
             "time": agent_time,  # 시간 정보 추가
-            "event_id": event_id,  # 이벤트 ID 추가
             "event_description": event_description,
         }
         
@@ -434,14 +407,13 @@ async def react_to_event(payload: dict):
                     }
                 
             # 메모리 저장 (프롬프트 생성 및 API 응답 이후)
-            memory_utils.save_memory(
+            memory_id = memory_utils.save_memory(
                 event_sentence=event_sentence,
                 embedding=embedding,
                 event_time=agent_time,  # 에이전트의 시간 사용
-                agent_name=agent_name,
-                event_id=event_id  # 이벤트 ID 추가
+                agent_name=agent_name
             )
-            print(f"💾 메모리 저장 완료 (시간: {agent_time}, 이벤트 ID: {event_id})")
+            print(f"💾 메모리 저장 완료 (시간: {agent_time}, 메모리 ID: {memory_id})")
             
             # 전체 처리 시간 계산
             total_response_time = time.time() - total_start_time
@@ -451,8 +423,8 @@ async def react_to_event(payload: dict):
             print(f"  - Ollama 응답 시간: {ollama_response_time:.2f}초")
             print(f"  - 전체 처리 시간: {total_response_time:.2f}초")
             
-            # 이벤트 ID를 응답에 포함
-            reaction_obj["event_id"] = event_id
+            # 메모리 ID를 응답에 포함
+            reaction_obj["memory_id"] = memory_id
             
             return {
                 "success": True,

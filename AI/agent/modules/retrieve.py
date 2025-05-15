@@ -101,16 +101,19 @@ class MemoryRetriever:
         all_items = []
         
         # 메모리 추가
-        for memory in memories[agent_name]["memories"]:
+        for memory_id, memory in memories[agent_name]["memories"].items():
             memory_embedding = memory.get("embeddings", [])
             if memory_embedding:
                 similarity = np.dot(event_embedding, memory_embedding) / (
                     np.linalg.norm(event_embedding) * np.linalg.norm(memory_embedding)
                 )
                 if similarity >= similarity_threshold:
-                    all_items.append((memory, similarity, False))  # False는 메모리임을 나타냄
+                    # memory_id 추가
+                    memory_with_id = memory.copy()
+                    memory_with_id["memory_id"] = memory_id
+                    all_items.append((memory_with_id, similarity, False))  # False는 메모리임을 나타냄
         
-        # 반성 추가
+        # 반성 추가 (반성 데이터는 기존 구조 유지)
         if agent_name in reflections:
             for reflection in reflections[agent_name]["reflections"]:
                 reflection_embedding = reflection.get("embeddings", [])
@@ -143,82 +146,37 @@ class MemoryRetriever:
         # 상위 k개 반환
         return [(item, value) for item, value, _ in valued_items[:top_k]]
 
-    def _find_group_memories(self, memory: Dict[str, Any], agent_name: str) -> List[Dict[str, Any]]:
+    def _create_event_string(self, memory: Dict[str, Any]) -> str:
         """
-        같은 그룹의 메모리 검색
+        메모리를 이벤트 문자열로 변환
         
         Args:
-            memory: 기준 메모리
-            agent_name: 에이전트 이름
-            
-        Returns:
-            List[Dict[str, Any]]: 같은 그룹의 메모리 리스트
-        """
-        memories = self.memory_utils._load_memories()
-        if agent_name not in memories:
-            return []
-        
-        group_id = memory.get("groupId")
-        if not group_id:
-            return []
-        
-        # 같은 그룹의 메모리 검색
-        group_memories = []
-        for m in memories[agent_name]["memories"]:
-            if m.get("groupId") == group_id and m != memory:
-                group_memories.append(m)
-        
-        return group_memories
-
-    def _create_event_string(self, event: str, time: str, thought: str = None) -> str:
-        """
-        이벤트 문자열 생성
-        
-        Args:
-            event: 이벤트 내용
-            time: 이벤트 시간
-            thought: 반성 내용 (선택적)
+            memory: 메모리 데이터
             
         Returns:
             str: 포맷된 이벤트 문자열
         """
-        if thought:
-            return f"- {event}\n  thought: {thought}"
-        return f"- {event}"
-
-    def _create_cause_effect_string(
-        self,
-        effect: str,
-        cause: str,
-        effect_time: str,
-        cause_time: str,
-        effect_thought: str = None,
-        cause_thought: str = None
-    ) -> str:
-        """
-        원인-결과 관계 문자열 생성
+        memory_id = memory.get("memory_id", "")
+        time = memory.get("time", "")
         
-        Args:
-            effect: 결과 이벤트
-            cause: 원인 이벤트
-            effect_time: 결과 시간
-            cause_time: 원인 시간
-            effect_thought: 결과에 대한 반성 (선택적)
-            cause_thought: 원인에 대한 반성 (선택적)
-            
-        Returns:
-            str: 포맷된 원인-결과 관계 문자열
-        """
-        effect_str = f"{effect} (time: {effect_time})"
-        if effect_thought:
-            effect_str += f"\n  thought: {effect_thought}"
-            
-        cause_str = f"{cause} (time: {cause_time})"
-        if cause_thought:
-            cause_str += f"\n  thought: {cause_thought}"
-            
-        return f"- {effect_str} because {cause_str}"
-    
+        # 새 구조에서 어떤 필드에 내용이 있는지 확인
+        event = memory.get("event", "")
+        action = memory.get("action", "")
+        feedback = memory.get("feedback", "")
+        thought = memory.get("thought", "")  # 반성 데이터 호환성
+        
+        content = ""
+        if event:
+            content = f"Event: {event}"
+        elif action:
+            content = f"Action: {action}"
+        elif feedback:
+            content = f"Feedback: {feedback}"
+        
+        if thought:
+            return f"- {content} (time: {time}, id: {memory_id})\n  thought: {thought}"
+        return f"- {content} (time: {time}, id: {memory_id})"
+
     def _format_visible_interactables(self, visible_interactables: List[Dict[str, Any]]) -> str:
         """
         상호작용 가능한 객체 목록을 문자열로 변환
@@ -357,48 +315,15 @@ class MemoryRetriever:
         )
         
         # 중복 제거를 위한 Set 사용
-        processed_events: Set[str] = set()
+        processed_events = set()
         similar_events = []
         
         for memory, _ in similar_memories:
-            event = memory.get("event", "")
-            time = memory.get("time", "")
-            thought = memory.get("thought")  # 반성의 경우 thought가 있을 수 있음
-            
-            if not event or not time:
-                continue
-                
-            # 기본 이벤트 문자열 생성
-            event_str = self._create_event_string(event, time, thought)
+            # 메모리 문자열 생성
+            event_str = self._create_event_string(memory)
             if event_str not in processed_events:
                 similar_events.append(event_str)
                 processed_events.add(event_str)
-            
-            # 같은 그룹의 메모리 검색
-            group_memories = self._find_group_memories(memory, agent_name)
-            for group_memory in group_memories:
-                group_event = group_memory.get("event", "")
-                group_time = group_memory.get("time", "")
-                group_thought = group_memory.get("thought")
-                
-                if not group_event or not group_time:
-                    continue
-                
-                # 시간 순서에 따라 원인-결과 관계 결정
-                if group_time < time:
-                    cause_effect_str = self._create_cause_effect_string(
-                        event, group_event, time, group_time,
-                        thought, group_thought
-                    )
-                else:
-                    cause_effect_str = self._create_cause_effect_string(
-                        group_event, event, group_time, time,
-                        group_thought, thought
-                    )
-                
-                if cause_effect_str not in processed_events:
-                    similar_events.append(cause_effect_str)
-                    processed_events.add(cause_effect_str)
         
         similar_event_str = "\n".join(similar_events) if similar_events else "No similar past events found."
         
@@ -441,4 +366,4 @@ class MemoryRetriever:
             return prompt
         except Exception as e:
             print(f"프롬프트 생성 중 오류 발생: {e}")
-            return None 
+            return None
