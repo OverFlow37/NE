@@ -188,5 +188,7 @@ pyrightconfig.json
 
 
 # agent/data folder
-agent/data/
-agent/data/**
+agent/data/plans.json
+agent/data/memories.json
+agent/data/reflections.json
+agent/data/event_ids.json
