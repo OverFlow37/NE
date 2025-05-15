@@ -529,7 +529,7 @@ public class AgentController : MonoBehaviour
             // 각 감정 상태 증가
             ModifyNeed(AgentNeedsType.Hunger, 1);
             ModifyNeed(AgentNeedsType.Sleepiness, 1);
-            ModifyNeed(AgentNeedsType.Loneliness, 1);
+           //ModifyNeed(AgentNeedsType.Loneliness, 1);
             ModifyNeed(AgentNeedsType.Stress, 1);
             if (mShowDebugInfo)
             {
