@@ -93,6 +93,8 @@ public class AgentController : MonoBehaviour
 
     public bool mIsReactJudge = false;
 
+    public TimeSpan mWaitTIme;
+
     private void Awake()
     {
         // 참조 가져오기
@@ -146,6 +148,8 @@ public class AgentController : MonoBehaviour
         {
             mInteractable.OnLocationChanged += HandleMyLocationChanged;
         }
+        // 대기시간 초기화
+        mWaitTIme = TimeManager.Instance.GetCurrentGameTime();
     }
 
     private void OnDestroy()
@@ -546,11 +550,17 @@ public class AgentController : MonoBehaviour
         }
     }
 
+    // 반응 판단 하는 중에 UI 표시
+    public void ShowReactUI(string _text, bool _isReact){
+        mAgentUI.ShowReact(_text, _isReact);
+    }
+
     // 반응 판단 받았을 때, AIBridge에서 이 함수를 호출
     public void ReactToResponse(bool _response, PerceiveEvent _perceiveEvent){
         LogManager.Log("Agent", $"{mName}: 반응 판단 결과 받음: {_response}", 2);
         mIsReactJudge = false;
         // TODO: 반응 UI 종료 처리
+        mAgentUI.ShowReact("!", true);
         if(_response){            
             // AIBridge_perceive에 반응 행동 요청하기
             AIBridge_Perceive.Instance.SendReactActionEvent(this, _perceiveEvent);
@@ -558,7 +568,7 @@ public class AgentController : MonoBehaviour
             mStateMachine.ChangeState(AgentState.WAITING_FOR_AI_RESPONSE);
         }
         else{
-            // 반응 판단 결과 처리
+            // 반응하지 않는 것으로 판단
         }
     }
 }

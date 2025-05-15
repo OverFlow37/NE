@@ -152,6 +152,7 @@ public class AgentVision : MonoBehaviour
         }
         // 이벤트 감지
         // TODO: 이벤트 레이어 감지가 우선?
+        // TODO: 이벤트에 따라 반응할지 관찰할지 룰베이스로 판단
         else if (other.gameObject.layer == LayerMask.NameToLayer("Event"))
         {
             EventController eventController = other.GetComponent<EventController>();
@@ -164,6 +165,7 @@ public class AgentVision : MonoBehaviour
                 // TODO: 이벤트 위치가 오브젝트 위치가 아니라 이벤트 위치를 전송해야함
                 perceiveEvent.event_location = " ";
                 perceiveEvent.event_description = eventController.mEventInfo.event_description;
+                mAgentController.ShowReactUI("?", true);
                 mAIBridgePerceive.SendReactJudgeEvent(mAgentController, perceiveEvent);
             }
         }
