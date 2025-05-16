@@ -35,3 +35,10 @@ Location :
 RELEVANT OBJECTS :
 {RELEVANT_OBJECTS}
 
+
+AVAILABLE ACTIONS :
+- "eat": "eat this object to reduce hunger.",
+- "use": "to use, observe, or play with this object",
+- "keep": "Pick up this object and store them.",
+- "break": "Destroy break this object and harvest resources.",
+- "offer": "offering this object to God."
