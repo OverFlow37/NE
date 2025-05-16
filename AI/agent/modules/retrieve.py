@@ -546,3 +546,41 @@ class MemoryRetriever:
         except Exception as e:
             print(f"프롬프트 생성 중 오류 발생: {e}")
             return None
+
+    def _get_recent_memories(
+        self,
+        agent_name: str,
+        top_k: int = 3,
+        exclude_memory_ids: Set[str] = None
+    ) -> List[Tuple[Dict[str, Any], float]]:
+        """
+        최근 메모리를 가져옵니다.
+        
+        Args:
+            agent_name: 에이전트 이름
+            top_k: 반환할 메모리 개수
+            exclude_memory_ids: 제외할 메모리 ID 집합
+            
+        Returns:
+            List[Tuple[Dict[str, Any], float]]: (메모리, 기본 유사도) 튜플 리스트
+        """
+        memories = self.memory_utils._load_memories()
+        
+        if agent_name not in memories:
+            return []
+            
+        # 메모리를 시간순으로 정렬
+        memory_list = []
+        for memory_id, memory in memories[agent_name]["memories"].items():
+            if exclude_memory_ids and memory_id in exclude_memory_ids:
+                continue
+                
+            memory_with_id = memory.copy()
+            memory_with_id["memory_id"] = memory_id
+            memory_list.append(memory_with_id)
+            
+        # 시간 기준으로 정렬 (최신순)
+        memory_list.sort(key=lambda x: x.get("time", ""), reverse=True)
+        
+        # 상위 k개 메모리 반환 (기본 유사도 0.5 부여)
+        return [(memory, 0.5) for memory in memory_list[:top_k]]
