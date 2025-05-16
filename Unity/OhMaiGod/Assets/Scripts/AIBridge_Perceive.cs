@@ -58,7 +58,7 @@ public class AIBridge_Perceive : MonoBehaviour
     public struct ResponseActionDetails
     {
         public string target_location;
-        public string target_interactable;
+        public string target_object; // AI 프롬프트 혼동을 막기 위해 여기서만 object로 명명
         public string duration;
         public string thought;
     }
@@ -181,7 +181,7 @@ public class AIBridge_Perceive : MonoBehaviour
                 name = _agent.AgentName,
                 state = currentNeeds,
                 current_location = agentLocation,
-                personality = "friendly, helpful", // TODO: 에이전트별 성격 구현 필요
+                personality = _agent.mPersonality, // TODO: 에이전트별 성격 구현 필요
                 time = TimeManager.Instance.GetCurrentGameTime(),
                 visible_interactables = visibleObjectGroups,
                 perceive_event = _perceiveEvent,          
@@ -262,7 +262,7 @@ public class AIBridge_Perceive : MonoBehaviour
                 name = _agent.AgentName,
                 state = currentNeeds,
                 current_location = agentLocation,
-                personality = "friendly, helpful", // TODO: 에이전트별 성격 구현 필요
+                personality = _agent.mPersonality,
                 time = TimeManager.Instance.GetCurrentGameTime(),
                 visible_interactables = visibleObjectGroups,
                 perceive_event = _perceiveEvent,          
@@ -355,7 +355,7 @@ public class AIBridge_Perceive : MonoBehaviour
                 name = _agent.AgentName,
                 state = currentNeeds,
                 current_location = agentLocation,
-                personality = "friendly, helpful", // TODO: 에이전트별 성격 구현 필요
+                personality = _agent.mPersonality, // TODO: 에이전트별 성격 구현 필요
                 time = TimeManager.Instance.GetCurrentGameTime(),
                 visible_interactables = visibleObjectGroups,
                 perceive_event = _perceiveEvent,          
@@ -416,7 +416,7 @@ public class AIBridge_Perceive : MonoBehaviour
             (
                 actionData.action,
                 details.target_location,
-                details.target_interactable,
+                details.target_object,
                 currentTime,
                 endTime,
                 1, 
@@ -438,6 +438,21 @@ public class AIBridge_Perceive : MonoBehaviour
         {
             LogManager.Log("AI", $"Error processing response (에이전트: {_agent.AgentName}): {ex.Message}\n{ex.StackTrace}", 0);
         }
+    }
+
+    public void SendFeedbackToAI(PerceiveFeedback _feedback){
+        LogManager.Log("AI", $"[AIBridge_Perceive] SendFeedbackToAI: {_feedback}", 3);
+        // TODO: 피드백 전송 엔드포인트 구현 후 주석 해제
+        StartCoroutine(SendFeedbackToAIData(_feedback));
+    }
+
+    IEnumerator SendFeedbackToAIData(PerceiveFeedback _feedback){
+        mIsRequesting = true;
+
+        // ---- 피드백 정보 ----
+        // feedback를 JSON으로 변환
+        string requestJson = JsonUtility.ToJson(_feedback);
+        yield return null;
     }
 
 } 

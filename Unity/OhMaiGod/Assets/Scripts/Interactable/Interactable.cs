@@ -116,6 +116,7 @@ public class Interactable : MonoBehaviour
                 // InteractionAction의 Execute 메서드 호출
                 if (action.mAction.Execute(interactor, this.gameObject))
                 {
+                    interactor.GetComponent<AgentController>().isSuccessForFeedback = true;
                     LogManager.Log("Interact", $"{mInteractableData.mName} 상호작용 성공.", 2);
                     return true;
                 }

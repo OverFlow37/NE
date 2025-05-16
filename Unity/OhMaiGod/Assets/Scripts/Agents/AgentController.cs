@@ -55,7 +55,8 @@ public class AgentController : MonoBehaviour
     [Header("Base Profile")]
     [SerializeField] private int mID;                               // 에이전트 고유 식별자
     [SerializeField] private string mName;                          // 이름
-    [SerializeField] private string mDescription;                   // 초기 설명    
+    [SerializeField] private string mDescription;                   // 초기 설명
+    [SerializeField] public string mPersonality;                    // 성격
     [SerializeField] private float mVisualRange;                    // 시야 범위
     [SerializeField] private bool mAutoStart = true;                // 자동 시작 여부
     [SerializeField] [Tooltip("감정 상태 자동 증가 간격 (분)")] private int mNeedIntervalMinutes = 30;
@@ -94,6 +95,17 @@ public class AgentController : MonoBehaviour
     public bool mIsReactJudge = false;
 
     public TimeSpan mWaitTIme;
+
+    public bool isSuccessForFeedback = false;
+    public string mActionNameForFeedback = ""; // 피드백 디버그용
+    public PerceiveFeedback mCurrentFeedback; // 현재 체크 중인 피드백
+    public struct Needs{
+        public int hunger;
+        public int sleepiness;
+        public int loneliness;
+        public int stress;
+    }
+    public Needs mNeedsStart; // 행동 시작 시점의 Needs 수치
 
     private void Awake()
     {
@@ -297,8 +309,10 @@ public class AgentController : MonoBehaviour
         {
             CompleteAction();
         }
+        mActionNameForFeedback = _action.ActionName;
+        InitFeedback();
         mCurrentAction = _action;
-        
+        isSuccessForFeedback = false;
         // 현재 위치와 목표 위치가 다르면 MOVE_TO_LOCATION 상태로 전환
         if (mCurrentAction.LocationName != null && mCurrentAction.LocationName != mInteractable.CurrentLocation)
         {
@@ -463,6 +477,14 @@ public class AgentController : MonoBehaviour
     // 주의: 상호작용 scheduler에서 종료시 ScheduleItem이 없어진 후 이 함수를 호출하게됨
     public void EndInteraction() 
     {
+        Debug.Log(CurrentTargetInteractable.InteractableName);
+        Debug.Log(mActionNameForFeedback);
+        if(isSuccessForFeedback){
+            SendFeedbackToAI(true, CurrentTargetInteractable.InteractableName, mActionNameForFeedback); // 행동 성공
+        }
+        else{
+            SendFeedbackToAI(false, CurrentTargetInteractable.InteractableName, mActionNameForFeedback); // 행동 실패
+        }
         mInteractionProgress = 0.0f;
         if (mInteractionCoroutine != null)
         {
@@ -489,11 +511,12 @@ public class AgentController : MonoBehaviour
                 LogManager.Log("Agent", $"{mName}: 활동 완료 - {mCurrentAction.ActionName}", 2);
             }
             
-            // 스케줄러에 활동 완료 알림
-            mScheduler.CompleteCurrentAction();
-            
+  
             // 상태 초기화
             mCurrentAction = null;
+            Debug.Log("액션 초기화됨");
+            // 스케줄러에 활동 완료 알림
+            mScheduler.CompleteCurrentAction();
             mStateMachine.ChangeState(AgentState.WAITING);
         }
     }
@@ -578,5 +601,47 @@ public class AgentController : MonoBehaviour
         else{
             // 반응하지 않는 것으로 판단
         }
+    }
+
+    // 피드백 초기화
+    public void InitFeedback(){
+        mCurrentFeedback = new PerceiveFeedback();
+        mCurrentFeedback.agent_name = mName;
+        mCurrentFeedback.current_location = mCurrentLocation;
+        mCurrentFeedback.time = TimeManager.Instance.GetCurrentGameTime().ToString();
+        mCurrentFeedback.interactable_name = "";
+        mCurrentFeedback.action_name = mActionNameForFeedback;
+        mCurrentFeedback.success = false;
+        mCurrentFeedback.feedback.feedback_description = "";
+        mCurrentFeedback.feedback.memory_id = -1;
+        mCurrentFeedback.feedback.needs_diff.hunger = 0;
+        mCurrentFeedback.feedback.needs_diff.sleepiness = 0;
+        mCurrentFeedback.feedback.needs_diff.loneliness = 0;
+        mCurrentFeedback.feedback.needs_diff.stress = 0;
+        mNeedsStart.hunger = mAgentNeeds.Hunger;
+        mNeedsStart.sleepiness = mAgentNeeds.Sleepiness;
+        mNeedsStart.loneliness = mAgentNeeds.Loneliness;
+        mNeedsStart.stress = mAgentNeeds.Stress;
+    }
+
+    // AI 서버에 피드백 보냄
+    public void SendFeedbackToAI(bool _success, string _interactableName, string _actionName){
+        mCurrentFeedback.current_location = mCurrentLocation;
+        mCurrentFeedback.time = TimeManager.Instance.GetCurrentGameTime().ToString();
+        mCurrentFeedback.interactable_name = _interactableName;
+        mCurrentFeedback.action_name = _actionName;
+        mCurrentFeedback.success = _success;
+        mCurrentFeedback.feedback.feedback_description = "";
+        if(!_success){
+            mCurrentFeedback.feedback.feedback_description = $"{_interactableName} is can't {_actionName}";
+        }
+        mCurrentFeedback.feedback.needs_diff.hunger = mAgentNeeds.Hunger - mNeedsStart.hunger;
+        mCurrentFeedback.feedback.needs_diff.sleepiness = mAgentNeeds.Sleepiness - mNeedsStart.sleepiness;
+        mCurrentFeedback.feedback.needs_diff.loneliness = mAgentNeeds.Loneliness - mNeedsStart.loneliness;
+        mCurrentFeedback.feedback.needs_diff.stress = mAgentNeeds.Stress - mNeedsStart.stress;
+        // 실제 전송되는 JSON 양식도 로그로 출력
+        string feedbackJson = JsonUtility.ToJson(mCurrentFeedback);
+        LogManager.Log("AI", $"{mName}: 피드백 전송 JSON: {feedbackJson}", 2);
+        AIBridge_Perceive.Instance.SendFeedbackToAI(mCurrentFeedback);
     }
 }
