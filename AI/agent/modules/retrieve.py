@@ -45,7 +45,7 @@ class MemoryRetriever:
         event_embedding: List[float],
         object_embeddings: Dict[str, Dict[str, List[float]]],
         top_k: int = 10,
-        similarity_threshold: float = 0.1
+        similarity_threshold: float = 0.01
     ) -> List[Tuple[str, float]]:
         """
         이벤트와 관련된 상위 k개의 오브젝트를 찾습니다.
@@ -88,33 +88,7 @@ class MemoryRetriever:
             str: 오브젝트 설명
         """
         objects = self.object_dictionary.get("objects", {})
-        
-        # 각 카테고리에서 오브젝트 검색
-        for category in objects.values():
-            if isinstance(category, dict):
-                for subcategory in category.values():
-                    if isinstance(subcategory, dict):
-                        if object_name in subcategory:
-                            return subcategory[object_name]
-        
-        # locations에서도 검색
-        locations = self.object_dictionary.get("locations", {})
-        for location in locations.values():
-            if isinstance(location, dict):
-                # places에서 검색
-                places = location.get("places", {})
-                if object_name in places:
-                    return places[object_name]
-                # description이 있는 경우
-                if "description" in location and object_name == location.get("name", ""):
-                    return location["description"]
-        
-        # actions에서도 검색
-        actions = self.object_dictionary.get("actions", {})
-        if object_name in actions:
-            return actions[object_name]
-            
-        return f"Description not found for {object_name}"
+        return objects.get(object_name, f"Description not found for {object_name}")
 
     def _create_interactable_objects_list(
         self,
