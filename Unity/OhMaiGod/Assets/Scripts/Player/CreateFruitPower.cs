@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -93,7 +94,31 @@ public class CreateFruitPower : MonoBehaviour
         }
     }
 
+    // 아이템을 위에서 떨어뜨리는 코루틴
+    private IEnumerator DropItem(GameObject prefab, Vector3 targetPos, float dropHeight = 3f, float dropTime = 0.5f)
+    {
+        Vector3 startPos = targetPos + Vector3.up * dropHeight;
+        GameObject obj = Instantiate(prefab, startPos, Quaternion.identity);
+
+        float elapsed = 0f;
+        while (elapsed < dropTime)
+        {
+            elapsed += Time.deltaTime;
+            float t = Mathf.Clamp01(elapsed / dropTime);
+            // 부드러운 낙하(가속감 주고 싶으면 t*t 등 곡선 적용 가능)
+            obj.transform.position = Vector3.Lerp(startPos, targetPos, t);
+            yield return null;
+        }
+        obj.transform.position = targetPos;
+    }
+
     public void PlaceObject(Vector3 mouseWorldPos)
+    {
+        StartCoroutine(PlaceObjectsSequentially(mouseWorldPos));
+    }
+
+    // 여러 아이템을 하나씩 순차적으로 떨어뜨리는 코루틴
+    private IEnumerator PlaceObjectsSequentially(Vector3 mouseWorldPos)
     {
         Vector3Int centerCell = TileManager.Instance.GroundTilemap.WorldToCell(mouseWorldPos);
         Vector3 centerCellWorld = TileManager.Instance.GroundTilemap.GetCellCenterWorld(centerCell);
@@ -119,7 +144,7 @@ public class CreateFruitPower : MonoBehaviour
             cellList[randIdx] = temp;
         }
 
-        // 아이템 배치
+        // 아이템 배치 (하나씩 순차적으로)
         int placed = 0;
         for (int i = 0; i < cellList.Count && placed < itemCount; i++)
         {
@@ -135,22 +160,19 @@ public class CreateFruitPower : MonoBehaviour
                 break;
             }
             GameObject randomItem = mItemList[Random.Range(0, mItemList.Count)];
-            Instantiate(randomItem, cellCenter, Quaternion.identity);
+            // 하나씩 떨어뜨리기 (DropItem이 끝날 때까지 대기)
+            yield return StartCoroutine(DropItem(randomItem, cellCenter, 3f, 0.5f));
+            // 이펙트도 같이 떨어뜨리기(동시에)
+            if (mSelectedEffect != null)
+            {
+                StartCoroutine(DropItem(mSelectedEffect, cellCenter, 3f, 0.5f));
+            }
             placed++;
         }
-
-        // 이벤트 및 이펙트는 중앙 셀에만 생성
+        // 이벤트 생성(즉시 생성)
         if (mSelectedEvent != null)
         {
-            GameObject eventObject = Instantiate(mSelectedEvent, centerCellWorld, Quaternion.identity);
-            var eventCtrl = eventObject.GetComponent<EventController>();
-            var srcCtrl = mSelectedEvent.GetComponent<EventController>();
-            if (eventCtrl != null && srcCtrl != null)
-                eventCtrl.mEventInfo = srcCtrl.mEventInfo;
-        }
-        if (mSelectedEffect != null)
-        {
-            Instantiate(mSelectedEffect, centerCellWorld, Quaternion.identity);
+            Instantiate(mSelectedEvent, centerCellWorld, Quaternion.identity);
         }
     }
 
