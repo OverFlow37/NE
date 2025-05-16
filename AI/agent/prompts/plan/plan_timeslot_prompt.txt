@@ -58,6 +58,10 @@ Do not end the schedule early unless strictly required by constraints.
   For example:
   - "use desk at house" → ["use", "house", "desk", "06:00", "08:00", 4]
 
+* In any phrase like `"X at Y"`, the part **after `at` is always the location**, and the part **before `at` is the target**.
+    For example:
+    - `Bookshelf at house` → location = `house`, target = `"ookshelf`
+    - `Jewel at temple` → location = `temple`, target = `jewel`
 * DO NOT include "wake_up" in the output time slots.
 
 * The time slots must only contain real actions performed during the day (e.g., "use", "eat", "get", "break", "offer").
