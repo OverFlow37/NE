@@ -31,39 +31,40 @@
   "objects": {
     "foods": {
       "plants": {
-        "Banana": "Found in the plain.",
-        "Apple": "Found in the forest.",
-        "Grape": "Found in the forest.",
-        "Coconut": "Found on the beach.",
-        "Raspberry": "Found in the mountain.",
-        "Mushroom": "Found in the forest and mountain."
+        "Banana": "It is sweet and delicious, and you can get a little fullness when you eat it.",
+        "Apple": "It is sweet and delicious, and you can get a little fullness when you eat it.",
+        "Grape": "It is sweet and delicious, and you can get a little fullness when you eat it.",
+        "Coconut": "It is sweet and delicious, and you can get a little fullness when you eat it.",
+        "Strawberry": "It is sweet and delicious, and you can get a little fullness when you eat it.",
+        "Mushroom": "It is delicious, and you can get a more fullness when you eat it."
       },
       "meats": {
-        "Big Fish": "Obtained via fishing at the beach.",
-        "Small Fish": "Obtained via fishing at the beach.",
-        "Egg": "Occasionally found in any region."
+        "BigFish": "It is delicious, and you can get a great fullness when you eat it.",
+        "SmallFish": "It is and delicious, and you can get a little fullness when you eat it.",
+        "Egg": "It is delicious, and you can get a more fullness when you eat it."
       }
     },
     "furniture": {
-      "Bed": "Recovers fatigue. (Located in the house)",
-      "Bookshelf": "Increases knowledge and reduces loneliness. (Located in the house)",
-      "Desk": "Allows thinking, writing, or reading. (Located in the house)",
-      "Telescope": "Enables stargazing at night. (Located in the house)",
-      "Piano": "Reduces loneliness and increases cultural level. (Located in the house)",
-      "Fishing Rod": "Used for catching fish. (Located at the beach)",
-      "Wilson": "A volleyball-shaped friend that reduces loneliness. (Located in the square)"
+      "Bed": "Can sleep comfortably.",
+      "Bookshelf": "can read some books.",
+      "Candle" : "can pray what you want to god.",
+      "Desk": "can read, draw, writing and etc...",
+      "Telescope": "can look universe closer.",
+      "Piano": "can playing some music.",
+      "Fishing Rod": "can get a fish.",
+      "Wilson": "it is not just ball, but also be your good friend."
     },
     "resources": {
-      "Wood": "A useful material found in the mountain, forest, and plain.",
-      "Rock": "A solid material found in the mountain and beach."
+      "Tree": "can get some wooden resource.",
+      "Rock": "can get some stone resource."
     },
     "trinkets": {
-      "Flower": "Provides a calming effect. (Found in town, forest, mountain)",
-      "Shell": "Might be edible. (Found on the beach)",
-      "Conch": "Beautiful as a decoration. (Found on the beach)",
-      "Jewel": "Can be offered at the temple. (Rarely found across all regions)",
-      "Letter": "A message left by someone. (Found in all regions)",
-      "Book": "Increases knowledge when read. (Found in all regions)"
+      "Flower": "it is beautiful and can offer to god.",
+      "SeaShell": "it is beautiful and can offer to god.",
+      "Conch": "it is beautiful and can offer to god.",
+      "Jewel": "it is beautiful and can offer to god.",
+      "Letter": "it is sent from stranger.",
+      "Book": "can read something, or offer to god."
     }
   }
 }
