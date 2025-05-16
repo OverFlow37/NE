@@ -10,7 +10,7 @@ def remove_embeddings_from_memories(
     backup=True
 ):
     """
-    memories.json 파일에서 모든 NPC의 메모리 항목들의 embeddings 필드를 빈 리스트로 설정합니다.
+    memories.json 파일에서 모든 NPC의 메모리 항목들의 embeddings 섹션을 빈 딕셔너리로 설정합니다.
     
     Args:
         input_file (str): 입력 파일 경로 (기본값: ../data/memories.json)
@@ -36,7 +36,12 @@ def remove_embeddings_from_memories(
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
             print(f"출력 디렉토리 생성됨: {output_dir}")
-            
+        
+        # 백업 파일 생성
+        if backup:
+            backup_path = f"{input_path}.{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.bak"
+            shutil.copy2(input_path, backup_path)
+            print(f"원본 파일 백업됨: {backup_path}")
         
         # JSON 파일 로드
         with open(input_path, 'r', encoding='utf-8') as f:
@@ -48,17 +53,16 @@ def remove_embeddings_from_memories(
         # 모든 NPC에 대해 처리
         for npc_name, npc_data in memory_data.items():
             npc_count += 1
-            if "memories" in npc_data:
-                for memory in npc_data["memories"]:
-                    if "embeddings" in memory:
-                        memory["embeddings"] = []
-                        modified_count += 1
+            if "embeddings" in npc_data:
+                # embeddings 섹션을 빈 딕셔너리로 초기화
+                npc_data["embeddings"] = {}
+                modified_count += 1
         
         # 수정된 데이터 저장
         with open(output_path, 'w', encoding='utf-8') as f:
             json.dump(memory_data, f, indent=2, ensure_ascii=False)
         
-        print(f"처리 완료: {npc_count}명의 NPC, {modified_count}개의 메모리 항목에서 임베딩 제거됨")
+        print(f"처리 완료: {npc_count}명의 NPC, {modified_count}개의 embeddings 섹션 제거됨")
         print(f"결과가 {output_path}에 저장되었습니다.")
         
         return memory_data

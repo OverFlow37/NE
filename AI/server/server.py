@@ -390,11 +390,17 @@ async def react_to_event(payload: dict):
         if event_is_save == False:
             event_sentence = ""
 
+        # 상태 임베딩 생성
+        state_str = retrieve._format_state(agent_data.get("state", {})) if agent_data and "state" in agent_data else ""
+        state_embedding = memory_utils.get_embedding(state_str) if state_str else embedding
+        print(f"🔢 상태 임베딩 생성 완료 (차원: {len(state_embedding)})")
+
         # 프롬프트 생성
         prompt = retrieve.create_reaction_prompt(
             event_sentence=event_sentence,
             event_role=event_role,
             event_embedding=embedding,
+            state_embedding=state_embedding,
             agent_name=agent_name,
             prompt_template=load_prompt_file(RETRIEVE_PROMPT_PATH),
             agent_data=agent_data,
