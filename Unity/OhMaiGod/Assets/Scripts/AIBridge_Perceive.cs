@@ -68,6 +68,7 @@ public class AIBridge_Perceive : MonoBehaviour
     {
         public string action;
         public ResponseActionDetails details;
+        public string memory_id;
     }
 
     [System.Serializable]
@@ -283,7 +284,6 @@ public class AIBridge_Perceive : MonoBehaviour
         yield return request.SendWebRequest();
 
         ResponseReactJudge response = JsonUtility.FromJson<ResponseReactJudge>(request.downloadHandler.text);
-        Debug.Log(response.should_react);
         
         mIsRequesting = false;
 
@@ -420,7 +420,8 @@ public class AIBridge_Perceive : MonoBehaviour
                 currentTime,
                 endTime,
                 1, 
-                details.thought
+                details.thought,
+                actionData.memory_id
             );
             // 스케줄러에 새 일정 추가
             bool success = _agent.mScheduler.AddScheduleItem(newScheduleItem);
@@ -450,9 +451,53 @@ public class AIBridge_Perceive : MonoBehaviour
         mIsRequesting = true;
 
         // ---- 피드백 정보 ----
-        // feedback를 JSON으로 변환
-        string requestJson = JsonUtility.ToJson(_feedback);
-        yield return null;
+        // feedback를 JSON으로 변환 후 agent로 감싸기
+        string feedbackJson = JsonUtility.ToJson(_feedback);
+        string requestJson = $"{{\"agent\":{feedbackJson}}}";
+        LogManager.Log("AI", $"[AIBridge_Perceive] feedback JSON: {requestJson}", 3);
+
+        // HTTP 요청 설정 (임시 주소)
+        UnityWebRequest request = new UnityWebRequest("http://127.0.0.1:5000/simple_action_feedback", "POST");
+        byte[] bodyRaw = Encoding.UTF8.GetBytes(requestJson);
+        request.uploadHandler = new UploadHandlerRaw(bodyRaw);
+        request.downloadHandler = new DownloadHandlerBuffer();
+        request.SetRequestHeader("Content-Type", "application/json");
+
+        yield return request.SendWebRequest();
+
+        mIsRequesting = false;
+
+        if (request.result == UnityWebRequest.Result.Success)
+        {
+            LogManager.Log("AI", $"✅ 피드백 전송 성공: " + request.downloadHandler.text, 2);
+        }
+        else
+        {
+            LogManager.Log("AI", $"❌ 피드백 전송 실패: " + request.error, 0);
+        }
+    }
+
+    // 기억 리셋
+    public void ResetMemoryAllAgent(){
+        StartCoroutine(ResetMemoryAllAgentCoroutine());
+    }
+
+    IEnumerator ResetMemoryAllAgentCoroutine(){
+        UnityWebRequest request = new UnityWebRequest("http://127.0.0.1:5000/data/clear", "POST");
+        request.uploadHandler = new UploadHandlerRaw(new byte[0]);
+        request.downloadHandler = new DownloadHandlerBuffer();
+        request.SetRequestHeader("Content-Type", "application/json");
+
+        yield return request.SendWebRequest();
+
+        if (request.result == UnityWebRequest.Result.Success)
+        {
+            LogManager.Log("AI", $"✅ 기억 리셋 성공: " + request.downloadHandler.text, 2);
+        }
+        else
+        {
+            LogManager.Log("AI", $"❌ 기억 리셋 실패: " + request.error, 0);
+        }
     }
 
 } 

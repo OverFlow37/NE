@@ -102,6 +102,7 @@ namespace OhMAIGod.Agent
         public int Priority;                // 우선순위 (높을수록 중요)
         public bool IsCompleted;            // 완료 여부
         public string Thought;               // 활동 선택 이유
+        public string memory_id;            // 활동의 피드백 참조용 기억 ID(반응으로 생성된게 아니면 없을수도있음)
 
         // 런타임 변환용 프로퍼티
         public TimeSpan StartTime
@@ -125,7 +126,7 @@ namespace OhMAIGod.Agent
 
         // 생성자
         public ScheduleItem(string _actionName, string _locationName, string _targetName, TimeSpan _startTime, TimeSpan _endTime,
-                            int _priority, string _thought)
+                            int _priority, string _thought, string _memory_id = "")
         {
             ID = System.Guid.NewGuid().ToString();
             ActionName = _actionName;
@@ -140,6 +141,7 @@ namespace OhMAIGod.Agent
             Priority = _priority;
             IsCompleted = false;
             Thought = _thought;
+            memory_id = _memory_id;
         }
     }
 }

@@ -29,6 +29,8 @@ namespace OhMAIGod.Perceive{
         public PerceiveEventType event_type; // 이벤트 타입
         public string event_location;        // 이벤트 발생 위치
         public string event_description;     // 이벤트 설명
+        public bool event_is_save;           // 이벤트 메모리 저장 여부
+        public string event_role;            // 이벤트 발생 주체(GOD says, Tom Thougt)
     }
 
     // 피드백 구조체
@@ -43,7 +45,7 @@ namespace OhMAIGod.Perceive{
     [System.Serializable]
     public struct feedback
     {
-        public int memory_id;
+        public string memory_id;
         public string feedback_description;
         public needs_diff needs_diff;
     }

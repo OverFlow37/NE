@@ -85,7 +85,9 @@ public class ChatPower : MonoBehaviour
             PerceiveEvent perceiveEvent = new PerceiveEvent();
             perceiveEvent.event_type = PerceiveEventType.POWER_OBSERVE;
             perceiveEvent.event_location = "";
-            string message = $"God says: {chatText}";
+            perceiveEvent.event_role = "GOD says";
+            perceiveEvent.event_is_save = true;
+            string message = chatText;
             perceiveEvent.event_description = message;
             mAgentController.ReactToResponse(true, perceiveEvent);
         }
