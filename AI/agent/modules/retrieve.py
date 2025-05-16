@@ -93,34 +93,79 @@ class MemoryRetriever:
         for category in objects.values():
             if isinstance(category, dict):
                 for subcategory in category.values():
-                    if isinstance(subcategory, dict) and object_name in subcategory:
-                        return subcategory[object_name]
+                    if isinstance(subcategory, dict):
+                        if object_name in subcategory:
+                            return subcategory[object_name]
         
+        # locations에서도 검색
+        locations = self.object_dictionary.get("locations", {})
+        for location in locations.values():
+            if isinstance(location, dict):
+                # places에서 검색
+                places = location.get("places", {})
+                if object_name in places:
+                    return places[object_name]
+                # description이 있는 경우
+                if "description" in location and object_name == location.get("name", ""):
+                    return location["description"]
+        
+        # actions에서도 검색
+        actions = self.object_dictionary.get("actions", {})
+        if object_name in actions:
+            return actions[object_name]
+            
         return f"Description not found for {object_name}"
 
-    def _create_interactable_objects_string(
+    def _create_interactable_objects_list(
         self,
         event_embedding: List[float],
-        object_embeddings: Dict[str, Dict[str, List[float]]]
-    ) -> str:
+        object_embeddings: Dict[str, Dict[str, List[float]]],
+        visible_interactables: List[Dict[str, Any]] = None
+    ) -> List[str]:
         """
-        상호작용 가능한 오브젝트 문자열을 생성합니다.
+        상호작용 가능한 오브젝트 리스트를 생성합니다.
         
         Args:
             event_embedding: 이벤트 임베딩
             object_embeddings: 오브젝트 임베딩 딕셔너리
+            visible_interactables: 현재 보이는 상호작용 가능한 객체 목록
+            
+        Returns:
+            List[str]: 상호작용 가능한 오브젝트 이름 리스트
+        """
+        # 중복 제거를 위한 set 사용
+        interactable_objects = set()
+        
+        # visible_interactables에서 오브젝트 이름 추가
+        if visible_interactables:
+            for location_data in visible_interactables:
+                interactables = location_data.get("interactables", [])
+                if isinstance(interactables, list):
+                    interactable_objects.update(interactables)
+        
+        # object_embeddings에서 관련 오브젝트 추가
+        if object_embeddings:
+            relevant_objects = self._find_relevant_objects(event_embedding, object_embeddings)
+            for obj_name, _ in relevant_objects:
+                interactable_objects.add(obj_name)
+        
+        return list(interactable_objects)
+
+    def _create_interactable_objects_string(self, interactable_objects: List[str]) -> str:
+        """
+        상호작용 가능한 오브젝트 리스트를 문자열로 변환합니다.
+        
+        Args:
+            interactable_objects: 상호작용 가능한 오브젝트 이름 리스트
             
         Returns:
             str: 오브젝트 문자열
         """
-        relevant_objects = self._find_relevant_objects(event_embedding, object_embeddings)
-        
-        if not relevant_objects:
+        if not interactable_objects:
             return "No interactable objects found."
         
         object_strings = []
-        for obj_name, similarity in relevant_objects:
-            # object_dictionary에서 오브젝트 설명 찾기
+        for obj_name in interactable_objects:
             description = self._get_object_description(obj_name)
             if description:
                 object_strings.append(f"- {obj_name}: {description}")
@@ -457,9 +502,6 @@ class MemoryRetriever:
         
         similar_event_str = "\n".join(similar_events) if similar_events else "No similar past events found."
         
-        # 에이전트 정보 처리
-        #agent_info = f"{agent_name} in {agent_data.get('current_location', '')}" if agent_data else agent_name
-        
         # 상태 정보 처리
         state_str = ""
         if agent_data and "state" in agent_data:
@@ -470,13 +512,18 @@ class MemoryRetriever:
         if agent_data and "visible_interactables" in agent_data:
             visible_interactables_str = self._format_visible_interactables(agent_data["visible_interactables"])
         
-        # 관련 오브젝트 문자열 생성
-        interactable_objects_str = json.dumps({"interactable_objects": []})  # 기본값으로 빈 객체 리스트
-        if object_embeddings:
-            interactable_objects_str = self._create_interactable_objects_string(event_embedding, object_embeddings)
+        # 상호작용 가능한 오브젝트 리스트 생성
+        interactable_objects = self._create_interactable_objects_list(
+            event_embedding,
+            object_embeddings,
+            agent_data.get("visible_interactables") if agent_data else None
+        )
+        
+        # 상호작용 가능한 오브젝트 문자열 생성
+        interactable_objects_str = self._create_interactable_objects_string(interactable_objects)
+        
         # 에이전트 정보 문자열 생성
         agent_data_str = f"Your Name: {agent_name}\n"
-        #agent_data_str += f"Your Location: {agent_data.get('current_location', '')}\n"
         
         # 성격 정보 추가
         if agent_data and "personality" in agent_data:
