@@ -5,6 +5,7 @@ IMPORTANT RULES:
 - The `target_interactable` field **MUST** be one of the predefined relevant object
 - `"duration"` must be an **integer greater than 30 and less than 120**.
 - `"thought"` must be **no more than 100 characters** and reflect what the agent thinks.
+- "KNOWN OBJECTS" is the knowledge of things you know, things may not be in the current place.
 
 RESPONSE FORMAT (provide ONLY valid JSON):
 {
