@@ -28,7 +28,7 @@ public class CameraController : MonoBehaviour
         mCinemachineCam = GetComponent<CinemachineCamera>();
         if (mFollowTarget == null)
         {
-            mFollowTarget = GameObject.Find("NPC").transform;  // 기본 Tom 추적
+            mFollowTarget = GameObject.FindWithTag("NPC").GetComponent<Transform>();
         }
     }
 

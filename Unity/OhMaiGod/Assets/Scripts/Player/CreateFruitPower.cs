@@ -94,30 +94,12 @@ public class CreateFruitPower : MonoBehaviour
         }
     }
 
-    // 아이템을 위에서 떨어뜨리는 코루틴
-    private IEnumerator DropItem(GameObject prefab, Vector3 targetPos, float dropHeight = 3f, float dropTime = 0.5f)
-    {
-        Vector3 startPos = targetPos + Vector3.up * dropHeight;
-        GameObject obj = Instantiate(prefab, startPos, Quaternion.identity);
-
-        float elapsed = 0f;
-        while (elapsed < dropTime)
-        {
-            elapsed += Time.deltaTime;
-            float t = Mathf.Clamp01(elapsed / dropTime);
-            // 부드러운 낙하(가속감 주고 싶으면 t*t 등 곡선 적용 가능)
-            obj.transform.position = Vector3.Lerp(startPos, targetPos, t);
-            yield return null;
-        }
-        obj.transform.position = targetPos;
-    }
-
     public void PlaceObject(Vector3 mouseWorldPos)
     {
         StartCoroutine(PlaceObjectsSequentially(mouseWorldPos));
     }
 
-    // 여러 아이템을 하나씩 순차적으로 떨어뜨리는 코루틴
+    // 여러 아이템을 하나씩 순차적으로 생성하는 코루틴 (떨어지는 연출 없이 생성만 순차)
     private IEnumerator PlaceObjectsSequentially(Vector3 mouseWorldPos)
     {
         Vector3Int centerCell = TileManager.Instance.GroundTilemap.WorldToCell(mouseWorldPos);
@@ -144,7 +126,7 @@ public class CreateFruitPower : MonoBehaviour
             cellList[randIdx] = temp;
         }
 
-        // 아이템 배치 (하나씩 순차적으로)
+        // 순차적으로 아이템 배치
         int placed = 0;
         for (int i = 0; i < cellList.Count && placed < itemCount; i++)
         {
@@ -160,14 +142,15 @@ public class CreateFruitPower : MonoBehaviour
                 break;
             }
             GameObject randomItem = mItemList[Random.Range(0, mItemList.Count)];
-            // 하나씩 떨어뜨리기 (DropItem이 끝날 때까지 대기)
-            yield return StartCoroutine(DropItem(randomItem, cellCenter, 3f, 0.5f));
-            // 이펙트도 같이 떨어뜨리기(동시에)
+            Instantiate(randomItem, cellCenter, Quaternion.identity);
+            // 생성되는 아이템마다 이펙트 생성
             if (mSelectedEffect != null)
             {
-                StartCoroutine(DropItem(mSelectedEffect, cellCenter, 3f, 0.5f));
+                Instantiate(mSelectedEffect, cellCenter, Quaternion.identity);
             }
             placed++;
+            // 0.2초 간격으로 순차 생성
+            yield return new WaitForSeconds(0.2f);
         }
         // 이벤트 생성(즉시 생성)
         if (mSelectedEvent != null)
