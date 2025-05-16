@@ -102,40 +102,40 @@ class PlanGenerator:
     #         return False
     
     # 새로운 계획 데이터 병합
-def save_plans(self, new_plan_data: Dict) -> bool:
-    try:
-        existing_data = self.load_plans()
+    def save_plans(self, new_plan_data: Dict) -> bool:
+        try:
+            existing_data = self.load_plans()
 
-        for agent_name, agent_data in new_plan_data.items():
-            if agent_name not in existing_data:
-                existing_data[agent_name] = {"plans": {}}
-            if "plans" not in existing_data[agent_name]:
-                existing_data[agent_name]["plans"] = {}
+            for agent_name, agent_data in new_plan_data.items():
+                if agent_name not in existing_data:
+                    existing_data[agent_name] = {"plans": {}}
+                if "plans" not in existing_data[agent_name]:
+                    existing_data[agent_name]["plans"] = {}
 
-            new_plans = agent_data.get("plans", {})
+                new_plans = agent_data.get("plans", {})
 
-            for date_key, plan_value in new_plans.items():
-                # 💡 중첩된 plan이 있는 경우 (e.g. plan_value = {"John": {"plans": {...}}})
-                if isinstance(plan_value, dict) and any(
-                    isinstance(v, dict) and "plans" in v for v in plan_value.values()
-                ):
-                    for inner_agent_key, inner_data in plan_value.items():
-                        if isinstance(inner_data, dict) and "plans" in inner_data:
-                            for nested_date, nested_plan in inner_data["plans"].items():
-                                existing_data[agent_name]["plans"][nested_date] = nested_plan
-                else:
-                    # 정상적인 계획이면 그대로 저장
-                    existing_data[agent_name]["plans"][date_key] = plan_value
+                for date_key, plan_value in new_plans.items():
+                    # 💡 중첩된 plan이 있는 경우 (e.g. plan_value = {"John": {"plans": {...}}})
+                    if isinstance(plan_value, dict) and any(
+                        isinstance(v, dict) and "plans" in v for v in plan_value.values()
+                    ):
+                        for inner_agent_key, inner_data in plan_value.items():
+                            if isinstance(inner_data, dict) and "plans" in inner_data:
+                                for nested_date, nested_plan in inner_data["plans"].items():
+                                    existing_data[agent_name]["plans"][nested_date] = nested_plan
+                    else:
+                        # 정상적인 계획이면 그대로 저장
+                        existing_data[agent_name]["plans"][date_key] = plan_value
 
-        with open(self.plan_file_path, 'w', encoding='utf-8') as f:
-            json.dump(existing_data, f, ensure_ascii=False, indent=2)
+            with open(self.plan_file_path, 'w', encoding='utf-8') as f:
+                json.dump(existing_data, f, ensure_ascii=False, indent=2)
 
-        logger.info("✅ 계획 병합 저장 완료")
-        return True
+            logger.info("✅ 계획 병합 저장 완료")
+            return True
 
-    except Exception as e:
-        logger.error(f"❌ 계획 저장 실패: {e}")
-        return False
+        except Exception as e:
+            logger.error(f"❌ 계획 저장 실패: {e}")
+            return False
 
 
     def _load_prompt_template(self) -> str:
@@ -156,8 +156,9 @@ def save_plans(self, new_plan_data: Dict) -> bool:
             logger.error(f"시스템 프롬프트 로드 실패: {e}")
             return "You are a helpful AI assistant that creates daily plans in JSON format."
     
-    def _create_plan_prompt(self, agent_name: str, date: str, reflections: List[Dict], previous_plans: Dict) -> str:
-        """계획 생성 프롬프트 생성"""
+    def _create_plan_prompt(self, agent_name: str, plan_date: str, reflection_date: str,
+                        reflections: List[Dict], previous_plans: Dict) -> str:
+
         template = self._load_prompt_template()
         
         # 반성 데이터 포맷팅
@@ -173,14 +174,16 @@ def save_plans(self, new_plan_data: Dict) -> bool:
         # 프롬프트 생성
         prompt = template.format(
             AGENT_NAME=agent_name,
-            DATE=date,
+            DATE=reflection_date,      # 🟡 반성 기준 날짜
+            PLAN_DATE=plan_date,       # 🟡 계획 생성 대상 날짜
             REFLECTIONS=reflections_text,
             PREVIOUS_PLANS=previous_plans_text
         )
+
         
         # JSON 형식의 변수 치환
         prompt = prompt.replace("AGENT_NAME_PLACEHOLDER", agent_name)
-        prompt = prompt.replace("DATE_PLACEHOLDER", date)
+        prompt = prompt.replace("DATE_PLACEHOLDER", reflection_date)
         
         return prompt
     
@@ -206,6 +209,7 @@ def save_plans(self, new_plan_data: Dict) -> bool:
             date_parts = current_time.split(".")[:3]  # YYYY.MM.DD 부분만 추출
             current_date = datetime.datetime.strptime(".".join(date_parts), "%Y.%m.%d")
             next_date = (current_date + datetime.timedelta(days=1)).strftime("%Y.%m.%d")
+            current_date_str = current_date.strftime("%Y.%m.%d") 
             logger.info(f"다음 날짜: {next_date}")
             
             # 반성 데이터 로드
@@ -235,7 +239,7 @@ def save_plans(self, new_plan_data: Dict) -> bool:
                     previous_plans = plan_data[agent_name]["plans"][dates[-1]]
             
             # 프롬프트 생성
-            prompt = self._create_plan_prompt(agent_name, next_date, today_reflections, previous_plans)
+            prompt = self._create_plan_prompt(agent_name, next_date, current_date_str, today_reflections, previous_plans)
             logger.info(f"생성된 프롬프트:\n{prompt}")
             
             # 시스템 프롬프트 로드

@@ -52,6 +52,16 @@ Do not end the schedule early unless strictly required by constraints.
 
 * All `time_slots` must be **sequential and continuous** from **06:00 to 24:00**.
 
+* Format of each time slot:
+  ["action", "location", "target", "start time", "end time", "importance"]
+
+  For example:
+  - "use desk at house" → ["use", "house", "desk", "06:00", "08:00", 4]
+
+* DO NOT include "wake_up" in the output time slots.
+
+* The time slots must only contain real actions performed during the day (e.g., "use", "eat", "get", "break", "offer").
+
 **📤 OUTPUT FORMAT (strictly JSON):**
 {{ 
     "time_slots": [

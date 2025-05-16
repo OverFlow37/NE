@@ -2,10 +2,12 @@ You are a game assistant responsible for generating a character's daily plan.
 
 Use the following information to create a meaningful and balanced plan for the character named **"{AGENT_NAME}"**:
 
-**🧠 PRIORITY SOURCES** (in descending order):
+🧠 PRIORITY SOURCES (in descending order):
 1. Reflections from **{DATE}** (highest priority)
 2. Plan from **{DATE}** (second priority)
 3. Other reflections from earlier dates (lower priority)
+
+Generate plan for: **{PLAN_DATE}**
 
 ---
 
@@ -112,8 +114,6 @@ These are single-use items. They must be obtained before using and often reduce 
 
 * Avoid scheduling `eat` outside these periods unless strongly justified by reflections or special context.*
 
-* Each plan must contain **at least 10 distinct activities** in the plans
-
 * This ensures the full day (06:00–24:00) is meaningfully scheduled without excessive repetition or idle time.
 
 * The `"location"` field must refer only to a valid location within the given region.
@@ -130,9 +130,12 @@ These are single-use items. They must be obtained before using and often reduce 
 
 * You must generate a plan for the **next day** following the latest date in {AGENT_NAME}'s existing plans  
 
+* The `daily_plan` list must contain **at least 10** and **no more than 20** distinct actions.
+
 * DO NOT repeat the previous day's schedule. Create a **fresh, meaningful plan** that reflects variation in activities and priorities.
 
 * Avoid repeating low-priority or unimportant objects unless they are highly emphasized in the reflections.
+
 
 
 ---
@@ -147,7 +150,7 @@ The daily_plan must be following this format:
 {{
   "{AGENT_NAME}": {{
     "plans": {{
-      "{DATE}": {{
+      "{PLAN_DATE}": {{
         "wake_up_time": "06:00",
         "daily_plan": [
           "action1 object1 at location1",
