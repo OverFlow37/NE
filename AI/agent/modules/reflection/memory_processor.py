@@ -65,22 +65,6 @@ class MemoryProcessor:
         - 저장 성공 여부
         """
         try:
-            # 임베딩 구조 변환
-            for agent_name in memories:
-                if "memories" in memories[agent_name]:
-                    for memory_id, memory in memories[agent_name]["memories"].items():
-                        # embeddings 필드 처리
-                        if "embeddings" in memory:
-                            # 최대 3개의 임베딩만 유지
-                            memory["embeddings"] = memory["embeddings"][:3]
-                        else:
-                            memory["embeddings"] = []
-                        
-                        # 다른 임베딩 필드들은 제거
-                        for field in ["event_embeddings", "action_embeddings", "feedback_embeddings"]:
-                            if field in memory:
-                                del memory[field]
-            
             with open(self.memory_file_path, 'w', encoding='utf-8') as f:
                 json.dump(memories, f, ensure_ascii=False, indent=2)
             logger.info(f"메모리 파일 저장 완료: {self.memory_file_path}")
@@ -91,100 +75,126 @@ class MemoryProcessor:
     
     def filter_todays_memories(self, agent_name: str, date_str: str = None) -> List[Dict]:
         """
-        특정 날짜의 메모리 필터링
+        오늘 날짜(또는 지정한 날짜)의 메모리 필터링
         
-        Args:
-            agent_name: 에이전트 이름
-            date_str: 날짜 문자열 (YYYY.MM.DD 형식)
-            
+        Parameters:
+        - agent_name: 에이전트 이름
+        - date_str: 날짜 문자열 (None인 경우 최신 메모리 날짜 사용)
+        
         Returns:
-            List[Dict]: 필터링된 메모리 목록
+        - 필터링된 메모리 리스트
         """
+        if date_str is None:
+            # 날짜가 제공되지 않은 경우, 메모리에서 최신 날짜 찾기
+            date_str = self._find_latest_memory_date()
+            if not date_str:
+                date_str = self.today_str
+        
+        # 메모리 로드
         memories = self.load_memories()
         
-        if agent_name not in memories or "memories" not in memories[agent_name]:
-            return []
-        
+        # 특정 날짜 메모리 필터링
         filtered_memories = []
         
-        # 날짜가 제공되지 않은 경우 최신 날짜 사용
-        if not date_str:
-            # 모든 메모리의 날짜를 확인하여 최신 날짜 찾기
-            latest_date = None
-            for memory_id, memory in memories[agent_name]["memories"].items():
+        if agent_name in memories and "memories" in memories[agent_name]:
+            for memory in memories[agent_name]["memories"]:
                 time_str = memory.get("time", "")
-                if time_str:
-                    date_part = time_str.split(".")[:3]  # YYYY.MM.DD 부분만 추출
-                    date = ".".join(date_part)
-                    if not latest_date or date > latest_date:
-                        latest_date = date
-            date_str = latest_date
+                # 날짜 부분만 추출하여 비교
+                memory_date = self._extract_date_from_time(time_str)
+                if memory_date == date_str:
+                    filtered_memories.append(memory)
         
-        # 해당 날짜의 메모리 필터링
-        for memory_id, memory in memories[agent_name]["memories"].items():
-            time_str = memory.get("time", "")
-            if time_str:
-                date_part = time_str.split(".")[:3]  # YYYY.MM.DD 부분만 추출
-                date = ".".join(date_part)
-                if date == date_str:
-                    # memory_id 추가
-                    memory_with_id = memory.copy()
-                    memory_with_id["memory_id"] = memory_id
-                    
-                    # event, action, feedback 필드 확인 및 추가
-                    for field in ["event", "action", "feedback"]:
-                        if field not in memory_with_id:
-                            memory_with_id[field] = ""
-                    
-                    filtered_memories.append(memory_with_id)
-        
-        logger.info(f"에이전트 '{agent_name}'의 {date_str} 날짜 메모리 {len(filtered_memories)}개 필터링됨")
+        logger.info(f"에이전트 '{agent_name}'의 {date_str} 날짜 메모리 {len(filtered_memories)}개를 필터링했습니다.")
         return filtered_memories
     
-    def select_important_memories(self, memories: Dict, agent_name: str, date_str: str = None, k: int = 3) -> List[Dict]:
+    def _extract_date_from_time(self, time_str: str) -> str:
+        """
+        시간 문자열에서 날짜 부분만 추출
+        
+        Parameters:
+        - time_str: 시간 문자열 (YYYY.MM.DD.HH:MM 형식)
+        
+        Returns:
+        - 날짜 문자열 (YYYY.MM.DD 형식)
+        """
+        match = re.match(r'(\d{4}\.\d{2}\.\d{2})', time_str)
+        if match:
+            return match.group(1)
+        return ""
+    
+    def _find_latest_memory_date(self) -> str:
+        """
+        메모리 데이터에서 가장 최근 날짜 찾기
+        
+        Returns:
+        - 최신 날짜 (YYYY.MM.DD 형식) 또는 빈 문자열
+        """
+        memory_data = self.load_memories()
+        latest_date = ""
+        latest_datetime = datetime.datetime.min
+        
+        for agent_name in memory_data:
+            if "memories" in memory_data[agent_name]:
+                for memory in memory_data[agent_name]["memories"]:
+                    time_str = memory.get("time", "")
+                    if time_str:
+                        # 날짜 부분 추출 (YYYY.MM.DD)
+                        date_str = self._extract_date_from_time(time_str)
+                        if date_str:
+                            try:
+                                # datetime 객체로 변환하여 비교
+                                date_obj = datetime.datetime.strptime(date_str, "%Y.%m.%d")
+                                if date_obj > latest_datetime:
+                                    latest_datetime = date_obj
+                                    latest_date = date_str
+                            except:
+                                pass
+        
+        return latest_date
+
+    def select_important_memories(self, memories: Dict, agent_name: str, date_str: str = None, top_k: int = 3) -> List[Dict]:
         """
         중요한 메모리 선택
         
-        Args:
-            memories: 전체 메모리 데이터
-            agent_name: 에이전트 이름
-            date_str: 날짜 문자열 (YYYY.MM.DD 형식)
-            k: 선택할 메모리 개수
-            
+        Parameters:
+        - memories: 메모리 데이터
+        - agent_name: 에이전트 이름
+        - date_str: 날짜 문자열 (None인 경우 오늘 날짜)
+        - top_k: 선택할 상위 메모리 개수
+        
         Returns:
-            List[Dict]: 선택된 중요한 메모리 목록
+        - 중요도 순으로 정렬된 상위 k개 메모리
         """
-        if agent_name not in memories or "memories" not in memories[agent_name]:
+        if date_str is None:
+            date_str = self.today_str
+        
+        # 해당 날짜의 메모리만 필터링
+        todays_memories = []
+        if agent_name in memories and "memories" in memories[agent_name]:
+            for memory in memories[agent_name]["memories"]:
+                time_str = memory.get("time", "")
+                memory_date = self._extract_date_from_time(time_str)
+                if memory_date == date_str:
+                    todays_memories.append(memory)
+        
+        # 중요도 필드가 있는 메모리만 필터링
+        memories_with_importance = [m for m in todays_memories if "importance" in m]
+        
+        if not memories_with_importance:
+            logger.warning(f"에이전트 '{agent_name}'의 메모리 중 중요도가 있는 메모리가 없습니다.")
             return []
         
-        # 해당 날짜의 메모리 필터링
-        filtered_memories = []
-        for memory_id, memory in memories[agent_name]["memories"].items():
-            if "importance" not in memory:
-                continue
-                
-            time_str = memory.get("time", "")
-            if time_str:
-                date_part = time_str.split(".")[:3]  # YYYY.MM.DD 부분만 추출
-                date = ".".join(date_part)
-                if not date_str or date == date_str:
-                    # memory_id 추가
-                    memory_with_id = memory.copy()
-                    memory_with_id["memory_id"] = memory_id
-                    
-                    # event, action, feedback 필드 확인 및 추가
-                    for field in ["event", "action", "feedback"]:
-                        if field not in memory_with_id:
-                            memory_with_id[field] = ""
-                    
-                    filtered_memories.append(memory_with_id)
+        # 중요도 기준 내림차순 정렬
+        sorted_memories = sorted(
+            memories_with_importance, 
+            key=lambda x: x.get("importance", 0), 
+            reverse=True
+        )
         
-        # importance 기준으로 정렬
-        filtered_memories.sort(key=lambda x: x.get("importance", 0), reverse=True)
+        # 상위 k개 반환
+        selected_memories = sorted_memories[:top_k]
+        logger.info(f"중요도 기준 상위 {len(selected_memories)}개 메모리를 선택했습니다.")
         
-        # 상위 k개 선택
-        selected_memories = filtered_memories[:k]
-        logger.info(f"에이전트 '{agent_name}'의 중요한 메모리 {len(selected_memories)}개 선택됨")
         return selected_memories
 
 # 테스트 코드

@@ -208,10 +208,11 @@ class MemoryRetriever:
         
         # 메모리 추가
         for memory_id, memory in memories[agent_name]["memories"].items():
-            if "embeddings" in memory and memory["embeddings"]:
+            memory_embeddings = memory.get("embeddings", [])
+            if memory_embeddings:
                 # 여러 임베딩 중 가장 높은 유사도 계산
                 max_similarity = 0
-                for memory_embedding in memory["embeddings"]:
+                for memory_embedding in memory_embeddings:
                     memory_embedding = np.array(memory_embedding)
                     if memory_embedding.shape == event_embedding.shape:
                         similarity = np.dot(event_embedding, memory_embedding) / (
@@ -225,13 +226,14 @@ class MemoryRetriever:
                     memory_with_id["memory_id"] = memory_id
                     all_items.append((memory_with_id, max_similarity, False))  # False는 메모리임을 나타냄
         
-        # 반성 추가
+        # 반성 추가 (반성 데이터는 기존 구조 유지)
         if agent_name in reflections:
             for reflection in reflections[agent_name]["reflections"]:
-                if "embeddings" in reflection and reflection["embeddings"]:
+                reflection_embeddings = reflection.get("embeddings", [])
+                if reflection_embeddings:
                     # 여러 임베딩 중 가장 높은 유사도 계산
                     max_similarity = 0
-                    for reflection_embedding in reflection["embeddings"]:
+                    for reflection_embedding in reflection_embeddings:
                         reflection_embedding = np.array(reflection_embedding)
                         if reflection_embedding.shape == event_embedding.shape:
                             similarity = np.dot(event_embedding, reflection_embedding) / (

@@ -149,26 +149,11 @@ async def process_reflection_request(request_data: Dict[str, Any], ollama_client
         previous_reflections = reflection_generator.get_previous_reflections(agent_name, agent_date)
         
         # 8. 반성 생성
-        reflections = await reflection_generator.generate_reflections(
-            agent_name, 
-            important_memories, 
-            previous_reflections, 
-            time=agent_date
-        )
+        reflections = await reflection_generator.generate_reflections(agent_name, important_memories, previous_reflections, time=agent_date)
         
         if not reflections:
             logger.error("반성 생성에 실패했습니다.")
             return False
-        
-        # 반성 데이터에 event, action, feedback 추가
-        for reflection in reflections:
-            # 해당 메모리 찾기
-            memory_id = reflection.get("memory_id")
-            if memory_id and memory_id in memories[agent_name]["memories"]:
-                memory = memories[agent_name]["memories"][memory_id]
-                reflection["event"] = memory.get("event", "")
-                reflection["action"] = memory.get("action", "")
-                reflection["feedback"] = memory.get("feedback", "")
         
         logger.info(f"{len(reflections)}개의 반성이 생성되었습니다.")
         
