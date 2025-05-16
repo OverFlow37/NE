@@ -288,7 +288,7 @@ class MemoryRetriever:
         
         content = ""
         if event:
-            if event_role == "God say":
+            if event_role == "God says":
                 content = f"Event: God said, {event}\n"
             else:
                 content = f"Event: {event}\n"
@@ -367,9 +367,7 @@ class MemoryRetriever:
                 state_strings.append("very hungry")
             elif hunger >= 20:
                 state_strings.append("slightly hungry")
-            elif hunger >= -70:
-                state_strings.append("")
-            else:
+            elif hunger < -70:
                 state_strings.append("You can't eat anymore")
                 
         if "loneliness" in state:
@@ -380,9 +378,7 @@ class MemoryRetriever:
                 state_strings.append("lonely")
             elif loneliness >= 20:
                 state_strings.append("slightly lonely")
-            elif loneliness >= -70:
-                state_strings.append("")
-            else:
+            elif loneliness < -70:
                 state_strings.append("want to be alone")
                 
         # sleepiness와 stress는 0 이하일 때 표시하지 않음
@@ -499,7 +495,7 @@ class MemoryRetriever:
             prompt = prompt_template.format(
                 AGENT_NAME=agent_name,
                 AGENT_DATA=agent_data_str,
-                EVENT_CONTENT=f"{'God say: ' if event_role == 'God say' else ''}{event_sentence}",
+                EVENT_CONTENT=f"{event_role} {event_sentence}",
                 RELEVANT_MEMORIES=similar_event_str,
                 RELEVANT_OBJECTS=interactable_objects_str  # 키 이름을 INTERACTABLE_OBJECT로 수정
             )
