@@ -386,6 +386,9 @@ async def react_to_event(payload: dict):
         embedding = memory_utils.get_embedding(event_sentence)
         print(f"🔢 임베딩 생성 완료 (차원: {len(embedding)})")
         
+        # event_is_save가 False인 경우 이벤트 문장을 빈 문자열로 설정
+        if event_is_save == False:
+            event_sentence = ""
 
         # 프롬프트 생성
         prompt = retrieve.create_reaction_prompt(
@@ -460,21 +463,18 @@ async def react_to_event(payload: dict):
                         "reason": " "
                     }
                 
-            # 메모리 저장 (프롬프트 생성 및 API 응답 이후)
-            ## memory_is_save 파라미터를 통해 저장 여부를 결정
-            if event_is_save == True:
-                # action_sentence 생성
-                action_sentence = f"{reaction_obj.get('action', '')} {reaction_obj.get('details', {}).get('target_object', '')} at {reaction_obj.get('details', {}).get('target_location', '')} because {reaction_obj.get('details', {}).get('thought', '')}"
-                
-                memory_id = memory_utils.save_memory(
-                    event_sentence=event_sentence,
-                    embedding=embedding,
-                    event_time=agent_time,  # 에이전트의 시간 사용
-                    agent_name=agent_name,
-                    event_role=event_role,
-                    action_sentence=action_sentence
-                )
-                print(f"💾 메모리 저장 완료 (시간: {agent_time}, 메모리 ID: {memory_id})")
+            # action_sentence 생성
+            action_sentence = f"{reaction_obj.get('action', '')} {reaction_obj.get('details', {}).get('target_object', '')} at {reaction_obj.get('details', {}).get('target_location', '')} because {reaction_obj.get('details', {}).get('thought', '')}"
+            
+            memory_id = memory_utils.save_memory(
+                event_sentence=event_sentence,
+                embedding=embedding,
+                event_time=agent_time,  # 에이전트의 시간 사용
+                agent_name=agent_name,
+                event_role=event_role,
+                action_sentence=action_sentence
+            )
+            print(f"💾 메모리 저장 완료 (시간: {agent_time}, 메모리 ID: {memory_id})")
 
             # 전체 처리 시간 계산
             total_response_time = time.time() - total_start_time
@@ -485,7 +485,7 @@ async def react_to_event(payload: dict):
             print(f"  - 전체 처리 시간: {total_response_time:.2f}초")
             
             # 메모리 ID를 응답에 포함
-            reaction_obj["memory_id"] = memory_id if event_is_save == True else ""
+            reaction_obj["memory_id"] = memory_id
             
             return {
                 "success": True,
