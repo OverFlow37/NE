@@ -5,7 +5,7 @@ using UnityEngine.Tilemaps;
 using System.Collections;
 using UnityEngine.SceneManagement;
 
-public class TileManager : MonoBehaviour
+public class TileManager : MonoBehaviour, ISaveable
 {
     private static TileManager mInstance;
 
@@ -28,6 +28,21 @@ public class TileManager : MonoBehaviour
     [SerializeField] private bool mShowDebug = true;
     private bool mIsInitialized = false;
     private HashSet<Interactable> mPendingTargets = new HashSet<Interactable>();
+
+    // Interactable 정보 저장용 struct
+    [System.Serializable]
+    public struct InteractableSaveData
+    {
+        public string mPrefabName;      // 프리팹 이름(혹은 경로)
+        public Vector3 mPosition;       // 위치
+    }
+
+    // 리스트 직렬화용 래퍼 struct
+    [System.Serializable]
+    public struct InteractableSaveDataList
+    {
+        public List<InteractableSaveData> mList;
+    }
 
     // 싱글톤 인스턴스를 반환하는 프로퍼티
     public static TileManager Instance { 
@@ -312,5 +327,109 @@ public class TileManager : MonoBehaviour
     {
         // 오브젝트가 파괴될 때 씬 로드 이벤트 해제
         SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
+    public void SaveData()
+    {
+        // 저장할 데이터 리스트 생성
+        InteractableSaveDataList saveList = new InteractableSaveDataList();
+        saveList.mList = new List<InteractableSaveData>();
+
+        // mTileTree에 등록된 모든 Interactable 오브젝트 정보 수집
+        foreach (var tileController in mTileTree)
+        {
+            foreach (var interactable in tileController.ChildInteractables)
+            {
+                // Interactable에서 필요한 정보 추출
+                InteractableSaveData data = new InteractableSaveData();
+
+                // 프리팹 이름은 InteractableData의 mName을 사용
+                data.mPrefabName = interactable.mInteractableData != null ? interactable.mInteractableData.mName : interactable.name;
+                data.mPosition = interactable.transform.position;
+
+                saveList.mList.Add(data);
+            }
+        }
+
+        // Json으로 직렬화
+        string json = JsonUtility.ToJson(saveList, true);
+
+        // 파일로 저장 (경로는 Application.persistentDataPath 사용)
+        string path = System.IO.Path.Combine(Application.persistentDataPath, "interactables.json");
+        System.IO.File.WriteAllText(path, json);
+
+        LogManager.Log("Env", $"Interactable 세이브 완료: {path}", 2);
+    }
+
+    public void LoadData()
+    {
+        // 저장된 데이터 파일 경로
+        string path = System.IO.Path.Combine(Application.persistentDataPath, "interactables.json");
+        if (!System.IO.File.Exists(path))
+        {
+            LogManager.Log("SaveLoad", "세이브 파일이 존재하지 않습니다.", 1);
+            return;
+        }
+
+        // 파일에서 Json 읽기
+        string json = System.IO.File.ReadAllText(path);
+        InteractableSaveDataList saveList = JsonUtility.FromJson<InteractableSaveDataList>(json);
+        if (saveList.mList == null)
+        {
+            LogManager.Log("SaveLoad", "세이브 데이터가 비어 있습니다.", 1);
+            return;
+        }
+
+        // 기존 Interactable 오브젝트 삭제 (중복 방지)
+        foreach (var tileController in mTileTree)
+        {
+            // 리스트 복사 후 삭제
+            var interactables = new List<Interactable>(tileController.ChildInteractables);
+            foreach (var interactable in interactables)
+            {
+                GameObject.Destroy(interactable.gameObject);
+                tileController.RemoveChildInteractable(interactable);
+                LogManager.Log("SaveLoad", $"기존 Interactable 오브젝트 삭제: {interactable.name}", 2);
+            }
+        }
+
+        // 저장된 데이터로 Interactable 오브젝트 생성
+        foreach (var data in saveList.mList)
+        {
+            // 프리팹 로드 (Resources 폴더 내에 프리팹이 있어야 함)
+            GameObject prefab = Resources.Load<GameObject>(data.mPrefabName);
+            if (prefab == null)
+            {
+                LogManager.Log("SaveLoad", $"프리팹 {data.mPrefabName}을(를) 찾을 수 없습니다.", 1);
+                continue;
+            }
+
+            // 해당 위치에 이미 Interactable이 있는지 체크
+            bool alreadyExists = false;
+            foreach (var tileController in mTileTree)
+            {
+                foreach (var interactable in tileController.ChildInteractables)
+                {
+                    if (Vector3.Distance(interactable.transform.position, data.mPosition) < 0.1f)
+                    {
+                        alreadyExists = true;
+                        break;
+                    }
+                }
+                if (alreadyExists) break;
+            }
+            if (alreadyExists) continue;
+
+            // 오브젝트 생성 및 위치 지정
+            GameObject obj = GameObject.Instantiate(prefab, data.mPosition, Quaternion.identity);
+            Interactable interactableComp = obj.GetComponent<Interactable>();
+            if (interactableComp != null)
+            {
+                // 환경에 등록
+                RegisterTarget(interactableComp);
+            }
+        }
+
+        LogManager.Log("SaveLoad", "Interactable 오브젝트 로드 완료.", 2);
     }
 }

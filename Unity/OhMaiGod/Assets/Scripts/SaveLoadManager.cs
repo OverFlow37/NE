@@ -33,6 +33,9 @@ public class SaveLoadManager : MonoBehaviour
 
         mInstance = this;
         DontDestroyOnLoad(gameObject);
+
+        // 씬 로드 이벤트 등록
+        SceneManager.sceneLoaded += OnSceneLoaded;
     }
 
     private void Update()
@@ -47,18 +50,23 @@ public class SaveLoadManager : MonoBehaviour
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         //  씬 로드할때 세이브 파일로부터 값 읽어와서 오브젝트 생성
+        LoadData();
     }
 
     public void SaveData()
     {
         // 세이브 파일로 값 저장
-        
+        TileManager.Instance.SaveData();
 
     }
 
-    public List<Interactable> LoadData()
+    public void LoadData()
     {
-        // 세이브 파일로부터 값 읽어와서 Interactable 정보 반환
-        return new List<Interactable>();
+        TileManager.Instance.LoadData();
+    }
+
+    private void OnDestroy()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
     }
 }
