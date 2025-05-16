@@ -139,6 +139,10 @@ These are single-use items. They must be obtained before using and often reduce 
 
 **📤 OUTPUT FORMAT (strictly JSON):**
 
+The daily_plan must be following this format:
+
+- "action object at location"
+
 ```json
 {{
   "{AGENT_NAME}": {{
@@ -146,8 +150,8 @@ These are single-use items. They must be obtained before using and often reduce 
       "{DATE}": {{
         "wake_up_time": "06:00",
         "daily_plan": [
-          "action1",
-          "action2",
+          "action1 object1 at location1",
+          "action2 object2 at location2",
           ...
         ]
       }}

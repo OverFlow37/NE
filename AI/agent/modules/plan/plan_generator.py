@@ -72,35 +72,72 @@ class PlanGenerator:
             logger.warning(f"반성 파일 로드 오류: {e}")
             return {}
     
-    def save_plans(self, agent_name: str, date: str, plans: Dict) -> bool:
-        """계획을 파일에 저장"""
-        try:
-            # 기존 계획 파일 로드
-            plan_data = self.load_plans()
+    # def save_plans(self, agent_name: str, date: str, plans: Dict) -> bool:
+    #     """계획을 파일에 저장"""
+    #     try:
+    #         # 기존 계획 파일 로드
+    #         plan_data = self.load_plans()
             
-            # 에이전트가 없으면 생성
-            if agent_name not in plan_data:
-                plan_data[agent_name] = {"plans": {}}
+    #         # 에이전트가 없으면 생성
+    #         if agent_name not in plan_data:
+    #             plan_data[agent_name] = {"plans": {}}
             
-            # plans 필드가 없으면 생성
-            if "plans" not in plan_data[agent_name]:
-                plan_data[agent_name]["plans"] = {}
+    #         # plans 필드가 없으면 생성
+    #         if "plans" not in plan_data[agent_name]:
+    #             plan_data[agent_name]["plans"] = {}
             
-            # 계획 추가
-            plan_data[agent_name]["plans"][date] = plans
-            logger.info(f"{agent_name}의 {date} 계획이 추가되었습니다.")
+    #         # 계획 추가
+    #         plan_data[agent_name]["plans"][date] = plans
+    #         logger.info(f"{agent_name}의 {date} 계획이 추가되었습니다.")
             
-            # 파일 저장
-            with open(self.plan_file_path, 'w', encoding='utf-8') as f:
-                json.dump(plan_data, f, ensure_ascii=False, indent=2)
+    #         # 파일 저장
+    #         with open(self.plan_file_path, 'w', encoding='utf-8') as f:
+    #             json.dump(plan_data, f, ensure_ascii=False, indent=2)
             
-            logger.info(f"계획 파일 저장 완료: {self.plan_file_path}")
-            return True
+    #         logger.info(f"계획 파일 저장 완료: {self.plan_file_path}")
+    #         return True
             
-        except Exception as e:
-            logger.error(f"계획 저장 오류: {e}")
-            return False
+    #     except Exception as e:
+    #         logger.error(f"계획 저장 오류: {e}")
+    #         return False
     
+    # 새로운 계획 데이터 병합
+def save_plans(self, new_plan_data: Dict) -> bool:
+    try:
+        existing_data = self.load_plans()
+
+        for agent_name, agent_data in new_plan_data.items():
+            if agent_name not in existing_data:
+                existing_data[agent_name] = {"plans": {}}
+            if "plans" not in existing_data[agent_name]:
+                existing_data[agent_name]["plans"] = {}
+
+            new_plans = agent_data.get("plans", {})
+
+            for date_key, plan_value in new_plans.items():
+                # 💡 중첩된 plan이 있는 경우 (e.g. plan_value = {"John": {"plans": {...}}})
+                if isinstance(plan_value, dict) and any(
+                    isinstance(v, dict) and "plans" in v for v in plan_value.values()
+                ):
+                    for inner_agent_key, inner_data in plan_value.items():
+                        if isinstance(inner_data, dict) and "plans" in inner_data:
+                            for nested_date, nested_plan in inner_data["plans"].items():
+                                existing_data[agent_name]["plans"][nested_date] = nested_plan
+                else:
+                    # 정상적인 계획이면 그대로 저장
+                    existing_data[agent_name]["plans"][date_key] = plan_value
+
+        with open(self.plan_file_path, 'w', encoding='utf-8') as f:
+            json.dump(existing_data, f, ensure_ascii=False, indent=2)
+
+        logger.info("✅ 계획 병합 저장 완료")
+        return True
+
+    except Exception as e:
+        logger.error(f"❌ 계획 저장 실패: {e}")
+        return False
+
+
     def _load_prompt_template(self) -> str:
         """프롬프트 템플릿 로드"""
         try:
@@ -246,7 +283,7 @@ class PlanGenerator:
                 logger.info(f"생성된 계획: {plans}")
                 
                 # 계획 저장 (다음 날짜로 저장)
-                if self.save_plans(agent_name, next_date, plans):
+                if self.save_plans(plans):
                     return plans
                 return {}
                 
