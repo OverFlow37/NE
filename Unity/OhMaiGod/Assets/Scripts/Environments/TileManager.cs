@@ -62,7 +62,12 @@ public class TileManager : MonoBehaviour
 
         if (scene.name == "LoadScene")
         {
-            LogManager.Log("Env", $"TileManager: 씬 로드 완료", 3);
+            // 기존 Interactable들 제거
+            
+
+            // 저장된 데이터로 Interactable 오브젝트 생성
+            
+
             StartCoroutine(InitializeManager());
         }
     }

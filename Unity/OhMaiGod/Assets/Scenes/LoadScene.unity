@@ -271,6 +271,37 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 4318032351815619809, guid: 6b861d93a1bf71940b9855f2025edb6b, type: 3}
   m_PrefabInstance: {fileID: 1910885154}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1225372673
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1225372674}
+  m_Layer: 0
+  m_Name: SpawnPoint
+  m_TagString: Respawn
+  m_Icon: {fileID: 2974397684917235467, guid: 0000000000000000d000000000000000, type: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1225372674
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1225372673}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 1.5, y: 6.5, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1603064507 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 768911855808879620, guid: 6b861d93a1bf71940b9855f2025edb6b, type: 3}
@@ -679,3 +710,4 @@ SceneRoots:
   - {fileID: 1910885154}
   - {fileID: 263082001}
   - {fileID: 276064054}
+  - {fileID: 1225372674}

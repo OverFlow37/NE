@@ -58,6 +58,7 @@ public class AgentController : MonoBehaviour
     [SerializeField] private string mDescription;                   // 초기 설명
     [SerializeField] public string mPersonality;                    // 성격
     [SerializeField] private float mVisualRange;                    // 시야 범위
+    [SerializeField] private Transform mSpawnPoint;                 // 스폰 위치
     [SerializeField] private bool mAutoStart = true;                // 자동 시작 여부
     [SerializeField] [Tooltip("감정 상태 자동 증가 간격 (분)")] private int mNeedIntervalMinutes = 30;
     private TimeSpan mLastNeedsIncreaseTime; // 마지막 감정 상태 자동 증가 시각
@@ -274,6 +275,12 @@ public class AgentController : MonoBehaviour
         if (mAutoStart)
         {
             mStateMachine.Initialize(AgentState.WAITING);
+        }
+
+        if(mSpawnPoint == null)
+        {
+            mSpawnPoint = GameObject.FindWithTag("Respawn").GetComponent<Transform>();
+            if(mSpawnPoint != null) transform.position = mSpawnPoint.position;
         }
     }
 

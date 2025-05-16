@@ -1,5 +1,7 @@
 using UnityEngine;
+using System.Collections.Generic;
 using UnityEngine.SceneManagement;
+using System.Xml.Serialization;
 
 public class SaveLoadManager : MonoBehaviour
 {
@@ -45,5 +47,18 @@ public class SaveLoadManager : MonoBehaviour
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         //  씬 로드할때 세이브 파일로부터 값 읽어와서 오브젝트 생성
+    }
+
+    public void SaveData()
+    {
+        // 세이브 파일로 값 저장
+        
+
+    }
+
+    public List<Interactable> LoadData()
+    {
+        // 세이브 파일로부터 값 읽어와서 Interactable 정보 반환
+        return new List<Interactable>();
     }
 }
