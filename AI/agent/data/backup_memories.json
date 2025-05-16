@@ -2,7 +2,7 @@
   "John": {
     "memories": {
       "1": {
-        "event_role": "God say",
+        "event_role": "God says",
         "event": "you offer flower",
         "action": "offer flower at plain",
         "feedback": "",
@@ -22,7 +22,7 @@
         "importance": 2
       },
       "3": {
-        "event_role": "God say",
+        "event_role": "God says",
         "event": "you offer jewel",
         "action": "offer jewel at forest",
         "feedback": "",
@@ -92,7 +92,7 @@
         "importance": 2
       },
       "10": {
-        "event_role": "God say",
+        "event_role": "God says",
         "event": "you offer flower",
         "action": "offer flower at Town-house",
         "feedback": "",
@@ -112,7 +112,7 @@
         "importance": 2
       },
       "12": {
-        "event_role": "God say",
+        "event_role": "God says",
         "event": "you offer letter",
         "action": "offer letter at Town-temple",
         "feedback": "",
@@ -152,7 +152,7 @@
         "importance": 2
       },
       "16": {
-        "event_role": "God say",
+        "event_role": "God says",
         "event": "you offer flower",
         "action": "offer flower at Town-square",
         "feedback": "",
@@ -182,7 +182,7 @@
         "importance": 2
       },
       "19": {
-        "event_role": "God say",
+        "event_role": "God says",
         "event": "you offer conch",
         "action": "offer conch at Town-square",
         "feedback": "",
@@ -222,7 +222,7 @@
         "importance": 2
       },
       "23": {
-        "event_role": "God say",
+        "event_role": "God says",
         "event": "you offer jewel",
         "action": "offer jewel at forest",
         "feedback": "",
@@ -282,7 +282,7 @@
         "importance": 2
       },
       "29": {
-        "event_role": "God say",
+        "event_role": "God says",
         "event": "you offer letter",
         "action": "offer letter at plain",
         "feedback": "",
@@ -322,7 +322,7 @@
         "importance": 2
       },
       "33": {
-        "event_role": "God say",
+        "event_role": "God says",
         "event": "you offer letter",
         "action": "offer letter at Town-temple",
         "feedback": "",
@@ -342,7 +342,7 @@
         "importance": 2
       },
       "35": {
-        "event_role": "God say",
+        "event_role": "God says",
         "event": "you offer jewel",
         "action": "offer jewel at beach",
         "feedback": "",
@@ -382,7 +382,7 @@
         "importance": 2
       },
       "39": {
-        "event_role": "God say",
+        "event_role": "God says",
         "event": "you offer conch",
         "action": "offer conch at Town-square",
         "feedback": "",
@@ -412,7 +412,7 @@
         "importance": 2
       },
       "42": {
-        "event_role": "God say",
+        "event_role": "God says",
         "event": "you offer shell",
         "action": "offer shell at Town-temple",
         "feedback": "",
@@ -462,7 +462,7 @@
         "importance": 2
       },
       "47": {
-        "event_role": "God say",
+        "event_role": "God says",
         "event": "you offer jewel",
         "action": "offer jewel at plain",
         "feedback": "",
@@ -512,7 +512,7 @@
         "importance": 2
       },
       "52": {
-        "event_role": "God say",
+        "event_role": "God says",
         "event": "you offer book",
         "action": "offer book at plain",
         "feedback": "",
@@ -532,7 +532,7 @@
         "importance": 2
       },
       "54": {
-        "event_role": "God say",
+        "event_role": "God says",
         "event": "you offer letter",
         "action": "offer letter at mountain",
         "feedback": "",
@@ -552,7 +552,7 @@
         "importance": 2
       },
       "56": {
-        "event_role": "God say",
+        "event_role": "God says",
         "event": "you offer letter",
         "action": "offer letter at beach",
         "feedback": "",

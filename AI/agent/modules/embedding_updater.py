@@ -46,23 +46,12 @@ class EmbeddingUpdater:
         with open(self.object_dictionary_path, "r", encoding="utf-8") as f:
             data = json.load(f)
 
-        object_names = []
-        object_descriptions = []
-
-        def extract_objects(obj_dict):
-            for key, value in obj_dict.items():
-                if isinstance(value, dict):
-                    extract_objects(value)
-                else:
-                    object_names.append(key)
-                    object_descriptions.append(value)
-
-        extract_objects(data["objects"])
-        print(f"🔍 총 오브젝트 수: {len(object_names)}")
+        objects = data.get("objects", {})
+        print(f"🔍 총 오브젝트 수: {len(objects)}")
 
         embeddings = {}
         
-        for name, desc in zip(object_names, object_descriptions):
+        for name, desc in objects.items():
             # 이름만 사용한 임베딩
             name_words = name.lower().split()
             try:

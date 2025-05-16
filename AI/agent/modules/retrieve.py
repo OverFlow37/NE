@@ -45,7 +45,7 @@ class MemoryRetriever:
         event_embedding: List[float],
         object_embeddings: Dict[str, Dict[str, List[float]]],
         top_k: int = 10,
-        similarity_threshold: float = 0.1
+        similarity_threshold: float = 0.01
     ) -> List[Tuple[str, float]]:
         """
         이벤트와 관련된 상위 k개의 오브젝트를 찾습니다.
@@ -88,39 +88,58 @@ class MemoryRetriever:
             str: 오브젝트 설명
         """
         objects = self.object_dictionary.get("objects", {})
-        
-        # 각 카테고리에서 오브젝트 검색
-        for category in objects.values():
-            if isinstance(category, dict):
-                for subcategory in category.values():
-                    if isinstance(subcategory, dict) and object_name in subcategory:
-                        return subcategory[object_name]
-        
-        return f"Description not found for {object_name}"
+        return objects.get(object_name, f"Description not found for {object_name}")
 
-    def _create_interactable_objects_string(
+    def _create_interactable_objects_list(
         self,
         event_embedding: List[float],
-        object_embeddings: Dict[str, Dict[str, List[float]]]
-    ) -> str:
+        object_embeddings: Dict[str, Dict[str, List[float]]],
+        visible_interactables: List[Dict[str, Any]] = None
+    ) -> List[str]:
         """
-        상호작용 가능한 오브젝트 문자열을 생성합니다.
+        상호작용 가능한 오브젝트 리스트를 생성합니다.
         
         Args:
             event_embedding: 이벤트 임베딩
             object_embeddings: 오브젝트 임베딩 딕셔너리
+            visible_interactables: 현재 보이는 상호작용 가능한 객체 목록
+            
+        Returns:
+            List[str]: 상호작용 가능한 오브젝트 이름 리스트
+        """
+        # 중복 제거를 위한 set 사용
+        interactable_objects = set()
+        
+        # visible_interactables에서 오브젝트 이름 추가
+        if visible_interactables:
+            for location_data in visible_interactables:
+                interactables = location_data.get("interactables", [])
+                if isinstance(interactables, list):
+                    interactable_objects.update(interactables)
+        
+        # object_embeddings에서 관련 오브젝트 추가
+        if object_embeddings:
+            relevant_objects = self._find_relevant_objects(event_embedding, object_embeddings)
+            for obj_name, _ in relevant_objects:
+                interactable_objects.add(obj_name)
+        
+        return list(interactable_objects)
+
+    def _create_interactable_objects_string(self, interactable_objects: List[str]) -> str:
+        """
+        상호작용 가능한 오브젝트 리스트를 문자열로 변환합니다.
+        
+        Args:
+            interactable_objects: 상호작용 가능한 오브젝트 이름 리스트
             
         Returns:
             str: 오브젝트 문자열
         """
-        relevant_objects = self._find_relevant_objects(event_embedding, object_embeddings)
-        
-        if not relevant_objects:
+        if not interactable_objects:
             return "No interactable objects found."
         
         object_strings = []
-        for obj_name, similarity in relevant_objects:
-            # object_dictionary에서 오브젝트 설명 찾기
+        for obj_name in interactable_objects:
             description = self._get_object_description(obj_name)
             if description:
                 object_strings.append(f"- {obj_name}: {description}")
@@ -209,8 +228,11 @@ class MemoryRetriever:
         # 메모리 추가
         for memory_id, memory in memories[agent_name]["memories"].items():
             memory_embeddings = memory.get("embeddings", [])
+            memory_with_id = memory.copy()
+            memory_with_id["memory_id"] = memory_id
+            
             if memory_embeddings:
-                # 여러 임베딩 중 가장 높은 유사도 계산
+                # 임베딩이 있는 경우 유사도 계산
                 max_similarity = 0
                 for memory_embedding in memory_embeddings:
                     memory_embedding = np.array(memory_embedding)
@@ -221,17 +243,16 @@ class MemoryRetriever:
                         max_similarity = max(max_similarity, float(similarity))
                 
                 if max_similarity >= similarity_threshold:
-                    # memory_id 추가
-                    memory_with_id = memory.copy()
-                    memory_with_id["memory_id"] = memory_id
-                    all_items.append((memory_with_id, max_similarity, False))  # False는 메모리임을 나타냄
+                    all_items.append((memory_with_id, max_similarity, False))
+            else:
+                # 임베딩이 없는 경우 기본 유사도 부여
+                all_items.append((memory_with_id, 0.5, False))
         
-        # 반성 추가 (반성 데이터는 기존 구조 유지)
+        # 반성 추가
         if agent_name in reflections:
             for reflection in reflections[agent_name]["reflections"]:
                 reflection_embeddings = reflection.get("embeddings", [])
                 if reflection_embeddings:
-                    # 여러 임베딩 중 가장 높은 유사도 계산
                     max_similarity = 0
                     for reflection_embedding in reflection_embeddings:
                         reflection_embedding = np.array(reflection_embedding)
@@ -242,7 +263,7 @@ class MemoryRetriever:
                             max_similarity = max(max_similarity, float(similarity))
                     
                     if max_similarity >= similarity_threshold:
-                        all_items.append((reflection, max_similarity, True))  # True는 반성임을 나타냄
+                        all_items.append((reflection, max_similarity, True))
         
         # 시간순으로 정렬하여 가중치 계산
         def get_time(item):
@@ -264,7 +285,27 @@ class MemoryRetriever:
         valued_items.sort(key=lambda x: x[1], reverse=True)
         
         # 상위 k개 반환
-        return [(item, value) for item, value, _ in valued_items[:top_k]]
+        result = [(item, value) for item, value, _ in valued_items[:top_k]]
+        
+        # 결과가 부족한 경우 최근 메모리로 채우기
+        if len(result) < top_k:
+            # 이미 선택된 메모리 ID 수집
+            selected_memory_ids = {item.get("memory_id") for item, _ in result}
+            
+            # 추가로 필요한 메모리 개수 계산
+            needed_count = top_k - len(result)
+            
+            # 최근 메모리 가져오기
+            recent_memories = self._get_recent_memories(
+                agent_name,
+                top_k=needed_count,
+                exclude_memory_ids=selected_memory_ids
+            )
+            
+            # 최근 메모리 추가
+            result.extend(recent_memories)
+        
+        return result
 
     def _create_event_string(self, memory: Dict[str, Any]) -> str:
         """
@@ -288,7 +329,7 @@ class MemoryRetriever:
         
         content = ""
         if event:
-            if event_role == "God say":
+            if event_role == "God says":
                 content = f"Event: God said, {event}\n"
             else:
                 content = f"Event: {event}\n"
@@ -367,9 +408,7 @@ class MemoryRetriever:
                 state_strings.append("very hungry")
             elif hunger >= 20:
                 state_strings.append("slightly hungry")
-            elif hunger >= -70:
-                state_strings.append("")
-            else:
+            elif hunger < -70:
                 state_strings.append("You can't eat anymore")
                 
         if "loneliness" in state:
@@ -380,9 +419,7 @@ class MemoryRetriever:
                 state_strings.append("lonely")
             elif loneliness >= 20:
                 state_strings.append("slightly lonely")
-            elif loneliness >= -70:
-                state_strings.append("")
-            else:
+            elif loneliness < -70:
                 state_strings.append("want to be alone")
                 
         # sleepiness와 stress는 0 이하일 때 표시하지 않음
@@ -461,9 +498,6 @@ class MemoryRetriever:
         
         similar_event_str = "\n".join(similar_events) if similar_events else "No similar past events found."
         
-        # 에이전트 정보 처리
-        #agent_info = f"{agent_name} in {agent_data.get('current_location', '')}" if agent_data else agent_name
-        
         # 상태 정보 처리
         state_str = ""
         if agent_data and "state" in agent_data:
@@ -474,13 +508,18 @@ class MemoryRetriever:
         if agent_data and "visible_interactables" in agent_data:
             visible_interactables_str = self._format_visible_interactables(agent_data["visible_interactables"])
         
-        # 관련 오브젝트 문자열 생성
-        interactable_objects_str = json.dumps({"interactable_objects": []})  # 기본값으로 빈 객체 리스트
-        if object_embeddings:
-            interactable_objects_str = self._create_interactable_objects_string(event_embedding, object_embeddings)
+        # 상호작용 가능한 오브젝트 리스트 생성
+        interactable_objects = self._create_interactable_objects_list(
+            event_embedding,
+            object_embeddings,
+            agent_data.get("visible_interactables") if agent_data else None
+        )
+        
+        # 상호작용 가능한 오브젝트 문자열 생성
+        interactable_objects_str = self._create_interactable_objects_string(interactable_objects)
+        
         # 에이전트 정보 문자열 생성
         agent_data_str = f"Your Name: {agent_name}\n"
-        #agent_data_str += f"Your Location: {agent_data.get('current_location', '')}\n"
         
         # 성격 정보 추가
         if agent_data and "personality" in agent_data:
@@ -499,7 +538,7 @@ class MemoryRetriever:
             prompt = prompt_template.format(
                 AGENT_NAME=agent_name,
                 AGENT_DATA=agent_data_str,
-                EVENT_CONTENT=f"{'God say: ' if event_role == 'God say' else ''}{event_sentence}",
+                EVENT_CONTENT=f"{event_role} {event_sentence}",
                 RELEVANT_MEMORIES=similar_event_str,
                 RELEVANT_OBJECTS=interactable_objects_str  # 키 이름을 INTERACTABLE_OBJECT로 수정
             )
