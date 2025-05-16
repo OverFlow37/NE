@@ -415,7 +415,7 @@ public class AIBridge_Perceive : MonoBehaviour
             ScheduleItem newScheduleItem = new ScheduleItem
             (
                 actionData.action,
-                details.target_location,
+                details.target_location.ToLower(),
                 details.target_object,
                 currentTime,
                 endTime,
