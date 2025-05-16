@@ -115,7 +115,7 @@ class MemoryUtils:
             "time": event_time,
             "embeddings": embedding,  
         }
-        if event_role != "":
+        if event_role != "" and event_role != " ":
             memory["importance"] = 8
         
         memories[agent_name]["memories"][memory_id] = memory
@@ -152,10 +152,10 @@ class MemoryUtils:
 
     def event_to_sentence(self, event: Dict[str, Any]) -> str:
         """이벤트를 문장으로 변환"""
-        event_description = event.get('event_description', '')
-        event_location = event.get('event_location', '')
+        event_description = event.get("event_description", "")
+        event_location = event.get("event_location", "")
         
-        if event_location:
+        if event_location != "" and event_location != " ":
             return f"{event_description} at {event_location}"
         return event_description
 
