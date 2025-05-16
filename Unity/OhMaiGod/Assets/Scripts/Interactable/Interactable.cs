@@ -35,29 +35,7 @@ public class Interactable : MonoBehaviour
 
     void Awake()
     {
-        // ObjectData가 할당되지 않았으면 경고
-        // if (mInteractableData == null)
-        // {
-        //     LogManager.Log("Interact", "Interactable 컴포넌트에 mInteractableData 할당되지 않았습니다: " + gameObject.name, 1);
-        // }
-        // else
-        // {
-        //     // InteractableData와 동기화
-        //     InteractableName = mInteractableData.mName;
-        //     InteractableType = mInteractableData.mType;
-
-        //     mSpriteRenderer = GetComponent<SpriteRenderer>();
-        //     if (mSpriteRenderer != null)
-        //     {
-        //         mInteractableData.mIcon = mSpriteRenderer.sprite;
-        //     }
-        // }
-
-        // mTargetController = GetComponent<TargetController>();
-    }
-
-    void Start()
-    {
+        //ObjectData가 할당되지 않았으면 경고
         if (mInteractableData == null)
         {
             LogManager.Log("Interact", "Interactable 컴포넌트에 mInteractableData 할당되지 않았습니다: " + gameObject.name, 1);
@@ -76,7 +54,10 @@ public class Interactable : MonoBehaviour
         }
 
         mTargetController = GetComponent<TargetController>();
+    }
 
+    void Start()
+    {
         RegisterToEnvironment();
     }
 

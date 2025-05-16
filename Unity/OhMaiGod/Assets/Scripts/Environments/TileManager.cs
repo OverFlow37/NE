@@ -125,7 +125,7 @@ public class TileManager : MonoBehaviour
         }
 
         // 초기화가 완료된 경우 바로 등록
-        Vector3Int cellPos = GroundTilemap.WorldToCell(target.transform.position);
+        Vector3Int cellPos = mGroundTilemap.WorldToCell(target.transform.position);
         TileController tileController = GetTileController(cellPos);
         
         if (tileController != null)
@@ -212,7 +212,7 @@ public class TileManager : MonoBehaviour
     // 디버깅
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (Input.GetKeyDown(KeyCode.Escape))
         {
             LogManager.Log("Env", $"타일맵트리", 2);
             foreach (var tileController in mTileTree)

@@ -33,13 +33,17 @@ public class SaveLoadManager : MonoBehaviour
         DontDestroyOnLoad(gameObject);
     }
 
-    // Update is called once per frame
-    void Update()
+    private void Update()
     {
         // 테스트용 : 스페이스바 누르면 로드 씬으로 이동 (씬 로드 테스트)
         if(Input.GetKeyDown(KeyCode.Space))
         {
             SceneManager.LoadScene("LoadScene");
         }
+    }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        //  씬 로드할때 세이브 파일로부터 값 읽어와서 오브젝트 생성
     }
 }
