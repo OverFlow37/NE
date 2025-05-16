@@ -384,7 +384,7 @@ MonoBehaviour:
   mAgentName: NPC
   mObstaclesLayer:
     serializedVersion: 2
-    m_Bits: 256
+    m_Bits: 8448
   mNPCLayer:
     serializedVersion: 2
     m_Bits: 512

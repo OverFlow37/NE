@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 using OhMAIGod.Perceive;
+using UnityEngine.Tilemaps;
 
 // 에이전트 시야 관리
 // 에이전트 현재 보이는 오브젝트 관리
@@ -11,10 +12,6 @@ public class AgentVision : MonoBehaviour
     [Header("Vision Settings")]
     [SerializeField] private float mVisionRange = 5f;        // 시야 범위
     [SerializeField] private string mAgentName;              // 에이전트 이름 (자신을 제외하기 위한 식별자)
-
-    [Header("Target Layers")]
-    [SerializeField] private LayerMask mObstaclesLayer;      // Obstacles 레이어
-    [SerializeField] private LayerMask mNPCLayer;            // NPC 레이어
 
     [Header("Gizmo Settings")]
     [SerializeField] private Color mGizmoColor = new Color(0.2f, 0.8f, 1f, 0.2f);  // Gizmo 색상 (하늘색 반투명)
@@ -41,12 +38,6 @@ public class AgentVision : MonoBehaviour
         
         // 콜라이더 설정
         mVisionCollider.isTrigger = true;
-        // Obstacles와 NPC 레이어 모두 감지하도록 설정
-        LayerMask combinedMask = mObstaclesLayer | mNPCLayer;
-        mVisionCollider.includeLayers = combinedMask;
-        LogManager.Log("Vision", $"[AgentVision] Combined Layer Mask: {combinedMask.value}", 2);
-        LogManager.Log("Vision", $"[AgentVision] Obstacles Layer: {mObstaclesLayer.value}, NPC Layer: {mNPCLayer.value}", 2);
-        
         UpdateVisionRange(mVisionRange);
     }
 
@@ -68,8 +59,7 @@ public class AgentVision : MonoBehaviour
     private void CheckInitialVisionRange()
     {
         // Obstacles와 NPC 레이어의 콜라이더 모두 검사
-        LayerMask combinedMask = mObstaclesLayer | mNPCLayer;
-        Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, mVisionRange, combinedMask);
+        Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, mVisionRange, TileManager.Instance.InteractableLayerMask);
         
         LogManager.Log("Vision", $"[AgentVision] Initial Check - Found {colliders.Length} colliders in range", 2);
         foreach (Collider2D collider in colliders)
@@ -102,7 +92,7 @@ public class AgentVision : MonoBehaviour
         }
         // 레이어 체크
         // 오브젝트 감지
-        if (other.gameObject.layer == LayerMask.NameToLayer("Obstacles") || other.gameObject.layer == LayerMask.NameToLayer("NPC"))
+        if (((1 << other.gameObject.layer) & TileManager.Instance.InteractableLayerMask) != 0)
         {
             Interactable interactable = other.GetComponent<Interactable>();
             if (interactable != null)
@@ -174,7 +164,7 @@ public class AgentVision : MonoBehaviour
     // 시야 범위에서 나갔을 때
     private void OnTriggerExit2D(Collider2D other)
     {
-        if (other.gameObject.layer == LayerMask.NameToLayer("Obstacles") || other.gameObject.layer == LayerMask.NameToLayer("NPC"))
+        if (((1 << other.gameObject.layer) & TileManager.Instance.InteractableLayerMask) != 0)
         {
             Interactable interactable = other.GetComponent<Interactable>();
             if (interactable != null)
@@ -281,15 +271,6 @@ public class AgentVision : MonoBehaviour
         if (Application.isPlaying && mShowVisibleObjects)
         {
             UpdateDebugList();
-        }
-
-        // 레이어 설정이 변경되었을 때 로그
-        if (Application.isPlaying)
-        {
-            if (LogManager.Instance != null)
-            {
-                LogManager.Log("Vision", $"[AgentVision] Layer Settings - Obstacles: {mObstaclesLayer.value}, NPC: {mNPCLayer.value}", 2);
-            }
         }
     }
 }
