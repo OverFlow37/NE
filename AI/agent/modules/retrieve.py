@@ -333,6 +333,7 @@ class MemoryRetriever:
         K = 20  # 포물선형 시간 가중치 계산용
 
         valued_items = []
+        to_print_items = []
         for i, (item, event_sim, state_sim, avg_sim, max_sim, is_reflection) in enumerate(all_items):
             # (1) 시간 가중치
             t = min(i, K) / K
@@ -352,15 +353,17 @@ class MemoryRetriever:
             + gamma * time_weight
             )
 
-            valued_items.append((item, final_score, sim_max, imp_norm, time_weight, event_sim, state_sim))
+            valued_items.append((item, final_score))
+            to_print_items.append((item, final_score, sim_max, imp_norm, time_weight, event_sim, state_sim))
 
         # final_score 기준 내림차순 정렬
         valued_items.sort(key=lambda x: x[1], reverse=True)
+        to_print_items.sort(key=lambda x: x[1], reverse=True)
 
         # 인자로 넘어온 top_k 사용
         result = valued_items[:top_k]
 
-        for mem, score, sim_avg, imp_norm, tw, e_sim, s_sim in result:
+        for mem, score, sim_avg, imp_norm, tw, e_sim, s_sim in to_print_items[:top_k]:
             print(f"=== 메모리 ID: {mem.get('memory_id')} ===")
             print(f"  Final Score : {score:.4f}")
             print(f"    sim_max   : {sim_avg:.4f}  (event_sim={e_sim:.4f}, state_sim={s_sim:.4f})")
