@@ -30,4 +30,33 @@ namespace OhMAIGod.Perceive{
         public string event_location;        // 이벤트 발생 위치
         public string event_description;     // 이벤트 설명
     }
+
+    // 피드백 구조체
+    [System.Serializable]
+    public struct needs_diff
+    {
+        public int hunger;
+        public int sleepiness;
+        public int loneliness;
+        public int stress;
+    }
+    [System.Serializable]
+    public struct feedback
+    {
+        public int memory_id;
+        public string feedback_description;
+        public needs_diff needs_diff;
+    }
+
+    [System.Serializable]
+    public struct PerceiveFeedback
+    {
+        public string agent_name;   
+        public string current_location;  
+        public string time;     
+        public string interactable_name;
+        public string action_name;
+        public bool success;
+        public feedback feedback;
+    }
 }
