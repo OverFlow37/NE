@@ -56,6 +56,20 @@ except Exception as e:
 from agent.modules.reaction_decider import ReactionDecider
 from agent.modules.npc_conversation import NPCConversationManager
 
+# feedback_processor 모듈 임포트
+try:
+    from agent.modules.feedback_processor import FeedbackProcessor
+    print("✅ FeedbackProcessor 임포트 완료")
+except Exception as e:
+    print(f"❌ FeedbackProcessor 임포트 실패: {e}")
+
+# simple_feedback_processor 모듈 임포트
+try:
+    from agent.modules.simple_feedback_processor import SimpleFeedbackProcessor
+    print("✅ SimpleFeedbackProcessor 임포트 완료")
+except Exception as e:
+    print(f"❌ SimpleFeedbackProcessor 임포트 실패: {e}")
+
 print(f"⏱ 모듈 임포트 시간: {time.time() - import_start:.2f}초")
 
 app = FastAPI()
@@ -133,6 +147,23 @@ try:
 except Exception as e:
     print(f"❌ NPCConversationManager 인스턴스 생성 실패: {e}")
 
+# feedback_processor 인스턴스 생성
+try:
+    feedback_processor = FeedbackProcessor(
+        memory_utils=memory_utils,
+        ollama_client=client
+    )
+    print("✅ FeedbackProcessor 인스턴스 생성 완료")
+except Exception as e:
+    print(f"❌ FeedbackProcessor 인스턴스 생성 실패: {e}")
+
+try:
+    simple_feedback_processor = SimpleFeedbackProcessor(
+        memory_utils=memory_utils
+    )
+    print("✅ SimpleFeedbackProcessor 인스턴스 생성 완료")
+except Exception as e:
+    print(f"❌ SimpleFeedbackProcessor 인스턴스 생성 실패: {e}")
 
 print(f"⏱ 인스턴스 생성 시간: {time.time() - instance_start:.2f}초")
 
@@ -507,39 +538,35 @@ async def save_agent_action(payload: dict):
         print(f"❌ 에이전트 행동 저장 중 오류 발생: {str(e)}")
         return {"success": False, "error": str(e)}
 
+
 @app.post("/action_feedback")
 async def save_action_feedback(payload: dict):
     """행동에 대한 피드백을 저장하는 엔드포인트"""
     try:
+        # 전체 처리 시작 시간 기록
+        start_time = time.time()
+        print("\n=== /action_feedback 엔드포인트 호출 ===")
+        print("📥 요청 데이터:", json.dumps(payload, indent=2, ensure_ascii=False))
+        
         if not payload or 'agent' not in payload:
             return {"success": False, "error": "agent field is required"}
             
-        agent_data = payload.get('agent', {})
-        agent_name = agent_data.get('name', 'John')
-        feedback_data = agent_data.get('feedback', {})
+        # 피드백 처리
+        result = await feedback_processor.process_feedback(payload)
         
-        # 피드백 데이터에 시간 정보 추가
-        feedback_data['time'] = agent_data.get('time', datetime.now().strftime("%Y.%m.%d.%H:%M"))
+        if not result:
+            return {"success": False, "error": "Failed to process feedback"}
         
-        # 피드백 문장 추출
-        feedback_sentence = feedback_data.get('feedback_description', '')
+        # 처리 시간 계산
+        total_time = time.time() - start_time
+        print(f"⏱ 피드백 처리 시간: {total_time:.2f}초")
         
-        # 임베딩 생성
-        embedding = memory_utils.get_embedding(feedback_sentence)
-        
-        # 메모리 저장 (event_id 포함)
-        success = memory_utils.save_memory(
-            event_sentence=feedback_sentence,
-            embedding=embedding,
-            event_time=feedback_data['time'],
-            agent_name=agent_name,
-            event_id=feedback_data.get('event_id', '')  # event_id 추가
-        )
-        
-        return {"success": success}
+        return result
         
     except Exception as e:
         print(f"❌ 피드백 저장 중 오류 발생: {str(e)}")
+        import traceback
+        traceback.print_exc()
         return {"success": False, "error": str(e)}
 
 try:
@@ -549,6 +576,38 @@ try:
     print("✅ reflection 및 plan 모듈 임포트 완료")
 except Exception as e:
     print(f"❌ reflection 및 plan 모듈 임포트 실패: {e}")
+
+
+@app.post("/simple_action_feedback")
+async def save_simple_action_feedback(payload: dict):
+    """LLM을 사용하지 않고 행동에 대한 피드백을 저장하는 엔드포인트"""
+    try:
+        # 전체 처리 시작 시간 기록
+        start_time = time.time()
+        print("\n=== /simple_action_feedback 엔드포인트 호출 ===")
+        print("📥 요청 데이터:", json.dumps(payload, indent=2, ensure_ascii=False))
+        
+        if not payload or 'agent' not in payload:
+            return {"success": False, "error": "agent field is required"}
+            
+        # 피드백 처리
+        result = simple_feedback_processor.process_simple_feedback(payload)
+        
+        if not result:
+            return {"success": False, "error": "Failed to process feedback"}
+        
+        # 처리 시간 계산
+        total_time = time.time() - start_time
+        print(f"⏱ 피드백 처리 시간: {total_time:.2f}초")
+        
+        return result
+        
+    except Exception as e:
+        print(f"❌ 간단한 피드백 저장 중 오류 발생: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return {"success": False, "error": str(e)}
+
 
 @app.post("/reflect-and-plan")
 async def reflection_and_plan(payload: Dict[str, Any]):
