@@ -16,30 +16,39 @@ public class CameraController : MonoBehaviour
     private Camera mCam;
     private CinemachineCamera mCinemachineCam;
 
+    [Header("NPC 추적 타겟")]
+    public Transform mFollowTarget;
+    private bool mIsFollowMode = true; // true: 추적, false: 수동
+    public bool IsFollowMode { get { return mIsFollowMode; } }
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Awake()
     {
         mCam = Camera.main;
         mCinemachineCam = GetComponent<CinemachineCamera>();
+        if (mFollowTarget == null)
+        {
+            mFollowTarget = GameObject.Find("NPC").transform;  // 기본 Tom 추적
+        }
     }
 
     // Update is called once per frame
     void Update()
     {
-        // 마우스 휠버튼(중간 버튼) 클릭 시 드래그 시작
-        if (Input.GetMouseButtonDown(2))
+        // 마우스 휠버튼(중간 버튼) 클릭 시 드래그 시작 (수동 모드에서만)
+        if (!mIsFollowMode && Input.GetMouseButtonDown(2))
         {
             mIsDragging = true;
             mDragOrigin = Input.mousePosition;
             mCameraOrigin = transform.position;
         }
-        // 마우스 휠버튼(중간 버튼) 떼면 드래그 종료
-        if (Input.GetMouseButtonUp(2))
+        // 마우스 휠버튼(중간 버튼) 떼면 드래그 종료 (수동 모드에서만)
+        if (!mIsFollowMode && Input.GetMouseButtonUp(2))
         {
             mIsDragging = false;
         }
-        // 드래그 중이면 카메라 이동
-        if (mIsDragging)
+        // 드래그 중이면 카메라 이동 (수동 모드에서만)
+        if (!mIsFollowMode && mIsDragging)
         {
             Vector3 mouseDelta = Input.mousePosition - mDragOrigin;
             Vector3 worldDelta = mCam.ScreenToWorldPoint(mDragOrigin) - mCam.ScreenToWorldPoint(mDragOrigin + mouseDelta);
@@ -102,5 +111,21 @@ public class CameraController : MonoBehaviour
         pos.x = Mathf.Clamp(pos.x, minX, maxX);
         pos.y = Mathf.Clamp(pos.y, minY, maxY);
         transform.position = pos;
+    }
+
+    // 카메라 모드 토글용 public 메서드
+    public void ToggleFollowMode()
+    {
+        mIsFollowMode = !mIsFollowMode;
+        if (mCinemachineCam != null)
+        {
+            mCinemachineCam.Follow = mIsFollowMode ? mFollowTarget : null;
+        }
+        LogManager.Log("Camera", mIsFollowMode ? "NPC 추적 모드로 전환" : "수동 이동 모드로 전환", 2);
+    }
+
+    public void SetFollowTarget(Transform _target)
+    {
+        mFollowTarget = _target;
     }
 }
