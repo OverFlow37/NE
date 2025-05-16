@@ -254,8 +254,11 @@ class MemoryRetriever:
         # 메모리 추가
         for memory_id, memory in memories[agent_name]["memories"].items():
             memory_embeddings = memory.get("embeddings", [])
+            memory_with_id = memory.copy()
+            memory_with_id["memory_id"] = memory_id
+            
             if memory_embeddings:
-                # 여러 임베딩 중 가장 높은 유사도 계산
+                # 임베딩이 있는 경우 유사도 계산
                 max_similarity = 0
                 for memory_embedding in memory_embeddings:
                     memory_embedding = np.array(memory_embedding)
@@ -266,17 +269,16 @@ class MemoryRetriever:
                         max_similarity = max(max_similarity, float(similarity))
                 
                 if max_similarity >= similarity_threshold:
-                    # memory_id 추가
-                    memory_with_id = memory.copy()
-                    memory_with_id["memory_id"] = memory_id
-                    all_items.append((memory_with_id, max_similarity, False))  # False는 메모리임을 나타냄
+                    all_items.append((memory_with_id, max_similarity, False))
+            else:
+                # 임베딩이 없는 경우 기본 유사도 부여
+                all_items.append((memory_with_id, 0.5, False))
         
-        # 반성 추가 (반성 데이터는 기존 구조 유지)
+        # 반성 추가
         if agent_name in reflections:
             for reflection in reflections[agent_name]["reflections"]:
                 reflection_embeddings = reflection.get("embeddings", [])
                 if reflection_embeddings:
-                    # 여러 임베딩 중 가장 높은 유사도 계산
                     max_similarity = 0
                     for reflection_embedding in reflection_embeddings:
                         reflection_embedding = np.array(reflection_embedding)
@@ -287,7 +289,7 @@ class MemoryRetriever:
                             max_similarity = max(max_similarity, float(similarity))
                     
                     if max_similarity >= similarity_threshold:
-                        all_items.append((reflection, max_similarity, True))  # True는 반성임을 나타냄
+                        all_items.append((reflection, max_similarity, True))
         
         # 시간순으로 정렬하여 가중치 계산
         def get_time(item):
@@ -309,7 +311,27 @@ class MemoryRetriever:
         valued_items.sort(key=lambda x: x[1], reverse=True)
         
         # 상위 k개 반환
-        return [(item, value) for item, value, _ in valued_items[:top_k]]
+        result = [(item, value) for item, value, _ in valued_items[:top_k]]
+        
+        # 결과가 부족한 경우 최근 메모리로 채우기
+        if len(result) < top_k:
+            # 이미 선택된 메모리 ID 수집
+            selected_memory_ids = {item.get("memory_id") for item, _ in result}
+            
+            # 추가로 필요한 메모리 개수 계산
+            needed_count = top_k - len(result)
+            
+            # 최근 메모리 가져오기
+            recent_memories = self._get_recent_memories(
+                agent_name,
+                top_k=needed_count,
+                exclude_memory_ids=selected_memory_ids
+            )
+            
+            # 최근 메모리 추가
+            result.extend(recent_memories)
+        
+        return result
 
     def _create_event_string(self, memory: Dict[str, Any]) -> str:
         """

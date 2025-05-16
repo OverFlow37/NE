@@ -365,7 +365,7 @@ async def react_to_event(payload: dict):
             prompt_template=load_prompt_file(RETRIEVE_PROMPT_PATH),
             agent_data=agent_data,
             similar_data_cnt=3,  # 유사한 이벤트 3개 포함
-            similarity_threshold=0.5,  # 유사도 0.5 이상인 이벤트만 포함
+            similarity_threshold=0.1,  # 유사도 0.5 이상인 이벤트만 포함
             object_embeddings=object_embeddings
         )
         print(f"📋 생성된 프롬프트:\n{prompt}")
@@ -432,15 +432,19 @@ async def react_to_event(payload: dict):
             # 메모리 저장 (프롬프트 생성 및 API 응답 이후)
             ## memory_is_save 파라미터를 통해 저장 여부를 결정
             if event_is_save == True:
+                # action_sentence 생성
+                action_sentence = f"{reaction_obj.get('action', '')} {reaction_obj.get('details', {}).get('target_object', '')} at {reaction_obj.get('details', {}).get('target_location', '')} because {reaction_obj.get('details', {}).get('thought', '')}"
+                
                 memory_id = memory_utils.save_memory(
                     event_sentence=event_sentence,
                     embedding=embedding,
                     event_time=agent_time,  # 에이전트의 시간 사용
                     agent_name=agent_name,
-                    event_role=event_role
+                    event_role=event_role,
+                    action_sentence=action_sentence
                 )
                 print(f"💾 메모리 저장 완료 (시간: {agent_time}, 메모리 ID: {memory_id})")
-            
+
             # 전체 처리 시간 계산
             total_response_time = time.time() - total_start_time
             
