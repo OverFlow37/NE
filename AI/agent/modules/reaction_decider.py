@@ -110,7 +110,7 @@ Keep your explanation concise and provide ONLY this JSON with NO additional text
         유사한 메모리 검색
         
         Args:
-            event_embedding: 현재 이벤트의 임베딩
+            event_embedding: 현재 이벤트의 임베딩 (단일 벡터)
             agent_name: 에이전트 이름
             top_k: 반환할 메모리 개수
             
@@ -124,20 +124,30 @@ Keep your explanation concise and provide ONLY this JSON with NO additional text
         
         agent_memories = memories[agent_name]["memories"]
         
+        # event_embedding을 numpy 배열로 변환
+        event_embedding = np.array(event_embedding)
+        
         # 유사도 계산 및 정렬
         memory_similarities = []
-        for memory in agent_memories:
-            memory_embedding = memory.get("embeddings", [])
-            if not memory_embedding:
+        for memory_id, memory in agent_memories.items():
+            memory_embeddings = memory.get("embeddings", [])
+            if not memory_embeddings:
                 continue
                 
-            # 코사인 유사도 계산
-            similarity = np.dot(event_embedding, memory_embedding) / (
-                np.linalg.norm(event_embedding) * np.linalg.norm(memory_embedding)
-            )
+            # 여러 임베딩 중 가장 높은 유사도 계산
+            max_similarity = 0
+            for memory_embedding in memory_embeddings:
+                memory_embedding = np.array(memory_embedding)
+                if memory_embedding.shape == event_embedding.shape:
+                    # 코사인 유사도 계산
+                    similarity = np.dot(event_embedding, memory_embedding) / (
+                        np.linalg.norm(event_embedding) * np.linalg.norm(memory_embedding)
+                    )
+                    max_similarity = max(max_similarity, float(similarity))
             
-            if similarity >= self.similarity_threshold:
-                memory_similarities.append((memory, similarity))
+            if max_similarity >= self.similarity_threshold:
+                memory['memory_id'] = memory_id
+                memory_similarities.append((memory, max_similarity))
         
         # 유사도 기준으로 정렬
         memory_similarities.sort(key=lambda x: x[1], reverse=True)
@@ -160,12 +170,28 @@ Keep your explanation concise and provide ONLY this JSON with NO additional text
         
         formatted_memories = []
         for memory in similar_memories:
+            # 새 구조에서 이벤트와 액션 가져오기
             event = memory.get("event", "")
+            action = memory.get("action", "")
+            feedback = memory.get("feedback", "")
+            event_role = memory.get("event_role", "")
             time = memory.get("time", "")
             importance = memory.get("importance", "N/A")
+            memory_id = memory.get("memory_id", "")
             
-            if event and time:
-                formatted_memories.append(f"- {event} (time: {time}, importance: {importance})")
+            # 어떤 필드에 내용이 있는지 확인하고 표시
+            content = ""
+            if event:
+                if event_role == "God say":
+                    content = f"Event: God said, {event}"
+                content = f"Event: {event}"
+            elif action:
+                content = f"Action: {action}"
+            elif feedback:
+                content = f"Feedback: {feedback}"
+            
+            if content and time:
+                formatted_memories.append(f"- {content} (time: {time}, importance: {importance}, id: {memory_id})")
         
         return "\n".join(formatted_memories)
     
@@ -228,20 +254,25 @@ Keep your explanation concise and provide ONLY this JSON with NO additional text
             answer = response.get("response", "").strip()
             print(f"📝 모델 응답: {answer}")
             
-            # 응답이 1이면 반응, 0이면 반응하지 않음
-            should_react = answer.strip() == "1"
+            # JSON 파싱
+            import re
+            import json
             
-            # 이벤트 유형과 에이전트 성격 기반으로 이유 생성
-            if should_react:
-                reason = f"Event of type '{event.get('event_type', 'observation')}' is relevant to {agent_name}'s personality"
-            else:
-                reason = f"Event of type '{event.get('event_type', 'observation')}' is not important enough for {agent_name} to react"
+            # JSON 형식 추출
+            json_match = re.search(r'\{[\s\S]*\}', answer)
+            if json_match:
+                json_str = json_match.group(0)
+                try:
+                    result = json.loads(json_str)
+                    print(f"🤔 결정: {'반응' if result.get('should_react', True) else '무시'}, 이유: {result.get('reason', '')}")
+                    return result
+                except json.JSONDecodeError:
+                    print(f"❌ JSON 파싱 실패: {json_str}")
             
-            print(f"🤔 결정: {'반응' if should_react else '무시'}, 이유: {reason}")
-            
+            # 기본값 반환
             return {
-                "should_react": should_react,
-                "reason": reason
+                "should_react": True,
+                "reason": "Failed to parse response. Defaulting to react for safety."
             }
                 
         except Exception as e:

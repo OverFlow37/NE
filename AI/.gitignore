@@ -1,4 +1,6 @@
 
+# ollama models
+models/
 
 # result files
 action_results/
@@ -188,6 +190,7 @@ pyrightconfig.json
 
 
 # agent/data folder
+agent/data/conversations/
 agent/data/plans.json
 agent/data/memories.json
 agent/data/reflections.json

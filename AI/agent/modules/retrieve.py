@@ -23,6 +23,109 @@ class MemoryRetriever:
         """
         self.memory_utils = MemoryUtils(word2vec_model)
         self.memory_file_path = memory_file_path
+        self.object_dictionary = self._load_object_dictionary()
+
+    def _load_object_dictionary(self) -> Dict[str, Any]:
+        """
+        오브젝트 사전을 로드합니다.
+        
+        Returns:
+            Dict[str, Any]: 오브젝트 사전 데이터
+        """
+        dictionary_path = os.path.join(os.path.dirname(__file__), "../data/object_dict/object_dictionary.json")
+        try:
+            with open(dictionary_path, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except Exception as e:
+            print(f"오브젝트 사전 로드 중 오류 발생: {e}")
+            return {}
+
+    def _find_relevant_objects(
+        self,
+        event_embedding: List[float],
+        object_embeddings: Dict[str, Dict[str, List[float]]],
+        top_k: int = 10,
+        similarity_threshold: float = 0.1
+    ) -> List[Tuple[str, float]]:
+        """
+        이벤트와 관련된 상위 k개의 오브젝트를 찾습니다.
+        
+        Args:
+            event_embedding: 이벤트 임베딩
+            object_embeddings: 오브젝트 임베딩 딕셔너리
+            top_k: 반환할 오브젝트 개수
+            similarity_threshold: 유사도 임계값
+            
+        Returns:
+            List[Tuple[str, float]]: (오브젝트 이름, 유사도) 튜플 리스트
+        """
+        
+        event_embedding = np.array(event_embedding)
+        object_similarities = []
+        
+        for obj_name, obj_data in object_embeddings.items():
+            obj_embedding = np.array(obj_data.get("name_only", []))
+            
+            if obj_embedding.shape == event_embedding.shape:
+                similarity = np.dot(event_embedding, obj_embedding) / (
+                    np.linalg.norm(event_embedding) * np.linalg.norm(obj_embedding)
+                )
+                if similarity >= similarity_threshold:
+                    object_similarities.append((obj_name, float(similarity)))
+        
+        # 유사도 기준으로 정렬하고 상위 k개 반환
+        object_similarities.sort(key=lambda x: x[1], reverse=True)
+        return object_similarities[:top_k]
+
+    def _get_object_description(self, object_name: str) -> str:
+        """
+        오브젝트의 설명을 찾습니다.
+        
+        Args:
+            object_name: 오브젝트 이름
+            
+        Returns:
+            str: 오브젝트 설명
+        """
+        objects = self.object_dictionary.get("objects", {})
+        
+        # 각 카테고리에서 오브젝트 검색
+        for category in objects.values():
+            if isinstance(category, dict):
+                for subcategory in category.values():
+                    if isinstance(subcategory, dict) and object_name in subcategory:
+                        return subcategory[object_name]
+        
+        return f"Description not found for {object_name}"
+
+    def _create_interactable_objects_string(
+        self,
+        event_embedding: List[float],
+        object_embeddings: Dict[str, Dict[str, List[float]]]
+    ) -> str:
+        """
+        상호작용 가능한 오브젝트 문자열을 생성합니다.
+        
+        Args:
+            event_embedding: 이벤트 임베딩
+            object_embeddings: 오브젝트 임베딩 딕셔너리
+            
+        Returns:
+            str: 오브젝트 문자열
+        """
+        relevant_objects = self._find_relevant_objects(event_embedding, object_embeddings)
+        
+        if not relevant_objects:
+            return "No interactable objects found."
+        
+        object_strings = []
+        for obj_name, similarity in relevant_objects:
+            # object_dictionary에서 오브젝트 설명 찾기
+            description = self._get_object_description(obj_name)
+            if description:
+                object_strings.append(f"- {obj_name}: {description}")
+        
+        return "\n".join(object_strings)
 
     def should_react(self, event: Dict[str, Any]) -> bool:
         """
@@ -83,7 +186,7 @@ class MemoryRetriever:
         유사한 메모리 검색
         
         Args:
-            event_embedding: 현재 이벤트의 임베딩
+            event_embedding: 현재 이벤트의 임베딩 (단일 벡터)
             agent_name: 에이전트 이름
             top_k: 반환할 메모리 개수
             similarity_threshold: 유사도 임계값
@@ -100,26 +203,46 @@ class MemoryRetriever:
         # 모든 메모리와 반성을 하나의 리스트로 합치기
         all_items = []
         
-        # 메모리 추가
-        for memory in memories[agent_name]["memories"]:
-            memory_embedding = memory.get("embeddings", [])
-            if memory_embedding:
-                similarity = np.dot(event_embedding, memory_embedding) / (
-                    np.linalg.norm(event_embedding) * np.linalg.norm(memory_embedding)
-                )
-                if similarity >= similarity_threshold:
-                    all_items.append((memory, similarity, False))  # False는 메모리임을 나타냄
+        # event_embedding을 numpy 배열로 변환
+        event_embedding = np.array(event_embedding)
         
-        # 반성 추가
+        # 메모리 추가
+        for memory_id, memory in memories[agent_name]["memories"].items():
+            memory_embeddings = memory.get("embeddings", [])
+            if memory_embeddings:
+                # 여러 임베딩 중 가장 높은 유사도 계산
+                max_similarity = 0
+                for memory_embedding in memory_embeddings:
+                    memory_embedding = np.array(memory_embedding)
+                    if memory_embedding.shape == event_embedding.shape:
+                        similarity = np.dot(event_embedding, memory_embedding) / (
+                            np.linalg.norm(event_embedding) * np.linalg.norm(memory_embedding)
+                        )
+                        max_similarity = max(max_similarity, float(similarity))
+                
+                if max_similarity >= similarity_threshold:
+                    # memory_id 추가
+                    memory_with_id = memory.copy()
+                    memory_with_id["memory_id"] = memory_id
+                    all_items.append((memory_with_id, max_similarity, False))  # False는 메모리임을 나타냄
+        
+        # 반성 추가 (반성 데이터는 기존 구조 유지)
         if agent_name in reflections:
             for reflection in reflections[agent_name]["reflections"]:
-                reflection_embedding = reflection.get("embeddings", [])
-                if reflection_embedding:
-                    similarity = np.dot(event_embedding, reflection_embedding) / (
-                        np.linalg.norm(event_embedding) * np.linalg.norm(reflection_embedding)
-                    )
-                    if similarity >= similarity_threshold:
-                        all_items.append((reflection, similarity, True))  # True는 반성임을 나타냄
+                reflection_embeddings = reflection.get("embeddings", [])
+                if reflection_embeddings:
+                    # 여러 임베딩 중 가장 높은 유사도 계산
+                    max_similarity = 0
+                    for reflection_embedding in reflection_embeddings:
+                        reflection_embedding = np.array(reflection_embedding)
+                        if reflection_embedding.shape == event_embedding.shape:
+                            similarity = np.dot(event_embedding, reflection_embedding) / (
+                                np.linalg.norm(event_embedding) * np.linalg.norm(reflection_embedding)
+                            )
+                            max_similarity = max(max_similarity, float(similarity))
+                    
+                    if max_similarity >= similarity_threshold:
+                        all_items.append((reflection, max_similarity, True))  # True는 반성임을 나타냄
         
         # 시간순으로 정렬하여 가중치 계산
         def get_time(item):
@@ -143,119 +266,44 @@ class MemoryRetriever:
         # 상위 k개 반환
         return [(item, value) for item, value, _ in valued_items[:top_k]]
 
-    def _find_group_memories(self, memory: Dict[str, Any], agent_name: str) -> List[Dict[str, Any]]:
+    def _create_event_string(self, memory: Dict[str, Any]) -> str:
         """
-        같은 그룹의 메모리 검색
+        메모리를 이벤트 문자열로 변환
         
         Args:
-            memory: 기준 메모리
-            agent_name: 에이전트 이름
-            
-        Returns:
-            List[Dict[str, Any]]: 같은 그룹의 메모리 리스트
-        """
-        memories = self.memory_utils._load_memories()
-        if agent_name not in memories:
-            return []
-        
-        group_id = memory.get("groupId")
-        if not group_id:
-            return []
-        
-        # 같은 그룹의 메모리 검색
-        group_memories = []
-        for m in memories[agent_name]["memories"]:
-            if m.get("groupId") == group_id and m != memory:
-                group_memories.append(m)
-        
-        return group_memories
-
-    def _create_event_string(self, event: str, time: str, thought: str = None) -> str:
-        """
-        이벤트 문자열 생성
-        
-        Args:
-            event: 이벤트 내용
-            time: 이벤트 시간
-            thought: 반성 내용 (선택적)
+            memory: 메모리 데이터
             
         Returns:
             str: 포맷된 이벤트 문자열
         """
+        # memory_id = memory.get("memory_id", "")
+        # time = memory.get("time", "")
+        
+        # 새 구조에서 어떤 필드에 내용이 있는지 확인
+        event = memory.get("event", "")
+        action = memory.get("action", "")
+        feedback = memory.get("feedback", "")
+        thought = memory.get("thought", "")  # 반성 데이터 호환성
+        event_role = memory.get("event_role", "")
+        
+        content = ""
+        if event:
+            if event_role == "God say":
+                content = f"Event: God said, {event}\n"
+            else:
+                content = f"Event: {event}\n"
+        if action:
+            content += f"Action: {action}\n"
+        if feedback:
+            content += f"Feedback: {feedback}\n"
+        
+        # if thought:
+        #     return f"- {content} (time: {time}, id: {memory_id})\n  thought: {thought}"
+        # return f"- {content} (time: {time}, id: {memory_id})"
         if thought:
-            return f"- {event}\n  thought: {thought}"
-        return f"- {event}"
-
-    def _create_cause_effect_string(
-        self,
-        effect: str,
-        cause: str,
-        effect_time: str,
-        cause_time: str,
-        effect_thought: str = None,
-        cause_thought: str = None
-    ) -> str:
-        """
-        원인-결과 관계 문자열 생성
+            return f"- {content}\n  thought: {thought}\n"
+        return f"- {content}\n"
         
-        Args:
-            effect: 결과 이벤트
-            cause: 원인 이벤트
-            effect_time: 결과 시간
-            cause_time: 원인 시간
-            effect_thought: 결과에 대한 반성 (선택적)
-            cause_thought: 원인에 대한 반성 (선택적)
-            
-        Returns:
-            str: 포맷된 원인-결과 관계 문자열
-        """
-        effect_str = f"{effect} (time: {effect_time})"
-        if effect_thought:
-            effect_str += f"\n  thought: {effect_thought}"
-            
-        cause_str = f"{cause} (time: {cause_time})"
-        if cause_thought:
-            cause_str += f"\n  thought: {cause_thought}"
-            
-        return f"- {effect_str} because {cause_str}"
-    
-    # def _format_visible_interactables(self, visible_interactables: List[Dict[str, Any]]) -> str:
-    #     """
-    #     상호작용 가능한 객체 목록을 문자열로 변환
-        
-    #     Args:
-    #         visible_interactables: 상호작용 가능한 객체 목록
-            
-    #     Returns:
-    #         str: 포맷된 객체 목록 문자열
-    #     """
-    #     if not visible_interactables:
-    #         return "Nothing visible nearby."
-        
-    #     # 각 위치별로 고유한 객체 목록을 저장할 딕셔너리
-    #     location_objects = {}
-        
-    #     # 각 위치별로 고유한 객체 목록 생성
-    #     for location_data in visible_interactables:
-    #         location = location_data.get("location", "")
-    #         interactables = location_data.get("interactables", [])
-            
-    #         if location and interactables:
-    #             if location not in location_objects:
-    #                 location_objects[location] = set()
-                
-    #             # 중복 제거를 위해 set 사용
-    #             location_objects[location].update(interactables)
-        
-    #     # 결과 문자열 생성
-    #     interactable_strings = []
-    #     for location, objects in location_objects.items():
-    #         # 객체 목록을 정렬된 리스트로 변환
-    #         sorted_objects = sorted(list(objects))
-    #         interactable_strings.append(f"- Location: {location}, Objects: {', '.join(sorted_objects)}")
-        
-    #     return "\n".join(interactable_strings) if interactable_strings else "Nothing visible nearby."
-
 
     def _format_visible_interactables(self, visible_interactables: List[Dict[str, Any]]) -> str:
         """
@@ -364,11 +412,13 @@ class MemoryRetriever:
         self,
         event_sentence: str,
         event_embedding: List[float],
+        event_role: str,
         agent_name: str,
         prompt_template: str,
         agent_data: Dict[str, Any] = None,
         similar_data_cnt: int = 3,
-        similarity_threshold: float = 0.5
+        similarity_threshold: float = 0.5,
+        object_embeddings: List[Dict[str, Any]] = None
     ) -> Optional[str]:
         """
         이벤트에 대한 반응을 결정하기 위한 프롬프트 생성
@@ -381,6 +431,7 @@ class MemoryRetriever:
             agent_data: 에이전트 데이터 (성격, 위치, 상호작용 가능한 객체 등)
             similar_data_cnt: 유사한 이벤트 개수
             similarity_threshold: 유사도 임계값
+            object_embeddings: 오브젝트 임베딩 리스트
             
         Returns:
             Optional[str]: 생성된 프롬프트
@@ -398,48 +449,15 @@ class MemoryRetriever:
         )
         
         # 중복 제거를 위한 Set 사용
-        processed_events: Set[str] = set()
+        processed_events = set()
         similar_events = []
         
         for memory, _ in similar_memories:
-            event = memory.get("event", "")
-            time = memory.get("time", "")
-            thought = memory.get("thought")  # 반성의 경우 thought가 있을 수 있음
-            
-            if not event or not time:
-                continue
-                
-            # 기본 이벤트 문자열 생성
-            event_str = self._create_event_string(event, time, thought)
+            # 메모리 문자열 생성
+            event_str = self._create_event_string(memory)
             if event_str not in processed_events:
                 similar_events.append(event_str)
                 processed_events.add(event_str)
-            
-            # 같은 그룹의 메모리 검색
-            group_memories = self._find_group_memories(memory, agent_name)
-            for group_memory in group_memories:
-                group_event = group_memory.get("event", "")
-                group_time = group_memory.get("time", "")
-                group_thought = group_memory.get("thought")
-                
-                if not group_event or not group_time:
-                    continue
-                
-                # 시간 순서에 따라 원인-결과 관계 결정
-                if group_time < time:
-                    cause_effect_str = self._create_cause_effect_string(
-                        event, group_event, time, group_time,
-                        thought, group_thought
-                    )
-                else:
-                    cause_effect_str = self._create_cause_effect_string(
-                        group_event, event, group_time, time,
-                        group_thought, thought
-                    )
-                
-                if cause_effect_str not in processed_events:
-                    similar_events.append(cause_effect_str)
-                    processed_events.add(cause_effect_str)
         
         similar_event_str = "\n".join(similar_events) if similar_events else "No similar past events found."
         
@@ -456,6 +474,10 @@ class MemoryRetriever:
         if agent_data and "visible_interactables" in agent_data:
             visible_interactables_str = self._format_visible_interactables(agent_data["visible_interactables"])
         
+        # 관련 오브젝트 문자열 생성
+        interactable_objects_str = json.dumps({"interactable_objects": []})  # 기본값으로 빈 객체 리스트
+        if object_embeddings:
+            interactable_objects_str = self._create_interactable_objects_string(event_embedding, object_embeddings)
         # 에이전트 정보 문자열 생성
         agent_data_str = f"Your Name: {agent_name}\n"
         #agent_data_str += f"Your Location: {agent_data.get('current_location', '')}\n"
@@ -477,10 +499,11 @@ class MemoryRetriever:
             prompt = prompt_template.format(
                 AGENT_NAME=agent_name,
                 AGENT_DATA=agent_data_str,
-                EVENT_CONTENT=event_sentence,
-                RELEVANT_MEMORIES=similar_event_str
+                EVENT_CONTENT=f"{'God say: ' if event_role == 'God say' else ''}{event_sentence}",
+                RELEVANT_MEMORIES=similar_event_str,
+                RELEVANT_OBJECTS=interactable_objects_str  # 키 이름을 INTERACTABLE_OBJECT로 수정
             )
             return prompt
         except Exception as e:
             print(f"프롬프트 생성 중 오류 발생: {e}")
-            return None 
+            return None

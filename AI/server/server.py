@@ -53,9 +53,7 @@ try:
 except Exception as e:
     print(f"❌ EmbeddingUpdater 임포트 실패: {e}")
 
-from agent.modules.event_id_manager import EventIdManager
 from agent.modules.reaction_decider import ReactionDecider
-
 from agent.modules.npc_conversation import NPCConversationManager
 
 print(f"⏱ 모듈 임포트 시간: {time.time() - import_start:.2f}초")
@@ -78,6 +76,17 @@ instance_start = time.time()
 print("🤖 Word2Vec 모델 로딩 중...")
 word2vec_model = api.load('word2vec-google-news-300')
 print("✅ Word2Vec 모델 로딩 완료")
+
+# object_embeddings.json 파일 로드
+print("📚 object_embeddings.json 파일 로딩 중...")
+object_embeddings_path = ROOT_DIR / "agent" / "data" / "object_dict" / "object_embeddings.json"
+try:
+    with open(object_embeddings_path, 'r', encoding='utf-8') as f:
+        object_embeddings = json.load(f)
+    print("✅ object_embeddings.json 파일 로딩 완료")
+except Exception as e:
+    print(f"❌ object_embeddings.json 파일 로딩 실패: {e}")
+    object_embeddings = {}
 
 try:
     client = OllamaClient()
@@ -102,12 +111,6 @@ try:
     print("✅ EmbeddingUpdater 인스턴스 생성 완료")
 except Exception as e:
     print(f"❌ EmbeddingUpdater 인스턴스 생성 실패: {e}")
-
-try:
-    event_id_manager = EventIdManager(memory_utils=memory_utils)
-    print("✅ EventIdManager 인스턴스 생성 완료")
-except Exception as e:
-    print(f"❌ EventIdManager 인스턴스 생성 실패: {e}")
 
 try:
     reaction_decider = ReactionDecider(
@@ -210,17 +213,10 @@ async def perceive_event(payload: dict):
         if game_time and "time" not in event_data:
             event_data["time"] = game_time
         
-        # 이벤트 ID 할당 (게임 시간 전달)
-        event_id = event_id_manager.get_event_id(event_data, agent_name, game_time)
-        
-        # 이벤트 데이터에 event_id 추가
-        event_data["event_id"] = event_id
-        
         # 메모리 저장
         success = memory_utils.save_perception(event_data, agent_name)
         return {
-            "success": success,
-            "event_id": event_id
+            "success": success
         }
         
     except Exception as e:
@@ -247,11 +243,7 @@ async def should_react(payload: dict):
         # 게임 시간 가져오기
         game_time = agent_data.get('time', None)
         
-        # 이벤트 ID 할당 (게임 시간 전달)
-        event_id = event_id_manager.get_event_id(event_data, agent_name, game_time)
-        
-        # 이벤트 데이터에 event_id와 time 추가
-        event_data["event_id"] = event_id
+        # 이벤트 데이터에 time 추가
         if game_time and "time" not in event_data:
             event_data["time"] = game_time
         
@@ -266,12 +258,16 @@ async def should_react(payload: dict):
         should_react = reaction_decision.get("should_react", True)
         reason = reaction_decision.get("reason", "")
         
-        # 메모리 저장 (판단 결과와 무관하게 저장)
-        print("💾 메모리 저장 중...")
-        memory_start = time.time()
-        success = memory_utils.save_perception(event_data, agent_name)
-        memory_time = time.time() - memory_start
-        print(f"⏱ 메모리 저장 시간: {memory_time:.2f}초")
+        # 메모리 저장 (실패했을 경우만 저장)
+        ## 실패시에만 저장하는 이유는 성공했을 때 make_reaction에서 저장하기 때문
+        ### event_is_save 파라미터를 통해 저장 여부를 결정하는 것도 추가
+        event_is_save = event_data.get("event_is_save", True)
+        if should_react == False and event_is_save == True:
+            print("💾 메모리 저장 중...")
+            memory_start = time.time()
+            success = memory_utils.save_perception(event_data, agent_name)
+            memory_time = time.time() - memory_start
+            print(f"⏱ 메모리 저장 시간: {memory_time:.2f}초")
         
         # 전체 처리 시간 계산
         total_time = time.time() - react_start_time
@@ -279,9 +275,8 @@ async def should_react(payload: dict):
         
         # 응답 - 단순 형식으로 반환
         return {
-            "success": success,
-            "should_react": should_react,  # True 또는 False
-            "event_id": event_id,
+            "success": True,
+            "should_react": should_react  # True 또는 False
         }
         
     except Exception as e:
@@ -314,6 +309,8 @@ async def react_to_event(payload: dict):
         event_type = event_data.get('event_type', '')
         event_location = event_data.get('event_location', '')
         event_description = event_data.get('event_description', '')
+        event_role = event_data.get('event_role', '')
+        event_is_save = event_data.get("event_is_save", True)
         
         # 에이전트의 현재 시간 추출
         agent_time = agent_data.get('time', '')
@@ -330,6 +327,8 @@ async def react_to_event(payload: dict):
         print(f"⏰ 에이전트 시간: {agent_time}")
         print(f"🧩 성격: {agent_data.get('personality', 'None')}")
         print(f"📍 현재 위치: {agent_data.get('current_location', 'None')}")
+        print(f"🔍 이벤트 저장 여부: {event_is_save}")
+        print(f"🔍 이벤트 주체: {event_role}")
         
         visible_interactables = agent_data.get('visible_interactables', [])
         if visible_interactables:
@@ -338,20 +337,14 @@ async def react_to_event(payload: dict):
                 loc = loc_data.get('location', '')
                 objects = loc_data.get('interactables', [])
                 print(f"  - {loc}: {', '.join(objects)}")
-
-        # 이벤트 ID 할당 (게임 시간 전달)
-        event_id = event_id_manager.get_event_id(event_data, agent_name, agent_time)
-        
-        # 이벤트 데이터에 event_id 추가
-        event_data["event_id"] = event_id
         
         # 이벤트 객체 생성
         event = {
             "event_type": event_type,
             "event_location": event_location,
             "time": agent_time,  # 시간 정보 추가
-            "event_id": event_id,  # 이벤트 ID 추가
             "event_description": event_description,
+            "event_role": event_role
         }
         
         # 이벤트를 문장으로 변환
@@ -362,15 +355,18 @@ async def react_to_event(payload: dict):
         embedding = memory_utils.get_embedding(event_sentence)
         print(f"🔢 임베딩 생성 완료 (차원: {len(embedding)})")
         
+
         # 프롬프트 생성
         prompt = retrieve.create_reaction_prompt(
             event_sentence=event_sentence,
+            event_role=event_role,
             event_embedding=embedding,
             agent_name=agent_name,
             prompt_template=load_prompt_file(RETRIEVE_PROMPT_PATH),
             agent_data=agent_data,
             similar_data_cnt=3,  # 유사한 이벤트 3개 포함
-            similarity_threshold=0.5  # 유사도 0.5 이상인 이벤트만 포함
+            similarity_threshold=0.5,  # 유사도 0.5 이상인 이벤트만 포함
+            object_embeddings=object_embeddings
         )
         print(f"📋 생성된 프롬프트:\n{prompt}")
         
@@ -434,14 +430,16 @@ async def react_to_event(payload: dict):
                     }
                 
             # 메모리 저장 (프롬프트 생성 및 API 응답 이후)
-            memory_utils.save_memory(
-                event_sentence=event_sentence,
-                embedding=embedding,
-                event_time=agent_time,  # 에이전트의 시간 사용
-                agent_name=agent_name,
-                event_id=event_id  # 이벤트 ID 추가
-            )
-            print(f"💾 메모리 저장 완료 (시간: {agent_time}, 이벤트 ID: {event_id})")
+            ## memory_is_save 파라미터를 통해 저장 여부를 결정
+            if event_is_save == True:
+                memory_id = memory_utils.save_memory(
+                    event_sentence=event_sentence,
+                    embedding=embedding,
+                    event_time=agent_time,  # 에이전트의 시간 사용
+                    agent_name=agent_name,
+                    event_role=event_role
+                )
+                print(f"💾 메모리 저장 완료 (시간: {agent_time}, 메모리 ID: {memory_id})")
             
             # 전체 처리 시간 계산
             total_response_time = time.time() - total_start_time
@@ -451,8 +449,8 @@ async def react_to_event(payload: dict):
             print(f"  - Ollama 응답 시간: {ollama_response_time:.2f}초")
             print(f"  - 전체 처리 시간: {total_response_time:.2f}초")
             
-            # 이벤트 ID를 응답에 포함
-            reaction_obj["event_id"] = event_id
+            # 메모리 ID를 응답에 포함
+            reaction_obj["memory_id"] = memory_id if event_is_save == True else ""
             
             return {
                 "success": True,

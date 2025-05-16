@@ -1,10 +1,17 @@
 IMPORTANT RULES:
-
 - The combination of location and target must match the information in AGENT DATA.
 - Provide **EXACTLY ONE** action per character. Respond **ONLY** with JSON.
 - The `action` field **MUST** be one of the predefined available actions
+- The `target_interactable` field **MUST** be one of the predefined relevant object
 - `"duration"` must be an **integer greater than 30 and less than 120**.
 - `"thought"` must be **no more than 100 characters** and reflect what the agent thinks.
+
+AVAILABLE ACTIONS :
+- "eat": "eat this interactable to reduce hunger.",
+- "use": "to use, observe, or play with this interactable",
+- "get": "Pick up this interactable and store them.",
+- "break": "Destroy break this interactable and harvest resources.",
+- "offer": "offering this interactable to God."
 
 RESPONSE FORMAT (provide ONLY valid JSON):
 {
