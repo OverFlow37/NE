@@ -14,7 +14,6 @@ public class Interactable : MonoBehaviour
     // 오브젝트 타입 (InteractableData와 동기화)
     public InteractableData.Types InteractableType { get; private set; }
 
-
     // 현재 위치 정보
     public string CurrentLocation { get; private set; }
 
@@ -36,7 +35,7 @@ public class Interactable : MonoBehaviour
 
     void Awake()
     {
-        // ObjectData가 할당되지 않았으면 경고
+        //ObjectData가 할당되지 않았으면 경고
         if (mInteractableData == null)
         {
             LogManager.Log("Interact", "Interactable 컴포넌트에 mInteractableData 할당되지 않았습니다: " + gameObject.name, 1);
@@ -116,6 +115,7 @@ public class Interactable : MonoBehaviour
                 // InteractionAction의 Execute 메서드 호출
                 if (action.mAction.Execute(interactor, this.gameObject))
                 {
+                    interactor.GetComponent<AgentController>().isSuccessForFeedback = true;
                     LogManager.Log("Interact", $"{mInteractableData.mName} 상호작용 성공.", 2);
                     return true;
                 }
@@ -200,6 +200,11 @@ public class Interactable : MonoBehaviour
         }
 
         // 현재 위치의 TileController 찾기
+        if(TileManager.Instance.GroundTilemap == null)
+        {
+            LogManager.Log("Interact", "GroundTilemap이 없습니다.", 2);
+        }
+
         Vector3Int cellPosition = TileManager.Instance.GroundTilemap.WorldToCell(transform.position);
         TileController newTileController = TileManager.Instance.GetTileController(cellPosition);
 

@@ -3,6 +3,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 using System.Collections;
+using UnityEngine.SceneManagement;
 
 public class TileManager : MonoBehaviour
 {
@@ -18,7 +19,8 @@ public class TileManager : MonoBehaviour
 
     [Header("Layer Masks")]
     [SerializeField] private LayerMask mWallLayerMask;        // 벽 레이어 마스크
-    [SerializeField] private LayerMask mObjectLayerMask;      // 오브젝트 레이어 마스크
+    [SerializeField] private LayerMask mObjectLayerMask;      // 충돌 오브젝트 레이어 마스크
+    [SerializeField] private LayerMask mItemLayerMask;         // 비충돌 아이템 레이어 마스크
     [SerializeField] private LayerMask mNPCLayerMask;         // NPC 레이어 마스크
 
     [Header("Debug")]
@@ -48,14 +50,43 @@ public class TileManager : MonoBehaviour
         mLocationTilemaps = new List<Tilemap>();
         mTileTree = new List<TileController>();
         
+        // 씬 로드 이벤트 등록
+        SceneManager.sceneLoaded += OnSceneLoaded;
+        
         // Awake에서는 초기화하지 않음
         StartCoroutine(InitializeManager());
+    }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        mIsInitialized = false;
+
+        if (scene.name == "LoadScene")
+        {
+            // 기존 Interactable들 제거
+            
+
+            // 저장된 데이터로 Interactable 오브젝트 생성
+            
+
+            StartCoroutine(InitializeManager());
+        }
     }
 
     private IEnumerator InitializeManager()
     {
         // 한 프레임 대기하여 다른 오브젝트들의 Awake가 실행되도록 함
         yield return null;
+
+        // ground tilemap 설정
+        if(mGroundTilemap == null || mGroundTilemap.gameObject == null)
+        {
+            GameObject landBaseObj = GameObject.Find("Tilemap_land_base");
+            if (landBaseObj != null)
+            {
+                mGroundTilemap = landBaseObj.GetComponent<Tilemap>();
+            }
+        }
 
         // 씬의 모든 TileController 찾아서 등록
         var tileControllers = FindObjectsByType<TileController>(FindObjectsSortMode.None);
@@ -100,7 +131,7 @@ public class TileManager : MonoBehaviour
         }
 
         // 초기화가 완료된 경우 바로 등록
-        Vector3Int cellPos = GroundTilemap.WorldToCell(target.transform.position);
+        Vector3Int cellPos = mGroundTilemap.WorldToCell(target.transform.position);
         TileController tileController = GetTileController(cellPos);
         
         if (tileController != null)
@@ -187,7 +218,7 @@ public class TileManager : MonoBehaviour
     // 디버깅
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (Input.GetKeyDown(KeyCode.Escape))
         {
             LogManager.Log("Env", $"타일맵트리", 2);
             foreach (var tileController in mTileTree)
@@ -205,8 +236,11 @@ public class TileManager : MonoBehaviour
 
     public LayerMask WallLayerMask { get { return mWallLayerMask; } }
     public LayerMask ObjectLayerMask { get { return mObjectLayerMask; } }
+    public LayerMask ItemLayerMask { get { return mItemLayerMask; } }
     public LayerMask NPCLayerMask { get { return mNPCLayerMask; } }
     public LayerMask ObstacleLayerMask { get { return mWallLayerMask | mObjectLayerMask | mNPCLayerMask; } }
+    public LayerMask InteractableLayerMask { get { return mObjectLayerMask | mItemLayerMask | mNPCLayerMask; } }
+    public LayerMask AllLayerMask { get { return mWallLayerMask | mObjectLayerMask | mItemLayerMask | mNPCLayerMask; } }
 
     public List<TileController> TileTree { get { return mTileTree; } }
 
@@ -270,5 +304,11 @@ public class TileManager : MonoBehaviour
             mTileTree.Remove(tileController);
             mLocationTilemaps.Remove(tileController.Tilemap);
         }
+    }
+
+    private void OnDestroy()
+    {
+        // 오브젝트가 파괴될 때 씬 로드 이벤트 해제
+        SceneManager.sceneLoaded -= OnSceneLoaded;
     }
 }

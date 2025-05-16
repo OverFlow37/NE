@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 3660611132731533273}
   - component: {fileID: 5500847951612691376}
   - component: {fileID: 1877379931180570635}
-  m_Layer: 8
+  m_Layer: 13
   m_Name: Coconut
   m_TagString: Target
   m_Icon: {fileID: 0}
@@ -79,8 +79,8 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 9
-  m_Sprite: {fileID: -1481065034, guid: dfe835544bc4c0b41b9e6fddb16148b3, type: 3}
+  m_SortingOrder: 5
+  m_Sprite: {fileID: 4097144792221710411, guid: 7df4daf37e5a5954d9d5d97ee409b3c1, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -156,7 +156,7 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 0.5625, y: 0.625}
+    oldSize: {x: 1, y: 1}
     newSize: {x: 0.32, y: 0.32}
     adaptiveTilingThreshold: 0.5
     drawMode: 0

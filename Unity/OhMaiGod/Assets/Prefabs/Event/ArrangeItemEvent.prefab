@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 2803138962325272710}
   - component: {fileID: 716473192086518144}
   m_Layer: 12
-  m_Name: CreateEvent
+  m_Name: ArrangeItemEvent
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -49,7 +49,7 @@ MonoBehaviour:
   mEventInfo:
     event_type: 2
     event_location: 
-    event_description: I saw the power of God to create food.
+    event_description: I saw the power of God to create something.
   mLifeDuration: 10
 --- !u!50 &2803138962325272710
 Rigidbody2D:

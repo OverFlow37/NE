@@ -81,11 +81,7 @@ public class ArrangeItem : MonoBehaviour
         mPreviewObject.transform.position = cellCenter;
 
         // 설치 가능 여부에 따라 프리뷰 색상 변경
-        int wallLayer = LayerMask.NameToLayer("Wall");
-        int obstaclesLayer = LayerMask.NameToLayer("Obstacles");
-        int npcLayer = LayerMask.NameToLayer("NPC");
-        int mask = (1 << wallLayer) | (1 << obstaclesLayer) | (1 << npcLayer);
-        Collider2D hit = Physics2D.OverlapPoint(cellCenter, mask);
+        Collider2D hit = Physics2D.OverlapPoint(cellCenter, TileManager.Instance.AllLayerMask);
         SpriteRenderer sr = mPreviewObject.GetComponent<SpriteRenderer>();
         if (sr != null)
         {
@@ -107,7 +103,7 @@ public class ArrangeItem : MonoBehaviour
         Vector3 cellCenter = TileManager.Instance.GroundTilemap.GetCellCenterWorld(cellPos);
 
         // Wall, Obstacles, NPC 레이어에 오브젝트가 있으면 설치 불가
-        Collider2D hit = Physics2D.OverlapPoint(cellCenter, TileManager.Instance.ObstacleLayerMask);
+        Collider2D hit = Physics2D.OverlapPoint(cellCenter, TileManager.Instance.AllLayerMask);
         if (hit != null)
         {
             Debug.LogWarning("해당 타일에 벽, 장애물 또는 NPC가 있어 배치할 수 없습니다.");

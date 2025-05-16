@@ -1,0 +1,29 @@
+{
+  "objects": {
+    "Banana": "It is sweet and delicious, and you can get a little fullness when you eat it.",
+    "Apple": "It is sweet and delicious, and you can get a little fullness when you eat it.",
+    "Grape": "It is sweet and delicious, and you can get a little fullness when you eat it.",
+    "Coconut": "It is sweet and delicious, and you can get a little fullness when you eat it.",
+    "Strawberry": "It is sweet and delicious, and you can get a little fullness when you eat it.",
+    "Mushroom": "It is delicious, and you can get a more fullness when you eat it.",
+    "BigFish": "It is delicious, and you can get a great fullness when you eat it.",
+    "SmallFish": "It is and delicious, and you can get a little fullness when you eat it.",
+    "Egg": "It is delicious, and you can get a more fullness when you eat it.",
+    "Bed": "Can sleep comfortably.",
+    "Bookshelf": "can read some books.",
+    "Candle" : "can pray what you want to god.",
+    "Desk": "can read, draw, writing and etc...",
+    "Telescope": "can look universe closer.",
+    "Piano": "can playing some music.",
+    "Fishing Rod": "can get a fish.",
+    "Wilson": "it is not just ball, but also be your good friend.",
+    "Tree": "can get some wooden resource.",
+    "Rock": "can get some stone resource.",
+    "Flower": "it is beautiful and can offer to god.",
+    "SeaShell": "it is beautiful and can offer to god.",
+    "Conch": "it is beautiful and can offer to god.",
+    "Jewel": "it is beautiful and can offer to god.",
+    "Letter": "it is sent from stranger.",
+    "Book": "can read something, or offer to god."
+  }
+}

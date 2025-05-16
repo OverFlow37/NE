@@ -31,22 +31,23 @@ class MemoryUtils:
                 os.makedirs(os.path.dirname(file_path), exist_ok=True)
                 with open(file_path, 'w', encoding='utf-8') as f:
                     if file_path == self.memories_file:
-                        json.dump({"John": {"memories": []}, "Sarah": {"memories": []}}, f, ensure_ascii=False, indent=2)
+                        # 새로운 메모리 구조로 초기화
+                        json.dump({"John": {"memories": {}}, "Sarah": {"memories": {}}}, f, ensure_ascii=False, indent=2)
                     elif file_path == self.reflections_file:
                         json.dump({"John": {"reflections": []}, "Sarah": {"reflections": []}}, f, ensure_ascii=False, indent=2)
                     else:
                         json.dump({"John": [], "Sarah": []}, f, ensure_ascii=False, indent=2)
 
-    def _load_memories(self) -> Dict[str, Dict[str, List[Dict[str, Any]]]]:
+    def _load_memories(self) -> Dict[str, Dict[str, Dict[str, Dict[str, Any]]]]:
         """메모리 데이터 로드"""
         try:
             with open(self.memories_file, 'r', encoding='utf-8') as f:
                 return json.load(f)
         except Exception as e:
             print(f"메모리 로드 중 오류 발생: {e}")
-            return {"John": {"memories": []}, "Sarah": {"memories": []}}
+            return {"John": {"memories": {}}, "Sarah": {"memories": {}}}
 
-    def _save_memories(self, memories: Dict[str, Dict[str, List[Dict[str, Any]]]]):
+    def _save_memories(self, memories: Dict[str, Dict[str, Dict[str, Dict[str, Any]]]]):
         """메모리 데이터 저장"""
         try:
             with open(self.memories_file, 'w', encoding='utf-8') as f:
@@ -71,39 +72,56 @@ class MemoryUtils:
         except Exception as e:
             print(f"반성 데이터 저장 중 오류 발생: {e}")
 
-    def save_memory(self, event_sentence: str, embedding: List[float], event_time: str, agent_name: str, event_id: int = None):
+    def _get_next_memory_id(self, agent_name: str) -> str:
+        """에이전트의 다음 메모리 ID를 가져옴"""
+        memories = self._load_memories()
+        
+        if agent_name not in memories or "memories" not in memories[agent_name]:
+            return "1"
+            
+        agent_memories = memories[agent_name]["memories"]
+        if not agent_memories:
+            return "1"
+            
+        # 현재 메모리 ID 중 가장 큰 값을 찾음
+        try:
+            memory_ids = [int(id) for id in agent_memories.keys()]
+            return str(max(memory_ids) + 1)
+        except ValueError:
+            return "1"
+
+    def save_memory(self, event_sentence: str, embedding: List[float], event_time: str, agent_name: str, event_id: int = None,  event_role: str = "", action_sentence: str = ""):
         """새로운 메모리 저장"""
         memories = self._load_memories()
         
         if agent_name not in memories:
-            memories[agent_name] = {"memories": []}
+            memories[agent_name] = {"memories": {}}
             
         # 현재 시간이 제공되지 않은 경우 현재 시간 사용
         if not event_time:
             event_time = datetime.now().strftime("%Y.%m.%d.%H:%M")
+        
+        # 새 메모리 ID 생성
+        memory_id = self._get_next_memory_id(agent_name)
             
+        # 이벤트 종류 판단
+        
         memory = {
+            "event_role": event_role,
             "event": event_sentence,
+            "action": f"{action_sentence}",
+            "feedback": "",
+            "conversation_detail": "",
             "time": event_time,
-            "embeddings": embedding,
-            "created": event_time  # 게임 시간으로 수정 (실제 시간 대신)
+            "embeddings": embedding,  
         }
+        if event_role != "" and event_role != " ":
+            memory["importance"] = 8
         
-        # 이벤트 ID가 제공된 경우 추가
-        if event_id is not None:
-            memory["event_id"] = event_id
-            
-            # 동일한 이벤트 ID를 가진 기존 메모리의 importance 복사
-            for existing_memory in memories[agent_name]["memories"]:
-                if existing_memory.get("event_id") == event_id:
-                    memory["importance"] = existing_memory.get("importance", 5)
-                    break
-            else:
-                # 기존 메모리가 없으면 기본값 설정
-                memory["importance"] = 3
-        
-        memories[agent_name]["memories"].append(memory)
+        memories[agent_name]["memories"][memory_id] = memory
         self._save_memories(memories)
+        
+        return memory_id
 
     def get_embedding(self, text: str) -> List[float]:
         """
@@ -134,19 +152,21 @@ class MemoryUtils:
 
     def event_to_sentence(self, event: Dict[str, Any]) -> str:
         """이벤트를 문장으로 변환"""
-
-        return f"{event.get('event_description', '')} at {event.get('event_location', '')}"
+        event_description = event.get("event_description", "")
+        event_location = event.get("event_location", "")
+        
+        if event_location != "" and event_location != " ":
+            return f"{event_description} at {event_location}"
+        return event_description
 
     def save_perception(self, event: Dict[str, Any], agent_name: str) -> bool:
         """관찰 정보를 메모리에 저장"""
         try:
-            # event_sentence = self.event_to_sentence(event)
             event_sentence = f'{event.get("event_description", "")} at {event.get("event_location", "")}'
             embedding = self.get_embedding(event_sentence)
             event_time = event.get("time", datetime.now().strftime("%Y.%m.%d.%H:%M"))
-            event_id = event.get("event_id")  # 이벤트 ID 추출
             
-            self.save_memory(event_sentence, embedding, event_time, agent_name, event_id)
+            memory_id = self.save_memory(event_sentence, embedding, event_time, agent_name)
             return True
         except Exception as e:
             print(f"관찰 정보 저장 실패: {e}")

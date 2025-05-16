@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 2676595663665257326}
   - component: {fileID: 1045540595048447877}
   - component: {fileID: 4240444030045060222}
-  m_Layer: 8
+  m_Layer: 13
   m_Name: Jewel
   m_TagString: Target
   m_Icon: {fileID: 0}
@@ -79,7 +79,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 9
+  m_SortingOrder: 5
   m_Sprite: {fileID: 442232636, guid: e823350848ef41542a7e30a8e4a90e78, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -156,7 +156,7 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1.5625, y: 1.6875}
+    oldSize: {x: 0.78125, y: 0.84375}
     newSize: {x: 1, y: 1}
     adaptiveTilingThreshold: 0.5
     drawMode: 0

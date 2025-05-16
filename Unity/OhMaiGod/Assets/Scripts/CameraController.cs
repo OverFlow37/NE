@@ -1,5 +1,7 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
+using Unity.Cinemachine;
+using UnityEngine.Tilemaps;
 
 public class CameraController : MonoBehaviour
 {
@@ -12,30 +14,41 @@ public class CameraController : MonoBehaviour
     public float mMinZoom = 2f;
     public float mMaxZoom = 20f;
     private Camera mCam;
+    private CinemachineCamera mCinemachineCam;
+
+    [Header("NPC 추적 타겟")]
+    public Transform mFollowTarget;
+    private bool mIsFollowMode = true; // true: 추적, false: 수동
+    public bool IsFollowMode { get { return mIsFollowMode; } }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Awake()
     {
         mCam = Camera.main;
+        mCinemachineCam = GetComponent<CinemachineCamera>();
+        if (mFollowTarget == null)
+        {
+            mFollowTarget = GameObject.FindWithTag("NPC").GetComponent<Transform>();
+        }
     }
 
     // Update is called once per frame
     void Update()
     {
-        // 마우스 휠버튼(중간 버튼) 클릭 시 드래그 시작
-        if (Input.GetMouseButtonDown(2))
+        // 마우스 휠버튼(중간 버튼) 클릭 시 드래그 시작 (수동 모드에서만)
+        if (!mIsFollowMode && Input.GetMouseButtonDown(2))
         {
             mIsDragging = true;
             mDragOrigin = Input.mousePosition;
             mCameraOrigin = transform.position;
         }
-        // 마우스 휠버튼(중간 버튼) 떼면 드래그 종료
-        if (Input.GetMouseButtonUp(2))
+        // 마우스 휠버튼(중간 버튼) 떼면 드래그 종료 (수동 모드에서만)
+        if (!mIsFollowMode && Input.GetMouseButtonUp(2))
         {
             mIsDragging = false;
         }
-        // 드래그 중이면 카메라 이동
-        if (mIsDragging)
+        // 드래그 중이면 카메라 이동 (수동 모드에서만)
+        if (!mIsFollowMode && mIsDragging)
         {
             Vector3 mouseDelta = Input.mousePosition - mDragOrigin;
             Vector3 worldDelta = mCam.ScreenToWorldPoint(mDragOrigin) - mCam.ScreenToWorldPoint(mDragOrigin + mouseDelta);
@@ -63,6 +76,56 @@ public class CameraController : MonoBehaviour
                 mCam.orthographicSize - scroll * mZoomSpeed,
                 mMinZoom, mMaxZoom
             );
+            float prevSize = mCinemachineCam.Lens.OrthographicSize;
+            float newSize = Mathf.Clamp(
+                prevSize - scroll * mZoomSpeed,
+                mMinZoom, mMaxZoom
+            );
+            mCinemachineCam.Lens.OrthographicSize = newSize;
         }
+    }
+
+    void LateUpdate()
+    {
+        // 카메라 위치를 타일맵 영역 내로 제한
+        ClampCameraPosition();
+    }
+
+    // 카메라가 타일맵 영역 밖으로 나가지 않도록 위치를 제한하는 함수
+    void ClampCameraPosition()
+    {
+        if (mCam == null) return;
+
+        // 카메라의 반쪽 크기(orthographicSize, 화면 비율 고려)
+        float vertExtent = mCam.orthographicSize;
+        float horzExtent = vertExtent * mCam.aspect;
+
+        // 타일맵의 월드 영역
+        Bounds bounds = TileManager.Instance.GroundTilemap.localBounds;
+        float minX = bounds.min.x + horzExtent;
+        float maxX = bounds.max.x - horzExtent;
+        float minY = bounds.min.y + vertExtent;
+        float maxY = bounds.max.y - vertExtent;
+
+        Vector3 pos = transform.position;
+        pos.x = Mathf.Clamp(pos.x, minX, maxX);
+        pos.y = Mathf.Clamp(pos.y, minY, maxY);
+        transform.position = pos;
+    }
+
+    // 카메라 모드 토글용 public 메서드
+    public void ToggleFollowMode()
+    {
+        mIsFollowMode = !mIsFollowMode;
+        if (mCinemachineCam != null)
+        {
+            mCinemachineCam.Follow = mIsFollowMode ? mFollowTarget : null;
+        }
+        LogManager.Log("Camera", mIsFollowMode ? "NPC 추적 모드로 전환" : "수동 이동 모드로 전환", 2);
+    }
+
+    public void SetFollowTarget(Transform _target)
+    {
+        mFollowTarget = _target;
     }
 }

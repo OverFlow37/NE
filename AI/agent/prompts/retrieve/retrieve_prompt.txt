@@ -12,28 +12,35 @@ TASK: For each agent, determine ONE NEXT ACTION based on their current state.
 
 Location :
 
-1. Town
-   A place to rest, access amenities, and visit the temple for prayer and reflection.
+1. House 
+   A private space for resting and sleeping.
 
-   * House: A private space for resting and sleeping.
-   * Square: A social space with facilities and interactions with other assistants.
-   * Temple: A place for raising faith and offering prayers for personal wishes.
+2. Square
+    A social space with facilities and interactions with other assistants.
 
-2. Mountain
+3. Temple
+    A place for raising faith and offering prayers for personal wishes.
+
+4. Mountain
    Rich in resources and ingredients unique to this area.
 
-3. Forest
+5. Forest
    A dense area filled with natural resources and food ingredients.
 
-4. Plain
+6. Plain
    A peaceful region where players can gather food and resources.
 
-5. Beach
+7. Beach
    A coastal area for fishing and gathering various items and resources.
 
+
+KNOWN OBJECTS :
+{RELEVANT_OBJECTS}
+
+
 AVAILABLE ACTIONS :
-- "eat": "Consume food to reduce hunger.",
-- "use": "to use, observe, or play with tools or item",
-- "get": "Obtain a food item, resource, or trinket.",
-- "break": "Destroy breakable items or harvest resources.",
-- "offer": "offering target to God."
+- "eat": "eat this object to reduce hunger.",
+- "use": "to use, observe, or play with this object",
+- "keep": "Pick up this object and store them.",
+- "break": "Destroy break this object and harvest resources.",
+- "offer": "offering this object to God."

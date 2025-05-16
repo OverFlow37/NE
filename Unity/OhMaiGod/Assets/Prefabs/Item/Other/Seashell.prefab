@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 8545516270540547815}
   - component: {fileID: 6392128315090899744}
   - component: {fileID: 2577425124207678527}
-  m_Layer: 8
+  m_Layer: 13
   m_Name: Seashell
   m_TagString: Target
   m_Icon: {fileID: 0}
@@ -79,7 +79,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 9
+  m_SortingOrder: 5
   m_Sprite: {fileID: 1149931968, guid: dfe835544bc4c0b41b9e6fddb16148b3, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0

@@ -148,7 +148,7 @@ public class PathFinder : MonoBehaviour
         if (!TileManager.Instance.GroundTilemap.HasTile(cell)) return true;
         Vector2 checkPos = TileManager.Instance.GroundTilemap.GetCellCenterWorld(cell);
         // 감지 반경을 0.3으로 줄임
-        Collider2D[] colliders = Physics2D.OverlapCircleAll(checkPos, 0.3f, TileManager.Instance.ObstacleLayerMask);
+        Collider2D[] colliders = Physics2D.OverlapCircleAll(checkPos, 0.2f, TileManager.Instance.ObstacleLayerMask);
         foreach (Collider2D collider in colliders)
         {
             // 자기 자신은 무조건 무시
