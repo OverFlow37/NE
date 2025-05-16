@@ -1,5 +1,7 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
+using Unity.Cinemachine;
+using UnityEngine.Tilemaps;
 
 public class CameraController : MonoBehaviour
 {
@@ -12,11 +14,13 @@ public class CameraController : MonoBehaviour
     public float mMinZoom = 2f;
     public float mMaxZoom = 20f;
     private Camera mCam;
+    private CinemachineCamera mCinemachineCam;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Awake()
     {
         mCam = Camera.main;
+        mCinemachineCam = GetComponent<CinemachineCamera>();
     }
 
     // Update is called once per frame
@@ -63,6 +67,40 @@ public class CameraController : MonoBehaviour
                 mCam.orthographicSize - scroll * mZoomSpeed,
                 mMinZoom, mMaxZoom
             );
+            float prevSize = mCinemachineCam.Lens.OrthographicSize;
+            float newSize = Mathf.Clamp(
+                prevSize - scroll * mZoomSpeed,
+                mMinZoom, mMaxZoom
+            );
+            mCinemachineCam.Lens.OrthographicSize = newSize;
         }
+    }
+
+    void LateUpdate()
+    {
+        // 카메라 위치를 타일맵 영역 내로 제한
+        ClampCameraPosition();
+    }
+
+    // 카메라가 타일맵 영역 밖으로 나가지 않도록 위치를 제한하는 함수
+    void ClampCameraPosition()
+    {
+        if (mCam == null) return;
+
+        // 카메라의 반쪽 크기(orthographicSize, 화면 비율 고려)
+        float vertExtent = mCam.orthographicSize;
+        float horzExtent = vertExtent * mCam.aspect;
+
+        // 타일맵의 월드 영역
+        Bounds bounds = TileManager.Instance.GroundTilemap.localBounds;
+        float minX = bounds.min.x + horzExtent;
+        float maxX = bounds.max.x - horzExtent;
+        float minY = bounds.min.y + vertExtent;
+        float maxY = bounds.max.y - vertExtent;
+
+        Vector3 pos = transform.position;
+        pos.x = Mathf.Clamp(pos.x, minX, maxX);
+        pos.y = Mathf.Clamp(pos.y, minY, maxY);
+        transform.position = pos;
     }
 }

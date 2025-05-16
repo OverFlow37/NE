@@ -11,7 +11,6 @@ public class HeightCollider : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        Debug.Log("OnTriggerEnter2D: " + other.gameObject.name + ", layer: " + other.gameObject.layer);
         // LayerMask와 비교는 비트 연산으로 해야 함
         if (((1 << other.gameObject.layer) & TileManager.Instance.NPCLayerMask) != 0)
         {
@@ -28,7 +27,6 @@ public class HeightCollider : MonoBehaviour
 
     private void OnTriggerExit2D(Collider2D other)
     {
-        Debug.Log("OnTriggerExit2D: " + other.gameObject.name + ", layer: " + other.gameObject.layer);
         // LayerMask와 비교는 비트 연산으로 해야 함
         if (((1 << other.gameObject.layer) & TileManager.Instance.NPCLayerMask) != 0)
         {
