@@ -1,0 +1,13 @@
+
+I am {AGENT_NAME}, and I just tried to {ACTION} {INTERACTABLE} at {LOCATION}.
+
+Result: {SUCCESS_STATUS}
+{FEEDBACK_DESCRIPTION}
+
+Changes in my needs:
+- Hunger: {HUNGER_DIFF} {HUNGER_FEELING}
+- Sleepiness: {SLEEPINESS_DIFF} {SLEEPINESS_FEELING}
+- Loneliness: {LONELINESS_DIFF} {LONELINESS_FEELING}
+- Stress: {STRESS_DIFF} {STRESS_FEELING}
+
+Please create a concise, first-person perspective description of my experience that I can remember.
