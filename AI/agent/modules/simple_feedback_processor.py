@@ -284,8 +284,6 @@ class SimpleFeedbackProcessor:
             
             # 임베딩 생성 (통합 피드백 기반)
             embedding = self.memory_utils.get_embedding(combined_feedback)
-            
-            print(f"📝 통합 피드백 임베딩: {embedding}")
 
             # 메모리 데이터 로드
             memories = self.memory_utils._load_memories()
