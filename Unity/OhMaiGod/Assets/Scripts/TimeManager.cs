@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class TimeManager : MonoBehaviour
+public class TimeManager : MonoBehaviour, ISaveable
 {
     // 싱글톤
     private static TimeManager mInstance;
@@ -76,6 +76,38 @@ public class TimeManager : MonoBehaviour
             if (mShowDebugInfo)
             {
                 LogManager.Log("Time", $"새로운 날: {mGameDate.ToString("yyyy-MM-dd")} ({GetDayOfWeekString()})", 3);
+            }
+        }
+    }
+
+    // 게임 날짜만 저장할 데이터 구조체
+    [Serializable]
+    private struct TimeSaveData
+    {
+        public string GameDate; // DateTime 대신 문자열로 저장
+    }
+
+    public void SaveData()
+    {
+        // DateTime을 문자열(ISO 8601)로 변환해서 저장
+        TimeSaveData saveData = new TimeSaveData { GameDate = mGameDate.ToString("o") };
+        string json = JsonUtility.ToJson(saveData);
+        string path = System.IO.Path.Combine(Application.persistentDataPath, "time.json");
+        System.IO.File.WriteAllText(path, json);
+    }
+
+    public void LoadData()
+    {
+        string path = System.IO.Path.Combine(Application.persistentDataPath, "time.json");
+        if (System.IO.File.Exists(path))
+        {
+            string json = System.IO.File.ReadAllText(path);
+            TimeSaveData saveData = JsonUtility.FromJson<TimeSaveData>(json);
+            mGameDate = DateTime.Parse(saveData.GameDate); // 문자열을 DateTime으로 변환
+            mCurrentGameTime = new TimeSpan(7, 0, 0); // 게임 시간은 07:00으로 초기화
+            if (mShowDebugInfo)
+            {
+                LogManager.Log("Time", $"저장된 날짜로 복원: {mGameDate.ToString("yyyy-MM-dd")}, 시간은 07:00으로 초기화", 3);
             }
         }
     }

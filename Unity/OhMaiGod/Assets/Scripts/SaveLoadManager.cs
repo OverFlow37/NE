@@ -53,12 +53,28 @@ public class SaveLoadManager : MonoBehaviour
     {
         // 세이브 파일로 값 저장
         TileManager.Instance.SaveData();
+        
+        // 'NPC' 태그를 가진 모든 오브젝트의 AgentController의 SaveData 호출
+        GameObject[] npcObjects = GameObject.FindGameObjectsWithTag("NPC");
+        foreach (var go in npcObjects)
+        {
+            AgentController agent = go.GetComponent<AgentController>();
+            if (agent != null)
+                agent.SaveData();
+        }
 
+        // 인벤토리 저장
+        Inventory.Instance.SaveData();
+
+        // 시간 저장
+        TimeManager.Instance.SaveData();
     }
 
     public void LoadData()
     {
         TileManager.Instance.LoadData();
+        Inventory.Instance.LoadData();
+        TimeManager.Instance.LoadData();
     }
 
     private void OnDestroy()
