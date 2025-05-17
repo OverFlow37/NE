@@ -56,9 +56,10 @@ public class InteractableSpawner : MonoBehaviour
                     if (mTileController.Tilemap.HasTile(cell))
                     {
                         Vector2 worldPos = mTileController.Tilemap.GetCellCenterWorld(cell);
-                        // 해당 위치에 장애물이 없으면 후보에 추가
+                        // 해당 위치에 장애물이 없고 시야 바깥이면 후보에 추가
                         bool hasAny = Physics2D.OverlapCircle(worldPos, 0.2f, TileManager.Instance.AllLayerMask);
-                        if (!hasAny)
+                        bool hasVision = Physics2D.OverlapCircle(worldPos, 0.2f, TileManager.Instance.VisionLayerMask);
+                        if (!hasAny && !hasVision)
                         {
                             candidatePositions.Add(worldPos);
                         }
@@ -75,13 +76,19 @@ public class InteractableSpawner : MonoBehaviour
             LogManager.Log("Env", "스폰 가능한 위치가 없습니다.", 2);
             return;
         }
+        // 생성
+        Spawn(spawnPos);
+    }
 
+    public bool Spawn(Vector2 _spawnPos)
+    {
         // 프리팹 랜덤 선택
-        if (mInteractablePrefabs == null || mInteractablePrefabs.Count == 0) return;
+        if (mInteractablePrefabs == null || mInteractablePrefabs.Count == 0) return false;
         GameObject prefab = mInteractablePrefabs[Random.Range(0, mInteractablePrefabs.Count)];
 
-        // 생성
-        Instantiate(prefab, spawnPos, Quaternion.identity);
-        LogManager.Log("Env", $"{prefab.GetComponent<Interactable>().InteractableName}을(를) {spawnPos}에 스폰했습니다.", 2);
+        // 스폰
+        Instantiate(prefab, _spawnPos, Quaternion.identity);
+        LogManager.Log("Env", $"{prefab.GetComponent<Interactable>().InteractableName}을(를) {_spawnPos}에 스폰했습니다.", 2);
+        return true;
     }
 }

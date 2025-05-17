@@ -11,11 +11,13 @@ public class TileController : MonoBehaviour
     private List<Interactable> mChildInteractables;
     private bool mIsInitialized = false;
     private Tilemap mTilemap;
+    private InteractableSpawner mInteractableSpawner;
 
     private void Awake()
     {
         mTilemap = GetComponent<Tilemap>();
         mChildInteractables = new List<Interactable>();
+        mInteractableSpawner = GetComponent<InteractableSpawner>();
     }
 
     private void Start()
@@ -29,6 +31,7 @@ public class TileController : MonoBehaviour
     }
 
     public Tilemap Tilemap { get { return mTilemap; } }
+    public InteractableSpawner InteractableSpawner { get { return mInteractableSpawner; } }
     public string LocationName { get { return mLocationName; } }
     public List<Interactable> ChildInteractables { get { return mChildInteractables; } }
 

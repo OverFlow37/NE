@@ -7,6 +7,7 @@ namespace OhMAIGod.Agent
         public override void OnStateEnter(AgentController _controller)
         {
             base.OnStateEnter(_controller);
+            _controller.mMovement.ClearMovement();
             _controller.AllowStateChange = false;
         }
 
