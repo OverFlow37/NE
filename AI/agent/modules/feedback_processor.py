@@ -2,6 +2,7 @@
 피드백 처리 모듈
 
 행동에 대한 피드백을 처리하고 메모리에 저장합니다.
+이벤트 정보와 피드백을 합쳐서 저장하는 기능 추가
 """
 
 import json
@@ -10,6 +11,7 @@ from typing import Dict, Any, Optional
 from pathlib import Path
 import numpy as np
 from datetime import datetime
+import re
 
 class FeedbackProcessor:
     def __init__(self, memory_utils, ollama_client):
@@ -145,6 +147,81 @@ Please create a concise, first-person perspective description of my experience t
         
         return interpretations
     
+    def _create_event_text(self, action: str, interactable: str, location: str) -> str:
+        """
+        안전한 이벤트 텍스트 생성
+        
+        Args:
+            action: 행동 이름
+            interactable: 상호작용 대상
+            location: 위치
+            
+        Returns:
+            str: 생성된 이벤트 텍스트
+        """
+        event_str = ""
+        
+        if action:
+            event_str += action
+            
+            if interactable:
+                event_str += f" {interactable}"
+                
+            if location:
+                event_str += f" at {location}"
+        elif location:
+            event_str = f"went to {location}"
+        else:
+            event_str = "unknown event"
+            
+        return event_str
+    
+    def _create_combined_feedback(self, action: str, interactable: str, location: str, 
+                              success: bool, feedback_sentence: str, 
+                              feedback_description: str = "") -> str:
+        """
+        이벤트 정보와 피드백을 결합한 통합 피드백 생성
+        
+        Args:
+            action: 행동 이름
+            interactable: 상호작용 대상
+            location: 위치
+            success: 성공 여부
+            feedback_sentence: 생성된 피드백 문장
+            feedback_description: 피드백 설명
+            
+        Returns:
+            str: 결합된 피드백 문장
+        """
+        # 이벤트 정보 구성
+        event_info = "Event: "
+        
+        if action:
+            event_info += action
+            
+            if interactable:
+                event_info += f" {interactable}"
+                
+            if location:
+                event_info += f" at {location}"
+        elif location:
+            event_info += f"went to {location}"
+        else:
+            event_info += "unknown action"
+            
+        event_info += ". "
+        
+        # 성공/실패 상태
+        status_info = f"Result: {'Success' if success else 'Failed'}"
+        if feedback_description:
+            status_info += f" ({feedback_description})"
+        status_info += ". "
+        
+        # 통합 피드백 생성
+        combined_feedback = f"{event_info}{status_info}Feedback: {feedback_sentence}"
+        
+        return combined_feedback
+    
     async def process_feedback(self, feedback_data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         """
         피드백 데이터를 처리하여 메모리에 저장
@@ -187,8 +264,6 @@ Please create a concise, first-person perspective description of my experience t
             
             # 성공/실패 상태
             success_status = "Success" if success else "Failed"
-            if not success and feedback_description:
-                success_status += f": {feedback_description}"
             
             # 프롬프트 템플릿 로드
             system_prompt = self._load_prompt(self.system_prompt_path, self.default_system_prompt)
@@ -197,11 +272,11 @@ Please create a concise, first-person perspective description of my experience t
             # 프롬프트 생성
             formatted_prompt = feedback_prompt.format(
                 AGENT_NAME=agent_name,
-                ACTION=action if action else "go to",
-                INTERACTABLE=interactable if interactable else "location",
-                LOCATION=current_location,
+                ACTION=action if action else "",
+                INTERACTABLE=interactable if interactable else "",
+                LOCATION=current_location if current_location else "",
                 SUCCESS_STATUS=success_status,
-                FEEDBACK_DESCRIPTION=feedback_description,
+                FEEDBACK_DESCRIPTION=feedback_description if feedback_description else "",
                 HUNGER_DIFF=needs_diff.get("hunger", 0),
                 HUNGER_FEELING=needs_interpretations.get("hunger", ""),
                 SLEEPINESS_DIFF=needs_diff.get("sleepiness", 0),
@@ -225,12 +300,38 @@ Please create a concise, first-person perspective description of my experience t
             
             # 피드백 문장 생성
             feedback_sentence = response.get("response", "").strip()
-            # 쌍따옴표 제거 (양쪽 끝의 따옴표만 제거)
-            feedback_sentence = feedback_sentence[1:-1]
+            
+            # 따옴표 제거 로직 향상
+            # 전체 문장이 따옴표로 감싸져 있는 경우
+            if (feedback_sentence.startswith('"') and feedback_sentence.endswith('"')) or \
+            (feedback_sentence.startswith("'") and feedback_sentence.endswith("'")):
+                feedback_sentence = feedback_sentence[1:-1]
+            
+            # 따옴표로 감싸진 텍스트 패턴 확인 (예: "text" 또는 'text')
+            quote_pattern = r'^["\'](.*)["\']$'
+            match = re.match(quote_pattern, feedback_sentence)
+            if match:
+                feedback_sentence = match.group(1)
+            
+            # 줄바꿈 및 여러 공백 정리
+            feedback_sentence = re.sub(r'\s+', ' ', feedback_sentence).strip()
+            
             print(f"📝 생성된 피드백: {feedback_sentence}")
             
-            # 임베딩 생성
-            embedding = self.memory_utils.get_embedding(feedback_sentence)
+            # 이벤트 정보와 피드백 결합
+            combined_feedback = self._create_combined_feedback(
+                action=action,
+                interactable=interactable,
+                location=current_location,
+                success=success,
+                feedback_sentence=feedback_sentence,
+                feedback_description=feedback_description
+            )
+            
+            print(f"📝 통합 피드백: {combined_feedback}")
+            
+            # 임베딩 생성 (통합 피드백 기반)
+            embedding = self.memory_utils.get_embedding(combined_feedback)
             
             # 메모리 데이터 로드
             memories = self.memory_utils._load_memories()
@@ -242,22 +343,25 @@ Please create a concise, first-person perspective description of my experience t
             if "memories" not in memories[agent_name]:
                 memories[agent_name]["memories"] = {}
             
+            # 이벤트 텍스트 생성
+            event_text = self._create_event_text(action, interactable, current_location)
+            
             # 메모리 ID가 있으면 해당 메모리에 피드백 저장
             if memory_id:
                 agent_memories = memories[agent_name]["memories"]
                 
                 # 메모리 ID가 존재하는지 확인
                 if memory_id in agent_memories:
-                    # 기존 메모리에 피드백 추가
-                    agent_memories[memory_id]["feedback"] = feedback_sentence
-                    print(f"✅ 메모리 ID {memory_id}에 피드백 저장")
+                    # 기존 메모리에 통합 피드백 추가
+                    agent_memories[memory_id]["feedback"] = combined_feedback
+                    print(f"✅ 메모리 ID {memory_id}에 통합 피드백 저장")
                     self.memory_utils._save_memories(memories)
                     
                     return {
                         "success": True,
-                        "message": f"Feedback added to memory_id {memory_id}",
+                        "message": f"Combined feedback added to memory_id {memory_id}",
                         "memory_id": memory_id,
-                        "feedback": feedback_sentence
+                        "feedback": combined_feedback
                     }
                 else:
                     print(f"⚠️ 메모리 ID {memory_id}를 찾을 수 없습니다. 해당 ID로 새 메모리를 생성합니다.")
@@ -267,44 +371,44 @@ Please create a concise, first-person perspective description of my experience t
                 # 기존 ID로 새 메모리 생성
                 memories[agent_name]["memories"][memory_id] = {
                     "event_role": "",
-                    "event": "",
+                    "event": event_text,  # 안전하게 생성된 이벤트 텍스트
                     "action": action if action else "",
-                    "feedback": feedback_sentence,
+                    "feedback": combined_feedback,  # 통합 피드백 저장
                     "conversation_detail": "",
                     "time": time,
                     "embeddings": embedding,
-                    "importance": 4  # 피드백의 기본 중요도
+                    "importance": 3  # 피드백의 기본 중요도
                 }
-                print(f"✅ 메모리 ID {memory_id}로 새 메모리 생성 및 피드백 저장")
+                print(f"✅ 메모리 ID {memory_id}로 새 메모리 생성 및 통합 피드백 저장")
                 self.memory_utils._save_memories(memories)
                 
                 return {
                     "success": True,
                     "message": f"New memory created with ID {memory_id}",
                     "memory_id": memory_id,
-                    "feedback": feedback_sentence
+                    "feedback": combined_feedback
                 }
             else:
                 # 새 ID로 메모리 생성
                 new_memory_id = self.memory_utils._get_next_memory_id(agent_name)
                 memories[agent_name]["memories"][new_memory_id] = {
                     "event_role": "",
-                    "event": "",
+                    "event": event_text,  # 안전하게 생성된 이벤트 텍스트
                     "action": action if action else "",
-                    "feedback": feedback_sentence,
+                    "feedback": combined_feedback,  # 통합 피드백 저장
                     "conversation_detail": "",
                     "time": time,
                     "embeddings": embedding,
-                    "importance": 4  # 피드백의 기본 중요도
+                    "importance": 3  # 피드백의 기본 중요도
                 }
-                print(f"✅ 새 메모리 ID {new_memory_id}에 피드백 저장")
+                print(f"✅ 새 메모리 ID {new_memory_id}에 통합 피드백 저장")
                 self.memory_utils._save_memories(memories)
                 
                 return {
                     "success": True,
-                    "message": "New memory created with feedback",
+                    "message": "New memory created with combined feedback",
                     "memory_id": new_memory_id,
-                    "feedback": feedback_sentence
+                    "feedback": combined_feedback
                 }
             
         except Exception as e:
