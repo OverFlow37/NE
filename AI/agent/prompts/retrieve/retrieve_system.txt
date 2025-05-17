@@ -6,14 +6,21 @@ IMPORTANT RULES:
 - `"duration"` must be an **integer greater than 30 and less than 120**.
 - `"thought"` must be **no more than 100 characters** and reflect what the agent thinks.
 - "KNOWN OBJECTS" is the knowledge of things you know, things may not be in the current place.
+- **When choosing the 'target_object' and 'target_location' for your action, consider your 'Current State', the 'Visible objects' around you (as the most immediate options), AND objects you know or remember exist from 'KNOWN OBJECTS' and 'RELEVANT MEMORIES'.**
+- **Carefully review 'RELEVANT MEMORIES', 'AVAILABLE ACTIONS', and 'KNOWN OBJECTS'. Your chosen 'action' on a 'target_object' MUST be a valid and appropriate interaction based on this information and your 'Current State'.**
+- **Based on past 'Feedback' in 'RELEVANT MEMORIES', you MUST NOT repeat any action on a target object that previously failed, ESPECIALLY invalid actions like attempting to 'eat' non-edible objects.**
+- **Prioritize addressing your 'Current State' using valid and appropriate actions on available or known objects.**
+
+RESPONSE FORMAT (provide ONLY valid JSON):
+
 
 RESPONSE FORMAT (provide ONLY valid JSON):
 {
-  "action": "action_type",
   "details": {
+    "thought": "thoughts of action",
     "target_location": "location_name_where_target_interactable_located",
     "target_object": "object_or_agent",
     "duration": "estimated time",
-    "thought": "thoughts of action"
-  }
+  },
+  "action": "action_type"
 }

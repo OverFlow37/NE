@@ -624,7 +624,7 @@ public class AgentController : MonoBehaviour
     public void InitFeedback(){
         mCurrentFeedback = new PerceiveFeedback();
         mCurrentFeedback.agent_name = mName;
-        mCurrentFeedback.current_location = mCurrentLocation;
+        mCurrentFeedback.current_location_name = mCurrentLocation;
         mCurrentFeedback.time = TimeManager.Instance.GetCurrentGameTime().ToString();
         mCurrentFeedback.interactable_name = "";
         mCurrentFeedback.action_name = mActionNameForFeedback;
@@ -643,7 +643,7 @@ public class AgentController : MonoBehaviour
 
     // AI 서버에 피드백 보냄
     public void SendFeedbackToAI(bool _success, string _interactableName = "", string _actionName = "", string _memoryID = ""){
-        mCurrentFeedback.current_location = mCurrentLocation;
+        mCurrentFeedback.current_location_name = mCurrentLocation;
         mCurrentFeedback.time = TimeManager.Instance.GetCurrentGameTime().ToString();
         mCurrentFeedback.interactable_name = _interactableName;
         mCurrentFeedback.action_name = _actionName;

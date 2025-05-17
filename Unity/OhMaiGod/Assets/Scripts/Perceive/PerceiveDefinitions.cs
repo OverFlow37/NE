@@ -54,7 +54,7 @@ namespace OhMAIGod.Perceive{
     public struct PerceiveFeedback
     {
         public string agent_name;   
-        public string current_location;  
+        public string current_location_name;  
         public string time;     
         public string interactable_name;
         public string action_name;
