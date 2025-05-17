@@ -9677,7 +9677,7 @@ GameObject:
   - component: {fileID: 7799270548834679866}
   - component: {fileID: 5377758286319637026}
   m_Layer: 2
-  m_Name: effect_state_energy
+  m_Name: CreateEffect
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
