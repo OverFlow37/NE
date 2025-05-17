@@ -33,7 +33,7 @@ public class TileManager : MonoBehaviour, ISaveable
     [System.Serializable]
     public struct InteractableSaveData
     {
-        public string mPrefabName;      // 프리팹 이름(혹은 경로)
+        public string mPrefabName;      // 프리팹 이름
         public Vector3 mPosition;       // 위치
     }
 
@@ -340,13 +340,13 @@ public class TileManager : MonoBehaviour, ISaveable
         {
             foreach (var interactable in tileController.ChildInteractables)
             {
-                // Interactable에서 필요한 정보 추출
                 InteractableSaveData data = new InteractableSaveData();
 
-                // 프리팹 이름은 InteractableData의 mName을 사용
-                data.mPrefabName = interactable.mInteractableData != null ? interactable.mInteractableData.mName : interactable.name;
-                data.mPosition = interactable.transform.position;
+                // 프리팹 이름은 오브젝트 이름에서 ( 전까지 추출
+                data.mPrefabName = interactable.gameObject.name.Split('(')[0].Trim();
+                if (data.mPrefabName == "NPC") continue;
 
+                data.mPosition = interactable.transform.position;
                 saveList.mList.Add(data);
             }
         }
@@ -354,7 +354,7 @@ public class TileManager : MonoBehaviour, ISaveable
         // Json으로 직렬화
         string json = JsonUtility.ToJson(saveList, true);
 
-        // 파일로 저장 (경로는 Application.persistentDataPath 사용)
+        // 파일로 저장 (경로는 Application.persistentDataPath 사용해서 PC는 C:\Users\SSAFY\AppData\LocalLow\DefaultCompany\OhMaiGod 저장됨)
         string path = System.IO.Path.Combine(Application.persistentDataPath, "interactables.json");
         System.IO.File.WriteAllText(path, json);
 
@@ -380,24 +380,17 @@ public class TileManager : MonoBehaviour, ISaveable
             return;
         }
 
-        // 기존 Interactable 오브젝트 삭제 (중복 방지)
+        // 기존 TileTree 초기화
         foreach (var tileController in mTileTree)
         {
-            // 리스트 복사 후 삭제
-            var interactables = new List<Interactable>(tileController.ChildInteractables);
-            foreach (var interactable in interactables)
-            {
-                GameObject.Destroy(interactable.gameObject);
-                tileController.RemoveChildInteractable(interactable);
-                LogManager.Log("SaveLoad", $"기존 Interactable 오브젝트 삭제: {interactable.name}", 2);
-            }
+            tileController.RemoveAllChildInteractables();
         }
 
         // 저장된 데이터로 Interactable 오브젝트 생성
         foreach (var data in saveList.mList)
         {
-            // 프리팹 로드 (Resources 폴더 내에 프리팹이 있어야 함)
-            GameObject prefab = Resources.Load<GameObject>(data.mPrefabName);
+            // 프리팹 로드 (PrefabManager에서 로드)
+            GameObject prefab = PrefabManager.Instance.GetPrefabByName(data.mPrefabName);
             if (prefab == null)
             {
                 LogManager.Log("SaveLoad", $"프리팹 {data.mPrefabName}을(를) 찾을 수 없습니다.", 1);
