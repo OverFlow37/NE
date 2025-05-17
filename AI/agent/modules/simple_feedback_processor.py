@@ -72,11 +72,6 @@ class SimpleFeedbackProcessor:
                 result_text = f"failed to go to {location}"
             else:
                 result_text = "failed to perform an action"
-            
-            # 실패 원인 추가 (feedback_description에서)
-            if feedback_description and "Inedible" not in feedback_description:
-                result_text += f". {feedback_description}"
-        
         # 욕구 변화를 자연스러운 문장으로 표현
         effects = []
         
