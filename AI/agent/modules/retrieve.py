@@ -414,15 +414,13 @@ class MemoryRetriever:
         event_role = memory.get("event_role", "")
         
         content = ""
-        if event:
+        if event and event != "":
             if event_role == "God says":
                 content = f"Event: God said, {event}\n"
             else:
                 content = f"Event: {event}\n"
-        if action:
-            content += f"Action: {action}\n"
-        if feedback:
-            content += f"Feedback: {feedback}\n"
+        if feedback and feedback != "":
+            content = f"Feedback: {feedback}\n"
         
         # if thought:
         #     return f"- {content} (time: {time}, id: {memory_id})\n  thought: {thought}"
