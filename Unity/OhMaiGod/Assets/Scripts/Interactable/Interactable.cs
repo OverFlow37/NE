@@ -32,6 +32,7 @@ public class Interactable : MonoBehaviour
     public TargetController TargetController { get { return mTargetController; } }
     // 스프라이트 렌더러
     private SpriteRenderer mSpriteRenderer;
+    private Collider2D mCollider;
 
     void Awake()
     {
@@ -54,6 +55,7 @@ public class Interactable : MonoBehaviour
         }
 
         mTargetController = GetComponent<TargetController>();
+        mCollider = GetComponent<Collider2D>();
     }
 
     void Start()
@@ -65,6 +67,15 @@ public class Interactable : MonoBehaviour
     {
         // 오브젝트가 활성화될 때마다 환경 등록 시도
         RegisterToEnvironment();
+
+        // 오브젝트 활성화 될 때 sorting order 계산
+        if (mSpriteRenderer != null && mCollider != null)
+        {
+            // collider 중앙 위치 y값 참조
+            float y = mCollider.bounds.center.y;
+            // 중앙 위치 y값에 따라 sorting order 계산
+            mSpriteRenderer.sortingOrder = Mathf.FloorToInt(y * -1) + 50;
+        }
     }
 
     void OnDisable()
