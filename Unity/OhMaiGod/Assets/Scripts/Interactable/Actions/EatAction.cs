@@ -50,6 +50,11 @@ public class EatAction : InteractionAction
 
         // 2. 효과값 반영
         AgentController agentController = interactor.GetComponent<AgentController>();
+        // 에이전트의 상태가 INTERACTION이 아니면(행동 주체가 이상하져 ㅈㅅ... ㅠㅠ)
+        if(agentController.CurrentState != AgentState.INTERACTING){
+            LogManager.Log("Interact", $"에이전트가 상호작용 가능한 상태가 아닙니다.: {mActionName}", 1);
+            return false;
+        }
         if (agentController != null)
         {
             agentController.ModifyNeed(AgentNeedsType.Hunger, actionInfo.mHungerEffect);
@@ -57,6 +62,8 @@ public class EatAction : InteractionAction
             agentController.ModifyNeed(AgentNeedsType.Loneliness, actionInfo.mLonelinessEffect);
             agentController.ModifyNeed(AgentNeedsType.Stress, actionInfo.mStressEffect);
         }
+        // 피드백에 효과 반영
+        IncreaseNeedsForFeedback(agentController, actionInfo);
 
         // 먹어도 배고픔이 사라지지 않는 오브젝트면 실패
         if (actionInfo.mHungerEffect >= 0)

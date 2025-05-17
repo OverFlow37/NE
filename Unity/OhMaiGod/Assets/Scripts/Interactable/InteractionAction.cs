@@ -1,4 +1,6 @@
 using UnityEngine;
+using OhMAIGod.Perceive;
+using OhMAIGod.Agent;
 
 // 모든 상호작용 행동의 기본 클래스
 // ScriptableObject로 만들어 에셋으로 관리할 수 있게 합니다.
@@ -15,4 +17,12 @@ public abstract class InteractionAction : ScriptableObject
     public abstract string mActionName {get; set;}
     // 상호작용 효과 구현
     public abstract bool Execute(GameObject interactor, GameObject targetObject);
+    public void IncreaseNeedsForFeedback(AgentController _interactor, InteractableData.InteractionActionInfo _actionInfo){
+        AgentNeeds agentNeeds = new AgentNeeds();
+        agentNeeds.Hunger = _actionInfo.mHungerEffect;
+        agentNeeds.Loneliness = _actionInfo.mLonelinessEffect;
+        agentNeeds.Sleepiness = _actionInfo.mSleepinessEffect;
+        agentNeeds.Stress = _actionInfo.mStressEffect;
+        _interactor.IncreaseNeedsForFeedback(agentNeeds);
+    }
 }

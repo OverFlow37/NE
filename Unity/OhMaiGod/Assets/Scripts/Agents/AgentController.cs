@@ -101,13 +101,7 @@ public class AgentController : MonoBehaviour
     public string mActionNameForFeedback = ""; // 피드백 디버그용
     public string mCurrentMemoryID = "";
     public PerceiveFeedback mCurrentFeedback; // 현재 체크 중인 피드백
-    public struct Needs{
-        public int hunger;
-        public int sleepiness;
-        public int loneliness;
-        public int stress;
-    }
-    public Needs mNeedsStart; // 행동 시작 시점의 Needs 수치
+    private int mInteractCountForFeedback = 0; // 상호작용 발생 횟수
 
     private void Awake()
     {
@@ -402,9 +396,9 @@ public class AgentController : MonoBehaviour
                     LogManager.Log("Agent", $"{mName}: {mCurrentAction.TargetName} 상호작용 가능한 오브젝트를 찾을 수 없습니다.", 1);
                     
                     mMovement.ClearMovement();
+                    ChangeState(AgentState.WAITING);
                     // 해당 위치에 원하는 오브젝트가 없다는 피드백 전송
                     SendFeedbackToAI(false, mCurrentAction.TargetName);
-                    ChangeState(AgentState.WAITING);
                     // TODO: 상호작용 가능한 오브젝트를 찾을 수 없을 때
                 }
                 break;
@@ -607,17 +601,23 @@ public class AgentController : MonoBehaviour
     public void ReactToResponse(bool _response, PerceiveEvent _perceiveEvent){
         LogManager.Log("Agent", $"{mName}: 반응 판단 결과 받음: {_response}", 2);
         mIsReactJudge = false;
-        // TODO: 반응 UI 종료 처리
-        mAgentUI.ShowReact("!", true);
+        
         if(_response){            
-            // AIBridge_perceive에 반응 행동 요청하기
-            AIBridge_Perceive.Instance.SendReactActionEvent(this, _perceiveEvent);
-            // state를 WAITING FOR AI RESPONSE로 변경
-            mStateMachine.ChangeState(AgentState.WAITING_FOR_AI_RESPONSE);
+            SendReactAction(_perceiveEvent);
         }
         else{
             // 반응하지 않는 것으로 판단
+            mAgentUI.ShowReact("", false);
         }
+    }
+
+    // 반응 행동 요청
+    public void SendReactAction(PerceiveEvent _perceiveEvent){
+        // AIBridge_perceive에 반응 행동 요청하기
+            AIBridge_Perceive.Instance.SendReactActionEvent(this, _perceiveEvent);
+            // state를 WAITING FOR AI RESPONSE로 변경
+            mStateMachine.ChangeState(AgentState.WAITING_FOR_AI_RESPONSE);
+            mAgentUI.ShowReact("?", true);
     }
 
     // 피드백 초기화
@@ -635,10 +635,19 @@ public class AgentController : MonoBehaviour
         mCurrentFeedback.feedback.needs_diff.sleepiness = 0;
         mCurrentFeedback.feedback.needs_diff.loneliness = 0;
         mCurrentFeedback.feedback.needs_diff.stress = 0;
-        mNeedsStart.hunger = mAgentNeeds.Hunger;
-        mNeedsStart.sleepiness = mAgentNeeds.Sleepiness;
-        mNeedsStart.loneliness = mAgentNeeds.Loneliness;
-        mNeedsStart.stress = mAgentNeeds.Stress;
+        mInteractCountForFeedback = 0;
+    }
+
+    public void IncreaseNeedsForFeedback(AgentNeeds _needs){
+        // use는 주기가 여러번 발생하므로 보정치 적용
+        // 상호작용 최대 10번까지 발생하는 것을 기준으로 
+        if(mInteractCountForFeedback < 10){
+            mCurrentFeedback.feedback.needs_diff.hunger += _needs.Hunger;
+            mCurrentFeedback.feedback.needs_diff.loneliness += _needs.Loneliness;
+            mCurrentFeedback.feedback.needs_diff.sleepiness += _needs.Sleepiness;
+            mCurrentFeedback.feedback.needs_diff.stress += _needs.Stress;
+        }
+        mInteractCountForFeedback ++;
     }
 
     // AI 서버에 피드백 보냄
@@ -656,11 +665,16 @@ public class AgentController : MonoBehaviour
         // 타겟 로케이션에 타겟 오브젝트가 없는 경우
         else if (!_success && _actionName == ""){
             mCurrentFeedback.feedback.feedback_description = $"There are no {_interactableName} at the {mCurrentLocation}.";
+            Debug.Log("로케이션에 오브젝트가 없어 피드백 보냄: "+ mCurrentFeedback.feedback.feedback_description);
+            PerceiveEvent perceiveEvent = new PerceiveEvent();
+            perceiveEvent.event_is_save = false;
+            perceiveEvent.event_location = mCurrentLocation;
+            perceiveEvent.event_role = "";
+            perceiveEvent.event_type = PerceiveEventType.TARGET_NOT_IN_LOCATION;
+            perceiveEvent.event_description = mCurrentFeedback.feedback.feedback_description;
+            // AIBridge_perceive에 바로 반응 행동 요청하기
+            SendReactAction(perceiveEvent);
         }
-        mCurrentFeedback.feedback.needs_diff.hunger = mAgentNeeds.Hunger - mNeedsStart.hunger;
-        mCurrentFeedback.feedback.needs_diff.sleepiness = mAgentNeeds.Sleepiness - mNeedsStart.sleepiness;
-        mCurrentFeedback.feedback.needs_diff.loneliness = mAgentNeeds.Loneliness - mNeedsStart.loneliness;
-        mCurrentFeedback.feedback.needs_diff.stress = mAgentNeeds.Stress - mNeedsStart.stress;
         mCurrentFeedback.feedback.memory_id = mCurrentMemoryID;
         // 실제 전송되는 JSON 양식도 로그로 출력
         string feedbackJson = JsonUtility.ToJson(mCurrentFeedback);
