@@ -285,6 +285,8 @@ class SimpleFeedbackProcessor:
             # 임베딩 생성 (통합 피드백 기반)
             embedding = self.memory_utils.get_embedding(combined_feedback)
             
+            print(f"📝 통합 피드백 임베딩: {embedding}")
+
             # 메모리 데이터 로드
             memories = self.memory_utils._load_memories()
             
@@ -309,6 +311,26 @@ class SimpleFeedbackProcessor:
                     print(f"✅ 메모리 ID {memory_id}에 통합 피드백 저장")
                     self.memory_utils._save_memories(memories)
                     
+                    # 임베딩 데이터 저장
+                    print(f"🔍 임베딩 저장 시작 - agent_name: {agent_name}, memory_id: {memory_id}")
+                    if "embeddings" not in memories[agent_name]:
+                        print("📁 embeddings 디렉토리 생성")
+                        memories[agent_name]["embeddings"] = {}
+                    if memory_id not in memories[agent_name]["embeddings"]:
+                        print("📝 새로운 memory_id에 대한 임베딩 구조 생성")
+                        memories[agent_name]["embeddings"][memory_id] = {
+                            "event": [],
+                            "action": [],
+                            "feedback": []
+                        }
+                    print(f"💾 임베딩 저장 시도 - embedding 길이: {len(embedding) if embedding else 'None'}")
+                    memories[agent_name]["embeddings"][memory_id]["feedback"] = embedding
+                    print("✅ 임베딩 저장 완료")
+                    
+                    # 메모리 저장 확인
+                    self.memory_utils._save_memories(memories)
+                    print("💾 메모리 파일 저장 완료")
+
                     return {
                         "success": True,
                         "message": f"Combined feedback added to memory_id {memory_id}",
@@ -328,8 +350,12 @@ class SimpleFeedbackProcessor:
                     "feedback": combined_feedback,  # 통합 피드백 저장
                     "conversation_detail": "",
                     "time": time,
-                    "embeddings": embedding,
                     "importance": 4  # 피드백의 기본 중요도
+                }
+                memories[agent_name]["embeddings"][memory_id] = {
+                    "event": [],
+                    "action": self.memory_utils.get_embedding(action) if action else [],
+                    "feedback": embedding
                 }
                 print(f"✅ 메모리 ID {memory_id}로 새 메모리 생성 및 통합 피드백 저장")
                 self.memory_utils._save_memories(memories)
