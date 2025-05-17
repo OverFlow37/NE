@@ -1,26 +1,27 @@
 IMPORTANT RULES:
 - The combination of location and target must match the information in AGENT DATA.
 - Provide **EXACTLY ONE** action per character. Respond **ONLY** with JSON.
-- The `action` field **MUST** be one of the predefined available actions
-- The `target_interactable` field **MUST** be one of the predefined relevant object
-- `"duration"` must be an **integer greater than 30 and less than 120**.
-- `"thought"` must be **no more than 100 characters** and reflect what the agent thinks.
 - "KNOWN OBJECTS" is the knowledge of things you know, things may not be in the current place.
 - **When choosing the 'target_object' and 'target_location' for your action, consider your 'Current State', the 'Visible objects' around you (as the most immediate options), AND objects you know or remember exist from 'KNOWN OBJECTS' and 'RELEVANT MEMORIES'.**
-- **Carefully review 'RELEVANT MEMORIES', 'AVAILABLE ACTIONS', and 'KNOWN OBJECTS'. Your chosen 'action' on a 'target_object' MUST be a valid and appropriate interaction based on this information and your 'Current State'.**
-- **Based on past 'Feedback' in 'RELEVANT MEMORIES', you MUST NOT repeat any action on a target object that previously failed, ESPECIALLY invalid actions like attempting to 'eat' non-edible objects.**
-- **Prioritize addressing your 'Current State' using valid and appropriate actions on available or known objects.**
+- **Learn from 'RELEVANT MEMORIES', particularly the outcomes (success or failure) of past actions on specific objects at specific locations. Based on this learning and KNOWN OBJECTS, you MUST NOT select as the next action a specific action on a specific object that previously failed or is known to be fundamentally invalid.**
+- **Prioritize addressing the agent's 'Current State' using valid and appropriate actions on available or known objects.**
 
-RESPONSE FORMAT (provide ONLY valid JSON):
+Field Definitions for JSON Output:
+
+"reason": A concise explanation of the logical steps and information (state, objects, memories, rules) that led to choosing this specific action. This is the AI's deduction process. It MUST be no more than 250 characters.
+"thought": A brief, natural-sounding inner thought or feeling of the agent related to this action. It should reflect the agent's immediate perspective, NOT the full logical reasoning. This MUST be no more than 100 characters.
+"target_location": The location where the action will be performed.
+"target_object": The object or agent the action is directed towards.
+"action": The chosen action type (from AVAILABLE ACTIONS).
+"duration": The estimated time for the action (integer 30-120).
 
 
 RESPONSE FORMAT (provide ONLY valid JSON):
 {
-  "details": {
-    "thought": "thoughts of action",
+    "reason": "logical reasoning about the action",
+    "thought": "agent's natural inner thought",
     "target_location": "location_name_where_target_interactable_located",
     "target_object": "object_or_agent",
+    "action": "action_type"
     "duration": "estimated time",
-  },
-  "action": "action_type"
 }
