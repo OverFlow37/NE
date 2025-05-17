@@ -456,18 +456,18 @@ async def react_to_event(payload: dict):
             reaction_obj = json.loads(json_text)
             print(f"✅ JSON 파싱 성공: {reaction_obj}")
             
-            # 필수 필드 확인
-            if "action" not in reaction_obj or "details" not in reaction_obj:
-                print("⚠️ 응답에 필수 필드가 없습니다. 기본값으로 대체합니다.")
-                if "action" not in reaction_obj:
-                    reaction_obj["action"] = "use"
-                if "details" not in reaction_obj:
-                    reaction_obj["details"] = {
-                        "location": " ",
-                        "target": " ",
-                        "duration": " ",
-                        "reason": " "
-                    }
+            # # 필수 필드 확인
+            # if "action" not in reaction_obj or "details" not in reaction_obj:
+            #     print("⚠️ 응답에 필수 필드가 없습니다. 기본값으로 대체합니다.")
+            #     if "action" not in reaction_obj:
+            #         reaction_obj["action"] = "use"
+            #     if "details" not in reaction_obj:
+            #         reaction_obj["details"] = {
+            #             "location": " ",
+            #             "target": " ",
+            #             "duration": " ",
+            #             "reason": " "
+            #         }
                 
             # action_sentence 생성
             action_sentence = f"{reaction_obj.get('action', '')} {reaction_obj.get('details', {}).get('target_object', '')} at {reaction_obj.get('details', {}).get('target_location', '')} because {reaction_obj.get('details', {}).get('thought', '')}"
