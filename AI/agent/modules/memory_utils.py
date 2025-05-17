@@ -192,7 +192,11 @@ class MemoryUtils:
     def save_perception(self, event: Dict[str, Any], agent_name: str) -> bool:
         """관찰 정보를 메모리에 저장"""
         try:
-            event_sentence = f'{event.get("event_description", "")} at {event.get("event_location", "")}'
+            event_sentence = ""
+            if event.get("event_location", "") != "" and event.get("event_location", "") != " ":
+                event_sentence = f'{event.get("event_description", "")} at {event.get("event_location", "")}'
+            else:
+                event_sentence = event.get("event_description", "")
             embedding = self.get_embedding(event_sentence)
             event_time = event.get("time", datetime.now().strftime("%Y.%m.%d.%H:%M"))
             

@@ -235,7 +235,7 @@ async def perceive_event(payload: dict):
             
         agent_data = payload.get('agent', {})
         agent_name = agent_data.get('name', 'John')
-        event_data = agent_data.get('event', {})
+        event_data = agent_data.get('perceive_event', {})
         
         # 게임 시간 가져오기
         game_time = agent_data.get('time', None)
@@ -465,7 +465,9 @@ async def react_to_event(payload: dict):
             #             "reason": " "
             #         }
                 
-            
+            if event_is_save == False:
+                event_sentence = ""
+
             memory_id = memory_utils.save_memory(
                 event_sentence=event_sentence,
                 embedding=embedding,
