@@ -134,7 +134,7 @@ public class AgentVision : MonoBehaviour
                 perceiveEvent.event_description = eventController.mEventInfo.event_description;
                 perceiveEvent.event_role = $"{mAgentController.AgentName} saw";
                 perceiveEvent.event_is_save = true;
-                mAgentController.ShowReactUI("?", true);
+                mAgentController.ShowReactUI("!", true);
                 mAIBridgePerceive.SendReactJudgeEvent(mAgentController, perceiveEvent);
             }
         }
