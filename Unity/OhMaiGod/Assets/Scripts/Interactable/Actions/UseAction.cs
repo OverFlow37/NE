@@ -48,6 +48,11 @@ public class UseAction : InteractionAction
 
         // 2. 효과값 반영
         AgentController agentController = interactor.GetComponent<AgentController>();
+        // 에이전트의 상태가 INTERACTION이 아니면(행동 주체가 이상하져 ㅈㅅ... ㅠㅠ)
+        if(agentController.CurrentState != AgentState.INTERACTING){
+            LogManager.Log("Interact", $"에이전트가 상호작용 가능한 상태가 아닙니다.: {mActionName}", 1);
+            return false;
+        }
         if (agentController != null)
         {
             agentController.ModifyNeed(AgentNeedsType.Hunger, actionInfo.mHungerEffect);
