@@ -633,8 +633,6 @@ async def reflection_and_plan(payload: Dict[str, Any]):
         if not agent_time:
             return {"success": False, "error": "agent.time이 필요합니다."}
         
-        # # Ollama 클라이언트 초기화
-        # client = OllamaClient()
         # 반성 처리 시작 시간
         reflection_start_time = time.time()
         reflection_success = await process_reflection_request(payload, client, word2vec_model=word2vec_model)
@@ -643,23 +641,9 @@ async def reflection_and_plan(payload: Dict[str, Any]):
         
         # 계획 처리 시작 시간
         plan_start_time = time.time()
-        plan_success = await process_plan_request(payload, client)
+        plan_success, unity_plan = await process_plan_request(payload, client)
         plan_time = time.time() - plan_start_time
         print(f"⏱ 계획 처리 시간: {plan_time:.2f}초")
-        
-        # 다음날 계획 가져오기
-        next_day_plan = {}
-        if plan_success:
-            try:
-                plan_file_path = os.path.join(ROOT_DIR, "agent", "data", "plans.json")
-                with open(plan_file_path, "r", encoding="utf-8") as f:
-                    plan_data = json.load(f)
-                    agent_name = payload["agent"]["name"]
-                    current_date = datetime.strptime(agent_time, "%Y.%m.%d.%H:%M")
-                    next_day = (current_date + timedelta(days=1)).strftime("%Y.%m.%d")
-                    next_day_plan = plan_data.get(agent_name, {}).get("plans", {}).get(next_day, {})
-            except Exception as e:
-                print(f"다음날 계획 로드 실패: {str(e)}")
         
         # 전체 처리 시간 계산
         total_time = time.time() - total_start_time
@@ -670,7 +654,7 @@ async def reflection_and_plan(payload: Dict[str, Any]):
         
         return {
             "success": reflection_success and plan_success,
-            "next_day_plan": next_day_plan,
+            "next_day_plan": unity_plan,
             "performance_metrics": {
                 "total_time": total_time,
                 "reflection_time": reflection_time,
