@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using Unity.Cinemachine;
 using UnityEngine.Tilemaps;
+using UnityEngine.SceneManagement;
 
 public class CameraController : MonoBehaviour
 {
@@ -30,8 +31,21 @@ public class CameraController : MonoBehaviour
         {
             mFollowTarget = GameObject.FindWithTag("NPC").GetComponent<Transform>();
         }
+        
+        // 씬 로드 이벤트 등록
+        SceneManager.sceneLoaded += OnSceneLoaded;
     }
 
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        if (mFollowTarget == null)
+        {
+            mFollowTarget = GameObject.FindWithTag("NPC").GetComponent<Transform>();
+        }
+
+        mCinemachineCam.Follow = mFollowTarget;
+    }
+    
     // Update is called once per frame
     void Update()
     {
@@ -127,5 +141,10 @@ public class CameraController : MonoBehaviour
     public void SetFollowTarget(Transform _target)
     {
         mFollowTarget = _target;
+    }
+
+    private void OnDestroy()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
     }
 }
