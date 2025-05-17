@@ -12,25 +12,25 @@ TASK: For each agent, determine ONE NEXT ACTION based on their current state.
 
 Location :
 
-1. House 
+1. house 
    A private space for resting and sleeping.
 
-2. Square
+2. square
     A social space with facilities and interactions with other assistants.
 
-3. Temple
+3. temple
     A place for raising faith and offering prayers for personal wishes.
 
-4. Mountain
+4. mountain
    Rich in resources and ingredients unique to this area.
 
-5. Forest
+5. forest
    A dense area filled with natural resources and food ingredients.
 
-6. Plain
+6. plain
    A peaceful region where players can gather food and resources.
 
-7. Beach
+7. beach
    A coastal area for fishing and gathering various items and resources.
 
 

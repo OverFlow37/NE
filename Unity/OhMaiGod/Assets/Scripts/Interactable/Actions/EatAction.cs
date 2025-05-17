@@ -58,20 +58,16 @@ public class EatAction : InteractionAction
             agentController.ModifyNeed(AgentNeedsType.Stress, actionInfo.mStressEffect);
         }
 
-        // Furniture나 Resource가 아니라면 먹기
-        if (targetInteractable.InteractableType != InteractableData.Types.Furniture && targetInteractable.InteractableType != InteractableData.Types.Resource)
+        // 먹어도 배고픔이 사라지지 않는 오브젝트면 실패
+        if (actionInfo.mHungerEffect >= 0)
         {
-            // 행동 완료 후 오브젝트 제거
-            LogManager.Log("Interact", $"eat {targetInteractable.InteractableName}");
-            targetInteractable.RemoveObject();
-        }
-        else
-        {
-            // Furniture나 Resource라면 피드백
-            LogManager.Log("Interact", $"{targetInteractable.InteractableName} 는 먹을 수 없습니다.", 1);
-            return false;
+            LogManager.Log("Interact", $"{targetInteractable.InteractableName}은 먹을 수 없는 것 같다.", 1);
+            return false;  
         }
 
+        // 행동 완료 후 오브젝트 제거
+        LogManager.Log("Interact", $"eat {targetInteractable.InteractableName}");
+        targetInteractable.RemoveObject();
         return true;
     }
 }

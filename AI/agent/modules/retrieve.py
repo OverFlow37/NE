@@ -348,38 +348,40 @@ class MemoryRetriever:
 
     def _format_visible_interactables(self, visible_interactables: List[Dict[str, Any]]) -> str:
         """
-        상호작용 가능한 객체 목록을 (location, object) 쌍 문자열로 변환합니다.
-
+        상호작용 가능한 객체 목록을 문자열로 변환
+        
         Args:
             visible_interactables: 상호작용 가능한 객체 목록
-                                    형식: [{"location": "...", "interactables": ["...", "..."]}, ...]
-
+            
         Returns:
-            str: (location, object) 쌍의 줄바꿈으로 구분된 문자열.
-                예: "- (outdoor, Flower)\n- (outdoor, Jewel)\n- (temple, Grape)"
+            str: 포맷된 객체 목록 문자열
         """
         if not visible_interactables:
             return "Nothing visible nearby."
-
-        formatted_lines = []
-
-        # 입력받은 visible_interactables 리스트를 순회합니다.
-        # 이 리스트의 각 요소는 {"location": "위치 이름", "interactables": ["객체1", "객체2", ...]} 형태입니다.
+        
+        # 각 위치별로 고유한 객체 목록을 저장할 딕셔너리
+        location_objects = {}
+        
+        # 각 위치별로 고유한 객체 목록 생성
         for location_data in visible_interactables:
-            location = location_data.get("location")
-            interactables = location_data.get("interactables", []) # 해당 위치의 객체 목록 (리스트)
-
-            # 위치 정보가 유효하고, interactables가 리스트이며 비어있지 않은 경우 처리
-            if location and isinstance(interactables, list) and interactables:
-                # 해당 위치(location)에 속한 각 객체(obj)에 대해 새로운 포맷의 문자열을 만듭니다.
-                for obj in interactables:
-                    # 각 (위치, 객체) 쌍을 "- (location, object)" 형태로 포맷하여 리스트에 추가
-                    formatted_lines.append(f"- ({location}, {obj})")
-
-        # 모든 포맷된 라인을 줄바꿈 문자로 연결하여 최종 문자열을 생성합니다.
-        # 만약 visible_interactables 데이터는 있었지만 유효한 location/interactables 엔트리가 하나도 없었다면
-        # formatted_lines는 비어있을 것이므로 "Nothing visible nearby."를 반환합니다.
-        return "\n".join(formatted_lines) if formatted_lines else "Nothing visible nearby."
+            location = location_data.get("location", "")
+            interactables = location_data.get("interactables", [])
+            
+            if location and interactables:
+                if location not in location_objects:
+                    location_objects[location] = set()
+                
+                # 중복 제거를 위해 set 사용
+                location_objects[location].update(interactables)
+        
+        # 결과 문자열 생성
+        interactable_strings = []
+        for location, objects in location_objects.items():
+            # 객체 목록을 정렬된 리스트로 변환
+            sorted_objects = sorted(list(objects))
+            interactable_strings.append(f"- Location: {location}, Objects: {', '.join(sorted_objects)}")
+        
+        return "\n".join(interactable_strings) if interactable_strings else "Nothing visible nearby."
 
 
     def _format_state(self, state: Dict[str, int]) -> str:
@@ -401,7 +403,7 @@ class MemoryRetriever:
         if "hunger" in state:
             hunger = state["hunger"]
             if hunger >= 90:
-                state_strings.append("You are so hungry that you need to eat something right away!")
+                state_strings.append("EXTREMELY HUNGRY")
             elif hunger >= 70:
                 state_strings.append("extremely hungry")
             elif hunger >= 40:
@@ -426,7 +428,7 @@ class MemoryRetriever:
         if "sleepiness" in state and state["sleepiness"] > 0:
             sleepiness = state["sleepiness"]
             if sleepiness >= 90:
-                state_strings.append("You are so sleepy that you are on the verge of fainting, you should use a bed.")
+                state_strings.append("EXTREMELY SLEEPY")
             elif sleepiness >= 70:
                 state_strings.append("very sleepy")
             elif sleepiness >= 40:

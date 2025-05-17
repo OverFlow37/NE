@@ -22,7 +22,7 @@ namespace OhMAIGod.Agent
         public override void OnStateExit(AgentController _controller)
         {
             
-            _controller.EndInteraction();
+            //_controller.EndInteraction();
             base.OnStateExit(_controller);
             // 상호작용 UI 종료
             if (_controller.mAgentUI != null)

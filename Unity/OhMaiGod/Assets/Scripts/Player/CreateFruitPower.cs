@@ -10,8 +10,10 @@ public class CreateFruitPower : MonoBehaviour
     public GameObject mSelectedEvent;
     [Header("생성할 이펙트")]
     public GameObject mSelectedEffect;
-    [Header("생성할 될 수 있는 아이템")]
+    [Header("생성할 수 있는 아이템")]
     [SerializeField] private List<GameObject> mItemList;
+    [Header("효과음")]
+    [SerializeField] private GameObject mSoundEffect;
 
 
     private bool mIsPlacementMode = false;
@@ -94,9 +96,13 @@ public class CreateFruitPower : MonoBehaviour
         }
     }
 
-    public void PlaceObject(Vector3 mouseWorldPos)
+    public void PlaceObject(Vector3 _mouseWorldPos)
     {
-        StartCoroutine(PlaceObjectsSequentially(mouseWorldPos));
+        if (mSoundEffect != null)
+        {
+            Instantiate(mSoundEffect, _mouseWorldPos, Quaternion.identity);
+        }
+        StartCoroutine(PlaceObjectsSequentially(_mouseWorldPos));
     }
 
     // 여러 아이템을 하나씩 순차적으로 생성하는 코루틴 (떨어지는 연출 없이 생성만 순차)
