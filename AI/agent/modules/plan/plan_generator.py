@@ -43,6 +43,7 @@ class PlanGenerator:
         self.prompt_dir = os.path.join(root_dir, "agent", "prompts", "plan")
         self.prompt_path = os.path.join(self.prompt_dir, "plan_prompt.txt")
         self.system_path = os.path.join(self.prompt_dir, "plan_system.txt")
+        self.timeslot_prompt_path = os.path.join(self.prompt_dir, "plan_timeslot_prompt.txt")
         
         # 폴더 생성
         os.makedirs(os.path.dirname(self.plan_file_path), exist_ok=True)
@@ -71,35 +72,72 @@ class PlanGenerator:
             logger.warning(f"반성 파일 로드 오류: {e}")
             return {}
     
-    def save_plans(self, agent_name: str, date: str, plans: Dict) -> bool:
-        """계획을 파일에 저장"""
-        try:
-            # 기존 계획 파일 로드
-            plan_data = self.load_plans()
+    # def save_plans(self, agent_name: str, date: str, plans: Dict) -> bool:
+    #     """계획을 파일에 저장"""
+    #     try:
+    #         # 기존 계획 파일 로드
+    #         plan_data = self.load_plans()
             
-            # 에이전트가 없으면 생성
-            if agent_name not in plan_data:
-                plan_data[agent_name] = {"plans": {}}
+    #         # 에이전트가 없으면 생성
+    #         if agent_name not in plan_data:
+    #             plan_data[agent_name] = {"plans": {}}
             
-            # plans 필드가 없으면 생성
-            if "plans" not in plan_data[agent_name]:
-                plan_data[agent_name]["plans"] = {}
+    #         # plans 필드가 없으면 생성
+    #         if "plans" not in plan_data[agent_name]:
+    #             plan_data[agent_name]["plans"] = {}
             
-            # 계획 추가
-            plan_data[agent_name]["plans"][date] = plans
-            logger.info(f"{agent_name}의 {date} 계획이 추가되었습니다.")
+    #         # 계획 추가
+    #         plan_data[agent_name]["plans"][date] = plans
+    #         logger.info(f"{agent_name}의 {date} 계획이 추가되었습니다.")
             
-            # 파일 저장
-            with open(self.plan_file_path, 'w', encoding='utf-8') as f:
-                json.dump(plan_data, f, ensure_ascii=False, indent=2)
+    #         # 파일 저장
+    #         with open(self.plan_file_path, 'w', encoding='utf-8') as f:
+    #             json.dump(plan_data, f, ensure_ascii=False, indent=2)
             
-            logger.info(f"계획 파일 저장 완료: {self.plan_file_path}")
-            return True
+    #         logger.info(f"계획 파일 저장 완료: {self.plan_file_path}")
+    #         return True
             
-        except Exception as e:
-            logger.error(f"계획 저장 오류: {e}")
-            return False
+    #     except Exception as e:
+    #         logger.error(f"계획 저장 오류: {e}")
+    #         return False
     
+    # 새로운 계획 데이터 병합
+    def save_plans(self, new_plan_data: Dict) -> bool:
+        try:
+            existing_data = self.load_plans()
+
+            for agent_name, agent_data in new_plan_data.items():
+                if agent_name not in existing_data:
+                    existing_data[agent_name] = {"plans": {}}
+                if "plans" not in existing_data[agent_name]:
+                    existing_data[agent_name]["plans"] = {}
+
+                new_plans = agent_data.get("plans", {})
+
+                for date_key, plan_value in new_plans.items():
+                    # 💡 중첩된 plan이 있는 경우 (e.g. plan_value = {"John": {"plans": {...}}})
+                    if isinstance(plan_value, dict) and any(
+                        isinstance(v, dict) and "plans" in v for v in plan_value.values()
+                    ):
+                        for inner_agent_key, inner_data in plan_value.items():
+                            if isinstance(inner_data, dict) and "plans" in inner_data:
+                                for nested_date, nested_plan in inner_data["plans"].items():
+                                    existing_data[agent_name]["plans"][nested_date] = nested_plan
+                    else:
+                        # 정상적인 계획이면 그대로 저장
+                        existing_data[agent_name]["plans"][date_key] = plan_value
+
+            with open(self.plan_file_path, 'w', encoding='utf-8') as f:
+                json.dump(existing_data, f, ensure_ascii=False, indent=2)
+
+            logger.info("✅ 계획 병합 저장 완료")
+            return True
+
+        except Exception as e:
+            logger.error(f"❌ 계획 저장 실패: {e}")
+            return False
+
+
     def _load_prompt_template(self) -> str:
         """프롬프트 템플릿 로드"""
         try:
@@ -118,8 +156,9 @@ class PlanGenerator:
             logger.error(f"시스템 프롬프트 로드 실패: {e}")
             return "You are a helpful AI assistant that creates daily plans in JSON format."
     
-    def _create_plan_prompt(self, agent_name: str, date: str, reflections: List[Dict], previous_plans: Dict) -> str:
-        """계획 생성 프롬프트 생성"""
+    def _create_plan_prompt(self, agent_name: str, plan_date: str, reflection_date: str,
+                        reflections: List[Dict], previous_plans: Dict) -> str:
+
         template = self._load_prompt_template()
         
         # 반성 데이터 포맷팅
@@ -135,25 +174,27 @@ class PlanGenerator:
         # 프롬프트 생성
         prompt = template.format(
             AGENT_NAME=agent_name,
-            DATE=date,
+            DATE=reflection_date,      # 🟡 반성 기준 날짜
+            PLAN_DATE=plan_date,       # 🟡 계획 생성 대상 날짜
             REFLECTIONS=reflections_text,
             PREVIOUS_PLANS=previous_plans_text
         )
+
         
         # JSON 형식의 변수 치환
         prompt = prompt.replace("AGENT_NAME_PLACEHOLDER", agent_name)
-        prompt = prompt.replace("DATE_PLACEHOLDER", date)
+        prompt = prompt.replace("DATE_PLACEHOLDER", reflection_date)
         
         return prompt
     
     async def generate_plans(self, agent_name: str, time: str) -> Dict:
         """
-        계획 생성
+        계획 생성 (1단계)
         Parameters:
         - agent_name: 에이전트 이름
         - time: 서버에서 받은 시간 (YYYY.MM.DD.HH:MM 형식)
         Returns:
-        - 생성된 계획
+        - 생성된 계획 JSON
         """
         try:
             if not time:
@@ -168,6 +209,7 @@ class PlanGenerator:
             date_parts = current_time.split(".")[:3]  # YYYY.MM.DD 부분만 추출
             current_date = datetime.datetime.strptime(".".join(date_parts), "%Y.%m.%d")
             next_date = (current_date + datetime.timedelta(days=1)).strftime("%Y.%m.%d")
+            current_date_str = current_date.strftime("%Y.%m.%d") 
             logger.info(f"다음 날짜: {next_date}")
             
             # 반성 데이터 로드
@@ -197,7 +239,7 @@ class PlanGenerator:
                     previous_plans = plan_data[agent_name]["plans"][dates[-1]]
             
             # 프롬프트 생성
-            prompt = self._create_plan_prompt(agent_name, next_date, today_reflections, previous_plans)
+            prompt = self._create_plan_prompt(agent_name, next_date, current_date_str, today_reflections, previous_plans)
             logger.info(f"생성된 프롬프트:\n{prompt}")
             
             # 시스템 프롬프트 로드
@@ -245,7 +287,7 @@ class PlanGenerator:
                 logger.info(f"생성된 계획: {plans}")
                 
                 # 계획 저장 (다음 날짜로 저장)
-                if self.save_plans(agent_name, next_date, plans):
+                if self.save_plans(plans):
                     return plans
                 return {}
                 
@@ -255,4 +297,81 @@ class PlanGenerator:
             
         except Exception as e:
             logger.error(f"계획 생성 중 오류 발생: {str(e)}")
+            return {}
+        
+########################################################
+######### 유니티로 반환할 계획(타임슬롯)생성 ##############
+########################################################
+    async def generate_unity_plan(self, plan_json: Dict) -> Dict:
+        """
+        Unity용 계획 객체 생성 (2단계)
+        Parameters:
+        - plan_json: 1단계에서 생성된 계획 JSON
+        Returns:
+        - Unity용 계획 객체
+        """
+        try:
+            if not plan_json:
+                logger.error("계획 JSON이 제공되지 않았습니다.")
+                return {}
+
+            # 프롬프트 템플릿 로드
+            try:
+                with open(self.timeslot_prompt_path, 'r', encoding='utf-8') as f:
+                    prompt_template = f.read().strip()
+            except Exception as e:
+                logger.error(f"타임슬롯 프롬프트 템플릿 로드 실패: {e}")
+                return {}
+
+            # 프롬프트 생성
+            prompt = prompt_template.format(
+                PLAN_JSON=json.dumps(plan_json, ensure_ascii=False, indent=2)
+            )
+
+            # 시스템 프롬프트
+            system_prompt = "You are a helpful AI assistant that converts daily plans into Unity-compatible format."
+
+            # Ollama API 호출
+            response = await self.ollama_client.process_prompt(
+                prompt=prompt,
+                system_prompt=system_prompt,
+                model_name="gemma3"
+            )
+
+            if response.get("status") != "success":
+                logger.error(f"Unity 계획 생성 API 호출 실패: {response.get('status')}")
+                return {}
+
+            # API 응답 로깅
+            logger.info(f"Unity API 응답: {response.get('response')}")
+
+            # JSON 파싱
+            try:
+                response_text = response["response"]
+                json_pattern = r'```(?:json)?\s*([\s\S]*?)```'
+                matches = re.findall(json_pattern, response_text)
+
+                if matches:
+                    json_str = matches[0].strip()
+                    unity_plan = json.loads(json_str)
+                else:
+                    json_pattern = r'({[\s\S]*})'
+                    matches = re.findall(json_pattern, response_text)
+                    
+                    if matches:
+                        json_str = max(matches, key=len)
+                        unity_plan = json.loads(json_str)
+                    else:
+                        logger.error("응답에서 JSON을 찾을 수 없습니다.")
+                        return {}
+
+                logger.info(f"생성된 Unity 계획: {unity_plan}")
+                return unity_plan
+
+            except json.JSONDecodeError as e:
+                logger.error(f"JSON 파싱 실패: {e}")
+                return {}
+
+        except Exception as e:
+            logger.error(f"Unity 계획 생성 중 오류 발생: {str(e)}")
             return {} 

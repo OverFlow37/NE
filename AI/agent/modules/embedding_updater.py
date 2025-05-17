@@ -98,26 +98,34 @@ class EmbeddingUpdater:
         memories = self.memory_utils._load_memories()
         for agent_name in memories:
             for memory_id, memory in memories[agent_name]["memories"].items():
-                embeddings_list = []
+                # 임베딩 데이터 초기화
+                if "embeddings" not in memories[agent_name]:
+                    memories[agent_name]["embeddings"] = {}
+                
+                embeddings = {
+                    "event": [],
+                    "action": [],
+                    "feedback": []
+                }
                 
                 # event 임베딩
                 event = memory.get("event", "")
                 if event:
-                    embeddings_list.append(self.memory_utils.get_embedding(event))
+                    embeddings["event"] = self.memory_utils.get_embedding(event)
                 
                 # action 임베딩
                 action = memory.get("action", "")
                 if action:
-                    embeddings_list.append(self.memory_utils.get_embedding(action))
+                    embeddings["action"] = self.memory_utils.get_embedding(action)
                 
                 # feedback 임베딩
                 feedback = memory.get("feedback", "")
                 if feedback:
-                    embeddings_list.append(self.memory_utils.get_embedding(feedback))
+                    embeddings["feedback"] = self.memory_utils.get_embedding(feedback)
                 
-                if embeddings_list:
-                    memory["embeddings"] = embeddings_list
-                    update_counts["memories"] += 1
+                # 임베딩 저장
+                memories[agent_name]["embeddings"][memory_id] = embeddings
+                update_counts["memories"] += 1
         
         self.memory_utils._save_memories(memories)
         

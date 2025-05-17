@@ -32,7 +32,16 @@ class MemoryUtils:
                 with open(file_path, 'w', encoding='utf-8') as f:
                     if file_path == self.memories_file:
                         # 새로운 메모리 구조로 초기화
-                        json.dump({"John": {"memories": {}}, "Sarah": {"memories": {}}}, f, ensure_ascii=False, indent=2)
+                        json.dump({
+                            "John": {
+                                "memories": {},
+                                "embeddings": {}
+                            },
+                            "Sarah": {
+                                "memories": {},
+                                "embeddings": {}
+                            }
+                        }, f, ensure_ascii=False, indent=2)
                     elif file_path == self.reflections_file:
                         json.dump({"John": {"reflections": []}, "Sarah": {"reflections": []}}, f, ensure_ascii=False, indent=2)
                     else:
@@ -45,7 +54,16 @@ class MemoryUtils:
                 return json.load(f)
         except Exception as e:
             print(f"메모리 로드 중 오류 발생: {e}")
-            return {"John": {"memories": {}}, "Sarah": {"memories": {}}}
+            return {
+                "John": {
+                    "memories": {},
+                    "embeddings": {}
+                },
+                "Sarah": {
+                    "memories": {},
+                    "embeddings": {}
+                }
+            }
 
     def _save_memories(self, memories: Dict[str, Dict[str, Dict[str, Dict[str, Any]]]]):
         """메모리 데이터 저장"""
@@ -90,12 +108,15 @@ class MemoryUtils:
         except ValueError:
             return "1"
 
-    def save_memory(self, event_sentence: str, embedding: List[float], event_time: str, agent_name: str, event_id: int = None,  event_role: str = "", action_sentence: str = ""):
+    def save_memory(self, event_sentence: str, embedding: List[float], event_time: str, agent_name: str, event_id: int = None, event_role: str = "", action_sentence: str = ""):
         """새로운 메모리 저장"""
         memories = self._load_memories()
         
         if agent_name not in memories:
-            memories[agent_name] = {"memories": {}}
+            memories[agent_name] = {
+                "memories": {},
+                "embeddings": {}
+            }
             
         # 현재 시간이 제공되지 않은 경우 현재 시간 사용
         if not event_time:
@@ -104,21 +125,30 @@ class MemoryUtils:
         # 새 메모리 ID 생성
         memory_id = self._get_next_memory_id(agent_name)
             
-        # 이벤트 종류 판단
-        
+        # 메모리 데이터 저장
         memory = {
             "event_role": event_role,
             "event": event_sentence,
-            "action": f"{action_sentence}",
+            "action": action_sentence,
             "feedback": "",
             "conversation_detail": "",
-            "time": event_time,
-            "embeddings": embedding,  
+            "time": event_time
         }
+        
         if event_role != "" and event_role != " ":
             memory["importance"] = 8
         
+        # 메모리와 임베딩을 별도로 저장
         memories[agent_name]["memories"][memory_id] = memory
+        
+        # 임베딩 데이터 저장
+        embeddings = {
+            "event": self.get_embedding(event_sentence),
+            "action": self.get_embedding(action_sentence) if action_sentence else [],
+            "feedback": []
+        }
+        memories[agent_name]["embeddings"][memory_id] = embeddings
+        
         self._save_memories(memories)
         
         return memory_id

@@ -43,6 +43,7 @@ class MemoryRetriever:
     def _find_relevant_objects(
         self,
         event_embedding: List[float],
+        state_embedding: List[float],
         object_embeddings: Dict[str, Dict[str, List[float]]],
         top_k: int = 10,
         similarity_threshold: float = 0.01
@@ -52,6 +53,7 @@ class MemoryRetriever:
         
         Args:
             event_embedding: 이벤트 임베딩
+            state_embedding: 상태 임베딩
             object_embeddings: 오브젝트 임베딩 딕셔너리
             top_k: 반환할 오브젝트 개수
             similarity_threshold: 유사도 임계값
@@ -61,21 +63,46 @@ class MemoryRetriever:
         """
         
         event_embedding = np.array(event_embedding)
+        state_embedding = np.array(state_embedding)
         object_similarities = []
         
         for obj_name, obj_data in object_embeddings.items():
             obj_embedding = np.array(obj_data.get("name_only", []))
             
             if obj_embedding.shape == event_embedding.shape:
-                similarity = np.dot(event_embedding, obj_embedding) / (
+                # 이벤트 유사도 계산
+                event_similarity = np.dot(event_embedding, obj_embedding) / (
                     np.linalg.norm(event_embedding) * np.linalg.norm(obj_embedding)
                 )
-                if similarity >= similarity_threshold:
-                    object_similarities.append((obj_name, float(similarity)))
+                
+                # 상태 유사도 계산
+                state_similarity = np.dot(state_embedding, obj_embedding) / (
+                    np.linalg.norm(state_embedding) * np.linalg.norm(obj_embedding)
+                )
+                
+                # 평균 유사도와 최고 유사도 계산
+                avg_similarity = (event_similarity + state_similarity) / 2
+                max_similarity = max(event_similarity, state_similarity)
+                
+                if avg_similarity >= similarity_threshold or max_similarity >= similarity_threshold:
+                    object_similarities.append((obj_name, float(event_similarity), float(state_similarity), float(avg_similarity), float(max_similarity)))
         
-        # 유사도 기준으로 정렬하고 상위 k개 반환
-        object_similarities.sort(key=lambda x: x[1], reverse=True)
-        return object_similarities[:top_k]
+        # 평균값 기준 정렬
+        avg_sorted = sorted(object_similarities, key=lambda x: x[3], reverse=True)
+        # 최고값 기준 정렬
+        max_sorted = sorted(object_similarities, key=lambda x: x[4], reverse=True)
+        
+        # 상위 10개 출력
+        print("\n=== 오브젝트 평균값 기준 상위 10개 ===")
+        for obj_name, event_sim, state_sim, avg_sim, max_sim in avg_sorted[:10]:
+            print(f"오브젝트: {obj_name}, 이벤트 유사도: {event_sim:.4f}, 상태 유사도: {state_sim:.4f}, 평균: {avg_sim:.4f}, 최고: {max_sim:.4f}")
+            
+        print("\n=== 오브젝트 최고값 기준 상위 10개 ===")
+        for obj_name, event_sim, state_sim, avg_sim, max_sim in max_sorted[:10]:
+            print(f"오브젝트: {obj_name}, 이벤트 유사도: {event_sim:.4f}, 상태 유사도: {state_sim:.4f}, 평균: {avg_sim:.4f}, 최고: {max_sim:.4f}")
+        
+        # 최고값 기준으로 정렬된 결과 반환
+        return [(obj_name, event_sim) for obj_name, event_sim, _, _, _ in max_sorted[:top_k]]
 
     def _get_object_description(self, object_name: str) -> str:
         """
@@ -93,6 +120,7 @@ class MemoryRetriever:
     def _create_interactable_objects_list(
         self,
         event_embedding: List[float],
+        state_embedding: List[float],
         object_embeddings: Dict[str, Dict[str, List[float]]],
         visible_interactables: List[Dict[str, Any]] = None
     ) -> List[str]:
@@ -101,6 +129,7 @@ class MemoryRetriever:
         
         Args:
             event_embedding: 이벤트 임베딩
+            state_embedding: 상태 임베딩
             object_embeddings: 오브젝트 임베딩 딕셔너리
             visible_interactables: 현재 보이는 상호작용 가능한 객체 목록
             
@@ -119,7 +148,7 @@ class MemoryRetriever:
         
         # object_embeddings에서 관련 오브젝트 추가
         if object_embeddings:
-            relevant_objects = self._find_relevant_objects(event_embedding, object_embeddings)
+            relevant_objects = self._find_relevant_objects(event_embedding, state_embedding, object_embeddings)
             for obj_name, _ in relevant_objects:
                 interactable_objects.add(obj_name)
         
@@ -197,6 +226,7 @@ class MemoryRetriever:
     def _find_similar_memories(
         self,
         event_embedding: List[float],
+        state_embedding: List[float],
         agent_name: str,
         top_k: int = 3,
         similarity_threshold: float = 0.5
@@ -205,7 +235,8 @@ class MemoryRetriever:
         유사한 메모리 검색
         
         Args:
-            event_embedding: 현재 이벤트의 임베딩 (단일 벡터)
+            event_embedding: 현재 이벤트의 임베딩
+            state_embedding: 현재 상태의 임베딩
             agent_name: 에이전트 이름
             top_k: 반환할 메모리 개수
             similarity_threshold: 유사도 임계값
@@ -224,46 +255,71 @@ class MemoryRetriever:
         
         # event_embedding을 numpy 배열로 변환
         event_embedding = np.array(event_embedding)
+        state_embedding = np.array(state_embedding)
         
         # 메모리 추가
         for memory_id, memory in memories[agent_name]["memories"].items():
-            memory_embeddings = memory.get("embeddings", [])
+            memory_embeddings = memories[agent_name]["embeddings"].get(memory_id, {})
             memory_with_id = memory.copy()
             memory_with_id["memory_id"] = memory_id
             
             if memory_embeddings:
                 # 임베딩이 있는 경우 유사도 계산
-                max_similarity = 0
-                for memory_embedding in memory_embeddings:
-                    memory_embedding = np.array(memory_embedding)
-                    if memory_embedding.shape == event_embedding.shape:
-                        similarity = np.dot(event_embedding, memory_embedding) / (
-                            np.linalg.norm(event_embedding) * np.linalg.norm(memory_embedding)
-                        )
-                        max_similarity = max(max_similarity, float(similarity))
+                max_event_similarity = 0
+                max_state_similarity = 0
                 
-                if max_similarity >= similarity_threshold:
-                    all_items.append((memory_with_id, max_similarity, False))
+                # 이벤트 임베딩 유사도 계산
+                if "event" in memory_embeddings and memory_embeddings["event"]:
+                    event_embedding_array = np.array(memory_embeddings["event"])
+                    if event_embedding_array.shape == event_embedding.shape:
+                        event_similarity = np.dot(event_embedding, event_embedding_array) / (
+                            np.linalg.norm(event_embedding) * np.linalg.norm(event_embedding_array)
+                        )
+                        max_event_similarity = max(max_event_similarity, float(event_similarity))
+                        
+                        # 상태 유사도 계산
+                        state_similarity = np.dot(state_embedding, event_embedding_array) / (
+                            np.linalg.norm(state_embedding) * np.linalg.norm(event_embedding_array)
+                        )
+                        max_state_similarity = max(max_state_similarity, float(state_similarity))
+                
+                avg_similarity = (max_event_similarity + max_state_similarity) / 2
+                max_similarity = max(max_event_similarity, max_state_similarity)
+                
+                if avg_similarity >= similarity_threshold or max_similarity >= similarity_threshold:
+                    all_items.append((memory_with_id, max_event_similarity, max_state_similarity, avg_similarity, max_similarity, False))
             else:
                 # 임베딩이 없는 경우 기본 유사도 부여
-                all_items.append((memory_with_id, 0.5, False))
+                all_items.append((memory_with_id, 0.1, 0.1, 0.1, 0.1, False))
         
         # 반성 추가
         if agent_name in reflections:
             for reflection in reflections[agent_name]["reflections"]:
                 reflection_embeddings = reflection.get("embeddings", [])
                 if reflection_embeddings:
-                    max_similarity = 0
+                    max_event_similarity = 0
+                    max_state_similarity = 0
+                    
                     for reflection_embedding in reflection_embeddings:
                         reflection_embedding = np.array(reflection_embedding)
                         if reflection_embedding.shape == event_embedding.shape:
-                            similarity = np.dot(event_embedding, reflection_embedding) / (
+                            # 이벤트 유사도 계산
+                            event_similarity = np.dot(event_embedding, reflection_embedding) / (
                                 np.linalg.norm(event_embedding) * np.linalg.norm(reflection_embedding)
                             )
-                            max_similarity = max(max_similarity, float(similarity))
+                            max_event_similarity = max(max_event_similarity, float(event_similarity))
+                            
+                            # 상태 유사도 계산
+                            state_similarity = np.dot(state_embedding, reflection_embedding) / (
+                                np.linalg.norm(state_embedding) * np.linalg.norm(reflection_embedding)
+                            )
+                            max_state_similarity = max(max_state_similarity, float(state_similarity))
                     
-                    if max_similarity >= similarity_threshold:
-                        all_items.append((reflection, max_similarity, True))
+                    avg_similarity = (max_event_similarity + max_state_similarity) / 2
+                    max_similarity = max(max_event_similarity, max_state_similarity)
+                    
+                    if avg_similarity >= similarity_threshold or max_similarity >= similarity_threshold:
+                        all_items.append((reflection, max_event_similarity, max_state_similarity, avg_similarity, max_similarity, True))
         
         # 시간순으로 정렬하여 가중치 계산
         def get_time(item):
@@ -271,41 +327,71 @@ class MemoryRetriever:
             
         all_items.sort(key=lambda x: get_time(x[0]), reverse=True)
         
-        # 각 항목의 가치 계산
+        # -------------------------------------------------------------------
+        # 1) 파라미터: 선형 가중합 계수
+        alpha, beta, gamma = 0.5, 0.2, 0.3
+        K = 20  # 포물선형 시간 가중치 계산용
+
         valued_items = []
-        for i, (item, similarity, is_reflection) in enumerate(all_items):
-            # 시간 가중치 계산 (0.99부터 0.01씩 감소)
-            time_weight = max(0.99 - (i * 0.01), 0.01)
-            
-            # 가치 계산
-            value = self._calculate_value(item, similarity, time_weight, is_reflection)
-            valued_items.append((item, value, is_reflection))
-        
-        # 가치 기준으로 정렬
-        valued_items.sort(key=lambda x: x[1], reverse=True)
-        
-        # 상위 k개 반환
-        result = [(item, value) for item, value, _ in valued_items[:top_k]]
-        
-        # 결과가 부족한 경우 최근 메모리로 채우기
-        if len(result) < top_k:
-            # 이미 선택된 메모리 ID 수집
-            selected_memory_ids = {item.get("memory_id") for item, _ in result}
-            
-            # 추가로 필요한 메모리 개수 계산
-            needed_count = top_k - len(result)
-            
-            # 최근 메모리 가져오기
-            recent_memories = self._get_recent_memories(
-                agent_name,
-                top_k=needed_count,
-                exclude_memory_ids=selected_memory_ids
+        to_print_items = []
+        for i, (item, event_sim, state_sim, avg_sim, max_sim, is_reflection) in enumerate(all_items):
+            # (1) 시간 가중치
+            t = min(i, K) / K
+            time_weight = max(1.0 - t**2, 0.01)
+
+            # (2) 중요도 정규화
+            importance = float(item.get("importance", 3))
+            imp_norm = importance / 10.0
+
+            # (3) 유사도 최고치
+            sim_max = max(event_sim, state_sim)
+
+            # (4) 최종 점수 계산
+            final_score = (
+                alpha * sim_max
+            + beta  * imp_norm
+            + gamma * time_weight
             )
-            
-            # 최근 메모리 추가
-            result.extend(recent_memories)
-        
+
+            valued_items.append((item, final_score))
+            to_print_items.append((item, final_score, sim_max, imp_norm, time_weight, event_sim, state_sim))
+
+        # final_score 기준 내림차순 정렬
+        valued_items.sort(key=lambda x: x[1], reverse=True)
+        to_print_items.sort(key=lambda x: x[1], reverse=True)
+
+        # 인자로 넘어온 top_k 사용
+        result = valued_items[:top_k]
+
+        for mem, score, sim_avg, imp_norm, tw, e_sim, s_sim in to_print_items[:top_k]:
+            print(f"=== 메모리 ID: {mem.get('memory_id')} ===")
+            print(f"  Final Score : {score:.4f}")
+            print(f"    sim_max   : {sim_avg:.4f}  (event_sim={e_sim:.4f}, state_sim={s_sim:.4f})")
+            print(f"    importance: {imp_norm:.4f}")
+            print(f"    time_weight: {tw:.4f}")
+            print()
+
         return result
+        
+        # # 결과가 부족한 경우 최근 메모리로 채우기
+        # if len(result) < top_k:
+        #     # 이미 선택된 메모리 ID 수집
+        #     selected_memory_ids = {item.get("memory_id") for item, _ in result}
+            
+        #     # 추가로 필요한 메모리 개수 계산
+        #     needed_count = top_k - len(result)
+            
+        #     # 최근 메모리 가져오기
+        #     recent_memories = self._get_recent_memories(
+        #         agent_name,
+        #         top_k=needed_count,
+        #         exclude_memory_ids=selected_memory_ids
+        #     )
+            
+        #     # 최근 메모리 추가
+        #     result.extend(recent_memories)
+        
+        # return result
 
     def _create_event_string(self, memory: Dict[str, Any]) -> str:
         """
@@ -328,15 +414,13 @@ class MemoryRetriever:
         event_role = memory.get("event_role", "")
         
         content = ""
-        if event:
+        if event and event != "":
             if event_role == "God says":
                 content = f"Event: God said, {event}\n"
             else:
                 content = f"Event: {event}\n"
-        if action:
-            content += f"Action: {action}\n"
-        if feedback:
-            content += f"Feedback: {feedback}\n"
+        if feedback and feedback != "":
+            content = f"Feedback: {feedback}\n"
         
         # if thought:
         #     return f"- {content} (time: {time}, id: {memory_id})\n  thought: {thought}"
@@ -451,6 +535,7 @@ class MemoryRetriever:
         self,
         event_sentence: str,
         event_embedding: List[float],
+        state_embedding: List[float],
         event_role: str,
         agent_name: str,
         prompt_template: str,
@@ -465,6 +550,8 @@ class MemoryRetriever:
         Args:
             event_sentence: 현재 이벤트 문장
             event_embedding: 현재 이벤트의 임베딩
+            state_embedding: 현재 상태의 임베딩
+            event_role: 이벤트 역할
             agent_name: 에이전트 이름
             prompt_template: 프롬프트 템플릿
             agent_data: 에이전트 데이터 (성격, 위치, 상호작용 가능한 객체 등)
@@ -482,6 +569,7 @@ class MemoryRetriever:
         # 유사한 메모리 검색
         similar_memories = self._find_similar_memories(
             event_embedding,
+            state_embedding,
             agent_name,
             top_k=similar_data_cnt,
             similarity_threshold=similarity_threshold
@@ -505,6 +593,8 @@ class MemoryRetriever:
         if agent_data and "state" in agent_data:
             state_str = self._format_state(agent_data["state"])
         
+
+        
         # 상호작용 가능한 객체 정보 처리
         visible_interactables_str = ""
         if agent_data and "visible_interactables" in agent_data:
@@ -513,6 +603,7 @@ class MemoryRetriever:
         # 상호작용 가능한 오브젝트 리스트 생성
         interactable_objects = self._create_interactable_objects_list(
             event_embedding,
+            state_embedding,
             object_embeddings,
             agent_data.get("visible_interactables") if agent_data else None
         )
@@ -542,7 +633,7 @@ class MemoryRetriever:
                 AGENT_DATA=agent_data_str,
                 EVENT_CONTENT=f"{event_role} {event_sentence}",
                 RELEVANT_MEMORIES=similar_event_str,
-                RELEVANT_OBJECTS=interactable_objects_str  # 키 이름을 INTERACTABLE_OBJECT로 수정
+                RELEVANT_OBJECTS=interactable_objects_str
             )
             return prompt
         except Exception as e:

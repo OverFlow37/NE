@@ -5,7 +5,7 @@
 """
 
 import logging
-from typing import Dict, Any
+from typing import Dict, Any, Tuple
 from .plan_generator import PlanGenerator
 
 # 로깅 설정
@@ -15,7 +15,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger("PlanPipeline")
 
-async def process_plan_request(request_data: Dict[str, Any], ollama_client) -> bool:
+async def process_plan_request(request_data: Dict[str, Any], ollama_client) -> Tuple[bool, Dict]:
     """
     계획 생성 요청 처리
     
@@ -24,7 +24,7 @@ async def process_plan_request(request_data: Dict[str, Any], ollama_client) -> b
         ollama_client: Ollama API 클라이언트 인스턴스
     
     Returns:
-        bool: 성공 여부
+        Tuple[bool, Dict]: (성공 여부, Unity용 계획 객체)
     """
     try:
         # 요청 데이터 로깅
@@ -33,7 +33,7 @@ async def process_plan_request(request_data: Dict[str, Any], ollama_client) -> b
         # 필수 필드 확인
         if not request_data or 'agent' not in request_data:
             logger.error("필수 필드 누락")
-            return False
+            return False, {}
         
         # 에이전트 데이터 추출
         agent_data = request_data.get('agent', {})
@@ -43,7 +43,7 @@ async def process_plan_request(request_data: Dict[str, Any], ollama_client) -> b
         date = agent_data.get('time', '')
         if not date:
             logger.error("날짜 정보 누락")
-            return False
+            return False, {}
         
         # 계획 생성기 초기화
         plan_generator = PlanGenerator(
@@ -52,16 +52,25 @@ async def process_plan_request(request_data: Dict[str, Any], ollama_client) -> b
             ollama_client=ollama_client
         )
         
-        # 계획 생성
+        # 1단계: 계획 JSON 생성
         plans = await plan_generator.generate_plans(agent_name, date)
         
         if not plans:
             logger.error("계획 생성 실패")
-            return False
+            return False, {}
         
-        logger.info(f"계획 생성 성공: {plans}")
-        return True
+        logger.info(f"1단계 계획 생성 성공: {plans}")
+        
+        # 2단계: Unity용 계획 객체 생성
+        unity_plan = await plan_generator.generate_unity_plan(plans)
+        
+        if not unity_plan:
+            logger.error("Unity 계획 생성 실패")
+            return False, {}
+        
+        logger.info(f"2단계 Unity 계획 생성 성공: {unity_plan}")
+        return True, unity_plan
         
     except Exception as e:
         logger.error(f"계획 생성 중 오류 발생: {str(e)}")
-        return False 
+        return False, {} 
