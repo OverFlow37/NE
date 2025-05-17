@@ -41,37 +41,20 @@ class SimpleFeedbackProcessor:
         """
         # 성공/실패 결과 (기본 템플릿)
         if success:
-            if action and interactable:
-                result_text = f"Successfully {action}ed {interactable}"
-                if location:
-                    result_text += f" at {location}"
-            elif action:
-                result_text = f"Successfully {action}ed"
-                if location:
-                    result_text += f" at {location}"
-            elif location:
-                result_text = f"Successfully went to {location}"
-            else:
-                result_text = "Successfully performed an action"
+            result_text = f"I {action} {interactable}, "
+        # 실패 케이스
         else:
-            # 실패 케이스
-            if "Inedible" in feedback_description and action == "eat":
-                result_text = f"tried to eat {interactable}"
-                if location:
-                    result_text += f" at {location}"
-                result_text += ", but it was completely inedible"
-            elif action and interactable:
-                result_text = f"failed to {action} {interactable}"
-                if location:
-                    result_text += f" at {location}"
-            elif action:
-                result_text = f"failed to {action}"
-                if location:
-                    result_text += f" at {location}"
-            elif location:
-                result_text = f"failed to go to {location}"
-            else:
-                result_text = "failed to perform an action"
+            result_text = f"{feedback_description} "
+            # # 행동 시도, 잘못된 액션
+            # if action:
+            #     result_text = f"but failed to {action} {interactable}"
+            # # 로케이션 이동 성공, 타겟이 없음
+            # elif interactable:
+            #     result_text = f"failed to {action}"
+            # # 로케이션 이동 실패(로케이션이 없음)
+            # else:
+            #     result_text = f"failed to go to {location}"
+        
         # 욕구 변화를 자연스러운 문장으로 표현
         effects = []
         
@@ -122,9 +105,9 @@ class SimpleFeedbackProcessor:
         # 효과 문장 결합
         if effects:
             if len(effects) == 1:
-                result_text += f". feeling {effects[0]}"
+                result_text += f" feeling {effects[0]}"
             else:
-                result_text += f". feeling {', '.join(effects[:-1])} and {effects[-1]}"
+                result_text += f" feeling {', '.join(effects[:-1])} and {effects[-1]}"
         
         return result_text
     
@@ -154,8 +137,8 @@ class SimpleFeedbackProcessor:
             event_str = f"went to {location}"
         else:
             event_str = "unknown event"
-            
-        return event_str
+        # 이벤트는 사용 안할 예정 임시로 ""
+        return ""
     
     def _create_combined_feedback(self, action: str, interactable: str, location: str, 
                             success: bool, feedback_sentence: str, 
@@ -164,56 +147,68 @@ class SimpleFeedbackProcessor:
         이벤트 정보와 피드백을 결합한 통합 피드백 생성
         성공 시에는 중복 정보 제거하여 간결하게 생성
         """
-        # 이벤트 부분 생성
-        event_part = ""
-        if action:
-            event_part += action
-            if interactable:
-                event_part += f" {interactable}"
-            if location:
-                event_part += f" at {location}"
-        elif location:
-            event_part = f"went to {location}"
-        else:
-            event_part = "unknown event"
+        # # 이벤트 부분 생성
+        # event_part = ""
+        # if action:
+        #     event_part += action
+        #     if interactable:
+        #         event_part += f" {interactable}"
+        #     if location:
+        #         event_part += f" at {location}"
+        # elif location:
+        #     event_part = f"went to {location}"
+        # else:
+        #     event_part = "unknown event"
         
-        # 피드백 문장 처리 (성공 시 간결하게, 실패 시 상세하게)
-        if success:
-            # 성공 시 욕구 변화만 표현 (이벤트 정보 + 욕구 변화)
-            # 욕구 변화 추출
-            needs_effects = ""
+        # # 피드백 문장 처리 (성공 시 간결하게, 실패 시 상세하게)
+        # if success:
+        #     # 성공 시 욕구 변화만 표현 (이벤트 정보 + 욕구 변화)
+        #     # 욕구 변화 추출
+        #     needs_effects = ""
             
-            # 원본 피드백 문장에서 "feeling" 이후 부분 추출
-            feeling_index = feedback_sentence.lower().find("feeling")
-            if feeling_index != -1:
-                needs_effects = feedback_sentence[feeling_index:]
+        #     # 원본 피드백 문장에서 "feeling" 이후 부분 추출
+        #     feeling_index = feedback_sentence.lower().find("feeling")
+        #     if feeling_index != -1:
+        #         needs_effects = feedback_sentence[feeling_index:]
             
-            # 결합된 피드백 (간결한 버전)
-            combined_feedback = f"{event_part}. {needs_effects}"
-        else:
-            # 실패 시 전체 피드백 (이벤트 + 실패 경험 + 욕구 변화)
-            # 'I' 시작 패턴 정리
-            processed_feedback = feedback_sentence
-            i_patterns = ['I tried to', 'I feel', 'I am', 'I was', 'I went', 'I found', 'I failed to']
-            for pattern in i_patterns:
-                if processed_feedback.startswith(pattern):
-                    processed_feedback = processed_feedback[len(pattern):].strip()
+        #     # 결합된 피드백 (간결한 버전)
+        #     combined_feedback = f"{needs_effects}"
+        # else:
+        #     # 실패 시 전체 피드백 (이벤트 + 실패 경험 + 욕구 변화)
+        #     # 'I' 시작 패턴 정리
+        #     processed_feedback = feedback_sentence
+        #     i_patterns = ['I tried to', 'I feel', 'I am', 'I was', 'I went', 'I found', 'I failed to']
+        #     for pattern in i_patterns:
+        #         if processed_feedback.startswith(pattern):
+        #             processed_feedback = processed_feedback[len(pattern):].strip()
             
-            # 첫 문자 소문자로 변경
-            if processed_feedback and len(processed_feedback) > 0:
-                processed_feedback = processed_feedback[0].lower() + processed_feedback[1:]
+        #     # 첫 문자 소문자로 변경
+        #     if processed_feedback and len(processed_feedback) > 0:
+        #         processed_feedback = processed_feedback[0].lower() + processed_feedback[1:]
             
-            # 결합된 피드백 (상세 버전)
-            combined_feedback = f"{event_part}. {processed_feedback}"
+        #     # 결합된 피드백 (상세 버전)
+        #     combined_feedback = f"{event_part}. {processed_feedback}"
         
-        # 피드백 설명 추가 (있는 경우)
+        # # 피드백 설명 추가 (있는 경우)
+        # if feedback_description:
+        #     # 이미 마침표로 끝나는지 확인
+        #     if combined_feedback.endswith('.'):
+        #         combined_feedback += f" {feedback_description}"
+        #     else:
+        #         combined_feedback += f". {feedback_description}"
+        
+        # 욕구 변화 추출
+        needs_effects = ""
+        
+        # 원본 피드백 문장에서 "feeling" 이후 부분 추출
+        feeling_index = feedback_sentence.lower().find("feeling")
+        if feeling_index != -1:
+            needs_effects = feedback_sentence[feeling_index:]
+        combined_feedback = ""
+        # 결합된 피드백 (간결한 버전)
         if feedback_description:
-            # 이미 마침표로 끝나는지 확인
-            if combined_feedback.endswith('.'):
-                combined_feedback += f" {feedback_description}"
-            else:
-                combined_feedback += f". {feedback_description}"
-        
+            combined_feedback = feedback_description
+        combined_feedback += f"{needs_effects}"
         return combined_feedback
     
     def process_simple_feedback(self, feedback_data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
@@ -244,7 +239,7 @@ class SimpleFeedbackProcessor:
             time = agent_data.get('time', datetime.now().strftime("%Y.%m.%d.%H:%M"))
             
             feedback = agent_data.get('feedback', {})
-            feedback_description = feedback.get('feedback_description', '')
+            feedback_description = feedback.get('feedback_description', ',')
             
             # memory_id 처리 - 문자열로 변환하여 확인
             memory_id = str(feedback.get('memory_id', '')) if feedback.get('memory_id') is not None else ''
@@ -265,16 +260,16 @@ class SimpleFeedbackProcessor:
             
             print(f"📝 생성된 피드백: {feedback_sentence}")
             
-            # 이벤트 정보와 피드백 결합
-            combined_feedback = self._create_combined_feedback(
-                action=action,
-                interactable=interactable,
-                location=current_location,
-                success=success,
-                feedback_sentence=feedback_sentence,
-                feedback_description=feedback_description
-            )
-            
+            # # 이벤트 정보와 피드백 결합
+            # combined_feedback = self._create_combined_feedback(
+            #     action=action,
+            #     interactable=interactable,
+            #     location=current_location,
+            #     success=success,
+            #     feedback_sentence=feedback_sentence,
+            #     feedback_description=feedback_description
+            # )
+            combined_feedback = feedback_sentence
             print(f"📝 통합 피드백: {combined_feedback}")
             
             # 임베딩 생성 (통합 피드백 기반)

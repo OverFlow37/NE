@@ -320,6 +320,7 @@ public class AgentController : MonoBehaviour
         mCurrentAction = _action;
         mCurrentMemoryID = _action.memory_id;
         isSuccessForFeedback = false;
+
         // 현재 위치와 목표 위치가 다르면 MOVE_TO_LOCATION 상태로 전환
         if (mCurrentAction.LocationName != null && mCurrentAction.LocationName != mInteractable.CurrentLocation)
         {
@@ -487,6 +488,7 @@ public class AgentController : MonoBehaviour
     // 주의: 상호작용 scheduler에서 종료시 ScheduleItem이 없어진 후 이 함수를 호출하게됨
     public void EndInteraction() 
     {
+        Debug.Log("EndInteraction");
         if(CurrentState != AgentState.INTERACTING){
             LogManager.Log("Agent", $"{mName}: 상호작용 종료 조건 불충족", 1);
             return;
@@ -668,7 +670,7 @@ public class AgentController : MonoBehaviour
             Debug.Log("로케이션에 오브젝트가 없어 피드백 보냄: "+ mCurrentFeedback.feedback.feedback_description);
             PerceiveEvent perceiveEvent = new PerceiveEvent();
             perceiveEvent.event_is_save = false;
-            perceiveEvent.event_location = mCurrentLocation;
+            perceiveEvent.event_location = "";
             perceiveEvent.event_role = "";
             perceiveEvent.event_type = PerceiveEventType.TARGET_NOT_IN_LOCATION;
             perceiveEvent.event_description = mCurrentFeedback.feedback.feedback_description;
