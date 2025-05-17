@@ -427,8 +427,8 @@ class MemoryRetriever:
         
         content = ""
         if event and event != "":
-            if event_role == "God says":
-                content = f"Event: God said, {event}\n"
+            if event_role != "" and event_role != " ":
+                content = f"Event: {event_role}, {event}\n"
             else:
                 content = f"Event: {event}\n"
         if feedback and feedback != "":
