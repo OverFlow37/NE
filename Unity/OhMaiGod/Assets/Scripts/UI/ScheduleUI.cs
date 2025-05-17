@@ -14,6 +14,11 @@ public class ScheduleUI : MonoBehaviour
             mScheduler = GameObject.FindGameObjectWithTag("NPC").GetComponent<AgentScheduler>();
         }
 
+        if (mScheduleText == null)
+        {
+            mScheduleText = this.GetComponent<Text>();
+        }
+
         // 씬 로드 이벤트 등록
         SceneManager.sceneLoaded += OnSceneLoaded;
     }

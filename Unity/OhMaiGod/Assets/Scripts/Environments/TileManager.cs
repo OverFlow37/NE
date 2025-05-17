@@ -5,7 +5,7 @@ using UnityEngine.Tilemaps;
 using System.Collections;
 using UnityEngine.SceneManagement;
 
-public class TileManager : MonoBehaviour
+public class TileManager : MonoBehaviour, ISaveable
 {
     private static TileManager mInstance;
 
@@ -28,6 +28,21 @@ public class TileManager : MonoBehaviour
     [SerializeField] private bool mShowDebug = true;
     private bool mIsInitialized = false;
     private HashSet<Interactable> mPendingTargets = new HashSet<Interactable>();
+
+    // Interactable 정보 저장용 struct
+    [System.Serializable]
+    public struct InteractableSaveData
+    {
+        public string mPrefabName;      // 프리팹 이름
+        public Vector3 mPosition;       // 위치
+    }
+
+    // 리스트 직렬화용 래퍼 struct
+    [System.Serializable]
+    public struct InteractableSaveDataList
+    {
+        public List<InteractableSaveData> mList;
+    }
 
     // 싱글톤 인스턴스를 반환하는 프로퍼티
     public static TileManager Instance { 
@@ -312,5 +327,82 @@ public class TileManager : MonoBehaviour
     {
         // 오브젝트가 파괴될 때 씬 로드 이벤트 해제
         SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
+    public void SaveData()
+    {
+        // 저장할 데이터 리스트 생성
+        InteractableSaveDataList saveList = new InteractableSaveDataList();
+        saveList.mList = new List<InteractableSaveData>();
+
+        // mTileTree에 등록된 모든 Interactable 오브젝트 정보 수집
+        foreach (var tileController in mTileTree)
+        {
+            foreach (var interactable in tileController.ChildInteractables)
+            {
+                InteractableSaveData data = new InteractableSaveData();
+
+                // 프리팹 이름은 오브젝트 이름에서 ( 전까지 추출
+                data.mPrefabName = interactable.gameObject.name.Split('(')[0].Trim();
+                if (data.mPrefabName == "NPC") continue;
+
+                data.mPosition = interactable.transform.position;
+                saveList.mList.Add(data);
+            }
+        }
+
+        // Json으로 직렬화
+        string json = JsonUtility.ToJson(saveList, true);
+
+        // 파일로 저장 (경로는 Application.persistentDataPath 사용해서 PC는 C:\Users\SSAFY\AppData\LocalLow\DefaultCompany\OhMaiGod 저장됨)
+        string path = System.IO.Path.Combine(Application.persistentDataPath, "interactables.json");
+        System.IO.File.WriteAllText(path, json);
+
+        LogManager.Log("Env", $"Interactable 세이브 완료: {path}", 2);
+    }
+
+    public void LoadData()
+    {
+        // 저장된 데이터 파일 경로
+        string path = System.IO.Path.Combine(Application.persistentDataPath, "interactables.json");
+        if (!System.IO.File.Exists(path))
+        {
+            LogManager.Log("SaveLoad", "세이브 파일이 존재하지 않습니다.", 1);
+            return;
+        }
+
+        // 파일에서 Json 읽기
+        string json = System.IO.File.ReadAllText(path);
+        InteractableSaveDataList saveList = JsonUtility.FromJson<InteractableSaveDataList>(json);
+        if (saveList.mList == null)
+        {
+            LogManager.Log("SaveLoad", "세이브 데이터가 비어 있습니다.", 1);
+            return;
+        }
+
+        // 기존 Target 태그 오브젝트 모두 삭제
+        GameObject[] targetObjs = GameObject.FindGameObjectsWithTag("Target");
+        foreach (var obj in targetObjs)
+        {
+            GameObject.Destroy(obj);
+            LogManager.Log("SaveLoad", $"기존 Target 오브젝트({obj.name}) 삭제", 2);
+        }
+
+        // 저장된 데이터로 Interactable 오브젝트 생성
+        foreach (InteractableSaveData data in saveList.mList)
+        {
+            // 프리팹 로드 (PrefabManager에서 프리팹 레퍼런스 가져와서 로드)
+            GameObject prefab = PrefabManager.Instance.GetPrefabByName(data.mPrefabName);
+            if (prefab == null)
+            {
+                LogManager.Log("SaveLoad", $"프리팹 {data.mPrefabName}을(를) 찾을 수 없습니다.", 1);
+                continue;
+            }
+
+            // 오브젝트 생성 및 위치 지정
+            Instantiate(prefab, data.mPosition, Quaternion.identity);
+        }
+
+        LogManager.Log("SaveLoad", "Interactable 오브젝트 로드 완료.", 2);
     }
 }
