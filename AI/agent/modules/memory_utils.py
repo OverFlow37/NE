@@ -108,7 +108,7 @@ class MemoryUtils:
         except ValueError:
             return "1"
 
-    def save_memory(self, event_sentence: str, embedding: List[float], event_time: str, agent_name: str, event_id: int = None, event_role: str = "", action_sentence: str = ""):
+    def save_memory(self, event_sentence: str, embedding: List[float], event_time: str, agent_name: str, event_id: int = None, event_role: str = ""):
         """새로운 메모리 저장"""
         memories = self._load_memories()
         
@@ -129,7 +129,7 @@ class MemoryUtils:
         memory = {
             "event_role": event_role,
             "event": event_sentence,
-            "action": action_sentence,
+            "action": "",
             "feedback": "",
             "conversation_detail": "",
             "time": event_time
@@ -144,7 +144,7 @@ class MemoryUtils:
         # 임베딩 데이터 저장
         embeddings = {
             "event": self.get_embedding(event_sentence),
-            "action": self.get_embedding(action_sentence) if action_sentence else [],
+            "action": [],
             "feedback": []
         }
         memories[agent_name]["embeddings"][memory_id] = embeddings
