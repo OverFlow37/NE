@@ -34,6 +34,9 @@ public class TimeManager : MonoBehaviour, ISaveable
     private TimeSpan mCurrentGameTime;      // 현재 게임 내 시간
     private bool mIsPaused = false;         // 시간 흐름 일시정지 상태 여부
 
+    // 하루에 한 번만 저장하도록 플래그 변수 추가
+    private bool mIsSavedToday = false;
+
     public bool isPaused {get => mIsPaused; set => mIsPaused = value; }
 
     private void Awake()
@@ -59,6 +62,8 @@ public class TimeManager : MonoBehaviour, ISaveable
         
         // 게임 시간 업데이트
         UpdateGameTime();
+
+        CalculateDaily();
     }
 
     // 게임 시간 업데이트
@@ -77,6 +82,18 @@ public class TimeManager : MonoBehaviour, ISaveable
             {
                 LogManager.Log("Time", $"새로운 날: {mGameDate.ToString("yyyy-MM-dd")} ({GetDayOfWeekString()})", 3);
             }
+        }
+    }
+
+    // 게임 시간 하루가 지나면 호출되는 정산 함수
+    private void CalculateDaily()
+    {
+        // 게임 시간이 19시(=TimeSpan(19,0,0))를 넘으면 저장
+        if (!mIsSavedToday && mCurrentGameTime >= new TimeSpan(19, 0, 0))
+        {
+            mGameDate = mGameDate.AddDays(1);
+            GameManager.Instance.SaveData();
+            mIsSavedToday = true;
         }
     }
 
@@ -105,6 +122,7 @@ public class TimeManager : MonoBehaviour, ISaveable
             TimeSaveData saveData = JsonUtility.FromJson<TimeSaveData>(json);
             mGameDate = DateTime.Parse(saveData.GameDate); // 문자열을 DateTime으로 변환
             mCurrentGameTime = new TimeSpan(7, 0, 0); // 게임 시간은 07:00으로 초기화
+            mIsSavedToday = false;
             if (mShowDebugInfo)
             {
                 LogManager.Log("Time", $"저장된 날짜로 복원: {mGameDate.ToString("yyyy-MM-dd")}, 시간은 07:00으로 초기화", 3);
