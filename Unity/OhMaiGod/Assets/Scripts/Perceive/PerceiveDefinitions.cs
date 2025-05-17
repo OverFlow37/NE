@@ -20,6 +20,7 @@ namespace OhMAIGod.Perceive{
         AGENT_LOCATION_CHANGE,          // 에이전트 지역 이동
         AGENT_NEED_LIMIT,               // 에이전트 욕구 한계치 도달
         AGENT_NO_TASK,                  // 현재 에이전트에 할당된 작업 없음
+        TARGET_NOT_IN_LOCATION          // 현재 위치에 목표가 없음
     }
 
     // 반응 또는 관찰을 유발한 Event에 대한 정보 구조화

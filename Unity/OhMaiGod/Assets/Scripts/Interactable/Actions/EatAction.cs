@@ -57,6 +57,8 @@ public class EatAction : InteractionAction
             agentController.ModifyNeed(AgentNeedsType.Loneliness, actionInfo.mLonelinessEffect);
             agentController.ModifyNeed(AgentNeedsType.Stress, actionInfo.mStressEffect);
         }
+        // 피드백에 효과 반영
+        IncreaseNeedsForFeedback(agentController, actionInfo);
 
         // 먹어도 배고픔이 사라지지 않는 오브젝트면 실패
         if (actionInfo.mHungerEffect >= 0)

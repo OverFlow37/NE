@@ -55,6 +55,8 @@ public class GetAction : InteractionAction
             agentController.ModifyNeed(AgentNeedsType.Loneliness, actionInfo.mLonelinessEffect);
             agentController.ModifyNeed(AgentNeedsType.Stress, actionInfo.mStressEffect);
         }
+        // 피드백에 효과 반영
+        IncreaseNeedsForFeedback(agentController, actionInfo);
 
 
         // Furniture나 Resource가 아니라면 인벤토리로 이동 시도

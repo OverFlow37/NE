@@ -55,6 +55,8 @@ public class UseAction : InteractionAction
             agentController.ModifyNeed(AgentNeedsType.Loneliness, actionInfo.mLonelinessEffect);
             agentController.ModifyNeed(AgentNeedsType.Stress, actionInfo.mStressEffect);
         }
+        // 피드백에 효과 반영
+        IncreaseNeedsForFeedback(agentController, actionInfo);
 
         // 로그 출력
         LogManager.Log("Interact", $"use {targetInteractable.InteractableName}");

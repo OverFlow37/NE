@@ -99,34 +99,9 @@ public class AgentVision : MonoBehaviour
             {
                 AddVisibleInteractable(interactable);
                 // 흥미도 계산
-                float threshold = 100.0f;
-                float interestBase = interactable.mInteractableData.mInterest; // 오브젝트별 베이스 흥미도
-                float totalInterest = interestBase;
-                const float BROKEN_REPO = 20.0f; //베이스 흥미도가 20 이상이면 BROKEN이 추가 흥미도 발생
                 bool isFirst = true;
-                // 처음 보는 물체인지 체크
-                // 반응이 이미 이루어진 물체인지 체크
-                // 현재 오브젝트의 상태 체크
-                switch (interactable.mInteractableData.mState)
-                {
-                    case InteractableData.States.Broken:
-                        totalInterest += (interestBase - BROKEN_REPO) * 2.0f;
-                        break;
-                    case InteractableData.States.Installed:
-                        // 설치된 물체이면서 처음 보는 오브젝트가 아닐 때
-                        if (!isFirst)
-                            totalInterest *= 0.5f;
-                        break;
-                    case InteractableData.States.Burn:
-                        totalInterest += 50.0f + interestBase * 0.5f;
-                        break;
-                    case InteractableData.States.Rotten:
-                        totalInterest += (interestBase - BROKEN_REPO) * 2.0f;
-                        break;
-                }
-                // 랜덤 가중치 적용 (0.5f ~ 2.0f)
-                float randomWeight = UnityEngine.Random.Range(0.5f, 2.0f);
-                totalInterest *= randomWeight;
+                float totalInterest = CalculateInterest(interactable, isFirst);
+                float threshold = 100.0f;
                 // 에이전트의 선호 오브젝트, 비선호 오브젝트 체크
                 // TODO: 반응과 관찰에 대한 임계치 분리, 호출 함수 분리
                 if (totalInterest >= threshold){
@@ -276,5 +251,39 @@ public class AgentVision : MonoBehaviour
         {
             UpdateDebugList();
         }
+    }
+
+    // 흥미도 계산 함수 분리
+    private float CalculateInterest(Interactable _interactable, bool _isFirst)
+    {
+        
+        float interestBase = _interactable.mInteractableData.mInterest;
+        float totalInterest = interestBase;
+        const float BROKEN_REPO = 20.0f;
+        // 처음 보는 물체인지 체크
+        // 반응이 이미 이루어진 물체인지 체크
+        // 현재 오브젝트의 상태 체크
+        // 현재 오브젝트의 상태 체크
+        switch (_interactable.mInteractableData.mState)
+        {
+            case InteractableData.States.Broken:
+                totalInterest += (interestBase - BROKEN_REPO) * 2.0f;
+                break;
+            case InteractableData.States.Installed:
+                // 설치된 물체이면서 처음 보는 오브젝트가 아닐 때
+                if (!_isFirst)
+                    totalInterest *= 0.5f;
+                break;
+            case InteractableData.States.Burn:
+                totalInterest += 50.0f + interestBase * 0.5f;
+                break;
+            case InteractableData.States.Rotten:
+                totalInterest += (interestBase - BROKEN_REPO) * 2.0f;
+                break;
+        }
+        // 랜덤 가중치 적용 (0.5f ~ 2.0f)
+        float randomWeight = UnityEngine.Random.Range(0.5f, 2.0f);
+        totalInterest *= randomWeight;
+        return totalInterest;
     }
 }

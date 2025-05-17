@@ -55,19 +55,13 @@ public class AIBridge_Perceive : MonoBehaviour
     }
 
     [System.Serializable]
-    public struct ResponseActionDetails
+    public struct ResponseActionData
     {
+        public string action;
         public string target_location;
         public string target_object; // AI 프롬프트 혼동을 막기 위해 여기서만 object로 명명
         public string duration;
         public string thought;
-    }
-
-    [System.Serializable]
-    public struct ResponseActionData
-    {
-        public string action;
-        public ResponseActionDetails details;
         public string memory_id;
     }
 
@@ -404,7 +398,6 @@ public class AIBridge_Perceive : MonoBehaviour
                 return;
             }
             ResponseActionData actionData = responseRoot.data;
-            ResponseActionDetails details = actionData.details;
             // 현재 시간 가져오기 및 활동 지속 시간 설정
             TimeSpan currentTime = TimeManager.Instance.GetCurrentGameTime();
             int durationMinutes = 30;
@@ -415,12 +408,12 @@ public class AIBridge_Perceive : MonoBehaviour
             ScheduleItem newScheduleItem = new ScheduleItem
             (
                 actionData.action,
-                details.target_location.ToLower(),
-                details.target_object,
+                actionData.target_location.ToLower(),
+                actionData.target_object,
                 currentTime,
                 endTime,
                 1, 
-                details.thought,
+                actionData.thought,
                 actionData.memory_id
             );
             // 스케줄러에 새 일정 추가

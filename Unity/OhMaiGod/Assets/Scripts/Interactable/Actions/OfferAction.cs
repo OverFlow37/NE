@@ -54,8 +54,9 @@ public class OfferAction : InteractionAction
             agentController.ModifyNeed(AgentNeedsType.Sleepiness, actionInfo.mSleepinessEffect);
             agentController.ModifyNeed(AgentNeedsType.Loneliness, actionInfo.mLonelinessEffect);
             agentController.ModifyNeed(AgentNeedsType.Stress, actionInfo.mStressEffect);
-
         }
+        // 피드백에 효과 반영
+        IncreaseNeedsForFeedback(agentController, actionInfo);
 
         Inventory.Instance.AddResource(Inventory.ResourceType.Power, targetInteractable.mInteractableData.mFaith);
 
