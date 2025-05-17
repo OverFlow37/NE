@@ -22,6 +22,7 @@ public class TileManager : MonoBehaviour
     [SerializeField] private LayerMask mObjectLayerMask;      // 충돌 오브젝트 레이어 마스크
     [SerializeField] private LayerMask mItemLayerMask;         // 비충돌 아이템 레이어 마스크
     [SerializeField] private LayerMask mNPCLayerMask;         // NPC 레이어 마스크
+    [SerializeField] private LayerMask mVisionLayerMask;      // 시야 레이어 마스크
 
     [Header("Debug")]
     [SerializeField] private bool mShowDebug = true;
@@ -238,6 +239,7 @@ public class TileManager : MonoBehaviour
     public LayerMask ObjectLayerMask { get { return mObjectLayerMask; } }
     public LayerMask ItemLayerMask { get { return mItemLayerMask; } }
     public LayerMask NPCLayerMask { get { return mNPCLayerMask; } }
+    public LayerMask VisionLayerMask { get { return mVisionLayerMask; } }
     public LayerMask ObstacleLayerMask { get { return mWallLayerMask | mObjectLayerMask | mNPCLayerMask; } }
     public LayerMask InteractableLayerMask { get { return mObjectLayerMask | mItemLayerMask | mNPCLayerMask; } }
     public LayerMask AllLayerMask { get { return mWallLayerMask | mObjectLayerMask | mItemLayerMask | mNPCLayerMask; } }
