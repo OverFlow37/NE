@@ -1,5 +1,5 @@
 """
-반성 처리 파이프라인
+반성 처리 파이프라인 (새로운 메모리 구조 대응)
 
 이 모듈은 반성 처리의 전체 워크플로우를 관리합니다:
 1. 당일 메모리에 importance 추가 (배치 처리 방식으로 개선)
@@ -20,7 +20,7 @@ from pathlib import Path
 
 # 각 단계별 처리 모듈 가져오기
 from .memory_processor import MemoryProcessor 
-from .importance_rater import ImportanceRater  # 배치 처리 버전
+from .importance_rater import ImportanceRater
 from .reflection_generator import ReflectionGenerator
 from ..ollama_client import OllamaClient
 
@@ -52,7 +52,7 @@ def _extract_date_from_time(time_str: str) -> str:
 
 async def process_reflection_request(request_data: Dict[str, Any], ollama_client: OllamaClient, word2vec_model=None) -> bool:
     """
-    AI 브릿지의 반성 요청 처리 파이프라인 (배치 처리 개선 버전)
+    AI 브릿지의 반성 요청 처리 파이프라인 (새로운 메모리 구조 대응)
     
     Parameters:
     - request_data: AI 브릿지로부터의 요청 데이터
@@ -184,7 +184,7 @@ if __name__ == "__main__":
         test_request = {
             "agent": {
                 "name": "John",
-                "time": "2025.05.07"  # 특정 날짜 테스트
+                "time": "2025.05.07.22:00"  # 특정 날짜 테스트
             }
         }
         
