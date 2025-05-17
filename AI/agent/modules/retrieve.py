@@ -92,14 +92,6 @@ class MemoryRetriever:
         # 최고값 기준 정렬
         max_sorted = sorted(object_similarities, key=lambda x: x[4], reverse=True)
         
-        # 상위 10개 출력
-        print("\n=== 오브젝트 평균값 기준 상위 10개 ===")
-        for obj_name, event_sim, state_sim, avg_sim, max_sim in avg_sorted[:10]:
-            print(f"오브젝트: {obj_name}, 이벤트 유사도: {event_sim:.4f}, 상태 유사도: {state_sim:.4f}, 평균: {avg_sim:.4f}, 최고: {max_sim:.4f}")
-            
-        print("\n=== 오브젝트 최고값 기준 상위 10개 ===")
-        for obj_name, event_sim, state_sim, avg_sim, max_sim in max_sorted[:10]:
-            print(f"오브젝트: {obj_name}, 이벤트 유사도: {event_sim:.4f}, 상태 유사도: {state_sim:.4f}, 평균: {avg_sim:.4f}, 최고: {max_sim:.4f}")
         
         # 최고값 기준으로 정렬된 결과 반환
         return [(obj_name, event_sim) for obj_name, event_sim, _, _, _ in max_sorted[:top_k]]
@@ -259,14 +251,9 @@ class MemoryRetriever:
         
         # 메모리 추가
         for memory_id, memory in memories[agent_name]["memories"].items():
-            print(f"\n=== 메모리 ID {memory_id} 처리 중 ===")
             memory_embeddings = memories[agent_name]["embeddings"].get(str(memory_id), {})
             memory_with_id = memory.copy()
             memory_with_id["memory_id"] = memory_id
-            
-            print(f"메모리 내용: {memory.get('event', '')} | {memory.get('feedback', '')}")
-            print(f"임베딩 존재 여부: {bool(memory_embeddings)}")
-            print(f"메모리 임베딩 내용: {memory_embeddings}")
             
             if memory_embeddings:
                 # 임베딩이 있는 경우 유사도 계산
@@ -279,14 +266,12 @@ class MemoryRetriever:
                     if feedback_embedding_array.shape == event_embedding.shape:
                         # 0으로만 이루어진 임베딩 체크
                         if np.all(feedback_embedding_array == 0):
-                            print("Feedback 임베딩이 0으로만 이루어져 있습니다.")
                             max_event_similarity = 0.0
                         else:
                             feedback_similarity = np.dot(event_embedding, feedback_embedding_array) / (
                                 np.linalg.norm(event_embedding) * np.linalg.norm(feedback_embedding_array)
                             )
                             max_event_similarity = float(feedback_similarity)
-                        print(f"Feedback 유사도: {max_event_similarity}")
                         
                         # feedback이 있는 경우 상태 유사도도 feedback으로 계산
                         state_similarity = np.dot(state_embedding, feedback_embedding_array) / (
@@ -299,14 +284,12 @@ class MemoryRetriever:
                     if event_embedding_array.shape == event_embedding.shape:
                         # 0으로만 이루어진 임베딩 체크를 먼저 수행
                         if np.all(event_embedding_array == 0):
-                            print("Event 임베딩이 0으로만 이루어져 있습니다.")
                             max_event_similarity = 0.0
                         else:
                             event_similarity = np.dot(event_embedding, event_embedding_array) / (
                                 np.linalg.norm(event_embedding) * np.linalg.norm(event_embedding_array)
                             )
                             max_event_similarity = float(event_similarity)
-                            print(f"Event 유사도: {max_event_similarity}")
                             
                             # event가 있는 경우 상태 유사도도 event로 계산
                             state_similarity = np.dot(state_embedding, event_embedding_array) / (

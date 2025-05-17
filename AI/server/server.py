@@ -400,7 +400,7 @@ async def react_to_event(payload: dict):
             agent_name=agent_name,
             prompt_template=load_prompt_file(RETRIEVE_PROMPT_PATH),
             agent_data=agent_data,
-            similar_data_cnt=3,  # 유사한 이벤트 3개 포함
+            similar_data_cnt=10,  # 유사한 이벤트 3개 포함
             similarity_threshold=0.1,  # 유사도 0.5 이상인 이벤트만 포함
             object_embeddings=object_embeddings
         )
