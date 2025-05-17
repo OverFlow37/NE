@@ -11,7 +11,7 @@ public class AgentVision : MonoBehaviour
 {
     [Header("Vision Settings")]
     [SerializeField] private float mVisionRange = 5f;        // 시야 범위
-    [SerializeField] private string mAgentName;              // 에이전트 이름 (자신을 제외하기 위한 식별자)
+    [SerializeField] private string mAgentObjectName;              // 에이전트 이름 (자신을 제외하기 위한 식별자)
 
     [Header("Gizmo Settings")]
     [SerializeField] private Color mGizmoColor = new Color(0.2f, 0.8f, 1f, 0.2f);  // Gizmo 색상 (하늘색 반투명)
@@ -64,7 +64,7 @@ public class AgentVision : MonoBehaviour
         LogManager.Log("Vision", $"[AgentVision] Initial Check - Found {colliders.Length} colliders in range", 2);
         foreach (Collider2D collider in colliders)
         {
-            if (collider.gameObject.name.Contains(mAgentName))
+            if (collider.gameObject.name.Contains(mAgentObjectName))
             {
                 LogManager.Log("Vision", $"[AgentVision] Skipping self: {collider.gameObject.name}", 3);
                 continue;
@@ -85,7 +85,7 @@ public class AgentVision : MonoBehaviour
         LogManager.Log("Vision", $"[AgentVision] OnTriggerEnter2D - Object: {other.gameObject.name}, Layer: {LayerMask.LayerToName(other.gameObject.layer)}", 2);
         
         // 자신은 무시
-        if (other.gameObject.name.Contains(mAgentName))
+        if (other.gameObject.name.Contains(mAgentObjectName))
         {
             LogManager.Log("Vision", $"[AgentVision] Skipping self: {other.gameObject.name}", 3);
             return;
@@ -134,6 +134,8 @@ public class AgentVision : MonoBehaviour
                     PerceiveEvent perceiveEvent = new PerceiveEvent();
                     perceiveEvent.event_type = PerceiveEventType.INTERACTABLE_DISCOVER;
                     perceiveEvent.event_location = interactable.CurrentLocation;
+                    perceiveEvent.event_role = $"{mAgentController.AgentName} saw";
+                    perceiveEvent.event_is_save = true;
                     // TODO: 오브젝트 이름이 아니라 이벤트 설명을 만든 뒤 설명을 전송해야함
                     perceiveEvent.event_description = interactable.mInteractableData.mName;
                     mAIBridgePerceive.SendPerceiveEvent(mAgentController, perceiveEvent);
@@ -155,6 +157,8 @@ public class AgentVision : MonoBehaviour
                 // TODO: 이벤트 위치가 오브젝트 위치가 아니라 이벤트 위치를 전송해야함
                 perceiveEvent.event_location = " ";
                 perceiveEvent.event_description = eventController.mEventInfo.event_description;
+                perceiveEvent.event_role = $"{mAgentController.AgentName} saw";
+                perceiveEvent.event_is_save = true;
                 mAgentController.ShowReactUI("?", true);
                 mAIBridgePerceive.SendReactJudgeEvent(mAgentController, perceiveEvent);
             }
@@ -262,9 +266,9 @@ public class AgentVision : MonoBehaviour
     private void OnValidate()
     {
         // AgentName이 비어있으면 게임오브젝트 이름으로 설정
-        if (string.IsNullOrEmpty(mAgentName))
+        if (string.IsNullOrEmpty(mAgentObjectName))
         {
-            mAgentName = gameObject.name;
+            mAgentObjectName = gameObject.name;
         }
 
         // Inspector에서 값이 변경될 때마다 디버그 목록 업데이트

@@ -99,6 +99,7 @@ public class AgentController : MonoBehaviour
 
     public bool isSuccessForFeedback = false;
     public string mActionNameForFeedback = ""; // 피드백 디버그용
+    public string mCurrentMemoryID = "";
     public PerceiveFeedback mCurrentFeedback; // 현재 체크 중인 피드백
     public struct Needs{
         public int hunger;
@@ -262,7 +263,11 @@ public class AgentController : MonoBehaviour
     // Interactable의 이벤트를 구독하여 위치 변경 시 호출
     private void HandleMyLocationChanged(Interactable _interactable, string _newLocation)
     {
+        if (mCurrentLocation == _newLocation) return;
+        Debug.Log("위치 변경 감지"+ _interactable.name + "mCurrentLocation: "+ mCurrentLocation + " _newLocation: " +  _newLocation);
         mCurrentLocation = _newLocation;
+        
+        SendCurrentLocationInfo(_newLocation);
         // mCurrentAction이 null이 아니고, 새로운 위치가 목표 위치와 같으면 상태 전환
         if (mCurrentAction != null && _newLocation == mCurrentAction.LocationName)
         {
@@ -319,6 +324,7 @@ public class AgentController : MonoBehaviour
         mActionNameForFeedback = _action.ActionName;
         InitFeedback();
         mCurrentAction = _action;
+        mCurrentMemoryID = _action.memory_id;
         isSuccessForFeedback = false;
         // 현재 위치와 목표 위치가 다르면 MOVE_TO_LOCATION 상태로 전환
         if (mCurrentAction.LocationName != null && mCurrentAction.LocationName != mInteractable.CurrentLocation)
@@ -396,6 +402,8 @@ public class AgentController : MonoBehaviour
                     LogManager.Log("Agent", $"{mName}: {mCurrentAction.TargetName} 상호작용 가능한 오브젝트를 찾을 수 없습니다.", 1);
                     
                     mMovement.ClearMovement();
+                    // 해당 위치에 원하는 오브젝트가 없다는 피드백 전송
+                    SendFeedbackToAI(false, mCurrentAction.TargetName);
                     ChangeState(AgentState.WAITING);
                     // TODO: 상호작용 가능한 오브젝트를 찾을 수 없을 때
                 }
@@ -457,11 +465,12 @@ public class AgentController : MonoBehaviour
             if (curDurationProgress >= interactionDuration)
             {
                 bool tryInteract = ApplyInteractionEffect();
+                isSuccessForFeedback = tryInteract;
                 curDurationProgress = 0.0f; // 주기 초기화
                 lastTickTime = now;
                 if (!tryInteract)
                 {
-                    LogManager.Log("Agent", "상호작용을 할 수 없어 종료합니다.");
+                    LogManager.Log("Agent", "상호작용 예외발생",2);
                     EndInteraction();
                     yield break;
                 }
@@ -484,8 +493,10 @@ public class AgentController : MonoBehaviour
     // 주의: 상호작용 scheduler에서 종료시 ScheduleItem이 없어진 후 이 함수를 호출하게됨
     public void EndInteraction() 
     {
-        Debug.Log(CurrentTargetInteractable.InteractableName);
-        Debug.Log(mActionNameForFeedback);
+        if(CurrentState != AgentState.INTERACTING){
+            LogManager.Log("Agent", $"{mName}: 상호작용 종료 조건 불충족", 1);
+            return;
+        }
         if(isSuccessForFeedback){
             SendFeedbackToAI(true, CurrentTargetInteractable.InteractableName, mActionNameForFeedback); // 행동 성공
         }
@@ -518,7 +529,6 @@ public class AgentController : MonoBehaviour
                 LogManager.Log("Agent", $"{mName}: 활동 완료 - {mCurrentAction.ActionName}", 2);
             }
             
-  
             // 상태 초기화
             mCurrentAction = null;
             Debug.Log("액션 초기화됨");
@@ -614,13 +624,13 @@ public class AgentController : MonoBehaviour
     public void InitFeedback(){
         mCurrentFeedback = new PerceiveFeedback();
         mCurrentFeedback.agent_name = mName;
-        mCurrentFeedback.current_location = mCurrentLocation;
+        mCurrentFeedback.current_location_name = mCurrentLocation;
         mCurrentFeedback.time = TimeManager.Instance.GetCurrentGameTime().ToString();
         mCurrentFeedback.interactable_name = "";
         mCurrentFeedback.action_name = mActionNameForFeedback;
         mCurrentFeedback.success = false;
         mCurrentFeedback.feedback.feedback_description = "";
-        mCurrentFeedback.feedback.memory_id = -1;
+        mCurrentFeedback.feedback.memory_id = "";
         mCurrentFeedback.feedback.needs_diff.hunger = 0;
         mCurrentFeedback.feedback.needs_diff.sleepiness = 0;
         mCurrentFeedback.feedback.needs_diff.loneliness = 0;
@@ -632,23 +642,39 @@ public class AgentController : MonoBehaviour
     }
 
     // AI 서버에 피드백 보냄
-    public void SendFeedbackToAI(bool _success, string _interactableName, string _actionName){
-        mCurrentFeedback.current_location = mCurrentLocation;
+    public void SendFeedbackToAI(bool _success, string _interactableName = "", string _actionName = "", string _memoryID = ""){
+        mCurrentFeedback.current_location_name = mCurrentLocation;
         mCurrentFeedback.time = TimeManager.Instance.GetCurrentGameTime().ToString();
         mCurrentFeedback.interactable_name = _interactableName;
         mCurrentFeedback.action_name = _actionName;
         mCurrentFeedback.success = _success;
         mCurrentFeedback.feedback.feedback_description = "";
-        if(!_success){
-            mCurrentFeedback.feedback.feedback_description = $"{_interactableName} is can't {_actionName}";
+        // 실패했고 액션까지는 성공
+        if(!_success && _actionName != ""){
+            mCurrentFeedback.feedback.feedback_description = $"{_interactableName} is can't {_actionName}.";
+        }
+        // 타겟 로케이션에 타겟 오브젝트가 없는 경우
+        else if (!_success && _actionName == ""){
+            mCurrentFeedback.feedback.feedback_description = $"There are no {_interactableName} at the {mCurrentLocation}.";
         }
         mCurrentFeedback.feedback.needs_diff.hunger = mAgentNeeds.Hunger - mNeedsStart.hunger;
         mCurrentFeedback.feedback.needs_diff.sleepiness = mAgentNeeds.Sleepiness - mNeedsStart.sleepiness;
         mCurrentFeedback.feedback.needs_diff.loneliness = mAgentNeeds.Loneliness - mNeedsStart.loneliness;
         mCurrentFeedback.feedback.needs_diff.stress = mAgentNeeds.Stress - mNeedsStart.stress;
+        mCurrentFeedback.feedback.memory_id = mCurrentMemoryID;
         // 실제 전송되는 JSON 양식도 로그로 출력
         string feedbackJson = JsonUtility.ToJson(mCurrentFeedback);
         LogManager.Log("AI", $"{mName}: 피드백 전송 JSON: {feedbackJson}", 2);
         AIBridge_Perceive.Instance.SendFeedbackToAI(mCurrentFeedback);
+    }
+
+    // 에이전트의 현재 지역이 바뀌었을 때, 현재 지역의 오브젝트 목록을 전송
+    public void SendCurrentLocationInfo(string _newLocation){
+        PerceiveEvent perceiveEvent = new PerceiveEvent();
+        perceiveEvent.event_type = PerceiveEventType.AGENT_LOCATION_CHANGE;
+        perceiveEvent.event_location = _newLocation;
+        perceiveEvent.event_role = "";
+        perceiveEvent.event_is_save = true;
+        Debug.Log("위치 변경: "+TileManager.Instance.GetInteractablesInLocation(_newLocation));
     }
 }

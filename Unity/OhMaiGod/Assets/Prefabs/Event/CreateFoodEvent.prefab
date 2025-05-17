@@ -49,7 +49,7 @@ MonoBehaviour:
   mEventInfo:
     event_type: 2
     event_location: 
-    event_description: I saw the power of God to create food.
+    event_description: I saw the power of God to create fruit.
   mLifeDuration: 10
 --- !u!50 &2803138962325272710
 Rigidbody2D:
