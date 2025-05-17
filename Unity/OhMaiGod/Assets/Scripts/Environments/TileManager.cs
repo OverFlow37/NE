@@ -380,16 +380,18 @@ public class TileManager : MonoBehaviour, ISaveable
             return;
         }
 
-        // 기존 TileTree 초기화
-        foreach (var tileController in mTileTree)
+        // 기존 Target 태그 오브젝트 모두 삭제
+        GameObject[] targetObjs = GameObject.FindGameObjectsWithTag("Target");
+        foreach (var obj in targetObjs)
         {
-            tileController.RemoveAllChildInteractables();
+            GameObject.Destroy(obj);
+            LogManager.Log("SaveLoad", $"기존 Target 오브젝트({obj.name}) 삭제", 2);
         }
 
         // 저장된 데이터로 Interactable 오브젝트 생성
-        foreach (var data in saveList.mList)
+        foreach (InteractableSaveData data in saveList.mList)
         {
-            // 프리팹 로드 (PrefabManager에서 로드)
+            // 프리팹 로드 (PrefabManager에서 프리팹 레퍼런스 가져와서 로드)
             GameObject prefab = PrefabManager.Instance.GetPrefabByName(data.mPrefabName);
             if (prefab == null)
             {
@@ -397,30 +399,8 @@ public class TileManager : MonoBehaviour, ISaveable
                 continue;
             }
 
-            // 해당 위치에 이미 Interactable이 있는지 체크
-            bool alreadyExists = false;
-            foreach (var tileController in mTileTree)
-            {
-                foreach (var interactable in tileController.ChildInteractables)
-                {
-                    if (Vector3.Distance(interactable.transform.position, data.mPosition) < 0.1f)
-                    {
-                        alreadyExists = true;
-                        break;
-                    }
-                }
-                if (alreadyExists) break;
-            }
-            if (alreadyExists) continue;
-
             // 오브젝트 생성 및 위치 지정
-            GameObject obj = GameObject.Instantiate(prefab, data.mPosition, Quaternion.identity);
-            Interactable interactableComp = obj.GetComponent<Interactable>();
-            if (interactableComp != null)
-            {
-                // 환경에 등록
-                RegisterTarget(interactableComp);
-            }
+            Instantiate(prefab, data.mPosition, Quaternion.identity);
         }
 
         LogManager.Log("SaveLoad", "Interactable 오브젝트 로드 완료.", 2);

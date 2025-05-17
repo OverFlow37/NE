@@ -38,19 +38,15 @@ public class SaveLoadManager : MonoBehaviour
         SceneManager.sceneLoaded += OnSceneLoaded;
     }
 
-    private void Update()
-    {
-        // 테스트용 : 스페이스바 누르면 로드 씬으로 이동 (씬 로드 테스트)
-        if(Input.GetKeyDown(KeyCode.Space))
-        {
-            SceneManager.LoadScene("LoadScene");
-        }
-    }
-
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         //  씬 로드할때 세이브 파일로부터 값 읽어와서 오브젝트 생성
         LoadData();
+    }
+
+    public void LoadScene()
+    {
+        SceneManager.LoadScene("LoadScene");
     }
 
     public void SaveData()
