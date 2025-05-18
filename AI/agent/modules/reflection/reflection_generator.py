@@ -232,6 +232,27 @@ class ReflectionGenerator:
             previous_reflections = self.get_previous_reflections(agent_name, current_time)
             logger.info(f"이전 반성 수: {len(previous_reflections)}")
         
+        # 각 메모리의 통합 이벤트 필드 생성
+        for memory_id, memory in important_memories.items():
+            event_role = memory.get("event_role", "").strip()
+            event = memory.get("event", "").strip()
+            action = memory.get("action", "").strip()
+            feedback = memory.get("feedback", "").strip()
+            
+            # 통합 이벤트 필드 생성
+            combined_event = ""
+            if event_role:
+                combined_event += f"{event_role} "
+            if event:
+                combined_event += f"{event} "
+            if action:
+                combined_event += f"{action} "
+            if feedback:
+                combined_event += f"{feedback}"
+            
+            memory["combined_event"] = combined_event.strip()
+            logger.debug(f"메모리 ID {memory_id}의 통합 이벤트 필드: '{memory['combined_event']}'")
+        
         prompt = self._create_reflection_prompt(agent_name, important_memories, previous_reflections)
         
         try:
@@ -266,30 +287,22 @@ class ReflectionGenerator:
                 if memory_id and memory_id in important_memories:
                     # 해당 메모리 정보 가져오기
                     memory = important_memories[memory_id]
-                    event = memory.get("event", "")
-                    action = memory.get("action", "")
-                    feedback = memory.get("feedback", "")
+                    original_event = memory.get("event", "")
+                    combined_event = memory.get("combined_event", "")
                     
-                    # 반성에 필요한 데이터 추가
-                    reflection["event"] = event
-                    if "event" not in reflection:
-                        reflection["event"] = event
+                    # 반성에 원본 이벤트와 통합 이벤트 저장
+                    reflection["event"] = combined_event
+                    # reflection["original_event"] = original_event
                     
-                    # 이벤트에 대한 임베딩 생성
-                    if self.embedding_model:
+                    # 통찰(thought)에 대한 임베딩 생성
+                    if self.embedding_model and "thought" in reflection:
                         try:
-                            if event:
-                                logger.info(f"이벤트 '{event}'에 대한 임베딩 생성 시작")
-                                # 프롬프트 템플릿 형식으로 이벤트 변환
-                                event_template = ""
-                                if action:
-                                    event_template += f"{action} "
-                                event_template += f"{event}"
-                                if feedback:
-                                    event_template += f" with feedback: {feedback}"
+                            thought = reflection.get("thought", "")
+                            if thought:
+                                logger.info(f"통찰 '{thought}'에 대한 임베딩 생성 시작")
                                 
                                 # 토큰화 및 소문자 변환
-                                tokens = [w.lower() for w in event_template.split() if w.lower() in self.embedding_model]
+                                tokens = [w.lower() for w in thought.split() if w.lower() in self.embedding_model]
                                 if not tokens:
                                     embedding = [0.0] * self.embedding_model.vector_size
                                 else:
@@ -302,9 +315,9 @@ class ReflectionGenerator:
                                         sentence_vector = sentence_vector / norm
                                     embedding = sentence_vector.tolist()
                                 reflection["embedding"] = embedding
-                                logger.info(f"이벤트 '{event}'에 대한 임베딩 생성 완료")
+                                logger.info(f"통찰 '{thought}'에 대한 임베딩 생성 완료")
                             else:
-                                logger.warning("이벤트가 비어있어 임베딩을 생성할 수 없습니다.")
+                                logger.warning("통찰이 비어있어 임베딩을 생성할 수 없습니다.")
                         except Exception as e:
                             logger.error(f"임베딩 생성 중 오류 발생: {str(e)}")
                 else:
@@ -366,33 +379,16 @@ class ReflectionGenerator:
         memory_ids = list(memories.keys())
         for i, memory_id in enumerate(memory_ids):
             memory = memories[memory_id]
-            event = memory.get("event", "")
-            event_role = memory.get("event_role", "")
-            action = memory.get("action", "")
-            feedback = memory.get("feedback", "")
-            conversation_detail = memory.get("conversation_detail", "")
+            combined_event = memory.get("combined_event", "")
             time_str = memory.get("time", "")
             importance = memory.get("importance", 0)
             
             memory_section = f"""
 MEMORY #{i+1} (ID: {memory_id}):
-Event: "{event}"
+Event: "{combined_event}"
+Time: {time_str}
+Importance: {importance}
 """
-            if event_role:
-                memory_section += f"Role: {event_role}\n"
-            
-            if action:
-                memory_section += f"Action: \"{action}\"\n"
-            
-            if feedback:
-                memory_section += f"Feedback: \"{feedback}\"\n"
-            
-            if conversation_detail:
-                memory_section += f"Conversation: \"{conversation_detail}\"\n"
-                
-            memory_section += f"Time: {time_str}\n"
-            memory_section += f"Importance: {importance}\n"
-            
             memory_sections.append(memory_section)
         
         memories_text = "\n".join(memory_sections)
@@ -441,10 +437,10 @@ DATE: {current_date}
         reflection_format = ""
         for i, memory_id in enumerate(memory_ids):
             memory = memories[memory_id]
-            event = memory.get("event", "")
+            combined_event = memory.get("combined_event", "")
             reflection_format += f"""    {{
       "memory_id": "{memory_id}",
-      "event": "{event}",
+      "event": "{combined_event}",
       "thought": "extremely_simple_reflection_in_2_or_3_basic_sentences",
       "importance": importance_rating_{i+1}
     }}{", " if i < len(memories)-1 else ""}
@@ -460,7 +456,7 @@ INSTRUCTIONS:
 - Keep each reflection concise but impactful
 - Consider how current reflections might connect to previous ones
 - Respect the character's past thoughts and growth
-- Consider the event, action, feedback, and other details in each memory
+- Consider all aspects of the event in each memory
 
 OUTPUT FORMAT (provide ONLY valid JSON):
 {{
@@ -578,6 +574,7 @@ if __name__ == "__main__":
             print(f"\n반성 #{i+1}:")
             print(f"  메모리 ID: {reflection.get('memory_id', '')}")
             print(f"  이벤트: {reflection.get('event', '')}")
+            print(f"  원본 이벤트: {reflection.get('original_event', '')}")
             print(f"  생각: {reflection.get('thought', '')}")
             print(f"  중요도: {reflection.get('importance', 0)}")
             print(f"  생성 시간: {reflection.get('time', '')}")
