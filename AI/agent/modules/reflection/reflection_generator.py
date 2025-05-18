@@ -1,5 +1,5 @@
 """
-반성 생성 모듈
+반성 생성 모듈 (새로운 메모리 구조 대응)
 
 메모리 데이터와 이전 반성을 기반으로 새로운 반성을 생성합니다.
 Ollama API(gemma3)를 사용하여 반성을 생성하고, 반성 파일에 저장합니다.
@@ -11,7 +11,7 @@ import re
 import datetime
 import logging
 import asyncio
-from typing import Dict, List, Any
+from typing import Dict, List, Any, Tuple
 from ..ollama_client import OllamaClient
 import numpy as np
 
@@ -204,12 +204,13 @@ class ReflectionGenerator:
             logger.error(f"이전 반성 처리 중 오류 발생: {str(e)}")
             return []
     
-    async def generate_reflections(self, agent_name: str, important_memories: List[Dict], previous_reflections: List[Dict] = None, time: str = None) -> List[Dict]:
+    async def generate_reflections(self, agent_name: str, important_memories: Dict[str, Dict], 
+                                 previous_reflections: List[Dict] = None, time: str = None) -> List[Dict]:
         """
         반성 생성
         Parameters:
         - agent_name: 에이전트 이름
-        - important_memories: 중요한 메모리 목록
+        - important_memories: 중요한 메모리 목록 (ID를 키로 사용)
         - previous_reflections: 이전 반성 목록 (None인 경우 자동으로 가져옴)
         - time: 서버에서 받은 시간 (YYYY.MM.DD.HH:MM 형식)
         Returns:
@@ -230,6 +231,27 @@ class ReflectionGenerator:
         if previous_reflections is None:
             previous_reflections = self.get_previous_reflections(agent_name, current_time)
             logger.info(f"이전 반성 수: {len(previous_reflections)}")
+        
+        # 각 메모리의 통합 이벤트 필드 생성
+        for memory_id, memory in important_memories.items():
+            event_role = memory.get("event_role", "").strip()
+            event = memory.get("event", "").strip()
+            action = memory.get("action", "").strip()
+            feedback = memory.get("feedback", "").strip()
+            
+            # 통합 이벤트 필드 생성
+            combined_event = ""
+            if event_role:
+                combined_event += f"{event_role} "
+            if event:
+                combined_event += f"{event} "
+            if action:
+                combined_event += f"{action} "
+            if feedback:
+                combined_event += f"{feedback}"
+            
+            memory["combined_event"] = combined_event.strip()
+            logger.debug(f"메모리 ID {memory_id}의 통합 이벤트 필드: '{memory['combined_event']}'")
         
         prompt = self._create_reflection_prompt(agent_name, important_memories, previous_reflections)
         
@@ -260,38 +282,46 @@ class ReflectionGenerator:
             for reflection in json_data.get("reflections", []):
                 reflection["time"] = current_time  # 수정된 시간 형식 사용
                 
-                # 이벤트에 대한 임베딩 생성
-                if self.embedding_model:
-                    try:
-                        event = reflection.get("event", "")
-                        if event:
-                            logger.info(f"이벤트 '{event}'에 대한 임베딩 생성 시작")
-                            # 프롬프트 템플릿 형식으로 이벤트 변환
-                            event_template = "{} at {}".format(
-                                event.split()[0],  # action
-                                event.split()[-1]  # location
-                            )
-                            # 토큰화 및 소문자 변환
-                            tokens = [w.lower() for w in event_template.split() if w.lower() in self.embedding_model]
-                            if not tokens:
-                                embedding = [0.0] * self.embedding_model.vector_size
+                # 메모리 ID 추가
+                memory_id = reflection.get("memory_id", "")
+                if memory_id and memory_id in important_memories:
+                    # 해당 메모리 정보 가져오기
+                    memory = important_memories[memory_id]
+                    original_event = memory.get("event", "")
+                    combined_event = memory.get("combined_event", "")
+                    
+                    # 반성에 원본 이벤트와 통합 이벤트 저장
+                    reflection["event"] = combined_event
+                    # reflection["original_event"] = original_event
+                    
+                    # 통찰(thought)에 대한 임베딩 생성
+                    if self.embedding_model and "thought" in reflection:
+                        try:
+                            thought = reflection.get("thought", "")
+                            if thought:
+                                logger.info(f"통찰 '{thought}'에 대한 임베딩 생성 시작")
+                                
+                                # 토큰화 및 소문자 변환
+                                tokens = [w.lower() for w in thought.split() if w.lower() in self.embedding_model]
+                                if not tokens:
+                                    embedding = [0.0] * self.embedding_model.vector_size
+                                else:
+                                    # 단어 벡터의 평균을 문장 벡터로 사용
+                                    word_vectors = [self.embedding_model[w] for w in tokens]
+                                    sentence_vector = np.mean(word_vectors, axis=0)
+                                    # 정규화
+                                    norm = np.linalg.norm(sentence_vector)
+                                    if norm > 0:
+                                        sentence_vector = sentence_vector / norm
+                                    embedding = sentence_vector.tolist()
+                                reflection["embedding"] = embedding
+                                logger.info(f"통찰 '{thought}'에 대한 임베딩 생성 완료")
                             else:
-                                # 단어 벡터의 평균을 문장 벡터로 사용
-                                word_vectors = [self.embedding_model[w] for w in tokens]
-                                sentence_vector = np.mean(word_vectors, axis=0)
-                                # 정규화
-                                norm = np.linalg.norm(sentence_vector)
-                                if norm > 0:
-                                    sentence_vector = sentence_vector / norm
-                                embedding = sentence_vector.tolist()
-                            reflection["embedding"] = embedding
-                            logger.info(f"이벤트 '{event}'에 대한 임베딩 생성 완료")
-                        else:
-                            logger.warning("이벤트가 비어있어 임베딩을 생성할 수 없습니다.")
-                    except Exception as e:
-                        logger.error(f"임베딩 생성 중 오류 발생: {str(e)}")
+                                logger.warning("통찰이 비어있어 임베딩을 생성할 수 없습니다.")
+                        except Exception as e:
+                            logger.error(f"임베딩 생성 중 오류 발생: {str(e)}")
                 else:
-                    logger.warning("임베딩 모델이 없어 임베딩을 생성할 수 없습니다.")
+                    logger.warning(f"메모리 ID {memory_id}에 해당하는 메모리를 찾을 수 없습니다.")
                 
                 reflections.append(reflection)
                 
@@ -329,14 +359,14 @@ class ReflectionGenerator:
         """
         return f"{date_str}.22:00"
     
-    def _create_reflection_prompt(self, agent_name: str, memories: List[Dict], 
+    def _create_reflection_prompt(self, agent_name: str, memories: Dict[str, Dict], 
                                  previous_reflections: List[Dict] = None) -> str:
         """
         반성 생성 프롬프트 작성
         
         Parameters:
         - agent_name: 에이전트 이름
-        - memories: 중요한 메모리 목록
+        - memories: 중요한 메모리 목록 (ID를 키로 사용)
         - previous_reflections: 이전 반성 목록
         
         Returns:
@@ -346,14 +376,16 @@ class ReflectionGenerator:
         
         # 각 메모리에 대한 섹션 생성
         memory_sections = []
-        for i, memory in enumerate(memories):
-            event = memory.get("event", "")
+        memory_ids = list(memories.keys())
+        for i, memory_id in enumerate(memory_ids):
+            memory = memories[memory_id]
+            combined_event = memory.get("combined_event", "")
             time_str = memory.get("time", "")
             importance = memory.get("importance", 0)
             
             memory_section = f"""
-MEMORY #{i+1}:
-Event: "{event}"
+MEMORY #{i+1} (ID: {memory_id}):
+Event: "{combined_event}"
 Time: {time_str}
 Importance: {importance}
 """
@@ -403,10 +435,12 @@ DATE: {current_date}
         
         # 지시사항 및 출력 형식 추가
         reflection_format = ""
-        for i, memory in enumerate(memories):
+        for i, memory_id in enumerate(memory_ids):
+            memory = memories[memory_id]
+            combined_event = memory.get("combined_event", "")
             reflection_format += f"""    {{
-      "memory_index": {i+1},
-      "event": "{memory.get('event', '')}",
+      "memory_id": "{memory_id}",
+      "event": "{combined_event}",
       "thought": "extremely_simple_reflection_in_2_or_3_basic_sentences",
       "importance": importance_rating_{i+1}
     }}{", " if i < len(memories)-1 else ""}
@@ -422,6 +456,7 @@ INSTRUCTIONS:
 - Keep each reflection concise but impactful
 - Consider how current reflections might connect to previous ones
 - Respect the character's past thoughts and growth
+- Consider all aspects of the event in each memory
 
 OUTPUT FORMAT (provide ONLY valid JSON):
 {{
@@ -448,59 +483,6 @@ REFLECTION GUIDELINES:
 """
         
         return prompt
-    
-    def _call_ollama(self, prompt: str, timeout: int = None) -> Dict[str, Any]:
-        """
-        Ollama API 호출
-        
-        Parameters:
-        - prompt: 프롬프트 텍스트
-        - timeout: 타임아웃 시간(초)
-        
-        Returns:
-        - API 응답
-        """
-        if timeout is None:
-            timeout = self.DEFAULT_TIMEOUT
-            
-        # API 요청 구성
-        payload = {
-            "model": self.MODEL,
-            "prompt": prompt,
-            "stream": False,
-            "options": {
-                "temperature": 0.7,
-                "top_p": 0.9,
-                "frequency_penalty": 0.3,
-                "presence_penalty": 0.3
-            }
-        }
-        
-        try:
-            # API 호출
-            response = requests.post(self.OLLAMA_URL, json=payload, timeout=timeout)
-            
-            if response.status_code == 200:
-                result = response.json()
-                return {
-                    "response": result.get("response", ""),
-                    "status": "success"
-                }
-            else:
-                return {
-                    "response": f"Error: HTTP status code {response.status_code}",
-                    "status": "error"
-                }
-        except requests.exceptions.Timeout:
-            return {
-                "response": f"Error: Request timed out after {timeout} seconds",
-                "status": "timeout"
-            }
-        except Exception as e:
-            return {
-                "response": f"Error: {str(e)}",
-                "status": "exception"
-            }
     
     def _extract_json_from_response(self, response_text: str) -> Dict[str, Any]:
         """
@@ -554,33 +536,47 @@ if __name__ == "__main__":
     reflection_file_path = os.path.join(current_dir, "./reflect/reflections.json")
     
     # OllamaClient 초기화
+    from ..ollama_client import OllamaClient
     ollama_client = OllamaClient()
     
     # 반성 생성기 초기화
     generator = ReflectionGenerator(reflection_file_path, ollama_client)
     
     # 테스트 메모리
-    test_memories = [
-        {
+    test_memories = {
+        "1": {
             "event": "observe stone Forest stream_bank",
+            "event_role": "observer",
+            "action": "examine stone closely",
+            "feedback": "noticed unusual markings",
             "time": "2025.05.08.08:10",
             "importance": 6
         },
-        {
+        "2": {
             "event": "eat raspberry Forest stream_bank",
+            "event_role": "actor",
+            "action": "pick more raspberries",
+            "feedback": "enjoyed the sweet taste",
             "time": "2025.05.08.11:00",
             "importance": 3
         }
-    ]
+    }
     
     # 반성 생성
-    print("반성 생성 테스트...")
-    reflections = generator.generate_reflections("John", test_memories)
+    import asyncio
     
-    # 결과 출력
-    for i, reflection in enumerate(reflections):
-        print(f"\n반성 #{i+1}:")
-        print(f"  이벤트: {reflection.get('event', '')}")
-        print(f"  생각: {reflection.get('thought', '')}")
-        print(f"  중요도: {reflection.get('importance', 0)}")
-        print(f"  생성 시간: {reflection.get('created', '')}")
+    async def test_reflection():
+        print("반성 생성 테스트...")
+        reflections = await generator.generate_reflections("John", test_memories, time="2025.05.08.22:00")
+        
+        # 결과 출력
+        for i, reflection in enumerate(reflections):
+            print(f"\n반성 #{i+1}:")
+            print(f"  메모리 ID: {reflection.get('memory_id', '')}")
+            print(f"  이벤트: {reflection.get('event', '')}")
+            print(f"  원본 이벤트: {reflection.get('original_event', '')}")
+            print(f"  생각: {reflection.get('thought', '')}")
+            print(f"  중요도: {reflection.get('importance', 0)}")
+            print(f"  생성 시간: {reflection.get('time', '')}")
+    
+    asyncio.run(test_reflection())
