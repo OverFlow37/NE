@@ -108,7 +108,7 @@ class MemoryUtils:
         except ValueError:
             return "1"
 
-    def save_memory(self, event_sentence: str, embedding: List[float], event_time: str, agent_name: str, event_id: int = None, event_role: str = ""):
+    def save_memory(self, event_sentence: str, embedding: List[float], event_time: str, agent_name: str, event_id: int = None, event_role: str = "", importance:int = 0):
         """새로운 메모리 저장"""
         memories = self._load_memories()
         
@@ -135,9 +135,17 @@ class MemoryUtils:
             "time": event_time
         }
         
-        if event_role != "" and event_role != " ":
-            memory["importance"] = 8
+        # if event_role != "" and event_role != " ":
+        #     memory["importance"] = 8
         
+        ## 10 이상의 importance -> 10 처리
+        if importance > 10 : 
+            importance = 10
+
+        ## importance가 디폴트 값이 아니면 메모리에 저장
+        if importance != 0 : 
+            memory["importance"] = importance
+
         # 메모리와 임베딩을 별도로 저장
         memories[agent_name]["memories"][memory_id] = memory
         
