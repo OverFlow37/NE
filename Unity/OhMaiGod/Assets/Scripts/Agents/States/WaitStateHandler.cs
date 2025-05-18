@@ -22,7 +22,7 @@ namespace OhMAIGod.Agent
             {
                 PerceiveEvent perceiveEvent = new PerceiveEvent();
                 perceiveEvent.event_type = PerceiveEventType.AGENT_NO_TASK;
-                perceiveEvent.event_location = " ";
+                perceiveEvent.event_location = "";
                 perceiveEvent.event_description = "There is nothing to do at the moment.";
                 perceiveEvent.event_is_save = false;
                 perceiveEvent.event_role = "";

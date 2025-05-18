@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 using OhMAIGod.Agent;
 using OhMAIGod.Perceive;
@@ -66,7 +67,7 @@ public class AgentController : MonoBehaviour
     [Header("디버깅")]
     [SerializeField] private bool mShowDebugInfo = true;            // 디버그 정보 표시 여부
     [SerializeField, ReadOnly] private AgentState mCurrentState; // 현재 상태 Inspector 디버그용
-    [SerializeField, ReadOnly] private string mCurrentLocation;  // 현재 위치 Inspector 디버그용
+    [SerializeField, ReadOnly] private string mCurrentLocation = "house";  // 현재 위치 Inspector 디버그용
     [SerializeField, ReadOnly] private Interactable mCurrentTargetInteractable;    // 현재 타겟 Inspector 디버그용
     private ScheduleItem mCurrentAction = null;                     // 현재 활동 정보
     private float mWaitTime = 0f;                                   // 대기 시간 (다음 활동까지)
@@ -258,7 +259,9 @@ public class AgentController : MonoBehaviour
     private void HandleMyLocationChanged(Interactable _interactable, string _newLocation)
     {
         if (mCurrentLocation == _newLocation) return;
-        Debug.Log("위치 변경 감지"+ _interactable.name + "mCurrentLocation: "+ mCurrentLocation + " _newLocation: " +  _newLocation);
+        if (_newLocation == null || _newLocation == "") return; // 중복 호출 방지
+        LogManager.Log("Agent", $"{mName}: 위치 변경 - {_interactable.name} -> {_newLocation}", 2);
+
         mCurrentLocation = _newLocation;
         
         SendCurrentLocationInfo(_newLocation);
@@ -488,7 +491,7 @@ public class AgentController : MonoBehaviour
     // 주의: 상호작용 scheduler에서 종료시 ScheduleItem이 없어진 후 이 함수를 호출하게됨
     public void EndInteraction() 
     {
-        Debug.Log("EndInteraction");
+        LogManager.Log("Agent", $"{mName}: 상호작용 종료", 2);
         if(CurrentState != AgentState.INTERACTING){
             LogManager.Log("Agent", $"{mName}: 상호작용 종료 조건 불충족", 1);
             return;
@@ -527,7 +530,6 @@ public class AgentController : MonoBehaviour
             
             // 상태 초기화
             mCurrentAction = null;
-            Debug.Log("액션 초기화됨");
             // 스케줄러에 활동 완료 알림
             mScheduler.CompleteCurrentAction();
             mStateMachine.ChangeState(AgentState.WAITING);
@@ -667,13 +669,14 @@ public class AgentController : MonoBehaviour
         // 타겟 로케이션에 타겟 오브젝트가 없는 경우
         else if (!_success && _actionName == ""){
             mCurrentFeedback.feedback.feedback_description = $"There are no {_interactableName} at the {mCurrentLocation}.";
-            Debug.Log("로케이션에 오브젝트가 없어 피드백 보냄: "+ mCurrentFeedback.feedback.feedback_description);
+            LogManager.Log("Agent", $"{mName}: 로케이션에 오브젝트가 없어 피드백 보냄: {mCurrentFeedback.feedback.feedback_description}", 2);
             PerceiveEvent perceiveEvent = new PerceiveEvent();
             perceiveEvent.event_is_save = false;
             perceiveEvent.event_location = "";
             perceiveEvent.event_role = "";
             perceiveEvent.event_type = PerceiveEventType.TARGET_NOT_IN_LOCATION;
-            perceiveEvent.event_description = mCurrentFeedback.feedback.feedback_description;
+            string eventData = mCurrentFeedback.feedback.feedback_description + GetCurrentLocationInteractables(mCurrentLocation);
+            perceiveEvent.event_description = eventData;
             // AIBridge_perceive에 바로 반응 행동 요청하기
             SendReactAction(perceiveEvent);
         }
@@ -683,14 +686,24 @@ public class AgentController : MonoBehaviour
         LogManager.Log("AI", $"{mName}: 피드백 전송 JSON: {feedbackJson}", 2);
         AIBridge_Perceive.Instance.SendFeedbackToAI(mCurrentFeedback);
     }
-
+    // 에이전트의 현재 지역이 바뀌었을 때, 현재 지역의 오브젝트 목록을 가져옴
+    public string GetCurrentLocationInteractables(string _newLocation){
+        List<Interactable> interactables = TileManager.Instance.GetInteractablesInLocation(_newLocation);
+        var grouped = interactables.GroupBy(i => i.InteractableName)
+                                   .Select(g => $"{g.Key} x{g.Count()}");
+        string interactableSummary = string.Join(", ", grouped);
+        string eventData = $"{_newLocation} had {interactableSummary}.";
+        return eventData;
+    }
     // 에이전트의 현재 지역이 바뀌었을 때, 현재 지역의 오브젝트 목록을 전송
     public void SendCurrentLocationInfo(string _newLocation){
         PerceiveEvent perceiveEvent = new PerceiveEvent();
         perceiveEvent.event_type = PerceiveEventType.AGENT_LOCATION_CHANGE;
-        perceiveEvent.event_location = _newLocation;
-        perceiveEvent.event_role = "";
+        perceiveEvent.event_location = "";
+        perceiveEvent.event_role = $"{mName} saw";
         perceiveEvent.event_is_save = true;
-        Debug.Log("위치 변경: "+TileManager.Instance.GetInteractablesInLocation(_newLocation));
+        perceiveEvent.event_description = GetCurrentLocationInteractables(_newLocation);
+        LogManager.Log("AI", $"{mName}: 위치 정보 전송: {perceiveEvent.event_description}", 2);
+        AIBridge_Perceive.Instance.SendPerceiveEvent(this, perceiveEvent);      
     }
 }

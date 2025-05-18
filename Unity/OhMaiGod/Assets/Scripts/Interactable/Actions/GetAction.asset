@@ -12,4 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4a62aeb332efab947ac0870fd54a4977, type: 3}
   m_Name: GetAction
   m_EditorClassIdentifier: 
-  _actionName: keep
+  _actionName: offer

@@ -629,6 +629,8 @@ class MemoryRetriever:
         
         # 에이전트 정보 문자열 생성
         agent_data_str = f"Your Name: {agent_name}\n"
+
+        agent_data_str += f"Your Current Location: {agent_data['current_location']}\n"
         
         # 성격 정보 추가
         if agent_data and "personality" in agent_data:

@@ -17,7 +17,7 @@ MonoBehaviour:
   mDescriptionPrompt: game character
   mType: 0
   mState: 0
+  mInterest: 0
+  mFaith: 0
+  mIcon: {fileID: 978012912, guid: 99a24620d31e5ce4e823c32d11e17c2c, type: 3}
   mActions: []
-  mHungerEffect: 0
-  mSleepinessEffect: 0
-  mLonelinessEffect: 0
