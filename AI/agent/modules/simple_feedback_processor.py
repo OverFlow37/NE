@@ -240,7 +240,12 @@ class SimpleFeedbackProcessor:
             
             feedback = agent_data.get('feedback', {})
             feedback_description = feedback.get('feedback_description', ',')
-            
+            ## importance 추가
+            importance = feedback.get('importance', 0)
+            ## importance 10 초과시 10으로 처리
+            if importance > 10:
+                importance = 10
+
             # memory_id 처리 - 문자열로 변환하여 확인
             memory_id = str(feedback.get('memory_id', '')) if feedback.get('memory_id') is not None else ''
             
@@ -297,6 +302,10 @@ class SimpleFeedbackProcessor:
                     # 기존 메모리에 통합 피드백 추가
                     agent_memories[memory_id]["feedback"] = combined_feedback
                     print(f"✅ 메모리 ID {memory_id}에 통합 피드백 저장")
+
+                    if importance != 0:
+                        agent_memories[memory_id]["importance"] = importance
+
                     self.memory_utils._save_memories(memories)
                     
                     # 임베딩 데이터 저장
@@ -314,7 +323,8 @@ class SimpleFeedbackProcessor:
                     print(f"💾 임베딩 저장 시도 - embedding 길이: {len(embedding) if embedding else 'None'}")
                     memories[agent_name]["embeddings"][memory_id]["feedback"] = embedding
                     print("✅ 임베딩 저장 완료")
-                    
+
+
                     # 메모리 저장 확인
                     self.memory_utils._save_memories(memories)
                     print("💾 메모리 파일 저장 완료")
@@ -337,9 +347,13 @@ class SimpleFeedbackProcessor:
                     "action": action if action else "",
                     "feedback": combined_feedback,  # 통합 피드백 저장
                     "conversation_detail": "",
-                    "time": time,
-                    "importance": 4  # 피드백의 기본 중요도
+                    "time": time
                 }
+
+                ## 메모리가 0이 아니면 메모리 추가
+                if importance != 0:
+                    memories[agent_name]["memories"][memory_id]["importance"] = importance
+
                 memories[agent_name]["embeddings"][memory_id] = {
                     "event": [],
                     "action": self.memory_utils.get_embedding(action) if action else [],

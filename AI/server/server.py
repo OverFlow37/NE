@@ -245,7 +245,11 @@ async def perceive_event(payload: dict):
             event_data["time"] = game_time
         
         # 메모리 저장
-        success = memory_utils.save_perception(event_data, agent_name)
+        success = False
+        if event_data.get("event_is_save", True):
+            success = memory_utils.save_perception(event_data, agent_name)
+        else:
+            print("💾 event_is_save 값이 False이므로 메모리 저장 건너뜀")
         return {
             "success": success
         }
@@ -288,7 +292,7 @@ async def should_react(payload: dict):
         # 결과 추출 - 단순 불리언 값과 이유
         should_react = reaction_decision.get("should_react", True)
         reason = reaction_decision.get("reason", "")
-        
+
         # 메모리 저장 (실패했을 경우만 저장)
         ## 실패시에만 저장하는 이유는 성공했을 때 make_reaction에서 저장하기 때문
         ### event_is_save 파라미터를 통해 저장 여부를 결정하는 것도 추가
@@ -342,6 +346,7 @@ async def react_to_event(payload: dict):
         event_description = event_data.get('event_description', '')
         event_role = event_data.get('event_role', '')
         event_is_save = event_data.get("event_is_save", True)
+        event_importance = event_data.get("importance", 0)
         
         # 에이전트의 현재 시간 추출
         agent_time = agent_data.get('time', '')
@@ -467,13 +472,15 @@ async def react_to_event(payload: dict):
                 
             if event_is_save == False:
                 event_sentence = ""
+                event_importance = 0
 
             memory_id = memory_utils.save_memory(
                 event_sentence=event_sentence,
                 embedding=embedding,
                 event_time=agent_time,  # 에이전트의 시간 사용
                 agent_name=agent_name,
-                event_role=event_role
+                event_role=event_role,
+                importance=event_importance
             )
             print(f"💾 메모리 저장 완료 (시간: {agent_time}, 메모리 ID: {memory_id})")
 
