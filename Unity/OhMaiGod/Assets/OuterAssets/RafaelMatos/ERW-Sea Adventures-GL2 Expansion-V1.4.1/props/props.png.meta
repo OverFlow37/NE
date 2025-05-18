@@ -5368,9 +5368,9 @@ TextureImporter:
       name: props_235
       rect:
         serializedVersion: 2
-        x: 558
+        x: 586
         y: 1129
-        width: 43
+        width: 15
         height: 15
       alignment: 0
       pivot: {x: 0.5, y: 0.5}

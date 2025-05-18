@@ -26,7 +26,7 @@ TagManager:
   - Event
   - NonObstacles
   - Transparency
-  - 
+  - Forge
   - 
   - 
   - 
@@ -49,6 +49,9 @@ TagManager:
     locked: 0
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: Effect
+    uniqueID: 54096481
     locked: 0
   m_RenderingLayers:
   - Default

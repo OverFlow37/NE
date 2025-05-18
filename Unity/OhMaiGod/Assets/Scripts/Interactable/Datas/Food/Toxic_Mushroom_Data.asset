@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1e12e118ca0cb8a4cb384edbbf9233dd, type: 3}
-  m_Name: Mushroom_Data
+  m_Name: Toxic_Mushroom_Data
   m_EditorClassIdentifier: 
   mDescription: "\uC232\uACFC \uC0B0\uC5D0\uC11C \uD68D\uB4DD\uD560 \uC218 \uC788\uB294
     \uBC84\uC12F"
@@ -24,10 +24,10 @@ MonoBehaviour:
   mActions:
   - mAction: {fileID: 11400000, guid: cbe91266aabd61348bd1864e9f7bac11, type: 2}
     mDuration: 120
-    mHungerEffect: -30
+    mHungerEffect: 0
     mSleepinessEffect: 0
-    mLonelinessEffect: -10
-    mStressEffect: -10
+    mLonelinessEffect: 0
+    mStressEffect: 50
   - mAction: {fileID: 11400000, guid: 834d1a928a543d444b3abefbce640270, type: 2}
     mDuration: 120
     mHungerEffect: 0

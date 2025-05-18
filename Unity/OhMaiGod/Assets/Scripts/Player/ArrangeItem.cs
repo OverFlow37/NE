@@ -4,13 +4,21 @@ public class ArrangeItem : MonoBehaviour
 {
     [Header("배치할 아이템")]
     public GameObject mSelectedItem; // UI에서 할당
-    [Header("배치할 이벤트")]
+    [Header("배치 이벤트")]
     public GameObject mSelectedEvent;
-    [Header("배치할 이펙트")]
+    [Header("배치 이펙트")]
     public GameObject mSelectedEffect;
+    [Header("제물 이펙트")]
+    public GameObject mSelectedSacrificeEffect;
 
     private bool mIsPlacementMode = false;
     private GameObject mPreviewObject;
+    private LayerMask mForgeLayerMask;
+
+    private void Awake()
+    {
+        mForgeLayerMask = LayerMask.GetMask("Forge");
+    }
 
     void Update()
     {
@@ -82,11 +90,14 @@ public class ArrangeItem : MonoBehaviour
 
         // 설치 가능 여부에 따라 프리뷰 색상 변경
         Collider2D hit = Physics2D.OverlapPoint(cellCenter, TileManager.Instance.AllLayerMask);
+        Collider2D hitForge = Physics2D.OverlapPoint(cellCenter, mForgeLayerMask);
         SpriteRenderer sr = mPreviewObject.GetComponent<SpriteRenderer>();
         if (sr != null)
         {
             if (hit != null)
                 sr.color = new Color(1, 0, 0, 0.5f); // 빨간색 반투명
+            else if (hitForge != null)
+                sr.color = new Color(1, 1, 0, 0.5f); // 노란색 반투명
             else
                 sr.color = new Color(1, 1, 1, 0.5f); // 흰색 반투명
         }
@@ -110,20 +121,38 @@ public class ArrangeItem : MonoBehaviour
             return;
         }
 
-        // 이벤트 생성
-        GameObject eventObject = Instantiate(mSelectedEvent, cellCenter, Quaternion.identity);
-        eventObject.GetComponent<EventController>().mEventInfo = mSelectedEvent.GetComponent<EventController>().mEventInfo;
-        // 이펙트 생성 및 자동 파괴
-        if (mSelectedEffect != null)
+        // Forge 레이어에 오브젝트가 있으면 신앙심 획득
+        Collider2D hitForge = Physics2D.OverlapPoint(cellCenter, mForgeLayerMask);
+        if (hitForge != null)
         {
-            GameObject effect = Instantiate(mSelectedEffect, cellCenter, Quaternion.identity);
-            Destroy(effect, 1.5f); // 1.5초 뒤에 이펙트 오브젝트 삭제
+            InteractableData interactableData = _item.GetComponent<Interactable>().mInteractableData;
+            Inventory.Instance.AddResource(Inventory.ResourceType.Power, interactableData.mFaith);
+            // 이펙트 생성
+            if (mSelectedSacrificeEffect != null)
+            {
+                Instantiate(mSelectedSacrificeEffect, cellCenter, Quaternion.identity);
+            }
+            _item.transform.position = cellCenter;
+            _item.SetActive(true);
+            Inventory.Instance.RemoveItem(mSelectedItem);
+            Destroy(_item, 1f);
+            CancelPlacementMode();
         }
-        
-        _item.transform.position = cellCenter;
-        _item.SetActive(true);
-        Inventory.Instance.RemoveItem(mSelectedItem);
-        CancelPlacementMode();
+        else
+        {
+            // 이벤트 생성
+            GameObject eventObject = Instantiate(mSelectedEvent, cellCenter, Quaternion.identity);
+            eventObject.GetComponent<EventController>().mEventInfo = mSelectedEvent.GetComponent<EventController>().mEventInfo;
+            // 이펙트 생성
+            if (mSelectedEffect != null)
+            {
+                Instantiate(mSelectedEffect, cellCenter, Quaternion.identity);
+            }
+            _item.transform.position = cellCenter;
+            _item.SetActive(true);
+            Inventory.Instance.RemoveItem(mSelectedItem);
+            CancelPlacementMode();
+        }
     }
 
     public void EnterPlacementMode(GameObject _item)
