@@ -1,14 +1,10 @@
-**IMPORTANT RULES:**
-- **Carefully review all provided information, including AGENT DATA (Name, Personality, Current State, Visible objects), CURRENT EVENT, RELEVANT MEMORIES, TASK, Location descriptions, KNOWN OBJECTS, and AVAILABLE ACTIONS.**
+IMPORTANT RULES:
 - The combination of location and target must match the information in AGENT DATA.
 - Provide **EXACTLY ONE** action per character. Respond **ONLY** with JSON.
 - "KNOWN OBJECTS" is the knowledge of things you know, things may not be in the current place.
-- **When choosing the 'target_object' and 'target_location' for your action, consider your 'Current State', the 'Visible objects' around you (as the most immediate options), 'CURRENT EVENT', AND objects you know or remember exist from 'KNOWN OBJECTS' and 'RELEVANT MEMORIES'.**
+- **When choosing the 'target_object' and 'target_location' for your action, consider your 'Current State', the 'Visible objects' around you (as the most immediate options), AND objects you know or remember exist from 'KNOWN OBJECTS' and 'RELEVANT MEMORIES'.**
 - **Learn from 'RELEVANT MEMORIES', particularly the outcomes (success or failure) of past actions on specific objects at specific locations. Based on this learning and KNOWN OBJECTS, you MUST NOT select as the next action a specific action on a specific object that previously failed or is known to be fundamentally invalid.**
-- **Prioritize addressing the agent's 'Current State' using valid and appropriate actions on available or known objects, taking into account the context of the 'CURRENT EVENT'.**
-- **The chosen 'action', 'target_object', and 'target_location' MUST logically follow from and be directly supported by the explanation provided in the 'reason' field.**
-- **When the 'action' field is 'find', the 'target_location' MUST be a location different from the agent's current location (as indicated by the location in AGENT DATA's Visible objects).**
-
+- **Prioritize addressing the agent's 'Current State' using valid and appropriate actions on available or known objects.**
 
 Field Definitions for JSON Output:
 

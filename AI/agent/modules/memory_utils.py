@@ -47,11 +47,51 @@ class MemoryUtils:
                     else:
                         json.dump({"John": [], "Sarah": []}, f, ensure_ascii=False, indent=2)
 
-    def _load_memories(self) -> Dict[str, Dict[str, Dict[str, Dict[str, Any]]]]:
-        """메모리 데이터 로드"""
+    def _load_memories(self, sort_by_time: bool = False) -> Dict[str, Dict[str, Dict[str, Dict[str, Any]]]]:
+        """메모리 데이터 로드. 필요에 따라 시간순으로 정렬합니다."""
         try:
             with open(self.memories_file, 'r', encoding='utf-8') as f:
-                return json.load(f)
+                memories_data = json.load(f)
+            
+            if sort_by_time:
+                # 각 에이전트의 메모리를 시간 역순으로 정렬
+                for agent_name in memories_data:
+                    if "memories" in memories_data[agent_name] and isinstance(memories_data[agent_name]["memories"], dict):
+                        # 메모리 항목들을 시간 기준으로 정렬
+                        # strptime 포맷을 유연하게 처리하기 위해 여러 포맷 시도
+                        def parse_time(time_str):
+                            formats_to_try = [
+                                "%Y.%m.%d.%H:%M:%S", 
+                                "%Y.%m.%d.%H:%M",
+                                "%Y-%m-%dT%H:%M:%S.%fZ", # ISO 8601 format
+                                "%Y-%m-%d %H:%M:%S" # 다른 일반적인 포맷
+                            ]
+                            for fmt in formats_to_try:
+                                try:
+                                    return datetime.strptime(time_str, fmt)
+                                except ValueError:
+                                    continue
+                            # 모든 포맷에 실패하면 None 반환 또는 에러 처리
+                            print(f"Warning: Could not parse time string {time_str} for agent {agent_name}")
+                            return datetime.min # 정렬에서 가장 오래된 것으로 처리
+
+                        memory_items = []
+                        for mem_id, mem_content in memories_data[agent_name]["memories"].items():
+                            parsed_time = parse_time(mem_content.get("time", ""))
+                            memory_items.append((mem_id, mem_content, parsed_time))
+
+                        # 시간(parsed_time)을 기준으로 내림차순 정렬
+                        sorted_memory_items = sorted(
+                            memory_items,
+                            key=lambda item: item[2], # item[2]는 parsed_time
+                            reverse=True
+                        )
+                        
+                        # 정렬된 결과를 새 딕셔너리에 저장
+                        ordered_memories = {mem_id: mem_content for mem_id, mem_content, _ in sorted_memory_items}
+                        memories_data[agent_name]["memories"] = ordered_memories
+            
+            return memories_data
         except Exception as e:
             print(f"메모리 로드 중 오류 발생: {e}")
             return {
@@ -108,7 +148,7 @@ class MemoryUtils:
         except ValueError:
             return "1"
 
-    def save_memory(self, event_sentence: str, embedding: List[float], event_time: str, agent_name: str, event_id: int = None, event_role: str = ""):
+    def save_memory(self, event_sentence: str, embedding: List[float], event_time: str, agent_name: str, event_role: str = "", importance:int = 0):
         """새로운 메모리 저장"""
         memories = self._load_memories()
         
@@ -135,15 +175,23 @@ class MemoryUtils:
             "time": event_time
         }
         
-        if event_role != "" and event_role != " ":
-            memory["importance"] = 8
+        # if event_role != "" and event_role != " ":
+        #     memory["importance"] = 8
         
+        ## 10 이상의 importance -> 10 처리
+        if importance > 10 : 
+            importance = 10
+
+        ## importance가 디폴트 값이 아니면 메모리에 저장
+        if importance != 0 : 
+            memory["importance"] = importance
+
         # 메모리와 임베딩을 별도로 저장
         memories[agent_name]["memories"][memory_id] = memory
         
         # 임베딩 데이터 저장
         embeddings = {
-            "event": self.get_embedding(event_sentence),
+            "event": embedding,
             "action": [],
             "feedback": []
         }
@@ -192,15 +240,116 @@ class MemoryUtils:
     def save_perception(self, event: Dict[str, Any], agent_name: str) -> bool:
         """관찰 정보를 메모리에 저장"""
         try:
-            event_sentence = ""
-            if event.get("event_location", "") != "" and event.get("event_location", "") != " ":
-                event_sentence = f'{event.get("event_description", "")} at {event.get("event_location", "")}'
-            else:
-                event_sentence = event.get("event_description", "")
+            event_sentence = event.get("event_description", "")
+            embedding = self.get_embedding(event_sentence)
+            event_role = event.get("event_role", "")
+            event_time = event.get("time", datetime.now().strftime("%Y.%m.%d.%H:%M"))
+            if event.get("importance", 0) != 0:
+                memory_id = self.save_memory(event_sentence, embedding, event_time, agent_name, event_role, importance=event.get("importance", 0))
+            else:   
+                memory_id = self.save_memory(event_sentence, embedding, event_time, agent_name, event_role)
+            return True
+        except Exception as e:
+            print(f"관찰 정보 저장 실패: {e}")
+            return False
+
+######################## 위치 저장하는 메소드 라인 ################################
+
+    def overwrite_location_memory(self, event_sentence: str, embedding: List[float], event_location: str, event_type: str, event_time: str, agent_name: str, event_role: str = "", importance:int = 0):
+        """기존 메모리 덮어쓰기"""
+        memories = self._load_memories(sort_by_time=True)
+        
+        if agent_name not in memories:
+            memories[agent_name] = {
+                "memories": {},
+                "embeddings": {}
+            }
+            
+        # 현재 시간이 제공되지 않은 경우 현재 시간 사용
+        if not event_time:
+            event_time = datetime.now().strftime("%Y.%m.%d.%H:%M")
+        
+        most_recent_match_id = None
+        older_duplicate_ids_to_delete = []
+
+        # 기존 메모리에서 event_type과 event_location이 일치하는지 확인
+        # _load_memories(sort_by_time=True)로 인해 memories는 최신순으로 정렬되어 있음
+        if agent_name in memories and "memories" in memories[agent_name]:
+            for mem_id, mem_data in memories[agent_name]["memories"].items():
+                if mem_data.get("event_type") == event_type and \
+                   mem_data.get("event_location") == event_location:
+                    if most_recent_match_id is None: # 첫 번째 일치 항목 (가장 최신)
+                        most_recent_match_id = mem_id
+                    else: # 이후 일치 항목 (오래된 중복)
+                        older_duplicate_ids_to_delete.append(mem_id)
+        
+        # 오래된 중복 메모리 삭제
+        if older_duplicate_ids_to_delete:
+            for del_id in older_duplicate_ids_to_delete:
+                if del_id in memories[agent_name]["memories"]:
+                    del memories[agent_name]["memories"][del_id]
+                if del_id in memories[agent_name]["embeddings"]: # 연결된 임베딩도 삭제
+                    del memories[agent_name]["embeddings"][del_id]
+
+        # 사용할 메모리 ID 결정
+        if most_recent_match_id:
+            memory_id = most_recent_match_id
+        else:
+            memory_id = self._get_next_memory_id(agent_name)
+            
+        # 메모리 데이터 저장
+        memory = {
+            "event_role": event_role,
+            "event": event_sentence,
+            "action": "",
+            "feedback": "",
+            "conversation_detail": "",
+            "time": event_time,
+            "event_type": event_type,  # event_type 저장
+            "event_location": event_location  # event_location 저장
+        }
+        
+
+        print(f"memory: {memory}")
+        print(f"memory_id: {memory_id}")
+        # if event_role != "" and event_role != " ":
+        #     memory["importance"] = 8
+        
+        ## 10 이상의 importance -> 10 처리
+        if importance > 10 : 
+            importance = 10
+
+        ## importance가 디폴트 값이 아니면 메모리에 저장
+        if importance != 0 : 
+            memory["importance"] = importance
+
+        # 메모리와 임베딩을 별도로 저장
+        memories[agent_name]["memories"][memory_id] = memory
+        
+        # 임베딩 데이터 저장
+        embeddings = {
+            "event": embedding,
+            "action": [],
+            "feedback": []
+        }
+        memories[agent_name]["embeddings"][memory_id] = embeddings
+        
+        self._save_memories(memories)
+        
+        return memory_id
+
+    def save_location_data(self, event: Dict[str, Any], agent_name: str) -> bool:
+        """지역 정보를 메모리에 저장"""
+        try:
+            event_sentence = event.get("event_description", "")
             embedding = self.get_embedding(event_sentence)
             event_time = event.get("time", datetime.now().strftime("%Y.%m.%d.%H:%M"))
-            
-            memory_id = self.save_memory(event_sentence, embedding, event_time, agent_name)
+            event_location = event.get("event_location", "")
+            event_type = event.get("event_type", "")
+            if event.get("importance", 0) != 0:
+                memory_id = self.overwrite_location_memory(event_sentence, embedding, event_location, event_type, event_time, agent_name, importance=event.get("importance", 0))
+            else:   
+                memory_id = self.overwrite_location_memory(event_sentence, embedding, event_location, event_type, event_time, agent_name)
             return True
         except Exception as e:
             print(f"관찰 정보 저장 실패: {e}")

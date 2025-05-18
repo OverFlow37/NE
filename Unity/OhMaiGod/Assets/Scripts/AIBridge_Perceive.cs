@@ -104,7 +104,7 @@ public class AIBridge_Perceive : MonoBehaviour
 
 
     // Interactable 목록을 ObjectGroup 배열로 변환
-    private ObjectGroup[] ConvertToObjectGroups(List<Interactable> _interactables)
+    private ObjectGroup[] ConvertToObjectGroups(List<Interactable> _interactables, string _excludeName = null)
     {
         // 위치별로 오브젝트들을 그룹화
         Dictionary<string, List<string>> locationGroups = new Dictionary<string, List<string>>();
@@ -112,6 +112,9 @@ public class AIBridge_Perceive : MonoBehaviour
         foreach (Interactable interactable in _interactables)
         {
             if (interactable == null || interactable.mInteractableData == null) continue;
+
+            // 오브젝트명이 제외 대상이면 건너뜀
+            if (!string.IsNullOrEmpty(_excludeName) && interactable.InteractableName == _excludeName) continue;
 
             string location = interactable.CurrentLocation;
             if (string.IsNullOrEmpty(location)) continue;
@@ -149,7 +152,7 @@ public class AIBridge_Perceive : MonoBehaviour
         var scheduler = _agent.mScheduler;
 
         // AI 서버에 보낼 요청 데이터 생성
-        var visibleObjectGroups = ConvertToObjectGroups(_agent.mVisibleInteractables);
+        var visibleObjectGroups = ConvertToObjectGroups(_agent.mVisibleInteractables, _agent.AgentName);
 
         // 에이전트의 현재 위치 가져오기 (CurrentAction이 null일 경우 대비)
         string agentLocation = "Unknown"; // 기본값
@@ -230,7 +233,7 @@ public class AIBridge_Perceive : MonoBehaviour
         var scheduler = _agent.mScheduler;
 
         // AI 서버에 보낼 요청 데이터 생성
-        var visibleObjectGroups = ConvertToObjectGroups(_agent.mVisibleInteractables);
+        var visibleObjectGroups = ConvertToObjectGroups(_agent.mVisibleInteractables, _agent.AgentName);
 
         // 에이전트의 현재 위치 가져오기 (CurrentAction이 null일 경우 대비)
         string agentLocation = "Unknown"; // 기본값
@@ -322,7 +325,7 @@ public class AIBridge_Perceive : MonoBehaviour
         var scheduler = _agent.mScheduler;
 
         // AI 서버에 보낼 요청 데이터 생성
-        var visibleObjectGroups = ConvertToObjectGroups(_agent.mVisibleInteractables);
+        var visibleObjectGroups = ConvertToObjectGroups(_agent.mVisibleInteractables, _agent.AgentName);
 
         // 에이전트의 현재 위치 가져오기 (CurrentAction이 null일 경우 대비)
         string agentLocation = "Unknown"; // 기본값
@@ -404,6 +407,11 @@ public class AIBridge_Perceive : MonoBehaviour
             //int.TryParse(details.duration, out durationMinutes);
             TimeSpan duration = TimeSpan.FromMinutes(durationMinutes);
             TimeSpan endTime = currentTime.Add(duration);
+
+            // 만일 action이 find면 object를 다른 오브젝트로 변경
+            if(actionData.action == "find"){
+                actionData.target_object = "something";
+            }
             // 새로운 일정 아이템 생성
             ScheduleItem newScheduleItem = new ScheduleItem
             (
