@@ -40,7 +40,13 @@ public class SaveLoadManager : MonoBehaviour
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        if(scene.name == "LoadingScene") return;
+        if(scene.name == "LoadingScene")
+        {
+            // 로딩 씬에서는 AIBridge_Perceive, TimeManager disbale
+            AIBridge_Perceive.Instance.gameObject.SetActive(false);
+            TimeManager.Instance.gameObject.SetActive(false);
+            return;
+        } 
 
         //  씬 로드할때 세이브 파일로부터 값 읽어와서 오브젝트 생성
         LoadData();
@@ -48,7 +54,10 @@ public class SaveLoadManager : MonoBehaviour
 
     public void LoadScene()
     {
-        SceneManager.LoadScene("LoadScene");
+        // 게임씬으로 로드할때는 AIBridge_Perceive, TimeManager enable
+        AIBridge_Perceive.Instance.gameObject.SetActive(true);
+        TimeManager.Instance.gameObject.SetActive(true);
+        SceneManager.LoadScene("Main_SYE");
     }
 
     public void SaveData()

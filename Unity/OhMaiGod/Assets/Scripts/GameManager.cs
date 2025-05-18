@@ -40,7 +40,7 @@ public class GameManager : MonoBehaviour
     {
         SaveLoadManager.Instance.SaveData();
 
-        SceneManager.LoadScene("LoadScene");
+        SceneManager.LoadScene("LoadingScene");
     }
 }
 
