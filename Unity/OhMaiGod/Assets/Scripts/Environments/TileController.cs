@@ -67,6 +67,12 @@ public class TileController : MonoBehaviour
                 Mathf.RoundToInt(mTilemap.cellBounds.center.x),
                 Mathf.RoundToInt(mTilemap.cellBounds.center.y),
                 0);
+            
+            if (mTilemap.HasTile(centerCell) && !Physics2D.OverlapCircle(
+                mTilemap.GetCellCenterWorld(centerCell), 0.2f, TileManager.Instance.ObstacleLayerMask))
+            {
+                return mTilemap.GetCellCenterWorld(centerCell);
+            }
 
             // BFS 탐색을 위한 큐와 방문 집합
             Queue<Vector3Int> queue = new Queue<Vector3Int>();
