@@ -339,7 +339,7 @@ public class AIBridge_Perceive : MonoBehaviour
 
         for (int i = 0; i < visibleObjectGroups.Length; i++)
         {
-            //LogManager.Log("AI", $"[AIBridge_Perceive] ObjectGroup {i}: location={visibleObjectGroups[i].location}, objects=[{string.Join(",", visibleObjectGroups[i].objects)}]", 3);
+            LogManager.Log("AI", $"[AIBridge_Perceive] ObjectGroup {i}: location={visibleObjectGroups[i].location}, objects=[{string.Join(",", visibleObjectGroups[i].interactables)}]", 3);
         }
 
         AgentRequest requestData = new AgentRequest
