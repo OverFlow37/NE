@@ -54,7 +54,7 @@ except Exception as e:
     print(f"❌ EmbeddingUpdater 임포트 실패: {e}")
 
 from agent.modules.reaction_decider import ReactionDecider
-from agent.modules.npc_conversation import NPCConversationManager
+from agent.modules.agent_conversation import AgentConversationManager
 
 # feedback_processor 모듈 임포트
 try:
@@ -137,15 +137,15 @@ except Exception as e:
     print(f"❌ ReactionDecider 인스턴스 생성 실패: {e}")
 
 try:
-    conversation_manager = NPCConversationManager(
+    conversation_manager = AgentConversationManager(
         ollama_client=client,
         memory_utils=memory_utils,
         word2vec_model=word2vec_model,
         max_turns=4  # 모듈 내부에서 최대 턴 수 설정 (필요에 따라 변경 가능)
     )
-    print("✅ NPCConversationManager 인스턴스 생성 완료")
+    print("✅ AgentConversationManager 인스턴스 생성 완료")
 except Exception as e:
-    print(f"❌ NPCConversationManager 인스턴스 생성 실패: {e}")
+    print(f"❌ AgentConversationManager 인스턴스 생성 실패: {e}")
 
 # feedback_processor 인스턴스 생성
 try:
@@ -650,10 +650,10 @@ async def update_embeddings():
 @app.post("/conversation")
 async def handle_conversation(payload: dict):
     """
-    NPC 간 대화를 처리하는 엔드포인트
+    Agent 간 대화를 처리하는 엔드포인트
     
     새 대화 시작, 대화 진행, 대화 종료 및 메모리 저장을 모두 처리합니다.
-    최대 대화 턴 수는 NPCConversationManager 내부에서 설정됩니다.
+    최대 대화 턴 수는 AgentConversationManager 내부에서 설정됩니다.
     """
     try:
         # 전체 처리 시작 시간 기록
