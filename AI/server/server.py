@@ -258,6 +258,38 @@ async def perceive_event(payload: dict):
         print(f"❌ 관찰 정보 저장 중 오류 발생: {str(e)}")
         return {"success": False, "error": str(e)}
 
+@app.post("/location_data")
+async def location_data(payload: dict):
+    """관찰 정보를 저장하는 엔드포인트"""
+    try:
+        if not payload or 'agent' not in payload:
+            return {"success": False, "error": "agent field is required"}
+            
+        agent_data = payload.get('agent', {})
+        agent_name = agent_data.get('name', 'John')
+        event_data = agent_data.get('perceive_event', {})
+        
+        # 게임 시간 가져오기
+        game_time = agent_data.get('time', None)
+        
+        # 시간 정보가 없으면 추가
+        if game_time and "time" not in event_data:
+            event_data["time"] = game_time
+        
+        # 메모리 저장
+        success = False
+        if event_data.get("event_is_save", True):
+            success = memory_utils.save_location_data(event_data, agent_name)
+        else:
+            print("💾 event_is_save 값이 False이므로 메모리 저장 건너뜀")
+        return {
+            "success": success
+        }
+        
+    except Exception as e:
+        print(f"❌ 관찰 정보 저장 중 오류 발생: {str(e)}")
+        return {"success": False, "error": str(e)}
+
 
 @app.post("/react")
 async def should_react(payload: dict):
@@ -510,80 +542,6 @@ async def react_to_event(payload: dict):
     except Exception as e:
         print(f"❌ 오류 발생: {str(e)}")
         return {"success": False, "error": str(e)}, 500
-
-@app.post("/agent_action")
-async def save_agent_action(payload: dict):
-    """에이전트의 행동을 저장하는 엔드포인트"""
-    try:
-        if not payload or 'agent' not in payload:
-            return {"success": False, "error": "agent field is required"}
-            
-        agent_data = payload.get('agent', {})
-        agent_name = agent_data.get('name', 'John')
-        action_data = agent_data.get('action', {})
-        
-        # 행동 데이터에 시간 정보 추가
-        action_data['time'] = agent_data.get('time', datetime.now().strftime("%Y.%m.%d.%H:%M"))
-        
-        # 행동 데이터를 영어 문장으로 변환
-        action_sentence = f"{action_data.get('action', '')} {action_data.get('target', '')} at {agent_data.get('current_location', '')}"
-        
-        # 임베딩 생성
-        embedding = memory_utils.get_embedding(action_sentence)
-        
-        # 메모리 저장 (event_id 포함)
-        success = memory_utils.save_memory(
-            event_sentence=action_sentence,
-            embedding=embedding,
-            event_time=action_data['time'],
-            agent_name=agent_name,
-            event_id=action_data.get('event_id', '')  # event_id 추가
-        )
-        
-        return {"success": success}
-        
-    except Exception as e:
-        print(f"❌ 에이전트 행동 저장 중 오류 발생: {str(e)}")
-        return {"success": False, "error": str(e)}
-
-
-@app.post("/action_feedback")
-async def save_action_feedback(payload: dict):
-    """행동에 대한 피드백을 저장하는 엔드포인트"""
-    try:
-        # 전체 처리 시작 시간 기록
-        start_time = time.time()
-        print("\n=== /action_feedback 엔드포인트 호출 ===")
-        print("📥 요청 데이터:", json.dumps(payload, indent=2, ensure_ascii=False))
-        
-        if not payload or 'agent' not in payload:
-            return {"success": False, "error": "agent field is required"}
-            
-        # 피드백 처리
-        result = await feedback_processor.process_feedback(payload)
-        
-        if not result:
-            return {"success": False, "error": "Failed to process feedback"}
-        
-        # 처리 시간 계산
-        total_time = time.time() - start_time
-        print(f"⏱ 피드백 처리 시간: {total_time:.2f}초")
-        
-        return result
-        
-    except Exception as e:
-        print(f"❌ 피드백 저장 중 오류 발생: {str(e)}")
-        import traceback
-        traceback.print_exc()
-        return {"success": False, "error": str(e)}
-
-try:
-    from agent.modules.reflection.importance_rater import ImportanceRater
-    from agent.modules.reflection.reflection_pipeline import process_reflection_request
-    from agent.modules.plan.plan_pipeline import process_plan_request
-    print("✅ reflection 및 plan 모듈 임포트 완료")
-except Exception as e:
-    print(f"❌ reflection 및 plan 모듈 임포트 실패: {e}")
 
 
 @app.post("/simple_action_feedback")
@@ -864,6 +822,83 @@ async def reset_all_data_from_backup():
     except Exception as e:
         print(f"❌ 데이터 초기화 중 오류 발생: {str(e)}")
         return {"success": False, "error": str(e)}
+
+
+
+# # 사용하지 않는 엔드포인트
+# @app.post("/agent_action")
+# async def save_agent_action(payload: dict):
+#     """에이전트의 행동을 저장하는 엔드포인트"""
+#     try:
+#         if not payload or 'agent' not in payload:
+#             return {"success": False, "error": "agent field is required"}
+            
+#         agent_data = payload.get('agent', {})
+#         agent_name = agent_data.get('name', 'John')
+#         action_data = agent_data.get('action', {})
+        
+#         # 행동 데이터에 시간 정보 추가
+#         action_data['time'] = agent_data.get('time', datetime.now().strftime("%Y.%m.%d.%H:%M"))
+        
+#         # 행동 데이터를 영어 문장으로 변환
+#         action_sentence = f"{action_data.get('action', '')} {action_data.get('target', '')} at {agent_data.get('current_location', '')}"
+        
+#         # 임베딩 생성
+#         embedding = memory_utils.get_embedding(action_sentence)
+        
+#         # 메모리 저장 (event_id 포함)
+#         success = memory_utils.save_memory(
+#             event_sentence=action_sentence,
+#             embedding=embedding,
+#             event_time=action_data['time'],
+#             agent_name=agent_name,
+#             event_id=action_data.get('event_id', '')  # event_id 추가
+#         )
+        
+#         return {"success": success}
+        
+#     except Exception as e:
+#         print(f"❌ 에이전트 행동 저장 중 오류 발생: {str(e)}")
+#         return {"success": False, "error": str(e)}
+
+# # 사용하지 않는 엔드포인트
+# @app.post("/action_feedback")
+# async def save_action_feedback(payload: dict):
+#     """행동에 대한 피드백을 저장하는 엔드포인트"""
+#     try:
+#         # 전체 처리 시작 시간 기록
+#         start_time = time.time()
+#         print("\n=== /action_feedback 엔드포인트 호출 ===")
+#         print("📥 요청 데이터:", json.dumps(payload, indent=2, ensure_ascii=False))
+        
+#         if not payload or 'agent' not in payload:
+#             return {"success": False, "error": "agent field is required"}
+            
+#         # 피드백 처리
+#         result = await feedback_processor.process_feedback(payload)
+        
+#         if not result:
+#             return {"success": False, "error": "Failed to process feedback"}
+        
+#         # 처리 시간 계산
+#         total_time = time.time() - start_time
+#         print(f"⏱ 피드백 처리 시간: {total_time:.2f}초")
+        
+#         return result
+        
+#     except Exception as e:
+#         print(f"❌ 피드백 저장 중 오류 발생: {str(e)}")
+#         import traceback
+#         traceback.print_exc()
+#         return {"success": False, "error": str(e)}
+
+# try:
+#     from agent.modules.reflection.importance_rater import ImportanceRater
+#     from agent.modules.reflection.reflection_pipeline import process_reflection_request
+#     from agent.modules.plan.plan_pipeline import process_plan_request
+#     print("✅ reflection 및 plan 모듈 임포트 완료")
+# except Exception as e:
+#     print(f"❌ reflection 및 plan 모듈 임포트 실패: {e}")
 
 
 if __name__ == "__main__":

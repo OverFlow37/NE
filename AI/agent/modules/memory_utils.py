@@ -108,7 +108,7 @@ class MemoryUtils:
         except ValueError:
             return "1"
 
-    def save_memory(self, event_sentence: str, embedding: List[float], event_time: str, agent_name: str, event_id: int = None, event_role: str = "", importance:int = 0):
+    def save_memory(self, event_sentence: str, embedding: List[float], event_time: str, agent_name: str, event_role: str = "", importance:int = 0):
         """새로운 메모리 저장"""
         memories = self._load_memories()
         
@@ -142,8 +142,6 @@ class MemoryUtils:
         if importance > 10 : 
             importance = 10
 
-        print(f"importance: {importance}")
-
         ## importance가 디폴트 값이 아니면 메모리에 저장
         if importance != 0 : 
             memory["importance"] = importance
@@ -153,7 +151,7 @@ class MemoryUtils:
         
         # 임베딩 데이터 저장
         embeddings = {
-            "event": self.get_embedding(event_sentence),
+            "event": embedding,
             "action": [],
             "feedback": []
         }
@@ -202,17 +200,103 @@ class MemoryUtils:
     def save_perception(self, event: Dict[str, Any], agent_name: str) -> bool:
         """관찰 정보를 메모리에 저장"""
         try:
-            event_sentence = ""
-            if event.get("event_location", "") != "" and event.get("event_location", "") != " ":
-                event_sentence = f'{event.get("event_description", "")} at {event.get("event_location", "")}'
-            else:
-                event_sentence = event.get("event_description", "")
+            event_sentence = event.get("event_description", "")
             embedding = self.get_embedding(event_sentence)
+            event_role = event.get("event_role", "")
             event_time = event.get("time", datetime.now().strftime("%Y.%m.%d.%H:%M"))
             if event.get("importance", 0) != 0:
-                memory_id = self.save_memory(event_sentence, embedding, event_time, agent_name, importance=event.get("importance", 0))
+                memory_id = self.save_memory(event_sentence, embedding, event_time, agent_name, event_role, importance=event.get("importance", 0))
             else:   
-                memory_id = self.save_memory(event_sentence, embedding, event_time, agent_name)
+                memory_id = self.save_memory(event_sentence, embedding, event_time, agent_name, event_role)
+            return True
+        except Exception as e:
+            print(f"관찰 정보 저장 실패: {e}")
+            return False
+
+######################## 위치 저장하는 메소드 라인 ################################
+
+    def overwrite_location_memory(self, event_sentence: str, embedding: List[float], event_location: str, event_type: str, event_time: str, agent_name: str, event_role: str = "", importance:int = 0):
+        """기존 메모리 덮어쓰기"""
+        memories = self._load_memories()
+        
+        if agent_name not in memories:
+            memories[agent_name] = {
+                "memories": {},
+                "embeddings": {}
+            }
+            
+        # 현재 시간이 제공되지 않은 경우 현재 시간 사용
+        if not event_time:
+            event_time = datetime.now().strftime("%Y.%m.%d.%H:%M")
+        
+        memory_id_to_overwrite = None
+        # 기존 메모리에서 event_type과 event_location이 일치하는지 확인
+        if agent_name in memories and "memories" in memories[agent_name]:
+            for mem_id, mem_data in memories[agent_name]["memories"].items():
+                print(f"mem_data: {mem_id}")
+                if mem_data.get("event_type") == event_type and mem_data.get("event_location") == event_location:
+                    memory_id_to_overwrite = mem_id
+                    break
+        
+        # 일치하는 메모리가 있으면 해당 ID 사용, 없으면 새 ID 생성
+        if memory_id_to_overwrite:
+            memory_id = memory_id_to_overwrite
+        else:
+            memory_id = self._get_next_memory_id(agent_name)
+            
+        # 메모리 데이터 저장
+        memory = {
+            "event_role": event_role,
+            "event": event_sentence,
+            "action": "",
+            "feedback": "",
+            "conversation_detail": "",
+            "time": event_time,
+            "event_type": event_type,  # event_type 저장
+            "event_location": event_location  # event_location 저장
+        }
+        
+
+        print(f"memory: {memory}")
+        print(f"memory_id: {memory_id}")
+        # if event_role != "" and event_role != " ":
+        #     memory["importance"] = 8
+        
+        ## 10 이상의 importance -> 10 처리
+        if importance > 10 : 
+            importance = 10
+
+        ## importance가 디폴트 값이 아니면 메모리에 저장
+        if importance != 0 : 
+            memory["importance"] = importance
+
+        # 메모리와 임베딩을 별도로 저장
+        memories[agent_name]["memories"][memory_id] = memory
+        
+        # 임베딩 데이터 저장
+        embeddings = {
+            "event": embedding,
+            "action": [],
+            "feedback": []
+        }
+        memories[agent_name]["embeddings"][memory_id] = embeddings
+        
+        self._save_memories(memories)
+        
+        return memory_id
+
+    def save_location_data(self, event: Dict[str, Any], agent_name: str) -> bool:
+        """지역 정보를 메모리에 저장"""
+        try:
+            event_sentence = event.get("event_description", "")
+            embedding = self.get_embedding(event_sentence)
+            event_time = event.get("time", datetime.now().strftime("%Y.%m.%d.%H:%M"))
+            event_location = event.get("event_location", "")
+            event_type = event.get("event_type", "")
+            if event.get("importance", 0) != 0:
+                memory_id = self.overwrite_location_memory(event_sentence, embedding, event_location, event_type, event_time, agent_name, importance=event.get("importance", 0))
+            else:   
+                memory_id = self.overwrite_location_memory(event_sentence, embedding, event_location, event_type, event_time, agent_name)
             return True
         except Exception as e:
             print(f"관찰 정보 저장 실패: {e}")
