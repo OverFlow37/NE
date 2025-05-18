@@ -188,7 +188,7 @@ public class AgentController : MonoBehaviour, ISaveable
         // AgentNeeds를 JSON 문자열로 변환
         string json = JsonUtility.ToJson(mAgentNeeds);
         // 저장 경로 설정 (persistentDataPath/Agent.json)
-        string path = System.IO.Path.Combine(Application.persistentDataPath, "Agent.json");
+        string path = System.IO.Path.Combine(Application.persistentDataPath, "agent.json");
         try
         {
             System.IO.File.WriteAllText(path, json);
@@ -203,7 +203,7 @@ public class AgentController : MonoBehaviour, ISaveable
     // AgentNeeds를 JSON 파일에서 불러오기
     public void LoadData()
     {
-        string path = System.IO.Path.Combine(Application.persistentDataPath, "Agent.json");
+        string path = System.IO.Path.Combine(Application.persistentDataPath, "agent.json");
         if (!System.IO.File.Exists(path))
         {
             LogManager.Log("Agent", $"AgentNeeds 저장 파일이 존재하지 않습니다: {path}", 1);

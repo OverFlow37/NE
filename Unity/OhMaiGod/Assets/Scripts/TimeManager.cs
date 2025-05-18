@@ -53,7 +53,7 @@ public class TimeManager : MonoBehaviour, ISaveable
         
         // 게임 날짜 및 시간 초기화
         mGameDate = DateTime.Today;
-        mCurrentGameTime = new TimeSpan(6, 0, 0);
+        mCurrentGameTime = new TimeSpan(7, 0, 0);
     }
 
     private void Update()
@@ -92,8 +92,8 @@ public class TimeManager : MonoBehaviour, ISaveable
         if (!mIsSavedToday && mCurrentGameTime >= new TimeSpan(19, 0, 0))
         {
             mGameDate = mGameDate.AddDays(1);
-            GameManager.Instance.SaveData();
             mIsSavedToday = true;
+            GameManager.Instance.DailySettlement(); // 일일 정산
         }
     }
 

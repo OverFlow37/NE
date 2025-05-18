@@ -35,8 +35,8 @@ public class GameManager : MonoBehaviour
         DontDestroyOnLoad(gameObject);
     }
 
-    // 모든 매니저의 SaveData 호출
-    public void SaveData()
+    // 모든 매니저의 SaveData 호출 후 다음날로 씬 로드
+    public void DailySettlement()
     {
         SaveLoadManager.Instance.SaveData();
 

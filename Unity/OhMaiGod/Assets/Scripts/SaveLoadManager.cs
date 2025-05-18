@@ -40,6 +40,8 @@ public class SaveLoadManager : MonoBehaviour
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
+        if(scene.name == "LoadingScene") return;
+
         //  씬 로드할때 세이브 파일로부터 값 읽어와서 오브젝트 생성
         LoadData();
     }
@@ -75,6 +77,8 @@ public class SaveLoadManager : MonoBehaviour
         TileManager.Instance.LoadData();
         Inventory.Instance.LoadData();
         TimeManager.Instance.LoadData();
+
+        Inventory.Instance.GetComponentInChildren<ChatPower>().SetAgentController();
     }
 
     private void OnDestroy()

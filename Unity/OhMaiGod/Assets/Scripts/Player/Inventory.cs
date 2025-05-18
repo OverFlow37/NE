@@ -118,37 +118,42 @@ public class Inventory : MonoBehaviour, ISaveable
         // mItems의 각 아이템 이름 저장
         foreach (GameObject item in mItems)
         {
-            saveData.itemNames.Add(item.name);
+            // 아이템 이름은 오브젝트 이름에서 ( 전까지 추출
+            string itemName = item.name.Split('(')[0].Trim();
+            saveData.itemNames.Add(itemName);
         }
 
         string json = JsonUtility.ToJson(saveData);
-        string path = System.IO.Path.Combine(Application.persistentDataPath, "Inventory.json");
+        string path = System.IO.Path.Combine(Application.persistentDataPath, "inventory.json");
         System.IO.File.WriteAllText(path, json);
         LogManager.Log("인벤토리 저장 완료: " + path);
     }
 
     public void LoadData()
     {
-        string path = System.IO.Path.Combine(Application.persistentDataPath, "Inventory.json");
+        string path = System.IO.Path.Combine(Application.persistentDataPath, "inventory.json");
         if (System.IO.File.Exists(path))
         {
             string json = System.IO.File.ReadAllText(path);
             InventorySaveData saveData = JsonUtility.FromJson<InventorySaveData>(json);
             
-            // 아이템 이름 리스트로부터 GameObject를 찾아서 mItems에 추가
+            // 아이템 이름 리스트로부터 PrefabManager에서 프리팹을 찾아 mItems에 추가
             mItems.Clear();
             if (saveData.itemNames != null)
             {
                 foreach (string itemName in saveData.itemNames)
                 {
-                    GameObject itemPrefab = Resources.Load<GameObject>(itemName);
+                    // PrefabManager에서 프리팹을 이름으로 찾아옴
+                    GameObject itemPrefab = PrefabManager.Instance.GetPrefabByName(itemName);
                     if (itemPrefab != null)
                     {
-                        mItems.Add(Instantiate(itemPrefab));
+                        GameObject item = Instantiate(itemPrefab);
+                        item.SetActive(false);
+                        mItems.Add(item);
                     }
                     else
                     {
-                        LogManager.Log($"아이템 프리팹을 찾을 수 없음: {itemName}");
+                        LogManager.Log("Inventory", $"프리팹 {itemName}을(를) 찾을 수 없습니다.", 1);
                     }
                 }
             }

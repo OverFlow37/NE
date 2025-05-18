@@ -26,6 +26,8 @@ public class ChatPower : MonoBehaviour
         mChatInputField.onEndEdit.AddListener(OnInputEndEdit);
         mChatPowerObject.transform.localScale = mHideScale;
         mChatPowerObject.SetActive(false);
+
+         SetAgentController();
     }
 
     public void ShowChatPower()
@@ -60,6 +62,11 @@ public class ChatPower : MonoBehaviour
         if (!_afterShow)
             mChatPowerObject.SetActive(false);
         mScaleCoroutine = null;
+    }
+
+    public void SetAgentController()
+    {
+        mAgentController = GameObject.FindWithTag("NPC").GetComponent<AgentController>();
     }
 
     // 엔터 입력 시 호출
