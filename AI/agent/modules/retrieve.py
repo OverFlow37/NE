@@ -242,7 +242,7 @@ class MemoryRetriever:
         Returns:
             List[Tuple[Dict[str, Any], float]]: (메모리, 유사도) 튜플 리스트
         """
-        memories = self.memory_utils._load_memories()
+        memories = self.memory_utils._load_memories(sort_by_time=True)
         reflections = self.memory_utils._load_reflections()
         
         if agent_name not in memories or not memories[agent_name]["memories"]:
