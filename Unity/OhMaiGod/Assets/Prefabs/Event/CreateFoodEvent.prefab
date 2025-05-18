@@ -49,7 +49,9 @@ MonoBehaviour:
   mEventInfo:
     event_type: 2
     event_location: 
-    event_description: I saw the power of God to create fruit.
+    event_description: the power of God to create fruit.
+    event_is_save: 0
+    event_role: 
   mLifeDuration: 10
 --- !u!50 &2803138962325272710
 Rigidbody2D:

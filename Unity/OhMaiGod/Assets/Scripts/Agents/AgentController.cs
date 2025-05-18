@@ -104,6 +104,8 @@ public class AgentController : MonoBehaviour, ISaveable
     public PerceiveFeedback mCurrentFeedback; // 현재 체크 중인 피드백
     private int mInteractCountForFeedback = 0; // 상호작용 발생 횟수
 
+    private Interactable mInteractableAgentSelf;
+
     private void Awake()
     {
         // 참조 가져오기
@@ -159,6 +161,9 @@ public class AgentController : MonoBehaviour, ISaveable
         }
         // 대기시간 초기화
         mWaitTIme = TimeManager.Instance.GetCurrentGameTime();
+
+        mInteractableAgentSelf = GetComponent<Interactable>();
+        mInteractableAgentSelf.mInteractableData.mName = mName;
     }
 
     private void OnDestroy()
@@ -711,11 +716,17 @@ public class AgentController : MonoBehaviour, ISaveable
         }
         // 타겟 로케이션에 타겟 오브젝트가 없는 경우
         else if (!_success && _actionName == ""){
-            mCurrentFeedback.feedback.feedback_description = $"There are no {_interactableName} at the {mCurrentLocation}.";
+            if (CurrentAction.ActionName == "find"){
+                mCurrentFeedback.feedback.feedback_description = $"Let's find something in the {mCurrentLocation}.";
+            }
+            else{
+                mCurrentFeedback.feedback.feedback_description = $"There are no {_interactableName} at the {mCurrentLocation}.";
+            }
+            
             LogManager.Log("Agent", $"{mName}: 로케이션에 오브젝트가 없어 피드백 보냄: {mCurrentFeedback.feedback.feedback_description}", 2);
             PerceiveEvent perceiveEvent = new PerceiveEvent();
             perceiveEvent.event_is_save = false;
-            perceiveEvent.event_location = "";
+            perceiveEvent.event_location = CurrentLocation;
             perceiveEvent.event_role = "";
             perceiveEvent.event_type = PerceiveEventType.TARGET_NOT_IN_LOCATION;
             string eventData = mCurrentFeedback.feedback.feedback_description + GetCurrentLocationInteractables(mCurrentLocation);

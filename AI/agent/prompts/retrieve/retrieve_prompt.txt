@@ -43,4 +43,4 @@ AVAILABLE ACTIONS :
 - "use": "to use, observe, or play with this object",
 - "break": "Destroy break this object and harvest resources.",
 - "offer": "offering this object to God."
-- "find": "find something at other location"
+- "find": "find something at other location, useful when none of the objects currently seen are suitable for the situation."
