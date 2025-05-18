@@ -513,6 +513,7 @@ async def react_to_event(payload: dict):
             if event_is_save == False:
                 event_sentence = ""
                 event_importance = 0
+                embedding = memory_utils.get_embedding("")
 
             memory_id = memory_utils.save_memory(
                 event_sentence=event_sentence,
