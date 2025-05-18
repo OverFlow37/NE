@@ -12,8 +12,6 @@ public class CreateFruitPower : MonoBehaviour
     public GameObject mSelectedEffect;
     [Header("생성할 수 있는 아이템")]
     [SerializeField] private List<GameObject> mItemList;
-    [Header("효과음")]
-    [SerializeField] private GameObject mSoundEffect;
 
 
     private bool mIsPlacementMode = false;
@@ -98,10 +96,6 @@ public class CreateFruitPower : MonoBehaviour
 
     public void PlaceObject(Vector3 _mouseWorldPos)
     {
-        if (mSoundEffect != null)
-        {
-            Instantiate(mSoundEffect, _mouseWorldPos, Quaternion.identity);
-        }
         StartCoroutine(PlaceObjectsSequentially(_mouseWorldPos));
     }
 
