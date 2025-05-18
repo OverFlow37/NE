@@ -142,6 +142,8 @@ class MemoryUtils:
         if importance > 10 : 
             importance = 10
 
+        print(f"importance: {importance}")
+
         ## importance가 디폴트 값이 아니면 메모리에 저장
         if importance != 0 : 
             memory["importance"] = importance
@@ -207,8 +209,10 @@ class MemoryUtils:
                 event_sentence = event.get("event_description", "")
             embedding = self.get_embedding(event_sentence)
             event_time = event.get("time", datetime.now().strftime("%Y.%m.%d.%H:%M"))
-            
-            memory_id = self.save_memory(event_sentence, embedding, event_time, agent_name)
+            if event.get("importance", 0) != 0:
+                memory_id = self.save_memory(event_sentence, embedding, event_time, agent_name, importance=event.get("importance", 0))
+            else:   
+                memory_id = self.save_memory(event_sentence, embedding, event_time, agent_name)
             return True
         except Exception as e:
             print(f"관찰 정보 저장 실패: {e}")
