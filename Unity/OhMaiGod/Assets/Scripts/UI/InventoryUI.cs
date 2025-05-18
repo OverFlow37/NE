@@ -77,9 +77,9 @@ public class InventoryUI : MonoBehaviour
             if (i < items.Count && items[i] != null)
             {
                 var interactable = items[i].GetComponent<Interactable>();
-                if (interactable != null && interactable.mInteractableData != null)
+                if (interactable != null && interactable.SpriteRenderer != null)
                 {
-                    iconImage.sprite = interactable.mInteractableData.mIcon;
+                    iconImage.sprite = interactable.SpriteRenderer.sprite;
                     iconImage.color = Color.white; // 아이콘이 있으면 보이게
                 }
                 else

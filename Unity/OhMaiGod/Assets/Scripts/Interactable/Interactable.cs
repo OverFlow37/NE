@@ -32,6 +32,7 @@ public class Interactable : MonoBehaviour
     public TargetController TargetController { get { return mTargetController; } }
     // 스프라이트 렌더러
     private SpriteRenderer mSpriteRenderer;
+    public SpriteRenderer SpriteRenderer { get { return mSpriteRenderer; } }
     private Collider2D mCollider;
 
     void Awake()
