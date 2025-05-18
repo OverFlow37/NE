@@ -23,7 +23,6 @@ public class MovementController : MonoBehaviour
     private bool mIsMoving;                                           // 이동 중 여부
 
     private SpriteRenderer mSpriteRenderer;                          // 스프라이트 렌더러
-    private NPCLog mNPCLog;
 
     // 목적지 도착 이벤트
     public event System.Action OnDestinationReached;
@@ -36,7 +35,6 @@ public class MovementController : MonoBehaviour
     // 초기화
     private void Awake()
     {
-        mNPCLog = GameObject.Find("NPCLog").GetComponent<NPCLog>();
         mSpriteRenderer = GetComponent<SpriteRenderer>();
     }
 
@@ -228,7 +226,6 @@ public class MovementController : MonoBehaviour
         // 현재 경로의 다음 지점으로 이동
         if (mCurrentPath != null && mCurrentPathIndex < mCurrentPath.Count - 1)
         {
-            mNPCLog.SetNPCLog($"{gameObject.name}이(가) 이동 중");
             mCurrentPathIndex++;
             mCurrentPoint = TileManager.Instance.GroundTilemap.GetCellCenterWorld(new Vector3Int(mCurrentPath[mCurrentPathIndex].x, mCurrentPath[mCurrentPathIndex].y, 0));
             mIsMoving = true;
@@ -237,7 +234,6 @@ public class MovementController : MonoBehaviour
         {
             mIsMoving = false;
             transform.position = mTargetPosition;
-            mNPCLog.SetNPCLog($"{gameObject.name}이(가) 목적지에 도착함");
             LogManager.Log("Movement", $"{gameObject.name}이(가) 목적지({mCurrentPoint})에 도착함", 2);
             mCurrentPath = null;
             mCurrentPathIndex = 0;

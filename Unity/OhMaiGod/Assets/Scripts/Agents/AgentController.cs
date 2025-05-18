@@ -6,7 +6,7 @@ using System.Linq;
 
 using OhMAIGod.Agent;
 using OhMAIGod.Perceive;
-public class AgentController : MonoBehaviour
+public class AgentController : MonoBehaviour, ISaveable
 {
     [SerializeField] public AgentUI mAgentUI;
     [SerializeField] private AgentVision agentVision;  // AgentVision 컴포넌트 참조 추가
@@ -182,6 +182,47 @@ public class AgentController : MonoBehaviour
         }
     }
 
+    // AgentNeeds를 JSON 파일로 저장
+    public void SaveData()
+    {
+        // AgentNeeds를 JSON 문자열로 변환
+        string json = JsonUtility.ToJson(mAgentNeeds);
+        // 저장 경로 설정 (persistentDataPath/Agent.json)
+        string path = System.IO.Path.Combine(Application.persistentDataPath, "agent.json");
+        try
+        {
+            System.IO.File.WriteAllText(path, json);
+            LogManager.Log("Agent", $"AgentNeeds가 {path}에 저장되었습니다.", 2);
+        }
+        catch (System.Exception e)
+        {
+            LogManager.Log("Agent", $"AgentNeeds 저장 실패: {e.Message}", 0);
+        }
+    }
+
+    // AgentNeeds를 JSON 파일에서 불러오기
+    public void LoadData()
+    {
+        string path = System.IO.Path.Combine(Application.persistentDataPath, "agent.json");
+        if (!System.IO.File.Exists(path)) return;
+        
+        try
+        {
+            string json = System.IO.File.ReadAllText(path);
+            var loadedNeeds = JsonUtility.FromJson<OhMAIGod.Agent.AgentNeeds>(json);
+            // 각 필드를 명시적으로 할당하여 Inspector에도 즉시 반영되도록 함
+            mAgentNeeds.Hunger = loadedNeeds.Hunger;
+            mAgentNeeds.Sleepiness = loadedNeeds.Sleepiness;
+            mAgentNeeds.Loneliness = loadedNeeds.Loneliness;
+            mAgentNeeds.Stress = loadedNeeds.Stress;
+            LogManager.Log("Agent", $"AgentNeeds가 {path}에서 불러와졌습니다.", 2);
+        }
+        catch (System.Exception e)
+        {
+            LogManager.Log("Agent", $"AgentNeeds 불러오기 실패: {e.Message}", 0);
+        }
+    }
+
     // 목적지(오브젝트만) 도착 이벤트 발생 시 호출되는 함수
     // 애니메이션 업데이트, Status 업데이트, 활동 시작
     // movementController의 이벤트로 호출
@@ -284,6 +325,8 @@ public class AgentController : MonoBehaviour
             mSpawnPoint = GameObject.FindWithTag("Respawn").GetComponent<Transform>();
             if(mSpawnPoint != null) transform.position = mSpawnPoint.position;
         }
+
+        LoadData();
     }
 
     private void Update()

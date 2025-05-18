@@ -68,7 +68,7 @@ public class TileManager : MonoBehaviour, ISaveable
         
         // 씬 로드 이벤트 등록
         SceneManager.sceneLoaded += OnSceneLoaded;
-        
+
         // Awake에서는 초기화하지 않음
         StartCoroutine(InitializeManager());
     }
@@ -77,13 +77,14 @@ public class TileManager : MonoBehaviour, ISaveable
     {
         mIsInitialized = false;
 
-        if (scene.name == "LoadScene")
+        if (scene.name == "Main")
         {
-            // 기존 Interactable들 제거
-            
-
-            // 저장된 데이터로 Interactable 오브젝트 생성
-            
+            // ground tilemap 설정
+            GameObject landBaseObj = GameObject.Find("Tilemap_land_base");
+            if (landBaseObj != null)
+            {
+                mGroundTilemap = landBaseObj.GetComponent<Tilemap>();
+            }
 
             StartCoroutine(InitializeManager());
         }
@@ -95,14 +96,14 @@ public class TileManager : MonoBehaviour, ISaveable
         yield return null;
 
         // ground tilemap 설정
-        if(mGroundTilemap == null || mGroundTilemap.gameObject == null)
+        GameObject landBaseObj = GameObject.Find("Tilemap_land_base");
+        if (landBaseObj != null)
         {
-            GameObject landBaseObj = GameObject.Find("Tilemap_land_base");
-            if (landBaseObj != null)
-            {
-                mGroundTilemap = landBaseObj.GetComponent<Tilemap>();
-            }
+            mGroundTilemap = landBaseObj.GetComponent<Tilemap>();
         }
+
+        mLocationTilemaps = new List<Tilemap>();
+        mTileTree = new List<TileController>();
 
         // 씬의 모든 TileController 찾아서 등록
         var tileControllers = FindObjectsByType<TileController>(FindObjectsSortMode.None);

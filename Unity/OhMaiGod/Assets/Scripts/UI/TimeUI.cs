@@ -4,8 +4,8 @@ using UnityEngine.UI;
 public class TimeUI : MonoBehaviour
 {
     
-    public Text mDateText;   // 날짜를 표시할 Text 컴포넌트 (Inspector에서 연결)
-    public Text mTimeText;   // 시간을 표시할 Text 컴포넌트 (Inspector에서 연결)
+    public Text mDateText;   // 날짜를 표시할 Text 컴포넌트 
+    public Text mTimeText;   // 시간을 표시할 Text 컴포넌트
 
     // 매 프레임마다 날짜와 시간을 갱신하여 UI에 표시
     private void Update()

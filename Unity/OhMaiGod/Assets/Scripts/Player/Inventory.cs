@@ -1,11 +1,12 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Inventory : MonoBehaviour
+public class Inventory : MonoBehaviour, ISaveable
 {
     // 싱글톤 인스턴스
     public static Inventory Instance { get; private set; }
-
+    
+    [System.Serializable]
     public class ResourceItemsCount
     {
         public int wood = 0;
@@ -96,4 +97,79 @@ public class Inventory : MonoBehaviour
         Stone,
         Power
     };
+
+    // 인벤토리 저장용 DTO 클래스
+    [System.Serializable]
+    private struct InventorySaveData
+    {
+        public List<string> itemNames; // 아이템 이름 리스트
+        public ResourceItemsCount resourceItems; // 자원 정보
+    }
+
+    public void SaveData()
+    {
+        // 인벤토리 데이터를 JSON 파일로 저장
+        InventorySaveData saveData = new InventorySaveData
+        {
+            itemNames = new List<string>(),
+            resourceItems = mResourceItems
+        };
+        
+        // mItems의 각 아이템 이름 저장
+        foreach (GameObject item in mItems)
+        {
+            // 아이템 이름은 오브젝트 이름에서 ( 전까지 추출
+            string itemName = item.name.Split('(')[0].Trim();
+            saveData.itemNames.Add(itemName);
+        }
+
+        string json = JsonUtility.ToJson(saveData);
+        string path = System.IO.Path.Combine(Application.persistentDataPath, "inventory.json");
+        System.IO.File.WriteAllText(path, json);
+        LogManager.Log("인벤토리 저장 완료: " + path);
+    }
+
+    public void LoadData()
+    {
+        string path = System.IO.Path.Combine(Application.persistentDataPath, "inventory.json");
+        if (System.IO.File.Exists(path))
+        {
+            string json = System.IO.File.ReadAllText(path);
+            InventorySaveData saveData = JsonUtility.FromJson<InventorySaveData>(json);
+            
+            // 아이템 이름 리스트로부터 PrefabManager에서 프리팹을 찾아 mItems에 추가
+            mItems.Clear();
+            if (saveData.itemNames != null)
+            {
+                foreach (string itemName in saveData.itemNames)
+                {
+                    // PrefabManager에서 프리팹을 이름으로 찾아옴
+                    GameObject itemPrefab = PrefabManager.Instance.GetPrefabByName(itemName);
+                    if (itemPrefab != null)
+                    {
+                        GameObject item = Instantiate(itemPrefab);
+                        item.SetActive(false);
+                        mItems.Add(item);
+                    }
+                    else
+                    {
+                        LogManager.Log("Inventory", $"프리팹 {itemName}을(를) 찾을 수 없습니다.", 1);
+                    }
+                }
+            }
+            
+            // 자원 정보 복사
+            if (saveData.resourceItems != null)
+            {
+                mResourceItems.wood = saveData.resourceItems.wood;
+                mResourceItems.stone = saveData.resourceItems.stone;
+                mResourceItems.power = saveData.resourceItems.power;
+            }
+            LogManager.Log("인벤토리 로드 완료: " + path);
+        }
+        else
+        {
+            LogManager.Log("저장된 인벤토리 파일이 없습니다: " + path);
+        }
+    }
 }

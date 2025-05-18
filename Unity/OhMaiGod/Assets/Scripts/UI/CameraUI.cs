@@ -1,10 +1,9 @@
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class CameraUI : MonoBehaviour
 {
-    public static CameraUI Instance { get; private set; }
-
     [Header("버튼")]
     [SerializeField] private Button mMoveCameraButton;
     [SerializeField] private Button mFollowCameraButton;
@@ -13,13 +12,26 @@ public class CameraUI : MonoBehaviour
 
     private void Awake()
     {
-        if (Instance != null && Instance != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
-        Instance = this;
-        mCameraController = GetComponent<CameraController>();
+        SceneManager.sceneLoaded += OnSceneLoaded;
+
+        Initialize();
+    }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        if(scene.name != "Main") return;
+
+        Initialize();
+    }
+
+    private void Initialize()
+    {
+        GameObject cinemachineCam = GameObject.Find("CinemachineCamera");
+
+        mCameraController = cinemachineCam.GetComponent<CameraController>();     
+
+        mMoveCameraButton.onClick.AddListener(mCameraController.ToggleFollowMode);
+        mFollowCameraButton.onClick.AddListener(mCameraController.ToggleFollowMode);
     }
 
     private void Update()
@@ -34,5 +46,10 @@ public class CameraUI : MonoBehaviour
             mMoveCameraButton.gameObject.SetActive(false);
             mFollowCameraButton.gameObject.SetActive(true);
         }
+    }
+
+    private void OnDestroy()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
     }
 }

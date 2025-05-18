@@ -75,18 +75,35 @@ public class AIBridge : MonoBehaviour
 
     private bool mIsRequesting = false;  // AI에게 응답 보내고 있는지 확인하는 변수
 
-    private void Update(){
+    private void Update()
+    {
         // if (Input.GetKeyDown(KeyCode.D))
         // {
         //     send_test();
         // }
     }
+
     // 게임 시작시 자동으로 첫 요청 보내기(임시)
     public void send_test()
     {
         // 게임 시작시 자동으로 첫 요청 보내기
         SendAgent(mAgentControllers[0]);
     }
+
+    // 씬에 존재하는 에이전트 참조 설정
+    public void SetAgentControllers()
+    {
+        // 'NPC' 태그를 가진 모든 오브젝트의 AgentController의 SaveData 호출
+        GameObject[] npcObjects = GameObject.FindGameObjectsWithTag("NPC");
+        mAgentControllers = new AgentController[npcObjects.Length];
+        for (int i = 0; i < npcObjects.Length; i++)
+        {   
+            AgentController agent = npcObjects[i].GetComponent<AgentController>();
+            if (agent != null)
+                mAgentControllers[i] = agent;
+        }
+    }
+
 
     // Interactable 목록을 ObjectGroup 배열로 변환
     private ObjectGroup[] ConvertToObjectGroups(List<Interactable> interactables)
