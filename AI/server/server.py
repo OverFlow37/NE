@@ -70,6 +70,14 @@ try:
 except Exception as e:
     print(f"❌ SimpleFeedbackProcessor 임포트 실패: {e}")
 
+try:
+    from agent.modules.reflection.importance_rater import ImportanceRater
+    from agent.modules.reflection.reflection_pipeline import process_reflection_request
+    from agent.modules.plan.plan_pipeline import process_plan_request
+    print("✅ reflection 및 plan 모듈 임포트 완료")
+except Exception as e:
+    print(f"❌ reflection 및 plan 모듈 임포트 실패: {e}")
+
 print(f"⏱ 모듈 임포트 시간: {time.time() - import_start:.2f}초")
 
 app = FastAPI()
@@ -891,14 +899,6 @@ async def reset_all_data_from_backup():
 #         import traceback
 #         traceback.print_exc()
 #         return {"success": False, "error": str(e)}
-
-# try:
-#     from agent.modules.reflection.importance_rater import ImportanceRater
-#     from agent.modules.reflection.reflection_pipeline import process_reflection_request
-#     from agent.modules.plan.plan_pipeline import process_plan_request
-#     print("✅ reflection 및 plan 모듈 임포트 완료")
-# except Exception as e:
-#     print(f"❌ reflection 및 plan 모듈 임포트 실패: {e}")
 
 
 if __name__ == "__main__":
