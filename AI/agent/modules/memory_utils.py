@@ -47,11 +47,51 @@ class MemoryUtils:
                     else:
                         json.dump({"John": [], "Sarah": []}, f, ensure_ascii=False, indent=2)
 
-    def _load_memories(self) -> Dict[str, Dict[str, Dict[str, Dict[str, Any]]]]:
-        """메모리 데이터 로드"""
+    def _load_memories(self, sort_by_time: bool = False) -> Dict[str, Dict[str, Dict[str, Dict[str, Any]]]]:
+        """메모리 데이터 로드. 필요에 따라 시간순으로 정렬합니다."""
         try:
             with open(self.memories_file, 'r', encoding='utf-8') as f:
-                return json.load(f)
+                memories_data = json.load(f)
+            
+            if sort_by_time:
+                # 각 에이전트의 메모리를 시간 역순으로 정렬
+                for agent_name in memories_data:
+                    if "memories" in memories_data[agent_name] and isinstance(memories_data[agent_name]["memories"], dict):
+                        # 메모리 항목들을 시간 기준으로 정렬
+                        # strptime 포맷을 유연하게 처리하기 위해 여러 포맷 시도
+                        def parse_time(time_str):
+                            formats_to_try = [
+                                "%Y.%m.%d.%H:%M:%S", 
+                                "%Y.%m.%d.%H:%M",
+                                "%Y-%m-%dT%H:%M:%S.%fZ", # ISO 8601 format
+                                "%Y-%m-%d %H:%M:%S" # 다른 일반적인 포맷
+                            ]
+                            for fmt in formats_to_try:
+                                try:
+                                    return datetime.strptime(time_str, fmt)
+                                except ValueError:
+                                    continue
+                            # 모든 포맷에 실패하면 None 반환 또는 에러 처리
+                            print(f"Warning: Could not parse time string {time_str} for agent {agent_name}")
+                            return datetime.min # 정렬에서 가장 오래된 것으로 처리
+
+                        memory_items = []
+                        for mem_id, mem_content in memories_data[agent_name]["memories"].items():
+                            parsed_time = parse_time(mem_content.get("time", ""))
+                            memory_items.append((mem_id, mem_content, parsed_time))
+
+                        # 시간(parsed_time)을 기준으로 내림차순 정렬
+                        sorted_memory_items = sorted(
+                            memory_items,
+                            key=lambda item: item[2], # item[2]는 parsed_time
+                            reverse=True
+                        )
+                        
+                        # 정렬된 결과를 새 딕셔너리에 저장
+                        ordered_memories = {mem_id: mem_content for mem_id, mem_content, _ in sorted_memory_items}
+                        memories_data[agent_name]["memories"] = ordered_memories
+            
+            return memories_data
         except Exception as e:
             print(f"메모리 로드 중 오류 발생: {e}")
             return {
@@ -217,7 +257,7 @@ class MemoryUtils:
 
     def overwrite_location_memory(self, event_sentence: str, embedding: List[float], event_location: str, event_type: str, event_time: str, agent_name: str, event_role: str = "", importance:int = 0):
         """기존 메모리 덮어쓰기"""
-        memories = self._load_memories()
+        memories = self._load_memories(sort_by_time=True)
         
         if agent_name not in memories:
             memories[agent_name] = {
