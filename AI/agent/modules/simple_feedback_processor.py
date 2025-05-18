@@ -378,9 +378,11 @@ class SimpleFeedbackProcessor:
                     "feedback": combined_feedback,  # 통합 피드백 저장
                     "conversation_detail": "",
                     "time": time,
-                    "embeddings": embedding,
-                    "importance": 4  # 피드백의 기본 중요도
+                    "embeddings": embedding
                 }
+                if importance != 0:
+                    memories[agent_name]["memories"][new_memory_id]["importance"] = importance
+
                 print(f"✅ 새 메모리 ID {new_memory_id}에 통합 피드백 저장")
                 self.memory_utils._save_memories(memories)
                 
