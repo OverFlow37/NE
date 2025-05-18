@@ -269,18 +269,31 @@ class MemoryUtils:
         if not event_time:
             event_time = datetime.now().strftime("%Y.%m.%d.%H:%M")
         
-        memory_id_to_overwrite = None
+        most_recent_match_id = None
+        older_duplicate_ids_to_delete = []
+
         # 기존 메모리에서 event_type과 event_location이 일치하는지 확인
+        # _load_memories(sort_by_time=True)로 인해 memories는 최신순으로 정렬되어 있음
         if agent_name in memories and "memories" in memories[agent_name]:
             for mem_id, mem_data in memories[agent_name]["memories"].items():
-                print(f"mem_data: {mem_id}")
-                if mem_data.get("event_type") == event_type and mem_data.get("event_location") == event_location:
-                    memory_id_to_overwrite = mem_id
-                    break
+                if mem_data.get("event_type") == event_type and \
+                   mem_data.get("event_location") == event_location:
+                    if most_recent_match_id is None: # 첫 번째 일치 항목 (가장 최신)
+                        most_recent_match_id = mem_id
+                    else: # 이후 일치 항목 (오래된 중복)
+                        older_duplicate_ids_to_delete.append(mem_id)
         
-        # 일치하는 메모리가 있으면 해당 ID 사용, 없으면 새 ID 생성
-        if memory_id_to_overwrite:
-            memory_id = memory_id_to_overwrite
+        # 오래된 중복 메모리 삭제
+        if older_duplicate_ids_to_delete:
+            for del_id in older_duplicate_ids_to_delete:
+                if del_id in memories[agent_name]["memories"]:
+                    del memories[agent_name]["memories"][del_id]
+                if del_id in memories[agent_name]["embeddings"]: # 연결된 임베딩도 삭제
+                    del memories[agent_name]["embeddings"][del_id]
+
+        # 사용할 메모리 ID 결정
+        if most_recent_match_id:
+            memory_id = most_recent_match_id
         else:
             memory_id = self._get_next_memory_id(agent_name)
             
