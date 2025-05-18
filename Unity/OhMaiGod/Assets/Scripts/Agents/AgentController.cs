@@ -204,11 +204,8 @@ public class AgentController : MonoBehaviour, ISaveable
     public void LoadData()
     {
         string path = System.IO.Path.Combine(Application.persistentDataPath, "agent.json");
-        if (!System.IO.File.Exists(path))
-        {
-            LogManager.Log("Agent", $"AgentNeeds 저장 파일이 존재하지 않습니다: {path}", 1);
-            return;
-        }
+        if (!System.IO.File.Exists(path)) return;
+        
         try
         {
             string json = System.IO.File.ReadAllText(path);

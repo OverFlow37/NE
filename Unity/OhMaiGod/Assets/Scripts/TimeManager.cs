@@ -63,7 +63,11 @@ public class TimeManager : MonoBehaviour, ISaveable
         // 게임 시간 업데이트
         UpdateGameTime();
 
-        CalculateDaily();
+        // 게임 시간이 19시(=TimeSpan(19,0,0))를 넘으면 저장
+        if (!mIsSavedToday && mCurrentGameTime >= new TimeSpan(19, 0, 0))
+        {
+            CalculateDaily();
+        }
     }
 
     // 게임 시간 업데이트
@@ -86,15 +90,11 @@ public class TimeManager : MonoBehaviour, ISaveable
     }
 
     // 게임 시간 하루가 지나면 호출되는 정산 함수
-    private void CalculateDaily()
+    public void CalculateDaily()
     {
-        // 게임 시간이 19시(=TimeSpan(19,0,0))를 넘으면 저장
-        if (!mIsSavedToday && mCurrentGameTime >= new TimeSpan(19, 0, 0))
-        {
-            mGameDate = mGameDate.AddDays(1);
-            mIsSavedToday = true;
-            GameManager.Instance.DailySettlement(); // 일일 정산
-        }
+        mGameDate = mGameDate.AddDays(1);
+        mIsSavedToday = true;
+        GameManager.Instance.DailySettlement(); // 일일 정산
     }
 
     // 게임 날짜만 저장할 데이터 구조체

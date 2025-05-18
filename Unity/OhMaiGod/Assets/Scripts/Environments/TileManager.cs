@@ -77,7 +77,7 @@ public class TileManager : MonoBehaviour, ISaveable
     {
         mIsInitialized = false;
 
-        if (scene.name == "LoadScene" || scene.name == "Main_SYE")
+        if (scene.name == "Main")
         {
             // ground tilemap 설정
             GameObject landBaseObj = GameObject.Find("Tilemap_land_base");

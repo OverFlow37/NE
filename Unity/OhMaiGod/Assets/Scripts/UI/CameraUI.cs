@@ -19,10 +19,9 @@ public class CameraUI : MonoBehaviour
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        if (scene.name == "Main_SYE")
-        {
-            Initialize();
-        }
+        if(scene.name != "Main") return;
+
+        Initialize();
     }
 
     private void Initialize()

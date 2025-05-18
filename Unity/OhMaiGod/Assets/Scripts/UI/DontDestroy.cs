@@ -30,7 +30,7 @@ public class DontDestroy : MonoBehaviour
         {
             this.gameObject.SetActive(false);
         }
-        else if (scene.name == "Main_SYE")
+        else if (scene.name == "Main")
         {
             this.gameObject.SetActive(true);
         }

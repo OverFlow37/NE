@@ -60,13 +60,13 @@ public class SaveLoadManager : MonoBehaviour
         TimeManager.Instance.gameObject.SetActive(true);
 
         // 동기로 로드
-        SceneManager.LoadScene("Main_SYE");
+        SceneManager.LoadScene("Main");
 
         // 비동기 씬 로드 및 로딩 씬 언로드 코루틴 시작 => 오류 너무 많음...
         // StartCoroutine(LoadAndSwitchSceneCoroutine());
     }
 
-    // Main_SYE 비동기 로드 후 로딩 씬 언로드 코루틴
+    // 비동기 로드 후 로딩 씬 언로드 코루틴
     // private IEnumerator LoadAndSwitchSceneCoroutine()
     // {
     //     // Main_SYE 씬을 Additive로 비동기 로드
