@@ -63,17 +63,26 @@ public class OfferAction : InteractionAction
         // 피드백에 효과 반영
         IncreaseNeedsForFeedback(agentController, actionInfo);
 
-        Inventory.Instance.AddResource(Inventory.ResourceType.Power, targetInteractable.mInteractableData.mFaith);
-
-        if (targetInteractable.mInteractableData.mFaith <= 0)
+        // Furniture나 Resource가 아니라면 인벤토리로 이동 시도
+        if (targetInteractable.InteractableType != InteractableData.Types.Furniture && targetInteractable.InteractableType != InteractableData.Types.Resource)
         {
-            LogManager.Log("Interact", $"{targetInteractable.InteractableName} 는 신이 원하지 않습니다.", 1);
-            return false;  
+            // 인벤토리가 가득 찼으면 피드백
+            if (Inventory.Instance.Items.Count >= Inventory.Instance.MaxSlotCount)
+            {
+                LogManager.Log("Interact", $"인벤토리가 가득 찼습니다.", 1);
+                return false;
+            }
+            // 행동 완료 후 오브젝트 제거
+            LogManager.Log("Interact", $"get {targetInteractable.InteractableName}");
+            targetInteractable.RemoveObject();
+            Inventory.Instance.AddItem(targetObject);
         }
-        // 행동 완료 후 오브젝트 제거
-        LogManager.Log("Interact", $"offer {targetInteractable.InteractableName}");
-        targetInteractable.RemoveObject();
-        
+        else
+        {
+            // TODO: Furniture나 Resource라면 피드백
+            LogManager.Log("Interact", $"{targetInteractable.InteractableName} 는 가지고 갈 수 없습니다.", 1);
+            return false;
+        }
 
         return true;
     }
