@@ -257,10 +257,11 @@ class MemoryRetriever:
         is_current_state_embedding_zero = np.all(current_state_embedding_np == 0)
         
         for memory_id, memory in memories[agent_name]["memories"].items():
+            if memory.get("event") == "" and memory.get("feedback") == "":
+                continue
             memory_embeddings = memories[agent_name]["embeddings"].get(str(memory_id), {})
             memory_with_id = memory.copy()
             memory_with_id["memory_id"] = memory_id
-            
             # 기본 유사도를 0.01로 설정
             calculated_event_similarity = 0.01
             calculated_state_similarity = 0.01
