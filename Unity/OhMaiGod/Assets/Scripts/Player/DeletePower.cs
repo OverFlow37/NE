@@ -106,10 +106,14 @@ public class DeletePower : MonoBehaviour
 
         // NPC 레이어 체크 (NPC 레이어에 속하면 true)
         bool isNPC = ((1 << targetObject.layer) & TileManager.Instance.NPCLayerMask) != 0;
-
+        Interactable interactable = targetObject.GetComponent<Interactable>();
+            
         if (!isNPC)
         {
-            Instantiate(mLightningStrikeEvent, cellCenter, Quaternion.identity);
+            EventController lightningEvent = Instantiate(mLightningStrikeEvent, cellCenter, Quaternion.identity).GetComponent<EventController>();
+            lightningEvent.mEventInfo.event_location = interactable.CurrentLocation;
+            lightningEvent.mEventInfo.event_description += $" {interactable.InteractableName} is broken! at {interactable.CurrentLocation}";
+            
             // 1초 대기
             yield return new WaitForSeconds(1f);
             Destroy(targetObject);
@@ -117,6 +121,7 @@ public class DeletePower : MonoBehaviour
         else
         {
             Instantiate(mLightningStrikeEventNPC, cellCenter, Quaternion.identity);
+            
         }
     }
 }
