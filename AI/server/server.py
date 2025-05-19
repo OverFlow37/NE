@@ -843,7 +843,7 @@ async def reset_all_data_from_backup():
         return {"success": False, "error": str(e)}
 
 
-@app.post("/save_memories")
+@app.post("/data/save_memories")
 async def save_memories_to_backup():
     """
     현재 memories.json 파일의 내용을 backup_memories.json 파일로 복사하여 백업합니다.
