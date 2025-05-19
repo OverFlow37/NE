@@ -188,12 +188,12 @@ public class AgentController : MonoBehaviour, ISaveable
     }
 
     // AgentNeeds를 JSON 파일로 저장
-    public void SaveData()
+    public void SaveData(string _savePath)
     {
         // AgentNeeds를 JSON 문자열로 변환
         string json = JsonUtility.ToJson(mAgentNeeds);
         // 저장 경로 설정 (persistentDataPath/Agent.json)
-        string path = System.IO.Path.Combine(Application.persistentDataPath, "agent.json");
+        string path = System.IO.Path.Combine(_savePath, "agent.json");
         try
         {
             System.IO.File.WriteAllText(path, json);
@@ -206,9 +206,9 @@ public class AgentController : MonoBehaviour, ISaveable
     }
 
     // AgentNeeds를 JSON 파일에서 불러오기
-    public void LoadData()
+    public void LoadData(string _loadPath)
     {
-        string path = System.IO.Path.Combine(Application.persistentDataPath, "agent.json");
+        string path = System.IO.Path.Combine(_loadPath, "agent.json");
         if (!System.IO.File.Exists(path)) return;
         
         try
@@ -331,7 +331,7 @@ public class AgentController : MonoBehaviour, ISaveable
             if(mSpawnPoint != null) transform.position = mSpawnPoint.position;
         }
 
-        LoadData();
+        LoadData(SaveLoadManager.Instance.SavePath);
     }
 
     private void Update()

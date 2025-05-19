@@ -30,21 +30,18 @@ public class StartScene : MonoBehaviour
     {
         mText.gameObject.SetActive(false);
 
-        // 세이브 파일 존재 여부 확인
-        string mSavePath = Path.Combine(Application.persistentDataPath, "interactables.json");
-        if (File.Exists(mSavePath))
+        // 세이브 데이터 폴더가 존재하는지 확인
+        if (SaveLoadManager.Instance.IsSaveDataExist())
         {
             // 세이브 파일이 있으면 이어하기 버튼 활성화, 비활성 버튼 비활성화
             mContinueButton.gameObject.SetActive(true);
             mContinueButtonDisabled.gameObject.SetActive(false);
-            LogManager.Log("StartScene", $"세이브 파일 존재: {mSavePath}", 2);
         }
         else
         {
             // 세이브 파일이 없으면 이어하기 버튼 비활성화, 비활성 버튼 활성화
             mContinueButton.gameObject.SetActive(false);
             mContinueButtonDisabled.gameObject.SetActive(true);
-            LogManager.Log("StartScene", $"세이브 파일 없음: {mSavePath}", 2);
         }
 
         mNewGameButton.onClick.AddListener(OnClickNewGame);
@@ -56,13 +53,15 @@ public class StartScene : MonoBehaviour
     // 새 게임 시작 버튼에 연결할 함수
     public void OnClickNewGame()
     {
-        SaveLoadManager.Instance.LoadScene();  // TODO: 새 게임 시작 데이터 초기화 필요
+        SaveLoadManager.Instance.ResetData();   // 기존 세이브 데이터 삭제
+
+        SaveLoadManager.Instance.LoadScene();
     }
 
     // 이어하기 버튼에 연결할 함수
     public void OnClickContinue()
     {
-        SaveLoadManager.Instance.LoadScene();  // TODO: 이어하기 데이터 로드 필요
+        SaveLoadManager.Instance.LoadScene();
     }
 
     public void OnClickContinueDisabled()

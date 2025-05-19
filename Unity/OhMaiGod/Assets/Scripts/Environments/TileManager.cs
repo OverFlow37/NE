@@ -330,7 +330,7 @@ public class TileManager : MonoBehaviour, ISaveable
         SceneManager.sceneLoaded -= OnSceneLoaded;
     }
 
-    public void SaveData()
+    public void SaveData(string _savePath)
     {
         // 저장할 데이터 리스트 생성
         InteractableSaveDataList saveList = new InteractableSaveDataList();
@@ -355,17 +355,17 @@ public class TileManager : MonoBehaviour, ISaveable
         // Json으로 직렬화
         string json = JsonUtility.ToJson(saveList, true);
 
-        // 파일로 저장 (경로는 Application.persistentDataPath 사용해서 PC는 C:\Users\SSAFY\AppData\LocalLow\DefaultCompany\OhMaiGod 저장됨)
-        string path = System.IO.Path.Combine(Application.persistentDataPath, "interactables.json");
+        // 파일로 저장
+        string path = System.IO.Path.Combine(_savePath, "interactables.json");
         System.IO.File.WriteAllText(path, json);
 
         LogManager.Log("Env", $"Interactable 세이브 완료: {path}", 2);
     }
 
-    public void LoadData()
+    public void LoadData(string _loadPath)
     {
         // 저장된 데이터 파일 경로
-        string path = System.IO.Path.Combine(Application.persistentDataPath, "interactables.json");
+        string path = System.IO.Path.Combine(_loadPath, "interactables.json");
         if (!System.IO.File.Exists(path))
         {
             LogManager.Log("SaveLoad", "세이브 파일이 존재하지 않습니다.", 1);

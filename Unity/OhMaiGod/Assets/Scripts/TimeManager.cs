@@ -52,7 +52,7 @@ public class TimeManager : MonoBehaviour, ISaveable
         DontDestroyOnLoad(gameObject);
         
         // 게임 날짜 및 시간 초기화
-        mGameDate = DateTime.Today;
+        mGameDate = new DateTime(2025, 5, 19);
         mCurrentGameTime = new TimeSpan(7, 0, 0);
     }
 
@@ -92,7 +92,6 @@ public class TimeManager : MonoBehaviour, ISaveable
     // 게임 시간 하루가 지나면 호출되는 정산 함수
     public void CalculateDaily()
     {
-        mGameDate = mGameDate.AddDays(1);
         mIsSavedToday = true;
         GameManager.Instance.DailySettlement(); // 일일 정산
     }
@@ -104,18 +103,20 @@ public class TimeManager : MonoBehaviour, ISaveable
         public string GameDate; // DateTime 대신 문자열로 저장
     }
 
-    public void SaveData()
+    public void SaveData(string _savePath)
     {
+        // 저장할 때만 mGameDate에 하루를 더해서 저장 (실제 mGameDate에는 영향 없음)
+        DateTime saveDate = mGameDate.AddDays(1);
         // DateTime을 문자열(ISO 8601)로 변환해서 저장
-        TimeSaveData saveData = new TimeSaveData { GameDate = mGameDate.ToString("o") };
+        TimeSaveData saveData = new TimeSaveData { GameDate = saveDate.ToString("o") };
         string json = JsonUtility.ToJson(saveData);
-        string path = System.IO.Path.Combine(Application.persistentDataPath, "time.json");
+        string path = System.IO.Path.Combine(_savePath, "time.json");
         System.IO.File.WriteAllText(path, json);
     }
 
-    public void LoadData()
+    public void LoadData(string _loadPath)
     {
-        string path = System.IO.Path.Combine(Application.persistentDataPath, "time.json");
+        string path = System.IO.Path.Combine(_loadPath, "time.json");
         if (System.IO.File.Exists(path))
         {
             string json = System.IO.File.ReadAllText(path);
@@ -140,6 +141,15 @@ public class TimeManager : MonoBehaviour, ISaveable
     public DateTime GetCurrentGameDate()
     {
         return mGameDate;
+    }
+
+    // 현재 게임 날짜를 yyyy.MM.dd.HH:mm 형식의 문자열로 반환
+    public string GetCurrentGameDateString()
+    {
+        // yyyy.MM.dd는 mGameDate, HH:mm은 mCurrentGameTime을 사용해서 조합
+        string datePart = mGameDate.ToString("yyyy.MM.dd");
+        string timePart = string.Format("{0:D2}:{1:D2}", mCurrentGameTime.Hours, mCurrentGameTime.Minutes);
+        return $"{datePart}.{timePart}";
     }
 
     // 현재 요일을 문자열로 반환

@@ -5,8 +5,8 @@ using UnityEngine;
 public interface ISaveable
 {
     // 데이터를 저장하는 함수.
-    public void SaveData();
+    public void SaveData(string _savePath);
 
     // 데이터를 로드하는 함수.
-    public void LoadData();
+    public void LoadData(string _loadPath);
 }
