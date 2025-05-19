@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine.SceneManagement;
 using System.Xml.Serialization;
 using System.Collections;
+using System.IO;
 
 public class SaveLoadManager : MonoBehaviour
 {
@@ -23,6 +24,9 @@ public class SaveLoadManager : MonoBehaviour
         }
     }
 
+    private string mSavePath = "";
+    public string SavePath {get {return mSavePath;} }
+
     private void Awake()
     {
         // 싱글톤 인스턴스 설정
@@ -37,14 +41,16 @@ public class SaveLoadManager : MonoBehaviour
 
         // 씬 로드 이벤트 등록
         SceneManager.sceneLoaded += OnSceneLoaded;
+
+        // 세이브 파일 경로 설정
+        mSavePath = Application.persistentDataPath + "/data/";
     }
 
     private void OnSceneLoaded(Scene _scene, LoadSceneMode _mode)
     {
         if(_scene.name == "LoadingScene")
         {
-            // 로딩 씬에서는 AIBridge_Perceive, TimeManager disbale
-            AIBridge_Perceive.Instance.gameObject.SetActive(false);
+            // 로딩 씬에서는 TimeManager disbale
             TimeManager.Instance.gameObject.SetActive(false);
             return;
         } 
@@ -53,10 +59,23 @@ public class SaveLoadManager : MonoBehaviour
         LoadData();
     }
 
+    public bool IsSaveDataExist()
+    {
+        if (Directory.Exists(mSavePath))
+        {
+            // 폴더 하위에 파일이 있는지 확인
+            string[] files = Directory.GetFiles(mSavePath);
+            if(files.Length > 0)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public void LoadScene()
     {
-        // 게임씬으로 로드할때는 AIBridge_Perceive, TimeManager enable
-        AIBridge_Perceive.Instance.gameObject.SetActive(true);
+        // 게임씬으로 로드할때는 TimeManager enable
         TimeManager.Instance.gameObject.SetActive(true);
 
         // 동기로 로드
@@ -108,8 +127,13 @@ public class SaveLoadManager : MonoBehaviour
 
     public void SaveData()
     {
+        if(!Directory.Exists(mSavePath))
+        {
+            Directory.CreateDirectory(mSavePath);
+        }
+
         // 세이브 파일로 값 저장
-        TileManager.Instance.SaveData();
+        TileManager.Instance.SaveData(mSavePath);
         
         // 'NPC' 태그를 가진 모든 오브젝트의 AgentController의 SaveData 호출
         GameObject[] npcObjects = GameObject.FindGameObjectsWithTag("NPC");
@@ -117,23 +141,32 @@ public class SaveLoadManager : MonoBehaviour
         {
             AgentController agent = go.GetComponent<AgentController>();
             if (agent != null)
-                agent.SaveData();
+                agent.SaveData(mSavePath);
         }
 
         // 인벤토리 저장
-        Inventory.Instance.SaveData();
+        Inventory.Instance.SaveData(mSavePath);
 
         // 시간 저장
-        TimeManager.Instance.SaveData();
+        TimeManager.Instance.SaveData(mSavePath);
     }
 
     public void LoadData()
     {
-        TileManager.Instance.LoadData();
-        Inventory.Instance.LoadData();
-        TimeManager.Instance.LoadData();
+        TileManager.Instance.LoadData(mSavePath);
+        Inventory.Instance.LoadData(mSavePath);
+        TimeManager.Instance.LoadData(mSavePath);
 
         Inventory.Instance.GetComponentInChildren<ChatPower>().SetAgentController();
+    }
+
+    public void ResetData()
+    {
+        // 세이브 파일 삭제
+        if (Directory.Exists(mSavePath))
+        {
+            Directory.Delete(mSavePath, true);
+        }
     }
 
     private void OnDestroy()

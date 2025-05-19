@@ -8,6 +8,7 @@ using System.Linq;
 using OhMAIGod.Agent;
 using Unity.VisualScripting;
 using OhMAIGod.Perceive;
+using UnityEngine.SceneManagement;
 
 // 관찰 정보 AI로 전송
 // 임계치에 따라 반응 판단과 관찰 정보 전송으로 나뉨
@@ -27,13 +28,13 @@ public class AIBridge_Perceive : MonoBehaviour
     [System.Serializable]
     public struct Agent
     {
-        public string name;                         // 에이전트 이름
-        public AgentNeeds state;                    // 에이전트의 욕구
-        public string current_location;             // 현재 위치
-        public string personality;                  // 성격 특성
-        public TimeSpan time;                       // 요청 보낸 시각
-        public ObjectGroup[] visible_interactables;       // 볼 수 있는 오브젝트들
-        public PerceiveEvent perceive_event;         // 관찰 이벤트
+        public string name;                             // 에이전트 이름
+        public AgentNeeds state;                        // 에이전트의 욕구
+        public string current_location;                 // 현재 위치
+        public string personality;                      // 성격 특성
+        public string time;                             // 요청 보낸 시각
+        public ObjectGroup[] visible_interactables;     // 볼 수 있는 오브젝트들
+        public PerceiveEvent perceive_event;            // 관찰 이벤트
     }
 
     // AI에게 전송할 에이전트 정보 구조체(지역 정보 전송용)
@@ -42,8 +43,8 @@ public class AIBridge_Perceive : MonoBehaviour
     {
         public string name;                         // 에이전트 이름
         public string current_location;             // 현재 위치
-        public TimeSpan time;                       // 요청 보낸 시각
-        public PerceiveEvent perceive_event;         // 관찰 이벤트
+        public string time;                         // 요청 보낸 시각
+        public PerceiveEvent perceive_event;        // 관찰 이벤트
     }
 
     // AI 서버에 보낼 요청 데이터 구조체
@@ -88,7 +89,47 @@ public class AIBridge_Perceive : MonoBehaviour
         public ResponseActionData data;
     }
 
-     // 싱글톤
+    // ========== 하루 결산 요청 데이터 구조체 ==========
+    [System.Serializable]
+    public struct DailySettlementAgent
+    {
+        public string name;
+        public string time;
+        public string personality;
+    }
+
+    [System.Serializable]
+    public struct DailySettlementRequest
+    {
+        public DailySettlementAgent agent;
+    }
+
+    // 하루 결산 계획 저장용 구조체
+    [System.Serializable]
+    public struct DayPlan
+    {
+        public string action;
+        public string location;
+        public string interactable;
+        public string start_time;
+        public string end_time;
+        public int priority;
+    }
+
+    // ==== 데일리 플랜 파싱용 구조체 ====
+    [System.Serializable]
+    private struct ReflectPlanRoot
+    {
+        public bool success;
+        public PlanData next_day_plan;
+    }
+    [System.Serializable]
+    private struct PlanData
+    {
+        public List<List<string>> time_slots;
+    }
+
+    // 싱글톤
     private static AIBridge_Perceive mInstance;
     
     public static AIBridge_Perceive Instance
@@ -105,7 +146,7 @@ public class AIBridge_Perceive : MonoBehaviour
         }
     }
 
-        private void Awake()
+    private void Awake()
     {
         // 싱글톤 인스턴스 설정
         if (mInstance != null && mInstance != this)
@@ -116,8 +157,101 @@ public class AIBridge_Perceive : MonoBehaviour
 
         mInstance = this;
         DontDestroyOnLoad(gameObject);
+
+        SceneManager.sceneLoaded += OnSceneLoaded;
     }
 
+    private void OnSceneLoaded(Scene _scene, LoadSceneMode _mode)
+    {
+        if(_scene.name == "LoadingScene")
+        {
+            // AI 서버에 하루 결산 요청 (TODO: AI서버에서 json 형태 수정하면 사용할 예정)
+            // StartCoroutine(SendDailySettlementRequest());
+        } 
+    }
+    
+    // 날짜별로 저장
+    public Dictionary<string, List<DayPlan>> mNextDayPlans = new Dictionary<string, List<DayPlan>>();
+
+    private IEnumerator SendDailySettlementRequest()
+    {
+        string agentName = "Tom";
+        string time = TimeManager.Instance.GetCurrentGameDateString();
+        string personality = "introverted, practical, punctual";
+
+        // 구조체로 요청 데이터 생성 후 JSON 변환
+        DailySettlementRequest requestData = new DailySettlementRequest
+        {
+            agent = new DailySettlementAgent
+            {
+                name = agentName,
+                time = time,
+                personality = personality
+            }
+        };
+        string requestJson = JsonUtility.ToJson(requestData);
+        LogManager.Log("AI", $"[AIBridge_Perceive] 하루 결산 요청 JSON: {requestJson}", 3);
+
+        UnityWebRequest request = new UnityWebRequest("http://127.0.0.1:5000/reflect-and-plan", "POST");
+        byte[] bodyRaw = Encoding.UTF8.GetBytes(requestJson);
+        request.uploadHandler = new UploadHandlerRaw(bodyRaw);
+        request.downloadHandler = new DownloadHandlerBuffer();
+        request.SetRequestHeader("Content-Type", "application/json");
+
+        yield return request.SendWebRequest();
+
+        if (request.result == UnityWebRequest.Result.Success)
+        {
+            LogManager.Log("AI", $"✅ 하루 결산 응답: " + request.downloadHandler.text, 2);
+            ParseAndStoreDayPlan(request.downloadHandler.text);
+        }
+        else
+        {
+            LogManager.Log("AI", $"❌ 하루 결산 요청 실패: " + request.error, 0);
+        }
+    }
+
+    // 하루 결산 응답 파싱 및 저장 (time_slots만 추출)
+    private void ParseAndStoreDayPlan(string _json)
+    {
+        try
+        {
+            // JSON 파싱용 임시 구조체
+            var root = JsonUtility.FromJson<ReflectPlanRoot>(_json);
+            if (root.success == false)
+            {
+                LogManager.Log("AI", "[AIBridge_Perceive] 응답 파싱 실패 또는 success=false", 0);
+                return;
+            }
+            var timeSlots = root.next_day_plan.time_slots;
+            if (timeSlots == null)
+            {
+                LogManager.Log("AI", "[AIBridge_Perceive] time_slots 없음", 0);
+                return;
+            }
+            // List<DayPlan> dayPlans = new List<DayPlan>();
+            // foreach (var slot in timeSlots)
+            // {
+            //     if (slot.Count < 6) continue;
+            //     DayPlan plan = new DayPlan
+            //     {
+            //         action = slot[0],
+            //         location = slot[1],
+            //         interactable = slot[2],
+            //         start_time = slot[3],
+            //         end_time = slot[4],
+            //         priority = int.Parse(slot[5])
+            //     };
+            //     dayPlans.Add(plan);
+            // }
+            // mNextDayPlans["default"] = dayPlans;
+            // LogManager.Log("AI", $"[AIBridge_Perceive] time_slots {dayPlans.Count}개 저장", 2);
+        }
+        catch (Exception ex)
+        {
+            LogManager.Log("AI", $"[AIBridge_Perceive] 계획 파싱 오류: {ex.Message}", 0);
+        }
+    }
 
     // Interactable 목록을 ObjectGroup 배열로 변환
     private ObjectGroup[] ConvertToObjectGroups(List<Interactable> _interactables, string _excludeName = null)
@@ -196,7 +330,7 @@ public class AIBridge_Perceive : MonoBehaviour
                 state = currentNeeds,
                 current_location = agentLocation,
                 personality = _agent.mPersonality, // TODO: 에이전트별 성격 구현 필요
-                time = TimeManager.Instance.GetCurrentGameTime(),
+                time = TimeManager.Instance.GetCurrentGameDateString(),
                 visible_interactables = visibleObjectGroups,
                 perceive_event = _perceiveEvent,          
             }
@@ -264,7 +398,7 @@ public class AIBridge_Perceive : MonoBehaviour
             {
                 name = _agent.AgentName,
                 current_location = agentLocation,
-                time = TimeManager.Instance.GetCurrentGameTime(),
+                time = TimeManager.Instance.GetCurrentGameDateString(),
                 perceive_event = _perceiveEvent,          
             }
         };
@@ -344,7 +478,7 @@ public class AIBridge_Perceive : MonoBehaviour
                 state = currentNeeds,
                 current_location = agentLocation,
                 personality = _agent.mPersonality,
-                time = TimeManager.Instance.GetCurrentGameTime(),
+                time = TimeManager.Instance.GetCurrentGameDateString(),
                 visible_interactables = visibleObjectGroups,
                 perceive_event = _perceiveEvent,          
             }
@@ -436,7 +570,7 @@ public class AIBridge_Perceive : MonoBehaviour
                 state = currentNeeds,
                 current_location = agentLocation,
                 personality = _agent.mPersonality, // TODO: 에이전트별 성격 구현 필요
-                time = TimeManager.Instance.GetCurrentGameTime(),
+                time = TimeManager.Instance.GetCurrentGameDateString(),
                 visible_interactables = visibleObjectGroups,
                 perceive_event = _perceiveEvent,          
             }
@@ -487,7 +621,7 @@ public class AIBridge_Perceive : MonoBehaviour
             // 현재 시간 가져오기 및 활동 지속 시간 설정
             TimeSpan currentTime = TimeManager.Instance.GetCurrentGameTime();
             int durationMinutes = 30;
-            //int.TryParse(details.duration, out durationMinutes);
+            int.TryParse(actionData.duration, out durationMinutes);
             TimeSpan duration = TimeSpan.FromMinutes(durationMinutes);
             TimeSpan endTime = currentTime.Add(duration);
 

@@ -106,7 +106,7 @@ public class Inventory : MonoBehaviour, ISaveable
         public ResourceItemsCount resourceItems; // 자원 정보
     }
 
-    public void SaveData()
+    public void SaveData(string _savePath)
     {
         // 인벤토리 데이터를 JSON 파일로 저장
         InventorySaveData saveData = new InventorySaveData
@@ -124,14 +124,14 @@ public class Inventory : MonoBehaviour, ISaveable
         }
 
         string json = JsonUtility.ToJson(saveData);
-        string path = System.IO.Path.Combine(Application.persistentDataPath, "inventory.json");
+        string path = System.IO.Path.Combine(_savePath, "inventory.json");
         System.IO.File.WriteAllText(path, json);
         LogManager.Log("인벤토리 저장 완료: " + path);
     }
 
-    public void LoadData()
+    public void LoadData(string _loadPath)
     {
-        string path = System.IO.Path.Combine(Application.persistentDataPath, "inventory.json");
+        string path = System.IO.Path.Combine(_loadPath, "inventory.json");
         if (System.IO.File.Exists(path))
         {
             string json = System.IO.File.ReadAllText(path);

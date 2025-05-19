@@ -180,18 +180,18 @@ public class Interactable : MonoBehaviour
         gameObject.SetActive(false);
     }
 
-    // private void OnTriggerExit2D(Collider2D other)
-    // {
-    //     // 게임오브젝트가 비활성화 중이면 무시
-    //     if (!gameObject.activeInHierarchy) return;
+    private void OnTriggerExit2D(Collider2D other)
+    {
+        // 게임오브젝트가 비활성화 중이면 무시
+        if (!gameObject.activeInHierarchy) return;
 
-    //     // Location 레이어인 경우에만 처리
-    //     if (other.gameObject.layer == LayerMask.NameToLayer("Location"))
-    //     {
-    //         LogManager.Log("Interact", $"[{gameObject.name}] {other.name} 영역에서 벗어남", 2);
-    //         StartCoroutine(UpdateEnvironmentRegistration());
-    //     }
-    // }
+        // Location 레이어인 경우에만 처리
+        if (other.gameObject.layer == LayerMask.NameToLayer("Location"))
+        {
+            LogManager.Log("Interact", $"[{gameObject.name}] {other.name} 영역에서 벗어남", 2);
+            StartCoroutine(UpdateEnvironmentRegistration());
+        }
+    }
 
     private void OnTriggerEnter2D(Collider2D other)
     {
