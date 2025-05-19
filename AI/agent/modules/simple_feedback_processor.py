@@ -64,8 +64,6 @@ class SimpleFeedbackProcessor:
             effects.append("much less hungry")
         elif hunger < -20:
             effects.append("a bit less hungry")
-        elif hunger >= 10:
-            effects.append("this is Inedible")
         
         # 졸림
         sleepiness = needs_diff.get("sleepiness", 0)
@@ -73,10 +71,6 @@ class SimpleFeedbackProcessor:
             effects.append("much less sleepy")
         elif sleepiness < -20:
             effects.append("a bit less sleepy")
-        elif sleepiness > 10:
-            effects.append("a bit more tired")
-        elif sleepiness > 0:
-            effects.append("that is so tired")
         
         # 외로움
         loneliness = needs_diff.get("loneliness", 0)
@@ -91,10 +85,6 @@ class SimpleFeedbackProcessor:
             effects.append("much less stressed")
         elif stress < -20:
             effects.append("a bit less stressed")
-        elif stress > 30:
-            effects.append("a bit more stressed")
-        elif stress > 10:
-            effects.append("much more stressed")
         
         # 효과 문장 결합
         if effects:
@@ -131,17 +121,15 @@ class SimpleFeedbackProcessor:
         
         # 배고픔
         hunger = needs_diff.get("hunger", 0)
-        if hunger > 10:
-            effects.append("much more hungry")
-        elif hunger > 0:
-            effects.append("a bit more hungry")
+        if hunger >= 10:
+            effects.append("this is Inedible")
         
         # 졸림
         sleepiness = needs_diff.get("sleepiness", 0)
         if sleepiness > 10:
-            effects.append("much more sleepy")
+            effects.append("a bit more tired")
         elif sleepiness > 0:
-            effects.append("a bit more sleepy")
+            effects.append("that is so tired")
         
         # 외로움
         loneliness = needs_diff.get("loneliness", 0)
@@ -152,10 +140,10 @@ class SimpleFeedbackProcessor:
         
         # 스트레스
         stress = needs_diff.get("stress", 0)
-        if stress > 10:
-            effects.append("much more stressed")
-        elif stress > 0:
+        if stress > 30:
             effects.append("a bit more stressed")
+        elif stress > 10:
+            effects.append("much more stressed")
         
         # 효과 문장 결합
         if effects:
@@ -422,40 +410,8 @@ class SimpleFeedbackProcessor:
                 else:
                     print(f"⚠️ 메모리 ID {memory_id}를 찾을 수 없습니다. 해당 ID로 새 메모리를 생성합니다.")
             
-            # 새 메모리 생성 (기존 ID 유지)
-            if memory_id:
-                # 기존 ID로 새 메모리 생성
-                memories[agent_name]["memories"][memory_id] = {
-                    "event_role": "",
-                    "event": event_text,  # 안전하게 생성된 이벤트 텍스트
-                    "action": action if action else "",
-                    "feedback": feedback_sentence,  # 피드백 저장
-                    "feedback_negative": feedback_sentence_negative,  # 부정 피드백 저장
-                    "conversation_detail": "",
-                    "time": time,
-                    "event_type": "",
-                    "event_location": ""
-                }
-
-                ## 메모리가 0이 아니면 메모리 추가
-                if importance != 0:
-                    memories[agent_name]["memories"][memory_id]["importance"] = importance
-
-                memories[agent_name]["embeddings"][memory_id] = {
-                    "event": [],
-                    "action": self.memory_utils.get_embedding(action) if action else [],
-                    "feedback": embedding
-                }
-                print(f"✅ 메모리 ID {memory_id}로 새 메모리 생성 및 통합 피드백 저장")
-                self.memory_utils._save_memories(memories)
-                
-                return {
-                    "success": True,
-                    "message": f"New memory created with ID {memory_id}",
-                    "memory_id": memory_id,
-                    "feedback": feedback_sentence + feedback_sentence_negative
-                }
-            else:
+            # 새 메모리 생성 
+            if memory_id == "":
                 # 새 ID로 메모리 생성
                 new_memory_id = self.memory_utils._get_next_memory_id(agent_name)
                 memories[agent_name]["memories"][new_memory_id] = {
@@ -466,12 +422,31 @@ class SimpleFeedbackProcessor:
                     "feedback_negative": feedback_sentence_negative,  # 부정 피드백 저장
                     "conversation_detail": "",
                     "time": time,
-                    "embeddings": embedding
+                    "event_type": "",
+                    "event_location": ""
                 }
                 if importance != 0:
                     memories[agent_name]["memories"][new_memory_id]["importance"] = importance
 
                 print(f"✅ 새 메모리 ID {new_memory_id}에 통합 피드백 저장")
+                self.memory_utils._save_memories(memories)
+                    
+                # 임베딩 데이터 저장
+                print(f"🔍 임베딩 저장 시작 - agent_name: {agent_name}, memory_id: {memory_id}")
+                if "embeddings" not in memories[agent_name]:
+                    print("📁 embeddings 디렉토리 생성")
+                    memories[agent_name]["embeddings"] = {}
+                if memory_id not in memories[agent_name]["embeddings"]:
+                    print("📝 새로운 memory_id에 대한 임베딩 구조 생성")
+                    memories[agent_name]["embeddings"][new_memory_id] = {
+                        "event": [],
+                        "action": [],
+                        "feedback": []
+                    }
+                print(f"💾 임베딩 저장 시도 - embedding 길이: {len(embedding) if embedding else 'None'}")
+                memories[agent_name]["embeddings"][new_memory_id]["feedback"] = embedding
+                print("✅ 임베딩 저장 완료")
+                # 메모리 저장 확인
                 self.memory_utils._save_memories(memories)
                 
                 return {
