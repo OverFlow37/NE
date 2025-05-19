@@ -6,7 +6,7 @@ using OhMAIGod.Perceive;
 using NUnit.Framework.Interfaces;
 using UnityEditor.VersionControl;
 
-public class ChatPower : MonoBehaviour
+public class ChatPower : Power
 {
     [SerializeField]
     private GameObject mChatPowerObject;
@@ -29,23 +29,7 @@ public class ChatPower : MonoBehaviour
 
          SetAgentController();
     }
-
-    public void ShowChatPower()
-    {
-        if (mScaleCoroutine != null)
-            StopCoroutine(mScaleCoroutine);
-        mChatPowerObject.SetActive(true);
-        mChatInputField.text = "";
-        mChatInputField.ActivateInputField();
-        mScaleCoroutine = StartCoroutine(ScaleAnim(mHideScale, mShowScale, true));
-    }
-
-    private void HideChatPower()
-    {
-        if (mScaleCoroutine != null)
-            StopCoroutine(mScaleCoroutine);
-        mScaleCoroutine = StartCoroutine(ScaleAnim(mShowScale, mHideScale, false));
-    }
+    
 
     private IEnumerator ScaleAnim(Vector3 _from, Vector3 _to, bool _afterShow)
     {
@@ -71,7 +55,10 @@ public class ChatPower : MonoBehaviour
 
     // 엔터 입력 시 호출
     private void OnInputEndEdit(string _input)
-    {
+    {   
+        // 에이전트가 반응 대기 중이면 채팅 입력 X
+        if(mAgentController.CurrentState == OhMAIGod.Agent.AgentState.WAITING_FOR_AI_RESPONSE)
+            return;
         if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter) || !Application.isMobilePlatform)
         {
             SubmitChat();
@@ -99,7 +86,7 @@ public class ChatPower : MonoBehaviour
             mAgentController.ReactToResponse(true, perceiveEvent);
         }
         mChatInputField.text = "";
-        HideChatPower();
+        Deactive();
     }
 
     // 실제 텍스트 전달 함수 (외부에서 구현/연결)
@@ -107,5 +94,25 @@ public class ChatPower : MonoBehaviour
     {
         LogManager.Log("Power", $"채팅 입력: {_text}");
         // TODO: 실제 채팅 처리 로직 구현
+    }
+
+    public override void Active()
+    {
+        base.Active();
+        if (mScaleCoroutine != null)
+            StopCoroutine(mScaleCoroutine);
+        mChatPowerObject.SetActive(true);
+        mChatInputField.text = "";
+        mChatInputField.ActivateInputField();
+        mScaleCoroutine = StartCoroutine(ScaleAnim(mHideScale, mShowScale, true));
+    }
+
+    public override void Deactive()
+    {
+        base.Deactive();
+        if (mScaleCoroutine != null)
+            StopCoroutine(mScaleCoroutine);
+        mScaleCoroutine = StartCoroutine(ScaleAnim(mShowScale, mHideScale, false));
+        mChatPowerObject.SetActive(false);
     }
 }

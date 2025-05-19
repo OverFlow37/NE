@@ -2,7 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-public class GenerateItemPower : MonoBehaviour
+using UnityEngine.EventSystems;
+public class GenerateItemPower : Power
 {
     [Header("배치할 아이템")]
     public GameObject mSelectedItem;
@@ -11,13 +12,26 @@ public class GenerateItemPower : MonoBehaviour
     [Header("배치할 이펙트")]
     public GameObject mSelectedEffect;
 
-    private bool mIsPlacementMode = false;
     private GameObject mPreviewObject;
 
     void Update()
     {
+        // UI 위에 마우스가 있으면 프리뷰 숨김
+        if (EventSystem.current != null && mPreviewObject != null)
+        {
+            if (EventSystem.current.IsPointerOverGameObject())
+            {
+                if (mPreviewObject.activeSelf)
+                    mPreviewObject.SetActive(false);
+            }
+            else
+            {
+                if (!mPreviewObject.activeSelf)
+                    mPreviewObject.SetActive(true);
+            }
+        }
         // 1. 프리뷰 활성화: mSelectedPrefab이 할당되어 있으면 프리뷰 생성
-        if (mIsPlacementMode)
+        if (base.mIsActive)
         {
             if (mPreviewObject == null)
                 StartPreview();
@@ -35,7 +49,7 @@ public class GenerateItemPower : MonoBehaviour
             // 오른쪽 마우스 버튼 누르면 취소
             if (Input.GetMouseButtonDown(1))
             {
-                CancelPlacementMode();
+                Deactive();
             }
         }
         else
@@ -97,6 +111,12 @@ public class GenerateItemPower : MonoBehaviour
 
     public void PlaceObject(Vector3 _mouseWorldPos)
     {
+        // UI 위에 마우스가 있으면 동작하지 않음
+        if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
+        {
+            LogManager.Log("Default", "UI 위에서는 아이템을 생성할 수 없습니다.", 1);
+            return;
+        }
         Vector3Int cellPos = TileManager.Instance.GroundTilemap.WorldToCell(_mouseWorldPos);
         TileController tileController = TileManager.Instance.GetTileController(cellPos);
         Vector2 cellCenter = TileManager.Instance.GroundTilemap.GetCellCenterWorld(cellPos);
@@ -110,42 +130,40 @@ public class GenerateItemPower : MonoBehaviour
         Collider2D hit = Physics2D.OverlapPoint(cellCenter, TileManager.Instance.AllLayerMask);
         if (hit != null)
         {
-            Debug.LogWarning("해당 타일에 벽, 장애물 또는 NPC가 있어 배치할 수 없습니다.");
+            LogManager.Log("Default", "해당 타일에 벽, 장애물 또는 NPC가 있어 배치할 수 없습니다.", 1);
             return;
         }
 
         // 아이템 생성
-        bool isSpawned = tileController.InteractableSpawner.Spawn(cellCenter);
-        if (!isSpawned)
+        string spawnedInteractableName = "";
+        spawnedInteractableName = tileController.InteractableSpawner.Spawn(cellCenter);
+        if (spawnedInteractableName == "")
         {
-            Debug.LogWarning("해당 타일에 아이템을 생성할 수 없습니다.");
+            LogManager.Log("Default", "해당 타일에 아이템을 생성할 수 없습니다.", 1);
             return;
         }
         // 이벤트 생성
-        Instantiate(mSelectedEvent, cellCenter, Quaternion.identity);
+        EventController eventController = Instantiate(mSelectedEvent, cellCenter, Quaternion.identity).GetComponent<EventController>();
+        eventController.mEventInfo.event_location = TileManager.Instance.GetTileController(cellPos).LocationName;
+        eventController.mEventInfo.event_description = $"God Created {spawnedInteractableName}! at {eventController.mEventInfo.event_location}";
         // 이펙트 생성
         Instantiate(mSelectedEffect, cellCenter, Quaternion.identity);
     }
 
 
-    public void EnterPlacementMode()
+    public override void Active()
     {
-        mIsPlacementMode = true;
+        base.Active();
     }
-
-    public void CancelPlacementMode()
+    public override void Deactive()
     {
-        mIsPlacementMode = false;
-        if (mPreviewObject != null)
+        base.Deactive();
+         if (mPreviewObject != null)
         {
             Destroy(mPreviewObject);
             mPreviewObject = null;
         }
     }
-
-    // UI 버튼에서 호출
-    public void OnClickPlaceObjectButton()
-    {
-        EnterPlacementMode();
-    }
+    
+    
 }

@@ -240,7 +240,9 @@ public class AgentController : MonoBehaviour, ISaveable
 
         // 이동 애니메이션 정지
         //animator.SetBool("isMoving", false);
-        if (mStateMachine.CurrentStateType == AgentState.MOVING_TO_INTERACTABLE)
+        if (mStateMachine.CurrentStateType == AgentState.MOVING_TO_LOCATION)
+            mStateMachine.ChangeState(AgentState.MOVING_TO_INTERACTABLE); // 상태 INTERACTION으로 전환
+        else if (mStateMachine.CurrentStateType == AgentState.MOVING_TO_INTERACTABLE)
             mStateMachine.ChangeState(AgentState.INTERACTING); // 상태 INTERACTION으로 전환
     }
 

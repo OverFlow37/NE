@@ -1,7 +1,8 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
-public class DeletePower : MonoBehaviour
+public class DeletePower : Power
 {
     [Header("번개치기 이펙트")]
     [SerializeField] private GameObject mLightningStrikeEffect;
@@ -10,34 +11,21 @@ public class DeletePower : MonoBehaviour
     [Header("NPC 번개 이벤트")]
     [SerializeField] private GameObject mLightningStrikeEventNPC;
 
-    private bool mIsDeleteMode = false;
     private GameObject mHighlightedObject = null;
     private Color mOriginalColor;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
-
-    // 삭제 모드 진입
-    public void EnterDeleteMode()
-    {
-        mIsDeleteMode = true;
-    }
-
-    // 삭제 모드 취소
-    public void CancelDeleteMode()
-    {
-        mIsDeleteMode = false;
-        RestoreHighlight();
-    }
 
     // Update is called once per frame
     void Update()
     {
-        if (mIsDeleteMode)
+        if (base.mIsActive)
         {
+            // UI 위에 마우스가 있으면 하이라이트 숨김
+            if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
+            {
+                RestoreHighlight();
+                return;
+            }
             HandleDeleteMode();
         }
     }
@@ -71,13 +59,19 @@ public class DeletePower : MonoBehaviour
         // 좌클릭: 삭제
         if (Input.GetMouseButtonDown(0) && mHighlightedObject != null)
         {
+            // UI 위에 마우스가 있으면 동작하지 않음
+            if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
+            {
+                LogManager.Log("Default", "UI 위에서는 삭제가 불가능합니다.", 1);
+                return;
+            }
             StartCoroutine(LightningStrike());
         }
 
         // 우클릭: 취소
         if (Input.GetMouseButtonDown(1))
         {
-            CancelDeleteMode();
+            Deactive();
         }
     }
 
@@ -124,4 +118,14 @@ public class DeletePower : MonoBehaviour
             
         }
     }
+    public override void Active()
+    {
+        base.Active();
+    }
+    public override void Deactive()
+    {
+        base.Deactive();
+    }
+    
+    
 }

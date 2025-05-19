@@ -2,7 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-public class CreateFruitPower : MonoBehaviour
+using UnityEngine.EventSystems;
+public class CreateFruitPower : Power
 {
     [Header("생성할 아이템")]
     public GameObject mSelectedPrefab; // UI에서 할당
@@ -14,13 +15,26 @@ public class CreateFruitPower : MonoBehaviour
     [SerializeField] private List<GameObject> mItemList;
 
 
-    private bool mIsPlacementMode = false;
     private GameObject mPreviewObject;
 
     void Update()
     {
+        // UI 위에 마우스가 있으면 프리뷰 숨김
+        if (EventSystem.current != null && mPreviewObject != null)
+        {
+            if (EventSystem.current.IsPointerOverGameObject())
+            {
+                if (mPreviewObject.activeSelf)
+                    mPreviewObject.SetActive(false);
+            }
+            else
+            {
+                if (!mPreviewObject.activeSelf)
+                    mPreviewObject.SetActive(true);
+            }
+        }
         // 1. 프리뷰 활성화: mSelectedPrefab이 할당되어 있으면 프리뷰 생성
-        if (mIsPlacementMode)
+        if (base.mIsActive)
         {
             if (mPreviewObject == null)
                 StartPreview();
@@ -38,7 +52,7 @@ public class CreateFruitPower : MonoBehaviour
             // 오른쪽 마우스 버튼 누르면 취소
             if (Input.GetMouseButtonDown(1))
             {
-                CancelPlacementMode();
+                Deactive();
             }
         }
         else
@@ -80,29 +94,42 @@ public class CreateFruitPower : MonoBehaviour
         mPreviewObject.layer = LayerMask.NameToLayer("Ignore Raycast");
     }
 
-    public void UpdatePreviewPosition(Vector3 mouseWorldPos)
+    public void UpdatePreviewPosition(Vector3 _mouseWorldPos)
     {
-        Vector3Int cellPos = TileManager.Instance.GroundTilemap.WorldToCell(mouseWorldPos);
+        Vector3Int cellPos = TileManager.Instance.GroundTilemap.WorldToCell(_mouseWorldPos);
         Vector3 cellCenter = TileManager.Instance.GroundTilemap.GetCellCenterWorld(cellPos);
         mPreviewObject.transform.position = cellCenter;
-        // 프리뷰 색상 변경
+        // 프리뷰 색상 변경 (Raycast 방식)
         if (mPreviewObject != null)
         {
             var previewRenderer = mPreviewObject.GetComponent<SpriteRenderer>();
             if (previewRenderer != null)
-                previewRenderer.color = new Color(1, 1, 1, 0.5f); // 흰색 반투명
+            {
+                // 아래 방향으로 레이캐스트 (2D에서는 Vector2.down 사용)
+                RaycastHit2D hit = Physics2D.Raycast(cellCenter, Vector2.zero, 0.1f, TileManager.Instance.AllLayerMask);
+                if (hit.collider != null)
+                    previewRenderer.color = new Color(1, 0, 0, 0.5f); // 빨간색 반투명(설치 불가)
+                else
+                    previewRenderer.color = new Color(1, 1, 1, 0.5f); // 흰색 반투명(설치 가능)
+            }
         }
     }
 
     public void PlaceObject(Vector3 _mouseWorldPos)
     {
+        // UI 위에 마우스가 있으면 동작하지 않음
+        if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
+        {
+            LogManager.Log("Default", "UI 위에서는 아이템을 생성할 수 없습니다.", 1);
+            return;
+        }
         StartCoroutine(PlaceObjectsSequentially(_mouseWorldPos));
     }
 
     // 여러 아이템을 하나씩 순차적으로 생성하는 코루틴 (떨어지는 연출 없이 생성만 순차)
-    private IEnumerator PlaceObjectsSequentially(Vector3 mouseWorldPos)
+    private IEnumerator PlaceObjectsSequentially(Vector3 _mouseWorldPos)
     {
-        Vector3Int centerCell = TileManager.Instance.GroundTilemap.WorldToCell(mouseWorldPos);
+        Vector3Int centerCell = TileManager.Instance.GroundTilemap.WorldToCell(_mouseWorldPos);
         Vector3 centerCellWorld = TileManager.Instance.GroundTilemap.GetCellCenterWorld(centerCell);
 
         // 3x3 주변 셀 좌표 구하기
@@ -131,9 +158,9 @@ public class CreateFruitPower : MonoBehaviour
         for (int i = 0; i < cellList.Count && placed < itemCount; i++)
         {
             Vector3 cellCenter = TileManager.Instance.GroundTilemap.GetCellCenterWorld(cellList[i]);
-            // 장애물 체크
-            Collider2D hit = Physics2D.OverlapPoint(cellCenter, TileManager.Instance.AllLayerMask);
-            if (hit != null)
+            // Raycast로 장애물 체크
+            RaycastHit2D hit = Physics2D.Raycast(cellCenter, Vector2.zero, 0.1f, TileManager.Instance.AllLayerMask);
+            if (hit.collider != null)
                 continue;
             // mItemList에서 랜덤 아이템 선택
             if (mItemList == null || mItemList.Count == 0)
@@ -155,28 +182,24 @@ public class CreateFruitPower : MonoBehaviour
         // 이벤트 생성(즉시 생성)
         if (mSelectedEvent != null)
         {
-            Instantiate(mSelectedEvent, centerCellWorld, Quaternion.identity);
+            EventController eventController = Instantiate(mSelectedEvent, centerCellWorld, Quaternion.identity).GetComponent<EventController>();
+            eventController.mEventInfo.event_location = TileManager.Instance.GetTileController(centerCell).LocationName;
+            eventController.mEventInfo.event_description += $" at {eventController.mEventInfo.event_location}";
         }
     }
 
-    public void EnterPlacementMode()
+    // UI 버튼에서 호출
+    public override void Active()
     {
-        mIsPlacementMode = true;
+        base.Active();
     }
-
-    public void CancelPlacementMode()
+    public override void Deactive()
     {
-        mIsPlacementMode = false;
+        base.Deactive();
         if (mPreviewObject != null)
         {
             Destroy(mPreviewObject);
             mPreviewObject = null;
         }
-    }
-
-    // UI 버튼에서 호출
-    public void OnClickPlaceObjectButton()
-    {
-        EnterPlacementMode();
     }
 }

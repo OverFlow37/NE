@@ -133,7 +133,7 @@ public class SaveLoadManager : MonoBehaviour
         Inventory.Instance.LoadData();
         TimeManager.Instance.LoadData();
 
-        Inventory.Instance.GetComponentInChildren<ChatPower>().SetAgentController();
+        PowerManager.Instance.GetComponentInChildren<ChatPower>().SetAgentController();
     }
 
     private void OnDestroy()
