@@ -87,8 +87,8 @@ public class InteractableSpawner : MonoBehaviour
         GameObject prefab = mInteractablePrefabs[Random.Range(0, mInteractablePrefabs.Count)];
 
         // 스폰
-        Instantiate(prefab, _spawnPos, Quaternion.identity);
-        LogManager.Log("Env", $"{prefab.GetComponent<Interactable>().InteractableName}을(를) {_spawnPos}에 스폰했습니다.", 2);
-        return prefab.GetComponent<Interactable>().InteractableName;
+        Interactable interactable = Instantiate(prefab, _spawnPos, Quaternion.identity).GetComponent<Interactable>();
+        LogManager.Log("Env", $"{interactable.InteractableName}을(를) {_spawnPos}에 스폰했습니다.", 2);
+        return interactable.InteractableName;
     }
 }

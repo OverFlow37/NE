@@ -19,6 +19,7 @@ MonoBehaviour:
   mState: 0
   mInterest: 0
   mFaith: 0
+  mIcon: {fileID: -1328792848, guid: d968c9bd06795e74aa94536ed935d41d, type: 3}
   mActions:
   - mAction: {fileID: 11400000, guid: cbe91266aabd61348bd1864e9f7bac11, type: 2}
     mDuration: 120
@@ -37,7 +38,7 @@ MonoBehaviour:
     mHungerEffect: 0
     mSleepinessEffect: 0
     mLonelinessEffect: 0
-    mStressEffect: -5
+    mStressEffect: 1
   - mAction: {fileID: 11400000, guid: 14924b0885f59384c89fbab8a8367982, type: 2}
     mDuration: 120
     mHungerEffect: 0
@@ -49,4 +50,4 @@ MonoBehaviour:
     mHungerEffect: 0
     mSleepinessEffect: 0
     mLonelinessEffect: 0
-    mStressEffect: -5
+    mStressEffect: -1

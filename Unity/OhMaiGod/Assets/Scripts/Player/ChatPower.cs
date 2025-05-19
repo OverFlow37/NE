@@ -81,6 +81,7 @@ public class ChatPower : Power
             perceiveEvent.event_location = "";
             perceiveEvent.event_role = "GOD says";
             perceiveEvent.event_is_save = true;
+            perceiveEvent.importance = 8;
             string message = chatText;
             perceiveEvent.event_description = message;
             mAgentController.ReactToResponse(true, perceiveEvent);

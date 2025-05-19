@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using Unity.VisualScripting;
 
 // 씬의 상호작용 가능한 게임 오브젝트에 붙는 컴포넌트 (MonoBehaviour)
 public class Interactable : MonoBehaviour
@@ -24,6 +25,13 @@ public class Interactable : MonoBehaviour
     // 위치 변경 이벤트 델리게이트 및 이벤트 정의
     public delegate void LocationChangedHandler(Interactable interactable, string newLocation);
     public event LocationChangedHandler OnLocationChanged;
+
+    [Header("Effect_use")]
+    [SerializeField]
+    public GameObject mEffectUse;
+    [Header("Effect_break")]
+    [SerializeField]
+    public GameObject mEffectBreak;
 
     // 타일매니저
     TileManager mtileManager;
@@ -104,7 +112,7 @@ public class Interactable : MonoBehaviour
     }
 
     // 상호작용 주체(Interactor)로부터 상호작용 요청을 받는 메서드
-    public bool Interact(GameObject interactor, string actionName)
+    public bool Interact(GameObject _interactor, string _actionName)
     {
         // InteractableData가 없거나 행동 목록이 없으면 상호작용 처리 불가
         if (mInteractableData == null || mInteractableData.mActions == null || mInteractableData.mActions.Length == 0)
@@ -113,21 +121,26 @@ public class Interactable : MonoBehaviour
             return false;
         }
 
-        LogManager.Log("Interact", $"{interactor.name}가 {mInteractableData.mName}와 상호작용 시도.", 2);
+        LogManager.Log("Interact", $"{_interactor.name}가 {mInteractableData.mName}와 상호작용 시도.", 2);
 
         // === 상호작용 처리 로직 ===
         // actionName과 일치하는 mAction만 실행
         bool actionFound = false;
         foreach (var action in mInteractableData.mActions)
         {
-            LogManager.Log("Interact", "action: "+action.mAction.mActionName+ "actionName: "+actionName, 3);
-            if (action.mAction != null && action.mAction.mActionName.ToLower() == actionName.ToLower())
+            LogManager.Log("Interact", "action: "+action.mAction.mActionName+ "actionName: "+_actionName, 3);
+            if (action.mAction != null && action.mAction.mActionName.ToLower() == _actionName.ToLower())
             {
                 actionFound = true;
                 // InteractionAction의 Execute 메서드 호출
-                if (action.mAction.Execute(interactor, this.gameObject))
+                if (action.mAction.Execute(_interactor, this.gameObject))
                 {
-                    interactor.GetComponent<AgentController>().isSuccessForFeedback = true;
+                    if(mEffectUse != null && _actionName == "use"){
+                        GameObject effect = Instantiate(mEffectUse, _interactor.transform.position, Quaternion.identity);
+                        Destroy(effect, 2f); // 2초 후 자동 삭제 (필요에 따라 시간 조절)
+                    }
+                    
+                    _interactor.GetComponent<AgentController>().isSuccessForFeedback = true;
                     LogManager.Log("Interact", $"{mInteractableData.mName} 상호작용 성공.", 2);
                     return true;
                 }
@@ -137,7 +150,7 @@ public class Interactable : MonoBehaviour
 
         if (!actionFound)
         {
-            LogManager.Log("Interact", $"{mInteractableData.mName}에 해당하는 행동({actionName})이 정의되어 있지 않음.", 1);
+            LogManager.Log("Interact", $"{mInteractableData.mName}에 해당하는 행동({_actionName})이 정의되어 있지 않음.", 1);
         }
         else
         {
@@ -244,6 +257,15 @@ public class Interactable : MonoBehaviour
             // 위치가 변경되면 이벤트 발생
             LogManager.Log("Interact", $"[{gameObject.name}] 위치 변경: {locationName}", 2);
             OnLocationChanged?.Invoke(this, locationName);
+        }
+    }
+
+    
+    void OnDestroy()
+    {
+        if(mEffectBreak != null){
+            GameObject effect = Instantiate(mEffectBreak, transform.position, Quaternion.identity);
+            Destroy(effect, 2f); // 2초 후 자동 삭제 (필요에 따라 시간 조절)
         }
     }
 }

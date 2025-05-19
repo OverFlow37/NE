@@ -508,7 +508,7 @@ class MemoryRetriever:
             elif hunger >= 20:
                 state_strings.append("slightly hungry")
             elif hunger < -70:
-                state_strings.append("You can't eat anymore")
+                state_strings.append("You are full, can't eat anymore")
                 
         if "loneliness" in state:
             loneliness = state["loneliness"]
@@ -542,6 +542,8 @@ class MemoryRetriever:
                 state_strings.append("stressed")
             elif stress >= 10:
                 state_strings.append("slightly stressed")
+            elif stress <= -70:
+                state_strings.append("you feel comfortable")
         
         ## 빈 배열일 경우 문자열 추가
         if not state_strings:
