@@ -172,7 +172,9 @@ class MemoryUtils:
             "action": "",
             "feedback": "",
             "conversation_detail": "",
-            "time": event_time
+            "time": event_time,
+            "event_type": "",
+            "event_location": "", 
         }
         
         # if event_role != "" and event_role != " ":
