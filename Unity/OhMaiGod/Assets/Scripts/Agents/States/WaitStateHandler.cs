@@ -23,7 +23,7 @@ namespace OhMAIGod.Agent
                 PerceiveEvent perceiveEvent = new PerceiveEvent();
                 perceiveEvent.event_type = PerceiveEventType.AGENT_NO_TASK;
                 perceiveEvent.event_location = "";
-                perceiveEvent.event_description = "There is nothing to do at the moment.";
+                perceiveEvent.event_description = "";
                 perceiveEvent.event_is_save = false;
                 perceiveEvent.event_role = "";
                 _controller.ReactToResponse(true, perceiveEvent); // 호출하고 싶은 함수명으로 변경

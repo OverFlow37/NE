@@ -760,6 +760,6 @@ public class AgentController : MonoBehaviour, ISaveable
         perceiveEvent.event_is_save = true;
         perceiveEvent.event_description = GetCurrentLocationInteractables(_newLocation);
         LogManager.Log("AI", $"{mName}: 위치 정보 전송: {perceiveEvent.event_description}", 2);
-        AIBridge_Perceive.Instance.SendPerceiveEvent(this, perceiveEvent);      
+        AIBridge_Perceive.Instance.SendPerceiveEventLocation(this, perceiveEvent);      
     }
 }
