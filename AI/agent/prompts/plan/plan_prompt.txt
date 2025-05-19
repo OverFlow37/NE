@@ -67,7 +67,7 @@ Foods can be interacted with using `eat` or `break`.
 
 #### Meat
 
-* **BigFish / Small Fish**: Obtained via fishing at the beach.
+* **BigFish / SmallFish**: Obtained via fishing at the beach.
 * **Egg**: Occasionally found in any region.
 
 ---
