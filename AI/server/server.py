@@ -243,7 +243,7 @@ async def perceive_event(payload: dict):
             return {"success": False, "error": "agent field is required"}
             
         agent_data = payload.get('agent', {})
-        agent_name = agent_data.get('name', 'John')
+        agent_name = agent_data.get('name', 'Tom')
         event_data = agent_data.get('perceive_event', {})
         
         # 게임 시간 가져오기
@@ -275,7 +275,7 @@ async def location_data(payload: dict):
             return {"success": False, "error": "agent field is required"}
             
         agent_data = payload.get('agent', {})
-        agent_name = agent_data.get('name', 'John')
+        agent_name = agent_data.get('name', 'Tom')
         event_data = agent_data.get('perceive_event', {})
         
         # 게임 시간 가져오기
@@ -313,7 +313,7 @@ async def should_react(payload: dict):
             return {"success": False, "error": "agent field is required"}
             
         agent_data = payload.get('agent', {})
-        agent_name = agent_data.get('name', 'John')
+        agent_name = agent_data.get('name', 'Tom')
         event_data = agent_data.get('perceive_event', {})
         
         # 게임 시간 가져오기
@@ -378,7 +378,7 @@ async def react_to_event(payload: dict):
             
         # 에이전트 데이터 추출
         agent_data = payload.get('agent', {})
-        agent_name = agent_data.get('name', 'John')
+        agent_name = agent_data.get('name', 'Tom')
         
         # 이벤트 데이터 추출
         event_data = agent_data.get('perceive_event', {})
@@ -624,12 +624,7 @@ async def reflection_and_plan(payload: Dict[str, Any]):
         
         return {
             "success": reflection_success and plan_success,
-            "next_day_plan": unity_plan,
-            "performance_metrics": {
-                "total_time": total_time,
-                "reflection_time": reflection_time,
-                "plan_time": plan_time
-            }
+            "next_day_plan": unity_plan
         }
         
     except Exception as e:
@@ -775,103 +770,122 @@ async def clear_all_data():
     return _perform_clear_all_data()
 
 
-@app.post("/data/reset")
-async def reset_all_data_from_backup():
+@app.post("/data/save")
+async def set_all_data(payload: dict):
     """
-    모든 데이터 파일을 각각의 백업 파일로부터 초기화하는 엔드포인트
-    
-    backup_memories.json, backup_plans.json, backup_reflections.json 파일의 내용으로
-    각각 memories.json, plans.json, reflections.json 파일을 초기화합니다.
+    서버의 모든 데이터를 설정하는 엔드포인트
+    payload는 {"이름": {"memories":{}, "reflections":[], "plans":[]}} 형식이어야 합니다.
+    저장 후에는 임베딩을 업데이트합니다.
     """
     try:
-        results = {}
-        data_dir = os.path.dirname(memory_utils.memories_file)
+        if not payload:
+            return {"success": False, "error": "데이터가 비어있습니다."}
         
-        # 초기화할 파일 목록
-        files_to_reset = [
-            {"name": "memories", "path": memory_utils.memories_file},
-            {"name": "plans", "path": memory_utils.plans_file},
-            {"name": "reflections", "path": memory_utils.reflections_file}
-        ]
-        
-        # 각 파일 초기화
-        for file_info in files_to_reset:
-            file_name = file_info["name"]
-            file_path = file_info["path"]
-            backup_path = os.path.join(data_dir, f"backup_{file_name}.json")
+        # 각 에이전트별로 데이터 처리
+        for agent_name, agent_data in payload.items():
+            # 메모리 데이터 저장
+            if "memories" in agent_data:
+                memories = {}
+                memories[agent_name] = {
+                    "memories": {},
+                    "embeddings": {}
+                }
+                memories[agent_name]["memories"] = agent_data["memories"]
+                memory_utils._save_memories(memories)
             
-            try:
-                # 백업 파일 존재 확인
-                if not os.path.exists(backup_path):
-                    print(f"⚠️ backup_{file_name}.json 파일이 존재하지 않습니다.")
-                    results[file_name] = {
-                        "success": False,
-                        "error": f"Backup file backup_{file_name}.json not found"
-                    }
-                    continue
+            # 반성 데이터 저장
+            if "reflections" in agent_data:
+                reflections = memory_utils._load_reflections()
+                if agent_name not in reflections:
+                    reflections[agent_name] = {"reflections": []}
+                reflections[agent_name]["reflections"] = agent_data["reflections"]
+                memory_utils._save_reflections(reflections)
+            
+            # 계획 데이터 저장
+            if "plans" in agent_data:
+                try:
+                    with open(memory_utils.plans_file, 'r', encoding='utf-8') as f:
+                        plans = json.load(f)
+                except Exception:
+                    plans = {}
                 
-                # 백업 파일로부터 초기화
-                import shutil
-                shutil.copy2(backup_path, file_path)
+                plans[agent_name] = agent_data["plans"]
                 
-                print(f"🔄 {file_name}.json 파일이 backup_{file_name}.json의 내용으로 초기화되었습니다.")
-                
-                # 결과 기록
-                results[file_name] = {
-                    "success": True,
-                    "message": f"{file_name}.json reset from backup_{file_name}.json",
-                }
-                
-            except Exception as e:
-                print(f"❌ {file_name}.json 초기화 중 오류 발생: {str(e)}")
-                results[file_name] = {
-                    "success": False,
-                    "error": str(e)
-                }
+                with open(memory_utils.plans_file, 'w', encoding='utf-8') as f:
+                    json.dump(plans, f, ensure_ascii=False, indent=2)
         
-        # 전체 성공 여부 확인
-        overall_success = all(result.get("success", False) for result in results.values())
+        # 임베딩 업데이트
+        print("\n=== 임베딩 업데이트 시작 ===")
+        update_counts = embedding_updater.update_embeddings()
+        print(f"✅ 임베딩 업데이트 완료: {update_counts}")
         
         return {
-            "success": overall_success,
-            "message": "All data files have been reset from backup" if overall_success else "Some files could not be reset",
-            "results": results
+            "success": True,
+            "message": "모든 데이터가 성공적으로 저장되었습니다.",
+            "embedding_updates": update_counts
         }
         
     except Exception as e:
-        print(f"❌ 데이터 초기화 중 오류 발생: {str(e)}")
+        print(f"❌ 데이터 저장 중 오류 발생: {str(e)}")
         return {"success": False, "error": str(e)}
 
 
-@app.post("/data/save_memories")
-async def save_memories_to_backup():
+@app.get("/data/load")
+async def get_all_data():
     """
-    현재 memories.json 파일의 내용을 backup_memories.json 파일로 복사하여 백업합니다.
+    현재 서버의 모든 데이터를 가져오는 엔드포인트
+    memories, reflections, plans 데이터를 하나의 객체로 반환합니다.
+    임베딩 데이터는 제외됩니다.
     """
     try:
-        memories_file_path = memory_utils.memories_file
-        if not os.path.exists(memories_file_path):
-            print(f"⚠️ 원본 memories.json 파일({memories_file_path})을 찾을 수 없습니다.")
-            return {
-                "success": False,
-                "error": f"memories.json not found at {memories_file_path}"
-            }
-
-        data_dir = os.path.dirname(memories_file_path)
-        # backup_memories.json 파일명은 reset 기능에서 사용하는 것과 일치해야 함
-        backup_file_name = f"backup_{Path(memories_file_path).stem}.json" 
-        backup_file_path = os.path.join(data_dir, backup_file_name)
-
-        shutil.copy2(memories_file_path, backup_file_path)
+        # 메모리 데이터 로드
+        memories_data = memory_utils._load_memories()
         
-        print(f"💾 memories.json 파일이 {backup_file_path}(으)로 성공적으로 백업되었습니다.")
+        # 반성 데이터 로드
+        reflections_data = memory_utils._load_reflections()
+        
+        # 계획 데이터 로드
+        try:
+            with open(memory_utils.plans_file, 'r', encoding='utf-8') as f:
+                plans_data = json.load(f)
+        except Exception as e:
+            print(f"계획 데이터 로드 중 오류 발생: {e}")
+            plans_data = {"Tom": [], "Jane": []}
+        
+        # 결과 데이터 구조 생성
+        result = {}
+        
+        # 각 에이전트별로 데이터 처리
+        for agent_name in memories_data.keys():
+            result[agent_name] = {
+                "memories": {},
+                "reflections": [],
+                "plans": []
+            }
+            
+            # 메모리 데이터 처리 (임베딩 제외)
+            if "memories" in memories_data[agent_name]:
+                result[agent_name]["memories"] = memories_data[agent_name]["memories"]
+            
+            # 반성 데이터 처리 (임베딩 제외)
+            if agent_name in reflections_data and "reflections" in reflections_data[agent_name]:
+                for reflection in reflections_data[agent_name]["reflections"]:
+                    # 임베딩 필드 제거
+                    if "embedding" in reflection:
+                        del reflection["embedding"]
+                    result[agent_name]["reflections"].append(reflection)
+            
+            # 계획 데이터 처리
+            if agent_name in plans_data:
+                result[agent_name]["plans"] = plans_data[agent_name]
+        
         return {
             "success": True,
-            "message": f"memories.json successfully backed up to {backup_file_path}"
+            "data": result
         }
         
     except Exception as e:
-        print(f"❌ memories.json 백업 중 오류 발생: {str(e)}")
+        print(f"❌ 데이터 로드 중 오류 발생: {str(e)}")
         return {"success": False, "error": str(e)}
 
 

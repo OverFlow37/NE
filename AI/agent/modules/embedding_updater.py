@@ -133,7 +133,7 @@ class EmbeddingUpdater:
         reflections = self.memory_utils._load_reflections()
         for agent_name in reflections:
             for reflection in reflections[agent_name]["reflections"]:
-                event = reflection.get("event", "")
+                event = reflection.get("thought", "")
                 if event:
                     # 시간 필드가 없는 경우 현재 시간 추가
                     current_time = datetime.now().strftime("%Y.%m.%d.%H:%M")
@@ -141,7 +141,7 @@ class EmbeddingUpdater:
                         reflection["time"] = current_time
                     if "created" not in reflection:
                         reflection["created"] = current_time
-                    reflection["embeddings"] = self.memory_utils.get_embedding(event)
+                    reflection["embedding"] = self.memory_utils.get_embedding(event)
                     update_counts["reflections"] += 1
         
         self.memory_utils._save_reflections(reflections)
