@@ -62,64 +62,50 @@ public class TileController : MonoBehaviour
     {
         get
         {
-            // 중심 셀 좌표 계산
-            Vector3Int centerCell = new Vector3Int(
-                Mathf.RoundToInt(mTilemap.cellBounds.center.x),
-                Mathf.RoundToInt(mTilemap.cellBounds.center.y),
-                0);
-            
-            if (mTilemap.HasTile(centerCell) && !Physics2D.OverlapCircle(
-                mTilemap.GetCellCenterWorld(centerCell), 0.2f, TileManager.Instance.ObstacleLayerMask))
-            {
-                return mTilemap.GetCellCenterWorld(centerCell);
-            }
-
-            // BFS 탐색을 위한 큐와 방문 집합
-            Queue<Vector3Int> queue = new Queue<Vector3Int>();
-            HashSet<Vector3Int> visited = new HashSet<Vector3Int>();
-
-            queue.Enqueue(centerCell);
-            visited.Add(centerCell);
-
-            // 8방향 이동 벡터
-            Vector3Int[] directions = new Vector3Int[]
-            {
-                Vector3Int.up, Vector3Int.down, Vector3Int.left, Vector3Int.right,
-                Vector3Int.up + Vector3Int.left, Vector3Int.up + Vector3Int.right,
-                Vector3Int.down + Vector3Int.left, Vector3Int.down + Vector3Int.right
-            };
-
+            // 실제 타일이 있는 셀 리스트 및 월드 좌표 리스트 생성
+            List<Vector3Int> tileCells = new List<Vector3Int>();
+            List<Vector2> worldPositions = new List<Vector2>();
             BoundsInt bounds = mTilemap.cellBounds;
-
-            while (queue.Count > 0)
+            for (int x = bounds.min.x; x < bounds.max.x; x++)
             {
-                Vector3Int cell = queue.Dequeue();
-
-                // 셀 범위 내, 타일 존재, 장애물 없음이면 반환
-                if (bounds.Contains(cell) && mTilemap.HasTile(cell))
+                for (int y = bounds.min.y; y < bounds.max.y; y++)
                 {
-                    bool hasObstacle = Physics2D.OverlapCircle(
-                        mTilemap.GetCellCenterWorld(cell), 0.2f, TileManager.Instance.ObstacleLayerMask);
-                    if (!hasObstacle)
+                    Vector3Int cell = new Vector3Int(x, y, 0);
+                    if (mTilemap.HasTile(cell))
                     {
-                        return mTilemap.GetCellCenterWorld(cell);
-                    }
-                }
-
-                // 8방향 인접 셀 탐색
-                foreach (var dir in directions)
-                {
-                    Vector3Int next = cell + dir;
-                    if (!visited.Contains(next) && bounds.Contains(next))
-                    {
-                        queue.Enqueue(next);
-                        visited.Add(next);
+                        Vector2 worldPos = mTilemap.GetCellCenterWorld(cell);
+                        if (!Physics2D.OverlapCircle(worldPos, 0.2f, TileManager.Instance.ObstacleLayerMask))
+                        {
+                            tileCells.Add(cell);
+                            worldPositions.Add(worldPos);
+                        }
                     }
                 }
             }
 
-            // 이동 가능한 셀이 없으면 Vector2.zero 반환
-            return Vector2.zero;
+            if (tileCells.Count == 0)
+                return Vector2.zero;
+
+            // 월드 좌표 평균 계산
+            Vector2 avg = Vector2.zero;
+            foreach (var pos in worldPositions)
+                avg += pos;
+            avg /= worldPositions.Count;
+
+            // 평균에 가장 가까운 셀 찾기
+            float minDist = float.MaxValue;
+            int minIdx = 0;
+            for (int i = 0; i < worldPositions.Count; i++)
+            {
+                float dist = (worldPositions[i] - avg).sqrMagnitude;
+                if (dist < minDist)
+                {
+                    minDist = dist;
+                    minIdx = i;
+                }
+            }
+
+            return worldPositions[minIdx];
         }
     }
 

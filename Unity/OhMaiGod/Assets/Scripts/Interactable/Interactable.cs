@@ -189,7 +189,6 @@ public class Interactable : MonoBehaviour
         if (other.gameObject.layer == LayerMask.NameToLayer("Location"))
         {
             LogManager.Log("Interact", $"[{gameObject.name}] {other.name} 영역에서 벗어남", 2);
-            StartCoroutine(UpdateEnvironmentRegistration());
         }
     }
 
