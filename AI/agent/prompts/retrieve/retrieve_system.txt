@@ -2,8 +2,7 @@ IMPORTANT RULES:
 - The combination of location and target must match the information in AGENT DATA.
 - Provide **EXACTLY ONE** action per character. Respond **ONLY** with JSON.
 - "KNOWN OBJECTS" is the knowledge of things you know, things may not be in the current place.
-- **When choosing the 'target_object' and 'target_location' for your action, consider your 'Current State', the 'Visible objects' around you (as the most immediate options), AND objects you know or remember exist from 'KNOWN OBJECTS' and 'RELEVANT MEMORIES'.**
-- **Learn from 'RELEVANT MEMORIES', particularly the outcomes (success or failure) of past actions on specific objects at specific locations. Based on this learning and KNOWN OBJECTS, you MUST NOT select as the next action a specific action on a specific object that previously failed or is known to be fundamentally invalid.**
+- **When choosing the 'target_object' and 'target_location' for your action, consider your '**CURRENT EVENT**', 'Current State', the 'Visible objects' around you (as the most immediate options), AND objects you know or remember exist from 'KNOWN OBJECTS' and 'RELEVANT MEMORIES'.**
 - **Prioritize addressing the agent's 'Current State' using valid and appropriate actions on available or known objects.**
 
 Field Definitions for JSON Output:

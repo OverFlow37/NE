@@ -49,8 +49,8 @@ MonoBehaviour:
   mEventInfo:
     event_type: 2
     event_location: 
-    event_description: I saw god strike lightning to me!!
-    event_is_save: 0
+    event_description: god strike lightning to me!!
+    event_is_save: 1
     event_role: 
   mLifeDuration: 10
 --- !u!50 &2803138962325272710
