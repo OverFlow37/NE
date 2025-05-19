@@ -7,6 +7,7 @@ import asyncio
 import sys
 from pathlib import Path
 import os
+import shutil
 from datetime import datetime, timedelta
 import time
 import gensim.downloader as api
@@ -699,11 +700,9 @@ async def handle_conversation(payload: dict):
         return {"success": False, "error": str(e)}
     
 
-@app.post("/data/clear")
-async def clear_all_data():
+def _perform_clear_all_data():
     """
-    모든 데이터 파일을 빈 상태로 초기화하는 엔드포인트
-    
+    실제로 모든 데이터 파일을 빈 상태로 초기화하는 내부 함수.
     memories.json, plans.json, reflections.json 파일을 완전히 초기화합니다.
     주의: 이 작업은 되돌릴 수 없습니다.
     """
@@ -754,6 +753,7 @@ async def clear_all_data():
         # 전체 성공 여부 확인
         overall_success = all(result["success"] for result in results.values())
         
+        print(f"데이터 초기화 결과: {'성공' if overall_success else '일부 실패'}")
         return {
             "success": overall_success,
             "message": "All data files have been cleared" if overall_success else "Some files could not be cleared",
@@ -763,6 +763,16 @@ async def clear_all_data():
     except Exception as e:
         print(f"❌ 데이터 초기화 중 오류 발생: {str(e)}")
         return {"success": False, "error": str(e)}
+
+@app.post("/data/clear")
+async def clear_all_data():
+    """
+    모든 데이터 파일을 빈 상태로 초기화하는 엔드포인트
+    
+    memories.json, plans.json, reflections.json 파일을 완전히 초기화합니다.
+    주의: 이 작업은 되돌릴 수 없습니다.
+    """
+    return _perform_clear_all_data()
 
 
 @app.post("/data/reset")
@@ -833,77 +843,41 @@ async def reset_all_data_from_backup():
         return {"success": False, "error": str(e)}
 
 
+@app.post("/data/save_memories")
+async def save_memories_to_backup():
+    """
+    현재 memories.json 파일의 내용을 backup_memories.json 파일로 복사하여 백업합니다.
+    """
+    try:
+        memories_file_path = memory_utils.memories_file
+        if not os.path.exists(memories_file_path):
+            print(f"⚠️ 원본 memories.json 파일({memories_file_path})을 찾을 수 없습니다.")
+            return {
+                "success": False,
+                "error": f"memories.json not found at {memories_file_path}"
+            }
 
-# # 사용하지 않는 엔드포인트
-# @app.post("/agent_action")
-# async def save_agent_action(payload: dict):
-#     """에이전트의 행동을 저장하는 엔드포인트"""
-#     try:
-#         if not payload or 'agent' not in payload:
-#             return {"success": False, "error": "agent field is required"}
-            
-#         agent_data = payload.get('agent', {})
-#         agent_name = agent_data.get('name', 'John')
-#         action_data = agent_data.get('action', {})
-        
-#         # 행동 데이터에 시간 정보 추가
-#         action_data['time'] = agent_data.get('time', datetime.now().strftime("%Y.%m.%d.%H:%M"))
-        
-#         # 행동 데이터를 영어 문장으로 변환
-#         action_sentence = f"{action_data.get('action', '')} {action_data.get('target', '')} at {agent_data.get('current_location', '')}"
-        
-#         # 임베딩 생성
-#         embedding = memory_utils.get_embedding(action_sentence)
-        
-#         # 메모리 저장 (event_id 포함)
-#         success = memory_utils.save_memory(
-#             event_sentence=action_sentence,
-#             embedding=embedding,
-#             event_time=action_data['time'],
-#             agent_name=agent_name,
-#             event_id=action_data.get('event_id', '')  # event_id 추가
-#         )
-        
-#         return {"success": success}
-        
-#     except Exception as e:
-#         print(f"❌ 에이전트 행동 저장 중 오류 발생: {str(e)}")
-#         return {"success": False, "error": str(e)}
+        data_dir = os.path.dirname(memories_file_path)
+        # backup_memories.json 파일명은 reset 기능에서 사용하는 것과 일치해야 함
+        backup_file_name = f"backup_{Path(memories_file_path).stem}.json" 
+        backup_file_path = os.path.join(data_dir, backup_file_name)
 
-# # 사용하지 않는 엔드포인트
-# @app.post("/action_feedback")
-# async def save_action_feedback(payload: dict):
-#     """행동에 대한 피드백을 저장하는 엔드포인트"""
-#     try:
-#         # 전체 처리 시작 시간 기록
-#         start_time = time.time()
-#         print("\n=== /action_feedback 엔드포인트 호출 ===")
-#         print("📥 요청 데이터:", json.dumps(payload, indent=2, ensure_ascii=False))
+        shutil.copy2(memories_file_path, backup_file_path)
         
-#         if not payload or 'agent' not in payload:
-#             return {"success": False, "error": "agent field is required"}
-            
-#         # 피드백 처리
-#         result = await feedback_processor.process_feedback(payload)
+        print(f"💾 memories.json 파일이 {backup_file_path}(으)로 성공적으로 백업되었습니다.")
+        return {
+            "success": True,
+            "message": f"memories.json successfully backed up to {backup_file_path}"
+        }
         
-#         if not result:
-#             return {"success": False, "error": "Failed to process feedback"}
-        
-#         # 처리 시간 계산
-#         total_time = time.time() - start_time
-#         print(f"⏱ 피드백 처리 시간: {total_time:.2f}초")
-        
-#         return result
-        
-#     except Exception as e:
-#         print(f"❌ 피드백 저장 중 오류 발생: {str(e)}")
-#         import traceback
-#         traceback.print_exc()
-#         return {"success": False, "error": str(e)}
+    except Exception as e:
+        print(f"❌ memories.json 백업 중 오류 발생: {str(e)}")
+        return {"success": False, "error": str(e)}
 
 
 if __name__ == "__main__":
     print(f"\n=== 서버 초기화 완료 (총 소요시간: {time.time() - start_time:.2f}초) ===")
     import uvicorn
+    _perform_clear_all_data()  # 서버 시작 시 데이터 초기화 함수 호출
     uvicorn.run(app, host="127.0.0.1", port=5000)
 
