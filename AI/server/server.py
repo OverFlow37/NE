@@ -11,6 +11,7 @@ import shutil
 from datetime import datetime, timedelta
 import time
 import gensim.downloader as api
+from gensim.models import KeyedVectors
 from typing import Dict, Any
 import numpy as np
 
@@ -97,7 +98,26 @@ instance_start = time.time()
 
 # Word2Vec 모델 로드
 print("🤖 Word2Vec 모델 로딩 중...")
-word2vec_model = api.load('word2vec-google-news-300')
+# 프로젝트 내부에 저장할 .kv 경로
+KV_PATH = os.path.join('models', 'word2vec-google-news-300.kv')
+
+# 1) .kv 파일이 없으면 압축 해제 후 변환
+if not os.path.exists(KV_PATH):
+    print("⚙️  .kv 포맷 파일이 없으므로 변환을 시작합니다...")
+    # api.load로 다운로드된 .bin 파일 경로 가져오기
+    bin_path = api.load('word2vec-google-news-300', return_path=True)
+    # 바이너리 포맷(.bin) 로드
+    kv = KeyedVectors.load_word2vec_format(bin_path, binary=True)
+    # 디렉토리 생성 후 저장
+    os.makedirs(os.path.dirname(KV_PATH), exist_ok=True)
+    kv.save(KV_PATH)
+    print("✅  .kv 포맷 변환 완료")
+
+# 2) 매핑(mmap) 방식으로 빠르게 로드
+print("🤖  KeyedVectors 모델 로딩 중...")
+word2vec_model = KeyedVectors.load(KV_PATH, mmap='r')
+print("✅  KeyedVectors 모델 로딩 완료")
+
 print("✅ Word2Vec 모델 로딩 완료")
 
 # object_embeddings.json 파일 로드
@@ -781,11 +801,11 @@ async def set_all_data(payload: dict):
         if not payload:
             return {"success": False, "error": "데이터가 비어있습니다."}
         
+        memories = {}
         # 각 에이전트별로 데이터 처리
         for agent_name, agent_data in payload.items():
             # 메모리 데이터 저장
             if "memories" in agent_data:
-                memories = {}
                 memories[agent_name] = {
                     "memories": {},
                     "embeddings": {}
