@@ -106,6 +106,8 @@ public class AgentController : MonoBehaviour, ISaveable
 
     private Interactable mInteractableAgentSelf;
 
+    public string mPreviousAction = ""; // 직전에 한 행동 기록
+
     private void Awake()
     {
         // 참조 가져오기
@@ -376,6 +378,7 @@ public class AgentController : MonoBehaviour, ISaveable
         mCurrentAction = _action;
         mCurrentMemoryID = _action.memory_id;
         isSuccessForFeedback = false;
+        mPreviousAction = $"{_action.ActionName} {_action.TargetName} at {_action.LocationName}";
 
         // 현재 위치와 목표 위치가 다르면 MOVE_TO_LOCATION 상태로 전환
         if (mCurrentAction.LocationName != null && mCurrentAction.LocationName != mInteractable.CurrentLocation)
@@ -681,7 +684,7 @@ public class AgentController : MonoBehaviour, ISaveable
     public void InitFeedback(){
         mCurrentFeedback = new PerceiveFeedback();
         mCurrentFeedback.agent_name = mName;
-        mCurrentFeedback.current_location_name = mCurrentLocation;
+        mCurrentFeedback.current_location_name = "";
         mCurrentFeedback.time = TimeManager.Instance.GetCurrentGameTime().ToString();
         mCurrentFeedback.interactable_name = "";
         mCurrentFeedback.action_name = mActionNameForFeedback;
@@ -709,15 +712,16 @@ public class AgentController : MonoBehaviour, ISaveable
 
     // AI 서버에 피드백 보냄
     public void SendFeedbackToAI(bool _success, string _interactableName = "", string _actionName = "", string _memoryID = ""){
-        mCurrentFeedback.current_location_name = mCurrentLocation;
+        mCurrentFeedback.current_location_name = "";
         mCurrentFeedback.time = TimeManager.Instance.GetCurrentGameTime().ToString();
         mCurrentFeedback.interactable_name = _interactableName;
         mCurrentFeedback.action_name = _actionName;
         mCurrentFeedback.success = _success;
         mCurrentFeedback.feedback.feedback_description = "";
+        PerceiveEvent perceiveEvent = new PerceiveEvent();
         // 실패했고 액션까지는 성공
         if(!_success && _actionName != ""){
-            mCurrentFeedback.feedback.feedback_description = $"{_interactableName} is can't {_actionName}.";
+            mCurrentFeedback.feedback.feedback_description = $"{_interactableName}: ";
         }
         // 타겟 로케이션에 타겟 오브젝트가 없는 경우
         else if (!_success && _actionName == ""){
@@ -729,9 +733,9 @@ public class AgentController : MonoBehaviour, ISaveable
             }
             
             LogManager.Log("Agent", $"{mName}: 로케이션에 오브젝트가 없어 피드백 보냄: {mCurrentFeedback.feedback.feedback_description}", 2);
-            PerceiveEvent perceiveEvent = new PerceiveEvent();
+            
             perceiveEvent.event_is_save = false;
-            perceiveEvent.event_location = CurrentLocation;
+            perceiveEvent.event_location = "";
             perceiveEvent.event_role = "";
             perceiveEvent.event_type = PerceiveEventType.TARGET_NOT_IN_LOCATION;
             string eventData = mCurrentFeedback.feedback.feedback_description + GetCurrentLocationInteractables(mCurrentLocation);
@@ -740,6 +744,7 @@ public class AgentController : MonoBehaviour, ISaveable
             SendReactAction(perceiveEvent);
         }
         mCurrentFeedback.feedback.memory_id = mCurrentMemoryID;
+        mCurrentFeedback.importance = 2;
         // 실제 전송되는 JSON 양식도 로그로 출력
         string feedbackJson = JsonUtility.ToJson(mCurrentFeedback);
         LogManager.Log("AI", $"{mName}: 피드백 전송 JSON: {feedbackJson}", 2);
@@ -764,6 +769,7 @@ public class AgentController : MonoBehaviour, ISaveable
         perceiveEvent.event_role = $"{mName} saw";
         perceiveEvent.event_is_save = true;
         perceiveEvent.event_description = GetCurrentLocationInteractables(_newLocation);
+        perceiveEvent.importance = 3;
         LogManager.Log("AI", $"{mName}: 위치 정보 전송: {perceiveEvent.event_description}", 2);
         AIBridge_Perceive.Instance.SendPerceiveEventLocation(this, perceiveEvent);      
     }

@@ -185,6 +185,7 @@ public class CreateFruitPower : Power
             EventController eventController = Instantiate(mSelectedEvent, centerCellWorld, Quaternion.identity).GetComponent<EventController>();
             eventController.mEventInfo.event_location = TileManager.Instance.GetTileController(centerCell).LocationName;
             eventController.mEventInfo.event_description += $" at {eventController.mEventInfo.event_location}";
+            eventController.mEventInfo.importance = 4;
         }
     }
 

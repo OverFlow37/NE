@@ -197,6 +197,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mInteractableData: {fileID: 11400000, guid: 8b1cd8989c325e34c929bc85586fc495, type: 2}
+  mEffectUse: {fileID: 0}
+  mEffectBreak: {fileID: 5956985526485463431, guid: 2f9a624aa970dc44e9579d329685f1e5, type: 3}
 --- !u!114 &2310740737412453000
 MonoBehaviour:
   m_ObjectHideFlags: 0

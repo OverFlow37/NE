@@ -20,14 +20,14 @@ MonoBehaviour:
   mState: 0
   mInterest: 0
   mFaith: 3
-  mIcon: {fileID: 0}
+  mIcon: {fileID: 1159245507, guid: d968c9bd06795e74aa94536ed935d41d, type: 3}
   mActions:
   - mAction: {fileID: 11400000, guid: cbe91266aabd61348bd1864e9f7bac11, type: 2}
     mDuration: 120
     mHungerEffect: -30
     mSleepinessEffect: 0
     mLonelinessEffect: -10
-    mStressEffect: -10
+    mStressEffect: 0
   - mAction: {fileID: 11400000, guid: 834d1a928a543d444b3abefbce640270, type: 2}
     mDuration: 120
     mHungerEffect: 0

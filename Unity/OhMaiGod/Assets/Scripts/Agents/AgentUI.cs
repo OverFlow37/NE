@@ -222,11 +222,26 @@ public class AgentUI : MonoBehaviour
     {
         if (mInteractionInfo != null)
         {
+            switch(_text){
+                case "eat":
+                    mInteractionText.text = " eating...";
+                    break;
+                case "use":
+                    mInteractionText.text = " using...";
+                    break;
+                case "offer":
+                    mInteractionText.text = " offering...";
+                    break;
+                case "break":
+                    mInteractionText.text = " breaking...";
+                    break;
+            }
             mInteractionInfo.SetActive(true);
+            UpdateSpeechBubbleActive();
             // 텍스트/이미지 등 세팅 필요시 여기서 처리
             // 예: mInteractionInfo.GetComponentInChildren<TextMeshProUGUI>().text = _text;
         }
-        UpdateSpeechBubbleActive();
+        
     }
 
     // 상호작용 UI 종료
