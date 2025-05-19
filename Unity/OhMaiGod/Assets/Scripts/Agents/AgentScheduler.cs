@@ -26,12 +26,6 @@ public class AgentScheduler : MonoBehaviour
     {
         // 에이전트 컨트롤러 참조 가져오기
         mAgentController = GetComponent<AgentController>();
-        
-        // 빈 일정으로 초기화
-        ResetSchedule();
-
-        // 데일리 일정 가져와서 적용
-        ApplyDailySchedule();
     }
 
     private void Update()
@@ -175,7 +169,7 @@ public class AgentScheduler : MonoBehaviour
     }
 
     // 데일리 일정 가져와서 적용
-    private void ApplyDailySchedule()
+    public void ApplyDailySchedule()
     {
         mDailySchedule = AIBridge_Perceive.Instance.NextDayPlans;
     }

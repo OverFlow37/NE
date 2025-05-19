@@ -164,6 +164,9 @@ public class AgentController : MonoBehaviour, ISaveable
 
         mInteractableAgentSelf = GetComponent<Interactable>();
         mInteractableAgentSelf.mInteractableData.mName = mName;
+
+        // 데일리 일정 가져와서 적용
+        mScheduler.ApplyDailySchedule();
     }
 
     private void OnDestroy()

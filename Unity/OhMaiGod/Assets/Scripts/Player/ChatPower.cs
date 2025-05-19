@@ -4,7 +4,6 @@ using TMPro;
 using System.Collections;
 using OhMAIGod.Perceive;
 using NUnit.Framework.Interfaces;
-using UnityEditor.VersionControl;
 
 public class ChatPower : Power
 {
