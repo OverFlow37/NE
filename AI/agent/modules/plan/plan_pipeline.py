@@ -96,7 +96,7 @@ async def process_plan_request(request_data: Dict[str, Any], ollama_client) -> T
         
         # 에이전트 데이터 추출
         agent_data = request_data.get('agent', {})
-        agent_name = agent_data.get('name', 'John')
+        agent_name = agent_data.get('name', 'Tom')
         
         # 날짜 추출
         date = agent_data.get('time', '')

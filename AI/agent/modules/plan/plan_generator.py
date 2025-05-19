@@ -115,7 +115,7 @@ class PlanGenerator:
                 new_plans = agent_data.get("plans", {})
 
                 for date_key, plan_value in new_plans.items():
-                    # 💡 중첩된 plan이 있는 경우 (e.g. plan_value = {"John": {"plans": {...}}})
+                    # 💡 중첩된 plan이 있는 경우 (e.g. plan_value = {"Tom": {"plans": {...}}})
                     if isinstance(plan_value, dict) and any(
                         isinstance(v, dict) and "plans" in v for v in plan_value.values()
                     ):

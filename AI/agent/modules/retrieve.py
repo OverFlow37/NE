@@ -248,8 +248,8 @@ class MemoryRetriever:
         if agent_name not in memories or not memories[agent_name]["memories"]:
             return []
         
-        all_items = []
-        
+        memory_items = []
+        reflection_items = []
         current_event_embedding_np = np.array(event_embedding)
         current_state_embedding_np = np.array(state_embedding)
 
@@ -303,53 +303,61 @@ class MemoryRetriever:
             max_similarity_val = max(calculated_event_similarity, calculated_state_similarity) # 변수명 변경 max_similarity -> max_similarity_val
             
             if avg_similarity >= similarity_threshold or max_similarity_val >= similarity_threshold:
-                all_items.append((memory_with_id, float(calculated_event_similarity), float(calculated_state_similarity), float(avg_similarity), float(max_similarity_val), False))
+                memory_items.append((memory_with_id, float(calculated_event_similarity), float(calculated_state_similarity), float(avg_similarity), float(max_similarity_val)))
             else: # 임베딩이 없거나, 계산된 유사도가 낮아도 기본 점수로 추가 (추후 개선 가능)
-                all_items.append((memory_with_id, 0.01, 0.01, 0.01, 0.01, False))
+                memory_items.append((memory_with_id, 0.01, 0.01, 0.01, 0.01))
 
-        # 반성 추가 로직 (유사하게 0 임베딩 체크 및 기본 유사도 0.01 적용 필요)
-        if agent_name in reflections:
-            for reflection in reflections[agent_name]["reflections"]:
-                reflection_embeddings = reflection.get("embeddings", [])
-                if reflection_embeddings:
-                    max_event_similarity = 0.01
-                    max_state_similarity = 0.01
+
+        # ### 반성 데이터 불안정성, 추후 개선 필요
+        
+        # # 반성 추가 로직 (유사하게 0 임베딩 체크 및 기본 유사도 0.01 적용 필요)
+        # if agent_name in reflections:
+        #     for reflection in reflections[agent_name]["reflections"]:
+        #         reflection_embedding = reflection.get("embedding", [])
+        #         if reflection_embedding:
+        #             max_event_similarity = 0.01
+        #             max_state_similarity = 0.01
+                
+        #             reflection_embedding = np.array(reflection_embedding)
+        #             if not np.all(reflection_embedding == 0):  # 임베딩이 0이 아닐 때만 계산
+        #                 if not is_current_event_embedding_zero:  # 현재 이벤트 임베딩이 0이 아닐 때
+        #                     norm_current_event = np.linalg.norm(current_event_embedding_np)
+        #                     norm_reflection = np.linalg.norm(reflection_embedding)
+        #                     if norm_current_event > 0 and norm_reflection > 0:
+        #                         event_similarity = np.dot(current_event_embedding_np, reflection_embedding) / (norm_current_event * norm_reflection)
+        #                         max_event_similarity = max(max_event_similarity, float(event_similarity))
+                        
+        #                 if not is_current_state_embedding_zero:  # 현재 상태 임베딩이 0이 아닐 때
+        #                     norm_current_state = np.linalg.norm(current_state_embedding_np)
+        #                     norm_reflection = np.linalg.norm(reflection_embedding)  # 위에서 계산되었을 수 있음
+        #                     if norm_current_state > 0 and norm_reflection > 0:
+        #                         state_similarity = np.dot(current_state_embedding_np, reflection_embedding) / (norm_current_state * norm_reflection)
+        #                         max_state_similarity = max(max_state_similarity, float(state_similarity))
+                
+        #             avg_similarity = (max_event_similarity + max_state_similarity) / 2
+        #             max_similarity = max(max_event_similarity, max_state_similarity)
                     
-                    for reflection_embedding in reflection_embeddings:
-                        reflection_embedding = np.array(reflection_embedding)
-                        if reflection_embedding.shape == event_embedding.shape:
-                            # 이벤트 유사도 계산
-                            event_similarity = np.dot(event_embedding, reflection_embedding) / (
-                                np.linalg.norm(event_embedding) * np.linalg.norm(reflection_embedding)
-                            )
-                            max_event_similarity = max(max_event_similarity, float(event_similarity))
-                            
-                            # 상태 유사도 계산
-                            state_similarity = np.dot(state_embedding, reflection_embedding) / (
-                                np.linalg.norm(state_embedding) * np.linalg.norm(reflection_embedding)
-                            )
-                            max_state_similarity = max(max_state_similarity, float(state_similarity))
-                    
-                    avg_similarity = (max_event_similarity + max_state_similarity) / 2
-                    max_similarity = max(max_event_similarity, max_state_similarity)
-                    
-                    if avg_similarity >= similarity_threshold or max_similarity >= similarity_threshold:
-                        all_items.append((reflection, max_event_similarity, max_state_similarity, avg_similarity, max_similarity, True))
+        #             if avg_similarity >= similarity_threshold or max_similarity >= similarity_threshold:
+        #                 reflection_items.append((reflection, max_event_similarity, max_state_similarity, avg_similarity, max_similarity))
         
         # 시간순으로 정렬하여 가중치 계산
         def get_time(item):
             return item.get("time", "")
             
-        all_items.sort(key=lambda x: get_time(x[0]), reverse=True)
+        memory_items.sort(key=lambda x: get_time(x[0]), reverse=True)
+        reflection_items.sort(key=lambda x: get_time(x[0]), reverse=True)
         
         # -------------------------------------------------------------------
         # 1) 파라미터: 선형 가중합 계수
-        alpha, beta, gamma = 0.5, 0.2, 0.3
+        memory_alpha, memory_beta, memory_gamma = 0.5, 0.2, 0.3
         K = 20  # 포물선형 시간 가중치 계산용
 
         valued_items = []
         to_print_items = []
-        for i, (item, event_sim, state_sim, avg_sim, max_sim, is_reflection) in enumerate(all_items):
+
+        ## 메모리 
+        for i, (item, event_sim, state_sim, avg_sim, max_sim) in enumerate(memory_items):
+        
             # (1) 시간 가중치
             t = min(i, K) / K
             time_weight = max(1.0 - t**2, 0.01)
@@ -363,13 +371,40 @@ class MemoryRetriever:
 
             # (4) 최종 점수 계산
             final_score = (
-                alpha * sim_max
-            + beta  * imp_norm
-            + gamma * time_weight
+                memory_alpha * sim_max
+            + memory_beta  * imp_norm
+            + memory_gamma * time_weight
             )
 
-            valued_items.append((item, final_score))
+            valued_items.append((item, final_score, False))
             to_print_items.append((item, final_score, sim_max, imp_norm, time_weight, event_sim, state_sim))
+
+        ## 반성
+        
+        # reflection_alpha, reflection_beta, reflection_gamma = 0.7, 0.1, 0.1
+
+
+        # for i, (item, event_sim, state_sim, avg_sim, max_sim) in enumerate(reflection_items):
+        #     # (1) 시간 가중치
+        #     t = min(i, K) / K
+        #     time_weight = max(1.0 - t**2, 0.01)
+
+        #     # (2) 중요도 정규화
+        #     importance = float(item.get("importance", 3))
+        #     imp_norm = importance / 10.0
+
+        #     # (3) 유사도 최고치
+        #     sim_max = max(event_sim, state_sim)
+
+        #     # (4) 최종 점수 계산
+        #     final_score = (
+        #         reflection_alpha * sim_max
+        #     + reflection_beta  * imp_norm
+        #     + reflection_gamma * time_weight
+        #     )
+
+        #     valued_items.append((item, final_score, True))
+        #     to_print_items.append((item, final_score, sim_max, imp_norm, time_weight, event_sim, state_sim))
 
         # final_score 기준 내림차순 정렬
         valued_items.sort(key=lambda x: x[1], reverse=True)
@@ -406,7 +441,7 @@ class MemoryRetriever:
         
         return result
 
-    def _create_event_string(self, memory: Dict[str, Any]) -> str:
+    def _create_event_string(self, memory: Dict[str, Any], is_reflection: bool) -> str:
         """
         메모리를 이벤트 문자열로 변환
         
@@ -427,19 +462,18 @@ class MemoryRetriever:
         event_role = memory.get("event_role", "")
         
         content = ""
-        if event and event != "":
-            if event_role != "" and event_role != " ":
-                content = f"Event: {event_role}, {event}\n"
-            else:
-                content = f"Event: {event}\n"
-        if feedback and feedback != "":
-            content = f"Feedback: {feedback}\n"
+        if is_reflection:
+            if thought and thought != "":
+                content = f"Thought: {thought}\n"
+        else:
+            if event and event != "":
+                if event_role != "" and event_role != " ":
+                    content = f"Event: {event_role}, {event}\n"
+                else:
+                    content = f"Event: {event}\n"
+            if feedback and feedback != "":
+                content = f"Feedback: {feedback}\n"
         
-        # if thought:
-        #     return f"- {content} (time: {time}, id: {memory_id})\n  thought: {thought}"
-        # return f"- {content} (time: {time}, id: {memory_id})"
-        if thought:
-            return f"- {content}\n  thought: {thought}\n"
         return f"- {content}\n"
         
 
@@ -597,9 +631,9 @@ class MemoryRetriever:
         processed_events = set()
         similar_events = []
         
-        for memory, _ in similar_memories:
+        for memory, _, is_reflection in similar_memories:
             # 메모리 문자열 생성
-            event_str = self._create_event_string(memory)
+            event_str = self._create_event_string(memory, is_reflection)
             if event_str not in processed_events:
                 similar_events.append(event_str)
                 processed_events.add(event_str)
