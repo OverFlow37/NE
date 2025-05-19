@@ -213,8 +213,13 @@ class MemoryUtils:
         Returns:
             List[float]: 임베딩 벡터
         """
+
+        # 특수문자 제거 (공백 제외)
+        import re
+        cleaned_text = re.sub(r'[^\w\s]', '', text)    
+
         # 토큰화 및 소문자 변환
-        tokens = [w.lower() for w in text.split() if w.lower() in self.model]
+        tokens = [w.lower() for w in cleaned_text.split() if w.lower() in self.model]
         
         if not tokens:
             return [0.0] * self.model.vector_size
