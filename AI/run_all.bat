@@ -1,16 +1,18 @@
-@echo off
-rem ── Setting Global Environment Variables ──
-set OLLAMA_KEEP_ALIVE=-1
-set OLLAMA_HOST=0.0.0.0
-set OLLAMA_DEBUG=1
-set CUDA_VISIBLE_DEVICES=0
+@REM REM current ollama.exe terminate
+@REM taskkill /IM ollama.exe /F >nul 2>&1
 
-rem ── Ollama path ──
-for /f "tokens=*" %%i in ('where ollama') do set OLLAMA_PATH=%%i
+@REM REM env setting
+@REM set OLLAMA_KEEP_ALIVE=-1
+@REM set CUDA_VISIBLE_DEVICES=0
 
-rem ── GPU check Ollama run ──
-start "Ollama GPU Run" cmd /k "nvidia-smi && echo Ollama path: %OLLAMA_PATH% && "%OLLAMA_PATH%" run gemma3"
+@REM rem ── Ollama path ──
+@REM for /f "tokens=*" %%i in ('where ollama') do set OLLAMA_PATH=%%i
 
 rem ── run ──
+
+@REM rem ── GPU check Ollama run ──
+@REM cmd /c "nvidia-smi && "%OLLAMA_PATH%" run gemma3"
+
+
 cd /d server
 call run_server.bat

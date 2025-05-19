@@ -21,9 +21,9 @@ if exist "%~dp0requirements.txt" (
 )
 
 REM --------------------------------------------------------
-REM  Launch Flask server in a new command window
+REM  Launch Flask server in a new command window with venv activated
 REM --------------------------------------------------------
-start "Server" cmd /k "cd /d %~dp0 && python -u server.py && pause"
+start "Server" cmd /k "cd /d %~dp0 && call venv\Scripts\activate.bat && python -u server.py && pause"
 
-REM Wait for server to initialize
+REM Wait a moment for server to spin up
 timeout /t 2 >nul
