@@ -49,7 +49,7 @@ MonoBehaviour:
   mEventInfo:
     event_type: 2
     event_location: 
-    event_description: the power of God to create fruit.
+    event_description: the power of God to create fruit!
     event_is_save: 0
     event_role: 
   mLifeDuration: 10

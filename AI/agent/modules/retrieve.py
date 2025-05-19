@@ -475,7 +475,7 @@ class MemoryRetriever:
         for location, objects in location_objects.items():
             # 객체 목록을 정렬된 리스트로 변환
             sorted_objects = sorted(list(objects))
-            interactable_strings.append(f"- Location: {location}, Objects: {', '.join(sorted_objects)}")
+            interactable_strings.append(f"- (Objects: ({', '.join(sorted_objects)}) in Location: {location})")
         
         return "\n".join(interactable_strings) if interactable_strings else "Nothing visible nearby."
 
@@ -518,9 +518,8 @@ class MemoryRetriever:
             elif loneliness >= 20:
                 state_strings.append("slightly lonely")
             elif loneliness < -70:
-                state_strings.append("want to be alone")
+                state_strings.append("you want to be alone")
                 
-        # sleepiness와 stress는 0 이하일 때 표시하지 않음
         if "sleepiness" in state and state["sleepiness"] > 0:
             sleepiness = state["sleepiness"]
             if sleepiness >= 90:
@@ -529,8 +528,10 @@ class MemoryRetriever:
                 state_strings.append("very sleepy")
             elif sleepiness >= 40:
                 state_strings.append("sleepy")
-            elif sleepiness >= 1:
+            elif sleepiness >= 20:
                 state_strings.append("slightly sleepy")
+            elif sleepiness <= -70:
+                state_strings.append("you feel completely awake")
                 
         if "stress" in state and state["stress"] > 0:
             stress = state["stress"]
@@ -538,7 +539,7 @@ class MemoryRetriever:
                 state_strings.append("very stressed")
             elif stress >= 40:
                 state_strings.append("stressed")
-            elif stress >= 1:
+            elif stress >= 10:
                 state_strings.append("slightly stressed")
         
         ## 빈 배열일 경우 문자열 추가

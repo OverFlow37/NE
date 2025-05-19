@@ -743,17 +743,19 @@ public class AgentController : MonoBehaviour, ISaveable
     // 에이전트의 현재 지역이 바뀌었을 때, 현재 지역의 오브젝트 목록을 가져옴
     public string GetCurrentLocationInteractables(string _newLocation){
         List<Interactable> interactables = TileManager.Instance.GetInteractablesInLocation(_newLocation);
-        var grouped = interactables.GroupBy(i => i.InteractableName)
+        // mName과 같은 InteractableName은 제외
+        var filtered = interactables.Where(i => i.InteractableName != mName);
+        var grouped = filtered.GroupBy(i => i.InteractableName)
                                    .Select(g => $"{g.Key} x{g.Count()}");
         string interactableSummary = string.Join(", ", grouped);
-        string eventData = $"{_newLocation} had {interactableSummary}.";
+        string eventData = $" {interactableSummary} in {_newLocation}.";
         return eventData;
     }
     // 에이전트의 현재 지역이 바뀌었을 때, 현재 지역의 오브젝트 목록을 전송
     public void SendCurrentLocationInfo(string _newLocation){
         PerceiveEvent perceiveEvent = new PerceiveEvent();
         perceiveEvent.event_type = PerceiveEventType.AGENT_LOCATION_CHANGE;
-        perceiveEvent.event_location = "";
+        perceiveEvent.event_location = CurrentLocation;
         perceiveEvent.event_role = $"{mName} saw";
         perceiveEvent.event_is_save = true;
         perceiveEvent.event_description = GetCurrentLocationInteractables(_newLocation);
