@@ -33,19 +33,19 @@ class MemoryUtils:
                     if file_path == self.memories_file:
                         # 새로운 메모리 구조로 초기화
                         json.dump({
-                            "John": {
+                            "Tom": {
                                 "memories": {},
                                 "embeddings": {}
                             },
-                            "Sarah": {
+                            "Jane": {
                                 "memories": {},
                                 "embeddings": {}
                             }
                         }, f, ensure_ascii=False, indent=2)
                     elif file_path == self.reflections_file:
-                        json.dump({"John": {"reflections": []}, "Sarah": {"reflections": []}}, f, ensure_ascii=False, indent=2)
+                        json.dump({"Tom": {"reflections": []}, "Jane": {"reflections": []}}, f, ensure_ascii=False, indent=2)
                     else:
-                        json.dump({"John": [], "Sarah": []}, f, ensure_ascii=False, indent=2)
+                        json.dump({"Tom": {}, "Jane": {}}, f, ensure_ascii=False, indent=2)
 
     def _load_memories(self, sort_by_time: bool = False) -> Dict[str, Dict[str, Dict[str, Dict[str, Any]]]]:
         """메모리 데이터 로드. 필요에 따라 시간순으로 정렬합니다."""
@@ -95,11 +95,11 @@ class MemoryUtils:
         except Exception as e:
             print(f"메모리 로드 중 오류 발생: {e}")
             return {
-                "John": {
+                "Tom": {
                     "memories": {},
                     "embeddings": {}
                 },
-                "Sarah": {
+                "Jane": {
                     "memories": {},
                     "embeddings": {}
                 }
@@ -120,7 +120,7 @@ class MemoryUtils:
                 return json.load(f)
         except Exception as e:
             print(f"반성 데이터 로드 중 오류 발생: {e}")
-            return {"John": {"reflections": []}, "Sarah": {"reflections": []}}
+            return {"Tom": {"reflections": []}, "Jane": {"reflections": []}}
 
     def _save_reflections(self, reflections: Dict[str, Dict[str, List[Dict[str, Any]]]]):
         """반성 데이터 저장"""

@@ -183,7 +183,7 @@ if __name__ == "__main__":
         # 테스트 요청 데이터
         test_request = {
             "agent": {
-                "name": "John",
+                "name": "Tom",
                 "time": "2025.05.07.22:00"  # 특정 날짜 테스트
             }
         }

@@ -567,7 +567,7 @@ if __name__ == "__main__":
     
     async def test_reflection():
         print("반성 생성 테스트...")
-        reflections = await generator.generate_reflections("John", test_memories, time="2025.05.08.22:00")
+        reflections = await generator.generate_reflections("Tom", test_memories, time="2025.05.08.22:00")
         
         # 결과 출력
         for i, reflection in enumerate(reflections):

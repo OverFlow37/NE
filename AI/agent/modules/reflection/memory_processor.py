@@ -232,11 +232,11 @@ if __name__ == "__main__":
     print(f"로드된 메모리: {bool(memories)}")
     
     # 오늘 메모리 필터링
-    today_memories = processor.filter_todays_memories("John")
+    today_memories = processor.filter_todays_memories("Tom")
     print(f"오늘 메모리 개수: {len(today_memories)}")
     
     # 중요한 메모리 선택
-    important_memories = processor.select_important_memories(memories, "John")
+    important_memories = processor.select_important_memories(memories, "Tom")
     print(f"중요한 메모리 개수: {len(important_memories)}")
     
     # 중요한 메모리 출력
