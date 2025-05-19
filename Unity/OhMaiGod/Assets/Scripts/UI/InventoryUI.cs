@@ -104,7 +104,7 @@ public class InventoryUI : MonoBehaviour
         var items = Inventory.Instance.Items;
         if (_slotIndex < items.Count && items[_slotIndex] != null)
         {
-            var item = items[_slotIndex];
+            GameObject item = items[_slotIndex];
             var interactable = item.GetComponent<Interactable>();
             if (interactable != null)
             {
