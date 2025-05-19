@@ -80,15 +80,15 @@ public class InteractableSpawner : MonoBehaviour
         Spawn(spawnPos);
     }
 
-    public bool Spawn(Vector2 _spawnPos)
+    public string Spawn(Vector2 _spawnPos)
     {
         // 프리팹 랜덤 선택
-        if (mInteractablePrefabs == null || mInteractablePrefabs.Count == 0) return false;
+        if (mInteractablePrefabs == null || mInteractablePrefabs.Count == 0) return "";
         GameObject prefab = mInteractablePrefabs[Random.Range(0, mInteractablePrefabs.Count)];
 
         // 스폰
         Instantiate(prefab, _spawnPos, Quaternion.identity);
         LogManager.Log("Env", $"{prefab.GetComponent<Interactable>().InteractableName}을(를) {_spawnPos}에 스폰했습니다.", 2);
-        return true;
+        return prefab.GetComponent<Interactable>().InteractableName;
     }
 }

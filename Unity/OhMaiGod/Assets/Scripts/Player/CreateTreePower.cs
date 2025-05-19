@@ -2,7 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-public class CreateTreePower : MonoBehaviour
+using UnityEngine.EventSystems;
+public class CreateTreePower : Power
 {
     [Header("생성할 아이템")]
     public GameObject mSelectedPrefab; // UI에서 할당
@@ -13,14 +14,26 @@ public class CreateTreePower : MonoBehaviour
     [Header("생성할 수 있는 아이템")]
     [SerializeField] private List<GameObject> mItemList;
 
-
-    private bool mIsPlacementMode = false;
     private GameObject mPreviewObject;
 
     void Update()
     {
+        // UI 위에 마우스가 있으면 프리뷰 숨김
+        if (EventSystem.current != null && mPreviewObject != null)
+        {
+            if (EventSystem.current.IsPointerOverGameObject())
+            {
+                if (mPreviewObject.activeSelf)
+                    mPreviewObject.SetActive(false);
+            }
+            else
+            {
+                if (!mPreviewObject.activeSelf)
+                    mPreviewObject.SetActive(true);
+            }
+        }
         // 1. 프리뷰 활성화: mSelectedPrefab이 할당되어 있으면 프리뷰 생성
-        if (mIsPlacementMode)
+        if (base.mIsActive)
         {
             if (mPreviewObject == null)
                 StartPreview();
@@ -38,7 +51,7 @@ public class CreateTreePower : MonoBehaviour
             // 오른쪽 마우스 버튼 누르면 취소
             if (Input.GetMouseButtonDown(1))
             {
-                CancelPlacementMode();
+                Deactive();
             }
         }
         else
@@ -100,6 +113,12 @@ public class CreateTreePower : MonoBehaviour
 
     public void PlaceObject(Vector3 _mouseWorldPos)
     {
+        // UI 위에 마우스가 있으면 동작하지 않음
+        if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
+        {
+            LogManager.Log("Default", "UI 위에서는 아이템을 생성할 수 없습니다.", 1);
+            return;
+        }
         Vector3Int cellPos = TileManager.Instance.GroundTilemap.WorldToCell(_mouseWorldPos);
         TileController tileController = TileManager.Instance.GetTileController(cellPos);
         Vector2 cellCenter = TileManager.Instance.GroundTilemap.GetCellCenterWorld(cellPos);
@@ -113,7 +132,7 @@ public class CreateTreePower : MonoBehaviour
         Collider2D hit = Physics2D.OverlapPoint(cellCenter, TileManager.Instance.AllLayerMask);
         if (hit != null)
         {
-            Debug.LogWarning("해당 타일에 벽, 장애물 또는 NPC가 있어 배치할 수 없습니다.");
+            LogManager.Log("Default", "해당 타일에 벽, 장애물 또는 NPC가 있어 배치할 수 없습니다.", 1);
             return;
         }
 
@@ -126,29 +145,25 @@ public class CreateTreePower : MonoBehaviour
         GameObject randomItem = mItemList[Random.Range(0, mItemList.Count)];
         Instantiate(randomItem, cellCenter, Quaternion.identity);
         // 이벤트 생성
-        Instantiate(mSelectedEvent, cellCenter, Quaternion.identity);
+        EventController eventController = Instantiate(mSelectedEvent, cellCenter, Quaternion.identity).GetComponent<EventController>();
+        eventController.mEventInfo.event_location = TileManager.Instance.GetTileController(cellPos).LocationName;
+        eventController.mEventInfo.event_description += $" at {eventController.mEventInfo.event_location}";
         // 이펙트 생성
         Instantiate(mSelectedEffect, cellCenter, Quaternion.identity);
     }
 
-    public void EnterPlacementMode()
-    {
-        mIsPlacementMode = true;
-    }
 
-    public void CancelPlacementMode()
+    public override void Active()
     {
-        mIsPlacementMode = false;
+        base.Active();
+    }
+    public override void Deactive()
+    {
+        base.Deactive();
         if (mPreviewObject != null)
         {
             Destroy(mPreviewObject);
             mPreviewObject = null;
         }
-    }
-
-    // UI 버튼에서 호출
-    public void OnClickPlaceObjectButton()
-    {
-        EnterPlacementMode();
     }
 }

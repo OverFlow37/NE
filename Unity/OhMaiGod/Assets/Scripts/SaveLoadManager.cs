@@ -157,7 +157,7 @@ public class SaveLoadManager : MonoBehaviour
         Inventory.Instance.LoadData(mSavePath);
         TimeManager.Instance.LoadData(mSavePath);
 
-        Inventory.Instance.GetComponentInChildren<ChatPower>().SetAgentController();
+        PowerManager.Instance.GetComponentInChildren<ChatPower>().SetAgentController();
     }
 
     public void ResetData()

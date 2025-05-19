@@ -35,7 +35,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 24, y: 24}
+  m_SizeDelta: {x: 96, y: 96}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &7983582174164296002
 CanvasRenderer:
@@ -86,6 +86,7 @@ GameObject:
   - component: {fileID: 713610832018364191}
   - component: {fileID: 545236266938602469}
   - component: {fileID: 5392929679796651282}
+  - component: {fileID: 263298775657842166}
   m_Layer: 5
   m_Name: CreateAppleButtom
   m_TagString: Untagged
@@ -102,7 +103,7 @@ RectTransform:
   m_GameObject: {fileID: 3957819597239262237}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 2, y: 2, z: 1}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 5630850876131006858}
@@ -167,17 +168,32 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: CreatePower, Assembly-CSharp
+        m_TargetAssemblyTypeName: CreateFruitPower, Assembly-CSharp
         m_MethodName: OnClickPlaceObjectButton
-        m_Mode: 2
+        m_Mode: 1
         m_Arguments:
-          m_ObjectArgument: {fileID: 325971536935325802, guid: 103a636e6fad4dd4a87bd1e0272696c8, type: 3}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.GameObject, UnityEngine
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!114 &263298775657842166
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3957819597239262237}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7383b591523b8894d9895a11a3a67619, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mButtonBackgroundImage: {fileID: 3355428049545645145}
+  mSpriteOn: {fileID: 21300000, guid: 5e804e0abab1c354f8002513abee5069, type: 3}
+  mSpriteOff: {fileID: 21300000, guid: b30d1ea06a8fe4943b2a886f793baf52, type: 3}
 --- !u!1 &3999191355152065221
 GameObject:
   m_ObjectHideFlags: 0
@@ -213,7 +229,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 16, y: 16}
+  m_SizeDelta: {x: 64, y: 64}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &6194904489635338367
 CanvasRenderer:
