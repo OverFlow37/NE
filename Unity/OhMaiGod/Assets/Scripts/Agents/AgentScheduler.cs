@@ -26,9 +26,6 @@ public class AgentScheduler : MonoBehaviour
     {
         // 에이전트 컨트롤러 참조 가져오기
         mAgentController = GetComponent<AgentController>();
-        
-        // 빈 일정으로 초기화
-        ResetSchedule();
     }
 
     private void Update()
@@ -171,38 +168,12 @@ public class AgentScheduler : MonoBehaviour
         return removed;
     }
 
-    // 전체 일정 갱신
-    public void UpdateSchedule(List<ScheduleItem> _newSchedule)
+    // 데일리 일정 가져와서 적용
+    public void ApplyDailySchedule()
     {
-        // 현재 진행 중인 활동은 보존
-        ScheduleItem currentAction = mCurrentAction;
-        
-        // 완료된 활동 목록 보존
-        var completedActivities = mDailySchedule
-            .Where(item => item.IsCompleted)
-            .ToList();
-        
-        // 새 일정으로 교체 (우선순위 기준 정렬)
-        mDailySchedule = _newSchedule
-            .OrderBy(item => item.StartTime)
-            .ThenBy(item => item.Priority)
-            .ToList();
-        
-        // 완료된 활동 상태 복원
-        foreach (var completed in completedActivities)
-        {
-            var matchingItem = mDailySchedule.FirstOrDefault(item => item.ID == completed.ID);
-            if (matchingItem != null)
-            {
-                matchingItem.IsCompleted = true;
-            }
-        }
-        
-        if (mShowDebugInfo)
-        {
-            LogManager.Log("Scheduler", $"전체 일정 갱신됨: {mDailySchedule.Count}개 항목", 2);
-        }
+        mDailySchedule = AIBridge_Perceive.Instance.NextDayPlans;
     }
+    
 
     // 현재 활동 완료 처리
     public void CompleteCurrentAction()

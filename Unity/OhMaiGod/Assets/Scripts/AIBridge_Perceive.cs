@@ -9,6 +9,7 @@ using OhMAIGod.Agent;
 using Unity.VisualScripting;
 using OhMAIGod.Perceive;
 using UnityEngine.SceneManagement;
+using Newtonsoft.Json;
 
 // 관찰 정보 AI로 전송
 // 임계치에 따라 반응 판단과 관찰 정보 전송으로 나뉨
@@ -105,28 +106,37 @@ public class AIBridge_Perceive : MonoBehaviour
     }
 
     // 하루 결산 계획 저장용 구조체
-    [System.Serializable]
-    public struct DayPlan
-    {
-        public string action;
-        public string location;
-        public string interactable;
-        public string start_time;
-        public string end_time;
-        public int priority;
-    }
+    // [System.Serializable]
+    // public struct DayPlan
+    // {
+    //     public string action;
+    //     public string location;
+    //     public string interactable;
+    //     public string start_time;
+    //     public string end_time;
+    //     public int priority;
+    // }
 
     // ==== 데일리 플랜 파싱용 구조체 ====
     [System.Serializable]
-    private struct ReflectPlanRoot
+    public class ReflectPlanRoot
     {
         public bool success;
         public PlanData next_day_plan;
+        public PerformanceMetrics performance_metrics;
     }
     [System.Serializable]
-    private struct PlanData
+    public class PlanData
     {
         public List<List<string>> time_slots;
+    }
+
+    [System.Serializable]
+    public class PerformanceMetrics
+    {
+        public float total_time;
+        public float reflection_time;
+        public float plan_time;
     }
 
     // 싱글톤
@@ -165,13 +175,14 @@ public class AIBridge_Perceive : MonoBehaviour
     {
         if(_scene.name == "LoadingScene")
         {
-            // AI 서버에 하루 결산 요청 (TODO: AI서버에서 json 형태 수정하면 사용할 예정)
-            // StartCoroutine(SendDailySettlementRequest());
-        } 
+            // AI 서버에 하루 결산 요청
+            StartCoroutine(SendDailySettlementRequest());
+        }
     }
     
-    // 날짜별로 저장
-    public Dictionary<string, List<DayPlan>> mNextDayPlans = new Dictionary<string, List<DayPlan>>();
+    // DailySettlementRequest 반응 저장용
+    private List<ScheduleItem> mNextDayPlans = new List<ScheduleItem>();
+    public List<ScheduleItem> NextDayPlans { get { return mNextDayPlans; } }
 
     private IEnumerator SendDailySettlementRequest()
     {
@@ -204,6 +215,9 @@ public class AIBridge_Perceive : MonoBehaviour
         {
             LogManager.Log("AI", $"✅ 하루 결산 응답: " + request.downloadHandler.text, 2);
             ParseAndStoreDayPlan(request.downloadHandler.text);
+
+            // 게임씬 로드
+            SaveLoadManager.Instance.LoadScene();
         }
         else
         {
@@ -216,36 +230,53 @@ public class AIBridge_Perceive : MonoBehaviour
     {
         try
         {
-            // JSON 파싱용 임시 구조체
-            var root = JsonUtility.FromJson<ReflectPlanRoot>(_json);
-            if (root.success == false)
+            // JSON 파싱: Newtonsoft.Json 사용
+            ReflectPlanRoot root = JsonConvert.DeserializeObject<ReflectPlanRoot>(_json);
+            if (root == null || root.success == false)
             {
                 LogManager.Log("AI", "[AIBridge_Perceive] 응답 파싱 실패 또는 success=false", 0);
                 return;
             }
-            var timeSlots = root.next_day_plan.time_slots;
+
+            var timeSlots = root.next_day_plan?.time_slots;
             if (timeSlots == null)
             {
                 LogManager.Log("AI", "[AIBridge_Perceive] time_slots 없음", 0);
                 return;
             }
-            // List<DayPlan> dayPlans = new List<DayPlan>();
-            // foreach (var slot in timeSlots)
-            // {
-            //     if (slot.Count < 6) continue;
-            //     DayPlan plan = new DayPlan
-            //     {
-            //         action = slot[0],
-            //         location = slot[1],
-            //         interactable = slot[2],
-            //         start_time = slot[3],
-            //         end_time = slot[4],
-            //         priority = int.Parse(slot[5])
-            //     };
-            //     dayPlans.Add(plan);
-            // }
-            // mNextDayPlans["default"] = dayPlans;
-            // LogManager.Log("AI", $"[AIBridge_Perceive] time_slots {dayPlans.Count}개 저장", 2);
+
+            // time_slots를 DayPlan 리스트로 변환하여 저장
+            mNextDayPlans.Clear();
+            foreach (var slot in timeSlots)
+            {
+                // 시간 파싱 (예: "07:00" 형식, DateTime.ParseExact 사용)
+                TimeSpan startTime, endTime;
+                try {
+                    startTime = DateTime.ParseExact(slot[3], "HH:mm", null).TimeOfDay;
+                } catch {
+                    startTime = TimeSpan.Zero;
+                }
+                try {
+                    endTime = DateTime.ParseExact(slot[4], "HH:mm", null).TimeOfDay;
+                } catch {
+                    endTime = TimeSpan.Zero;
+                }
+                int priority = int.TryParse(slot[5], out int p) ? p : 0;
+
+                // ScheduleItem 생성 (생성자: ActionName, LocationName, TargetName, StartTime, EndTime, Priority, Thought, memory_id)
+                ScheduleItem item = new ScheduleItem(
+                    slot[0], // action
+                    slot[1], // location
+                    slot[2], // interactable
+                    startTime,
+                    endTime,
+                    priority,
+                    "", // Thought(선택 이유, 현재 없음)
+                    ""  // memory_id(현재 없음)
+                );
+                mNextDayPlans.Add(item);
+            }
+            LogManager.Log("AI", $"[AIBridge_Perceive] time_slots {mNextDayPlans.Count}개(ScheduleItem) 저장", 2);
         }
         catch (Exception ex)
         {

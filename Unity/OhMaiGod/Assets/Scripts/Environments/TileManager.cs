@@ -73,11 +73,11 @@ public class TileManager : MonoBehaviour, ISaveable
         StartCoroutine(InitializeManager());
     }
 
-    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    private void OnSceneLoaded(Scene _scene, LoadSceneMode _mode)
     {
         mIsInitialized = false;
 
-        if (scene.name == "Main")
+        if (_scene.name.StartsWith("Main"))
         {
             // ground tilemap 설정
             GameObject landBaseObj = GameObject.Find("Tilemap_land_base");

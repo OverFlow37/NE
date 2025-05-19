@@ -17,11 +17,12 @@ public class CameraUI : MonoBehaviour
         Initialize();
     }
 
-    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    private void OnSceneLoaded(Scene _scene, LoadSceneMode _mode)
     {
-        if(scene.name != "Main") return;
-
-        Initialize();
+        if(_scene.name.StartsWith("Main"))
+        {   
+            Initialize();
+        }
     }
 
     private void Initialize()

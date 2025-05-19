@@ -32,6 +32,7 @@ public class TimeManager : MonoBehaviour, ISaveable
     // 시간 관리 변수들
     private DateTime mGameDate;             // 현재 게임 날짜
     private TimeSpan mCurrentGameTime;      // 현재 게임 내 시간
+    private int mDays = 1;                  // 누적 일 수
     private bool mIsPaused = false;         // 시간 흐름 일시정지 상태 여부
 
     // 하루에 한 번만 저장하도록 플래그 변수 추가
@@ -54,6 +55,7 @@ public class TimeManager : MonoBehaviour, ISaveable
         // 게임 날짜 및 시간 초기화
         mGameDate = new DateTime(2025, 5, 19);
         mCurrentGameTime = new TimeSpan(7, 0, 0);
+        mDays = 1;
     }
 
     private void Update()
@@ -75,18 +77,6 @@ public class TimeManager : MonoBehaviour, ISaveable
     {
         // 현실 시간의 흐름에 따라 게임 내 분 단위로 시간 증가
         mCurrentGameTime = mCurrentGameTime.Add(TimeSpan.FromMinutes(Time.deltaTime * mGameMinutesPerRealSecond));
-        
-        // 날짜 변경 확인
-        if (mCurrentGameTime.Days > 0)
-        {
-            mGameDate = mGameDate.AddDays(1);
-            mCurrentGameTime = new TimeSpan(mCurrentGameTime.Hours, mCurrentGameTime.Minutes, mCurrentGameTime.Seconds);
-            
-            if (mShowDebugInfo)
-            {
-                LogManager.Log("Time", $"새로운 날: {mGameDate.ToString("yyyy-MM-dd")} ({GetDayOfWeekString()})", 3);
-            }
-        }
     }
 
     // 게임 시간 하루가 지나면 호출되는 정산 함수
@@ -96,19 +86,22 @@ public class TimeManager : MonoBehaviour, ISaveable
         GameManager.Instance.DailySettlement(); // 일일 정산
     }
 
-    // 게임 날짜만 저장할 데이터 구조체
+    // 게임 시간 저장할 구조체
     [Serializable]
     private struct TimeSaveData
     {
-        public string GameDate; // DateTime 대신 문자열로 저장
+        public string GameDate; // DateTime (yyyy-MM-dd)
+        public int Days;       // 누적 일 수
     }
 
     public void SaveData(string _savePath)
     {
         // 저장할 때만 mGameDate에 하루를 더해서 저장 (실제 mGameDate에는 영향 없음)
         DateTime saveDate = mGameDate.AddDays(1);
+        mDays++;
+
         // DateTime을 문자열(ISO 8601)로 변환해서 저장
-        TimeSaveData saveData = new TimeSaveData { GameDate = saveDate.ToString("o") };
+        TimeSaveData saveData = new TimeSaveData { GameDate = saveDate.ToString("o"), Days = mDays };
         string json = JsonUtility.ToJson(saveData);
         string path = System.IO.Path.Combine(_savePath, "time.json");
         System.IO.File.WriteAllText(path, json);
@@ -122,6 +115,7 @@ public class TimeManager : MonoBehaviour, ISaveable
             string json = System.IO.File.ReadAllText(path);
             TimeSaveData saveData = JsonUtility.FromJson<TimeSaveData>(json);
             mGameDate = DateTime.Parse(saveData.GameDate); // 문자열을 DateTime으로 변환
+            mDays = saveData.Days;
             mCurrentGameTime = new TimeSpan(7, 0, 0); // 게임 시간은 07:00으로 초기화
             mIsSavedToday = false;
             if (mShowDebugInfo)
@@ -141,6 +135,11 @@ public class TimeManager : MonoBehaviour, ISaveable
     public DateTime GetCurrentGameDate()
     {
         return mGameDate;
+    }
+
+    public int GetDays()
+    {
+        return mDays;
     }
 
     // 현재 게임 날짜를 yyyy.MM.dd.HH:mm 형식의 문자열로 반환
