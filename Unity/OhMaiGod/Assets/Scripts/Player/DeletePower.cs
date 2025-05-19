@@ -107,14 +107,21 @@ public class DeletePower : Power
             EventController lightningEvent = Instantiate(mLightningStrikeEvent, cellCenter, Quaternion.identity).GetComponent<EventController>();
             lightningEvent.mEventInfo.event_location = interactable.CurrentLocation;
             lightningEvent.mEventInfo.event_description += $" {interactable.InteractableName} is broken! at {interactable.CurrentLocation}";
-            
+            lightningEvent.mEventInfo.importance = 4;
             // 1초 대기
             yield return new WaitForSeconds(1f);
             Destroy(targetObject);
         }
         else
         {
-            Instantiate(mLightningStrikeEventNPC, cellCenter, Quaternion.identity);
+            EventController lightningEvent = Instantiate(mLightningStrikeEventNPC, cellCenter, Quaternion.identity).GetComponent<EventController>();
+            lightningEvent.mEventInfo.event_location = interactable.CurrentLocation;
+            lightningEvent.mEventInfo.event_is_save = true;
+            lightningEvent.mEventInfo.importance = 10;
+
+            AgentController agentController = targetObject.GetComponent<AgentController>();
+            //agentController.ModifyNeed(OhMAIGod.Agent.AgentNeedsType.Stress, 100);
+            lightningEvent.mEventInfo.event_description = $" terrifying lightning strike over {agentController.AgentName}, maybe God is angry";
             
         }
     }
