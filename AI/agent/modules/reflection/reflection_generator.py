@@ -238,6 +238,7 @@ class ReflectionGenerator:
             event = memory.get("event", "").strip()
             action = memory.get("action", "").strip()
             feedback = memory.get("feedback", "").strip()
+            feedback_negative = memory.get("feedback_negative", "").strip()
             
             # 통합 이벤트 필드 생성
             combined_event = ""
@@ -249,6 +250,8 @@ class ReflectionGenerator:
                 combined_event += f"{action} "
             if feedback:
                 combined_event += f"{feedback}"
+            if feedback_negative:
+                combined_event += f"{feedback_negative}"
             
             memory["combined_event"] = combined_event.strip()
             logger.debug(f"메모리 ID {memory_id}의 통합 이벤트 필드: '{memory['combined_event']}'")

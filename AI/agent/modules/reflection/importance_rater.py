@@ -272,6 +272,7 @@ IMPORTANT: Only provide the JSON object with no additional text.
         event = memory.get("event", "")
         action = memory.get("action", "")
         feedback = memory.get("feedback", "")
+        feedback_negative = memory.get("feedback_negative", "")
         time_str = memory.get("time", "")
         # 통합 이벤트 필드 생성
         combined_event = ""
@@ -283,7 +284,10 @@ IMPORTANT: Only provide the JSON object with no additional text.
             combined_event += f"{action} "
         if feedback:
             combined_event += f"{feedback}"
+        if feedback_negative:
+            combined_event += f"{feedback_negative}"
         
+
         prompt = f"""
 TASK:
 Rate the importance/poignancy of the following memory event on a scale of 1 to 10.

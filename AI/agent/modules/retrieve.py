@@ -445,6 +445,7 @@ class MemoryRetriever:
         event = memory.get("event", "")
         action = memory.get("action", "")
         feedback = memory.get("feedback", "")
+        feedback_negative = memory.get("feedback_negative", "")
         thought = memory.get("thought", "")  # 반성 데이터 호환성
         event_role = memory.get("event_role", "")
         
@@ -459,7 +460,7 @@ class MemoryRetriever:
                 else:
                     content = f"Event: {event}\n"
             if feedback and feedback != "":
-                content = f"Feedback: {feedback}\n"
+                content = f"Feedback: {feedback + feedback_negative}\n"
         
         return f"- {content}\n"
         

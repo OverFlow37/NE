@@ -64,10 +64,6 @@ class SimpleFeedbackProcessor:
             effects.append("much less hungry now")
         elif hunger < 0:
             effects.append("a bit less hungry")
-        elif hunger > 10:
-            effects.append("much more hungry")
-        elif hunger > 0:
-            effects.append("a bit more hungry")
         
         # 졸림
         sleepiness = needs_diff.get("sleepiness", 0)
@@ -75,10 +71,6 @@ class SimpleFeedbackProcessor:
             effects.append("much more awake")
         elif sleepiness < 0:
             effects.append("a bit more awake")
-        elif sleepiness > 10:
-            effects.append("much more sleepy")
-        elif sleepiness > 0:
-            effects.append("a bit more sleepy")
         
         # 외로움
         loneliness = needs_diff.get("loneliness", 0)
@@ -86,10 +78,6 @@ class SimpleFeedbackProcessor:
             effects.append("much less lonely")
         elif loneliness < 0:
             effects.append("a bit less lonely")
-        elif loneliness > 10:
-            effects.append("much more lonely")
-        elif loneliness > 0:
-            effects.append("a bit more lonely")
         
         # 스트레스
         stress = needs_diff.get("stress", 0)
@@ -97,10 +85,6 @@ class SimpleFeedbackProcessor:
             effects.append("much less stressed")
         elif stress < 0:
             effects.append("a bit less stressed")
-        elif stress > 10:
-            effects.append("much more stressed")
-        elif stress > 0:
-            effects.append("a bit more stressed")
         
         # 효과 문장 결합
         if effects:
@@ -108,6 +92,71 @@ class SimpleFeedbackProcessor:
                 result_text += f" feeling {effects[0]}"
             else:
                 result_text += f" feeling {', '.join(effects[:-1])} and {effects[-1]}"
+        
+        return result_text
+    
+    def _create_negative_feedback_text(self, action: str, interactable: str, location: str, 
+                            success: bool, needs_diff: Dict[str, int], 
+                            feedback_description: str = "", negative_only: bool = False) -> str:
+        """
+        간단한 피드백 문장 생성
+        
+        Args:
+            action: 행동 이름
+            interactable: 상호작용 대상
+            location: 위치
+            success: 성공 여부
+            needs_diff: 욕구 변화량
+            feedback_description: 피드백 설명
+            negative_only: 부정적인 변화량만 있을 경우
+
+        Returns:
+            str: 생성된 피드백 문장
+        """
+        # 성공/실패 결과 (기본 템플릿)
+        result_text = ""
+        
+        # 욕구 변화를 자연스러운 문장으로 표현
+        effects = []
+        
+        # 배고픔
+        hunger = needs_diff.get("hunger", 0)
+        if hunger > 10:
+            effects.append("much more hungry")
+        elif hunger > 0:
+            effects.append("a bit more hungry")
+        
+        # 졸림
+        sleepiness = needs_diff.get("sleepiness", 0)
+        if sleepiness > 10:
+            effects.append("much more sleepy")
+        elif sleepiness > 0:
+            effects.append("a bit more sleepy")
+        
+        # 외로움
+        loneliness = needs_diff.get("loneliness", 0)
+        if loneliness > 10:
+            effects.append("much more lonely")
+        elif loneliness > 0:
+            effects.append("a bit more lonely")
+        
+        # 스트레스
+        stress = needs_diff.get("stress", 0)
+        if stress > 10:
+            effects.append("much more stressed")
+        elif stress > 0:
+            effects.append("a bit more stressed")
+        
+        # 효과 문장 결합
+        if effects:
+            if negative_only: ## 긍정 변화부분이 없으면 여기부터 시작
+                result_text += f" feeling "
+            else: ## 긍정 변화부분이 있으면 여기부터 시작
+                result_text += f", "
+            if len(effects) == 1:
+                result_text += f"{effects[0]}"
+            else:
+                result_text += f"{', '.join(effects[:-1])} and {effects[-1]}"
         
         return result_text
     
@@ -253,17 +302,42 @@ class SimpleFeedbackProcessor:
             
             needs_diff = feedback.get('needs_diff', {})
             
+            needs_diff_positive = {}
+            
+            needs_diff_negative = {}
+
+            for key, value in needs_diff.items():
+                if value < 0:
+                    needs_diff_positive[key] = value
+                else:
+                    needs_diff_negative[key] = value
+
             # 피드백 문장 생성 (LLM 사용하지 않음)
             feedback_sentence = self._create_feedback_text(
                 action=action,
                 interactable=interactable,
                 location=current_location,
                 success=success,
-                needs_diff=needs_diff,
+                needs_diff=needs_diff_positive,
                 feedback_description=feedback_description
             )
+
+            negative_only = False
+            if len(needs_diff_positive) == 0:
+                negative_only = True
+
+            # 부정 피드백 문장 생성 (LLM 사용하지 않음)
+            feedback_sentence_negative = self._create_negative_feedback_text(
+                action=action,
+                interactable=interactable,
+                location=current_location,
+                success=success,
+                needs_diff=needs_diff_negative,
+                feedback_description=feedback_description,
+                negative_only=negative_only
+            )
             
-            print(f"📝 생성된 피드백: {feedback_sentence}")
+            print(f"📝 생성된 피드백: {feedback_sentence}{feedback_sentence_negative}")
             
             # # 이벤트 정보와 피드백 결합
             # combined_feedback = self._create_combined_feedback(
@@ -274,11 +348,9 @@ class SimpleFeedbackProcessor:
             #     feedback_sentence=feedback_sentence,
             #     feedback_description=feedback_description
             # )
-            combined_feedback = feedback_sentence
-            print(f"📝 통합 피드백: {combined_feedback}")
             
             # 임베딩 생성 (통합 피드백 기반)
-            embedding = self.memory_utils.get_embedding(combined_feedback)
+            embedding = self.memory_utils.get_embedding(feedback_sentence)
 
             # 메모리 데이터 로드
             memories = self.memory_utils._load_memories()
@@ -300,7 +372,9 @@ class SimpleFeedbackProcessor:
                 # 메모리 ID가 존재하는지 확인
                 if memory_id in agent_memories:
                     # 기존 메모리에 통합 피드백 추가
-                    agent_memories[memory_id]["feedback"] = combined_feedback
+                    agent_memories[memory_id]["feedback"] = feedback_sentence
+                    # 기존 메모리에 부정 피드백 추가
+                    agent_memories[memory_id]["feedback_negative"] = feedback_sentence_negative
                     print(f"✅ 메모리 ID {memory_id}에 통합 피드백 저장")
 
                     if importance != 0:
@@ -333,7 +407,7 @@ class SimpleFeedbackProcessor:
                         "success": True,
                         "message": f"Combined feedback added to memory_id {memory_id}",
                         "memory_id": memory_id,
-                        "feedback": combined_feedback
+                        "feedback": feedback_sentence + feedback_sentence_negative
                     }
                 else:
                     print(f"⚠️ 메모리 ID {memory_id}를 찾을 수 없습니다. 해당 ID로 새 메모리를 생성합니다.")
@@ -345,9 +419,12 @@ class SimpleFeedbackProcessor:
                     "event_role": "",
                     "event": event_text,  # 안전하게 생성된 이벤트 텍스트
                     "action": action if action else "",
-                    "feedback": combined_feedback,  # 통합 피드백 저장
+                    "feedback": feedback_sentence,  # 피드백 저장
+                    "feedback_negative": feedback_sentence_negative,  # 부정 피드백 저장
                     "conversation_detail": "",
-                    "time": time
+                    "time": time,
+                    "event_type": "",
+                    "event_location": ""
                 }
 
                 ## 메모리가 0이 아니면 메모리 추가
@@ -366,7 +443,7 @@ class SimpleFeedbackProcessor:
                     "success": True,
                     "message": f"New memory created with ID {memory_id}",
                     "memory_id": memory_id,
-                    "feedback": combined_feedback
+                    "feedback": feedback_sentence + feedback_sentence_negative
                 }
             else:
                 # 새 ID로 메모리 생성
@@ -375,7 +452,8 @@ class SimpleFeedbackProcessor:
                     "event_role": "",
                     "event": event_text,  # 안전하게 생성된 이벤트 텍스트
                     "action": action if action else "",
-                    "feedback": combined_feedback,  # 통합 피드백 저장
+                    "feedback": feedback_sentence,  # 피드백 저장
+                    "feedback_negative": feedback_sentence_negative,  # 부정 피드백 저장
                     "conversation_detail": "",
                     "time": time,
                     "embeddings": embedding
@@ -390,7 +468,7 @@ class SimpleFeedbackProcessor:
                     "success": True,
                     "message": "New memory created with combined feedback",
                     "memory_id": new_memory_id,
-                    "feedback": combined_feedback
+                    "feedback": feedback_sentence + feedback_sentence_negative
                 }
             
         except Exception as e:
