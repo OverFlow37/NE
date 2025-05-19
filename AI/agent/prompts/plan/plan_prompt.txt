@@ -46,11 +46,11 @@ PREVIOUS_PLANS :
 
 **🎮 AVAILABLE ACTIONS:**
 
-* eat: Consume food to reduce hunger.
-* use: Interact with an object or item.
-* get: Obtain a food item, resource, or trinket.
-* break: Destroy breakable items or harvest resources.
-* offer: Present an offering during prayer at the temple.
+- "eat": "eat this object to reduce hunger.",
+- "use": "to use, observe, or play with this object",
+- "break": "Destroy break this object and harvest resources.",
+- "offer": "offering this object to God."
+- "find": "find something at other location, useful when none of the objects currently seen are suitable for the situation."
 
 ### 🍎 Food
 
@@ -62,12 +62,12 @@ Foods can be interacted with using `eat` or `break`.
 * **Apple**: Found in the forest.
 * **Grape**: Found in the forest.
 * **Coconut**: Found on the beach.
-* **Raspberry**: Found in the mountain.
+* **Strawberry**: Found in the mountain.
 * **Mushroom**: Found in the forest and mountain.
 
 #### Meat
 
-* **Big Fish / Small Fish**: Obtained via fishing at the beach.
+* **BigFish / Small Fish**: Obtained via fishing at the beach.
 * **Egg**: Occasionally found in any region.
 
 ---
@@ -82,15 +82,15 @@ Furniture can be used multiple times and affects conditions like fatigue or lone
 * **Telescope**: Enables stargazing at night. (Located in the house)
 * **Piano**: Reduces loneliness and increases cultural level. (Located in the house)
 * **Fishing Rod**: Used for catching fish. (Located at the beach)
-* **Wilson**: A volleyball-shaped friend that reduces loneliness. (Located in the square)
-
+* **Willson**: A volleyball-shaped friend that reduces loneliness. (Located in the square)
+* **Candle** : can pray what you want to god. (Located in the temple)
 ---
 
 ### 🪵 Resource
 
 Resources are only obtainable by using the `break` action.
 
-* **Wood**: A useful material found in the mountain, forest, and plain.
+* **Tree**: A useful material found in the mountain, forest, and plain.
 * **Rock**: A solid material found in the mountain and beach.
 
 ---
@@ -130,7 +130,7 @@ These are single-use items. They must be obtained before using and often reduce 
 
 * You must generate a plan for the **next day** following the latest date in {AGENT_NAME}'s existing plans  
 
-* The `daily_plan` list must contain **at least 10** and **no more than 20** distinct actions.
+* The `daily_plan` list must contain **at least 10** and **no more than 15** distinct actions.
 
 * DO NOT repeat the previous day's schedule. Create a **fresh, meaningful plan** that reflects variation in activities and priorities.
 
@@ -151,7 +151,7 @@ The daily_plan must be following this format:
   "{AGENT_NAME}": {{
     "plans": {{
       "{PLAN_DATE}": {{
-        "wake_up_time": "06:00",
+        "wake_up_time": "07:00",
         "daily_plan": [
           "action1 object1 at location1",
           "action2 object2 at location2",
