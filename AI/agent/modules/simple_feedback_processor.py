@@ -60,17 +60,23 @@ class SimpleFeedbackProcessor:
         
         # 배고픔
         hunger = needs_diff.get("hunger", 0)
-        if hunger <= -10:
-            effects.append("much less hungry now")
-        elif hunger < 0:
+        if hunger <= -40:
+            effects.append("much less hungry")
+        elif hunger < -20:
             effects.append("a bit less hungry")
+        elif hunger >= 10:
+            effects.append("this is Inedible")
         
         # 졸림
         sleepiness = needs_diff.get("sleepiness", 0)
-        if sleepiness <= -10:
-            effects.append("much more awake")
-        elif sleepiness < 0:
-            effects.append("a bit more awake")
+        if sleepiness <= -40:
+            effects.append("much less sleepy")
+        elif sleepiness < -20:
+            effects.append("a bit less sleepy")
+        elif sleepiness > 10:
+            effects.append("a bit more tired")
+        elif sleepiness > 0:
+            effects.append("that is so tired")
         
         # 외로움
         loneliness = needs_diff.get("loneliness", 0)
@@ -81,10 +87,14 @@ class SimpleFeedbackProcessor:
         
         # 스트레스
         stress = needs_diff.get("stress", 0)
-        if stress <= -10:
+        if stress <= -40:
             effects.append("much less stressed")
-        elif stress < 0:
+        elif stress < -20:
             effects.append("a bit less stressed")
+        elif stress > 30:
+            effects.append("a bit more stressed")
+        elif stress > 10:
+            effects.append("much more stressed")
         
         # 효과 문장 결합
         if effects:

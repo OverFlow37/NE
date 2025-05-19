@@ -149,7 +149,7 @@ public class CreateRockPower : Power
         EventController eventController = Instantiate(mSelectedEvent, cellCenter, Quaternion.identity).GetComponent<EventController>();
         eventController.mEventInfo.event_location = TileManager.Instance.GetTileController(cellPos).LocationName;
         eventController.mEventInfo.event_description += $" at {eventController.mEventInfo.event_location}";
-        
+        eventController.mEventInfo.importance = 4;
         // 이펙트 생성
         Instantiate(mSelectedEffect, cellCenter, Quaternion.identity);
     }

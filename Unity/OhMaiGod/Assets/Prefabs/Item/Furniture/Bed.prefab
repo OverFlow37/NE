@@ -103,6 +103,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mInteractableData: {fileID: 11400000, guid: 86e73ffccc9a4aa41b9fcd831dd5b47f, type: 2}
+  mEffectUse: {fileID: 3237079340180448360, guid: b52edc0c2ccb10540a4eb251ef9449a0, type: 3}
 --- !u!114 &2117851534291363315
 MonoBehaviour:
   m_ObjectHideFlags: 0
