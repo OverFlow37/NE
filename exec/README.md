@@ -5,11 +5,10 @@
 ---
 
 - ### AI
-
+  - `python 3.11.9`
   - `ollama v0.7.0` - 모델 : **GEMMA3**
   - `fastapi`
   - `gensim` - 모델 : **word2vec-google-news-300**
-  - `python 3.11.9`
 
 ---
 
@@ -58,5 +57,22 @@
 
 ## 🔗 기타 참고 사항
 
-- `gensim`은 `word2vec-google-news-300` 모델과 함께 사용되므로, 처음 실행 시 모델을 다운로드 받는 데 시간이 걸릴 수 있음
-- `fastapi`는 서버 API 구성에 사용되며, 별도로 `uvicorn` 등의 실행 도구가 필요할 수 있음
+- 서버의 원활한 구동을 위해 **가상 환경(venv)** 생성을 권장합니다.
+  아래 명령어를 순서대로 실행하세요
+
+```
+# 1. 가상환경 생성
+python -m venv venv
+
+# 2. 가상환경 활성화 (Windows)
+venv\Scripts\activate
+
+#    (macOS/Linux)
+source venv/bin/activate
+
+# 3. 필요한 패키지 설치
+pip install -r AI/server/requirements.txt
+```
+
+- `gensim`은 `word2vec-google-news-300` 모델과 함께 사용되므로, 처음 실행 시 모델을 다운로드 받는 데 시간이 걸릴 수 있습니다.
+- `fastapi`는 서버 API 구성에 사용되며, 별도로 `uvicorn` 등의 실행 도구가 필요할 수 있습니다.
