@@ -29,12 +29,12 @@ class ImportanceRater:
             ollama_client: Ollama API 클라이언트 인스턴스
         """
         self.ollama_client = ollama_client
-        self.MAX_BATCH_SIZE = 20  # 한 번에 처리할 최대 메모리 개수
+        self.MAX_BATCH_SIZE = 100  # 한 번에 처리할 최대 메모리 개수
         logger.info(f"메모리 중요도 평가기 초기화 (배치 처리 방식, 최대 배치 크기: {self.MAX_BATCH_SIZE})")
     
     async def add_importance_to_memories(self, memories: Dict, agent_name: str, target_memories: Dict[str, Dict]) -> Dict:
         """
-        메모리에 importance 필드 추가 (배치 처리 방식)
+        메모리에 importance 필드 추가 (항상 개별 처리 방식)
         
         Parameters:
         - memories: 전체 메모리 데이터
@@ -58,36 +58,24 @@ class ImportanceRater:
             logger.info("중요도를 평가할 메모리가 없습니다.")
             return updated_memories
         
-        # 배치 단위로 처리
-        total_memories = len(memories_to_rate)
-        logger.info(f"총 {total_memories}개 메모리에 대한 배치 중요도 평가 시작")
+        total_memories_to_rate = len(memories_to_rate)
+        logger.info(f"총 {total_memories_to_rate}개 메모리에 대한 개별 중요도 평가 시작")
         
-        # 메모리 ID와 메모리 객체를 별도 리스트로 변환
-        memory_ids = list(memories_to_rate.keys())
-        memory_objects = list(memories_to_rate.values())
-        
-        # 메모리 배치로 나누기
-        batch_indices = [range(i, min(i + self.MAX_BATCH_SIZE, len(memory_ids))) 
-                        for i in range(0, len(memory_ids), self.MAX_BATCH_SIZE)]
-        
-        logger.info(f"{len(batch_indices)}개 배치로 처리 예정")
-        
-        # 각 배치 처리
-        for batch_idx, indices in enumerate(batch_indices):
-            batch_memory_ids = [memory_ids[i] for i in indices]
-            batch_memories = [memory_objects[i] for i in indices]
+        processed_count = 0
+        for memory_id, memory_data in memories_to_rate.items():
+            processed_count += 1
+            logger.info(f"메모리 {processed_count}/{total_memories_to_rate} 평가 중 - ID: {memory_id}, 이벤트: '{memory_data.get('event', '')}'")
             
-            logger.info(f"배치 {batch_idx+1}/{len(batch_indices)} 처리 중 ({len(batch_memories)}개 메모리)")
-            
-            # 배치 평가 프롬프트 생성
-            prompt = self._create_batch_importance_rating_prompt(batch_memories, batch_memory_ids)
-            logger.debug(f"생성된 배치 프롬프트:\n{prompt}")
+            # 개별 평가 프롬프트 생성
+            # 이전 오류 수정을 위해 _create_single_importance_rating_prompt 내부에서 safe_combined_event_text를 사용하도록 이미 수정됨
+            prompt = self._create_single_importance_rating_prompt(memory_data) 
+            logger.debug(f"생성된 개별 프롬프트 (ID: {memory_id}):\n{prompt}")
             
             try:
-                logger.info(f"Ollama API 호출 시작 - 배치 {batch_idx+1}")
+                logger.info(f"Ollama API 호출 시작 - 메모리 ID: {memory_id}")
                 response = await self.ollama_client.process_prompt(
                     prompt=prompt,
-                    system_prompt="You are a helpful AI assistant that rates memory importance as instructed. Always respond only with the requested JSON format.",
+                    system_prompt="You are a helpful AI assistant that rates memory importance as instructed. Always respond only with a single integer.",
                     model_name="gemma3",
                     options={
                         "temperature": 0.1,
@@ -98,38 +86,36 @@ class ImportanceRater:
                 )
                 
                 if response and response.get("status") == "success":
-                    logger.info(f"배치 {batch_idx+1} 응답 수신 성공")
+                    logger.info(f"메모리 ID {memory_id} 응답 수신 성공")
+                    importance = self._extract_importance_rating(response["response"])
                     
-                    # JSON 응답에서 중요도 추출
-                    importance_ratings = self._extract_batch_importance_ratings(
-                        response["response"], 
-                        batch_memory_ids
-                    )
-                    
-                    if importance_ratings:
-                        # 각 메모리에 중요도 적용
-                        for memory_id, importance in importance_ratings.items():
-                            if memory_id in updated_memories[agent_name]["memories"]:
-                                updated_memories[agent_name]["memories"][memory_id]["importance"] = importance
-                                logger.info(f"메모리 ID {memory_id}에 중요도 {importance} 추가됨")
+                    if memory_id in updated_memories[agent_name]["memories"]:
+                        updated_memories[agent_name]["memories"][memory_id]["importance"] = importance
+                        logger.info(f"메모리 ID {memory_id}에 중요도 {importance} 추가됨")
                     else:
-                        logger.warning(f"배치 {batch_idx+1}의 중요도 목록을 추출할 수 없습니다. 개별 평가로 전환합니다.")
-                        await self._rate_memories_individually(updated_memories, agent_name, batch_memory_ids, batch_memories)
+                        logger.warning(f"메모리 ID {memory_id}가 updated_memories에 존재하지 않습니다.")
                 else:
-                    logger.warning(f"배치 {batch_idx+1} 평가 실패 - 응답 상태: {response.get('status') if response else 'None'}")
-                    # 실패 시 개별 평가로 폴백
-                    logger.info(f"배치 {batch_idx+1}을 개별 평가로 폴백합니다.")
-                    await self._rate_memories_individually(updated_memories, agent_name, batch_memory_ids, batch_memories)
-                    
+                    logger.warning(f"메모리 ID {memory_id} 평가 실패 - 응답 상태: {response.get('status') if response else 'None'}. 기본값 5 적용.")
+                    if memory_id in updated_memories[agent_name]["memories"]:
+                        updated_memories[agent_name]["memories"][memory_id]["importance"] = 5
+                    else:
+                        logger.warning(f"메모리 ID {memory_id}가 updated_memories에 존재하지 않아 기본 중요도를 적용할 수 없습니다.")
+            
             except Exception as e:
-                logger.error(f"배치 {batch_idx+1} 평가 중 오류 발생: {str(e)}")
+                logger.error(f"메모리 ID {memory_id} 평가 중 오류 발생: {str(e)}")
                 logger.error(f"오류 상세 정보: {type(e).__name__}")
                 import traceback
                 logger.error(f"스택 트레이스:\n{traceback.format_exc()}")
-                # 오류 발생 시 개별 평가로 폴백
-                logger.info(f"배치 {batch_idx+1}을 개별 평가로 폴백합니다.")
-                await self._rate_memories_individually(updated_memories, agent_name, batch_memory_ids, batch_memories)
-        
+                logger.info(f"메모리 ID {memory_id}에 기본 중요도 5 적용.")
+                if memory_id in updated_memories[agent_name]["memories"]:
+                    updated_memories[agent_name]["memories"][memory_id]["importance"] = 5
+                else:
+                    logger.warning(f"메모리 ID {memory_id}가 updated_memories에 존재하지 않아 기본 중요도를 적용할 수 없습니다.")
+            
+            # 연속 API 호출 사이에 짧은 지연 추가 (선택 사항, API 정책에 따라 조절)
+            await asyncio.sleep(0.2)
+            
+        logger.info("모든 메모리 중요도 평가 완료.")
         return updated_memories
     
     async def _rate_memories_individually(self, memories: Dict, agent_name: str, 
@@ -208,21 +194,28 @@ class ImportanceRater:
         memory_list = ""
         for i, memory in enumerate(memories):
             memory_id = memory_ids[i]
+            event_role = memory.get("event_role", "")
             event = memory.get("event", "")
             action = memory.get("action", "")
             feedback = memory.get("feedback", "")
             time_str = memory.get("time", "")
-            
-            memory_list += f"MEMORY #{i+1} (ID: {memory_id}):\n"
-            memory_list += f"  Event: \"{event}\"\n"
-            
+            # 통합 이벤트 필드 생성
+            combined_event = ""
+            if event_role:
+                combined_event += f"{event_role} "
+            if event:
+                combined_event += f"{event} "
             if action:
-                memory_list += f"  Action: \"{action}\"\n"
-            
+                combined_event += f"{action} "
             if feedback:
-                memory_list += f"  Feedback: \"{feedback}\"\n"
-                
-            memory_list += f"  Time: {time_str}\n\n"
+                combined_event += f"{feedback}"
+            
+            memory["combined_event"] = combined_event.strip()
+            logger.debug(f"메모리 ID {memory_id}의 통합 이벤트 필드: '{memory['combined_event']}'")
+
+
+            memory_list += f"MEMORY #{i+1} (ID: {memory_id}):\n"
+            memory_list += f"  MEMORY CONTENT: \"{combined_event}\"\n"
         
         # JSON 출력 형식 구성
         json_format = "{\n  \"ratings\": [\n"
@@ -243,11 +236,11 @@ MEMORIES TO RATE:
 
 MEMORY RATING RULES:
 On a scale of 1 to 10, where:
-  1 = purely mundane (e.g., brushing teeth, making bed)
-  3 = minor daily event (e.g., short conversation, shopping)
-  5 = moderately significant (e.g., playing games with friends)
-  7 = important event (e.g., having dinner with friends)
-  10 = extremely poignant (e.g., a breakup, college acceptance)
+  1 = purely mundane
+  3 = minor daily event
+  5 = moderately significant
+  7 = important event
+  10 = extremely poignant
 
 For each memory, consider:
 - The significance of the activity to daily life
@@ -262,6 +255,7 @@ Provide a JSON object with ratings for each memory. Each rating should be an int
 
 IMPORTANT: Only provide the JSON object with no additional text.
 """
+        print(prompt)
         return prompt
     
     def _create_single_importance_rating_prompt(self, memory: Dict) -> str:
@@ -274,24 +268,29 @@ IMPORTANT: Only provide the JSON object with no additional text.
         Returns:
         - 프롬프트 텍스트
         """
+        event_role = memory.get("event_role", "")
         event = memory.get("event", "")
         action = memory.get("action", "")
         feedback = memory.get("feedback", "")
         time_str = memory.get("time", "")
+        # 통합 이벤트 필드 생성
+        combined_event = ""
+        if event_role:
+            combined_event += f"{event_role} "
+        if event:
+            combined_event += f"{event} "
+        if action:
+            combined_event += f"{action} "
+        if feedback:
+            combined_event += f"{feedback}"
         
         prompt = f"""
 TASK:
 Rate the importance/poignancy of the following memory event on a scale of 1 to 10.
 
 MEMORY:
-Event: "{event}"
+Event: "{combined_event}"
 """
-
-        if action:
-            prompt += f"Action: \"{action}\"\n"
-        
-        if feedback:
-            prompt += f"Feedback: \"{feedback}\"\n"
             
         prompt += f"Time: {time_str}\n\n"
         

@@ -1,7 +1,7 @@
 """
-NPC 대화 시스템 모듈
+Agent 대화 시스템 모듈
 
-두 NPC 간의 대화를 처리하고 메모리에 저장하는 기능을 제공합니다.
+두 Agent 간의 대화를 처리하고 메모리에 저장하는 기능을 제공합니다.
 """
 
 import json
@@ -12,10 +12,10 @@ from datetime import datetime
 from pathlib import Path
 import asyncio
 
-class NPCConversationManager:
+class AgentConversationManager:
     def __init__(self, ollama_client, memory_utils, word2vec_model, max_turns=10):
         """
-        NPC 대화 관리자 초기화
+        Agent 대화 관리자 초기화
         
         Args:
             ollama_client: OllamaClient 인스턴스
@@ -37,7 +37,7 @@ class NPCConversationManager:
         self.conversations_dir = agent_dir / "data" / "conversations"
         os.makedirs(self.conversations_dir, exist_ok=True)
         
-        print(f"✅ NPCConversationManager 초기화 완료 (최대 대화 턴 수: {self.max_turns})")
+        print(f"✅ AgentConversationManager 초기화 완료 (최대 대화 턴 수: {self.max_turns})")
     
     async def process_conversation(self, payload):
         """
