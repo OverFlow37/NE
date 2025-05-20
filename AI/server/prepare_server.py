@@ -83,17 +83,22 @@ def start_server():
     server_path = os.path.join(current_dir, "server.py")
     
     try:
-        # server.py 백그라운드로 실행
-        if os.name == 'nt':  # Windows
-            # 콘솔창 안보이게 설정 - CREATE_NO_WINDOW = 0x08000000
-            subprocess.Popen([python_executable, server_path], 
-                            creationflags=0x08000000)
-        else:  # Unix/Linux
-            subprocess.Popen([python_executable, server_path],
-                            stdout=subprocess.DEVNULL,
-                            stderr=subprocess.DEVNULL)
+        # 백그라운드 실행 코드 주석 처리
+        # if os.name == 'nt':  # Windows
+        #     # 콘솔창 안보이게 설정 - CREATE_NO_WINDOW = 0x08000000
+        #     subprocess.Popen([python_executable, server_path], 
+        #                     creationflags=0x08000000)
+        # else:  # Unix/Linux
+        #     subprocess.Popen([python_executable, server_path],
+        #                     stdout=subprocess.DEVNULL,
+        #                     stderr=subprocess.DEVNULL)
         
-        print("✅ AI 서버가 백그라운드에서 시작되었습니다.")
+        # print("✅ AI 서버가 백그라운드에서 시작되었습니다.")
+
+
+        # 일반 실행으로 변경 (콘솔창이 보이게 실행)
+        subprocess.Popen([python_executable, server_path])
+        print("✅ AI 서버가 시작되었습니다.")
         return True
         
     except Exception as e:
