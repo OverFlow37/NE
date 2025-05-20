@@ -9,7 +9,7 @@
     "BigFish": "It is delicious, and you can get a great fullness when you eat it.",
     "SmallFish": "It is and delicious, and you can get a little fullness when you eat it.",
     "Egg": "It is delicious, and you can get a more fullness when you eat it.",
-    "Bed": "Can sleep comfortably.",
+    "Bed": "Can use this to sleep comfortably.",
     "Bookshelf": "can read some books.",
     "Candle": "can pray what you want to god.",
     "Desk": "can read, draw, writing and etc...",
@@ -24,6 +24,7 @@
     "Conch": "it is beautiful and can offer to god.",
     "Jewel": "it is beautiful and can offer to god.",
     "Letter": "it is sent from stranger.",
-    "Book": "can read something, or offer to god."
+    "Book": "can read something, or offer to god.",
+    "Alter": "can use this to pray to God."
   }
 }
