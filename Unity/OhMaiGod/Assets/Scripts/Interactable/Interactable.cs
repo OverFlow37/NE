@@ -139,12 +139,10 @@ public class Interactable : MonoBehaviour
                 if (action.mAction.Execute(_interactor, this.gameObject))
                 {
                     if(mEffectUse != null && _actionName == "use"){
-                        GameObject effect = Instantiate(mEffectUse, _interactor.transform.position, Quaternion.identity);
-                        Destroy(effect, 2f); // 2초 후 자동 삭제 (필요에 따라 시간 조절)
+                        PlayEffect("use");
                     }
                     if(mEffectBreak != null && _actionName == "break"){
-                        GameObject effect = Instantiate(mEffectBreak, this.transform.position, Quaternion.identity);
-                        Destroy(effect, 2f); // 2초 후 자동 삭제 (필요에 따라 시간 조절)
+                        PlayEffect("break");
                     }
                     
                     _interactor.GetComponent<AgentController>().isSuccessForFeedback = true;
@@ -252,6 +250,22 @@ public class Interactable : MonoBehaviour
             // 새로운 환경을 찾지 못한 경우 기존 환경에서만 제거
             TileManager.Instance.UnregisterTarget(this);
             LogManager.Log("Interact", $"[{gameObject.name}] 유효한 환경을 찾을 수 없음", 1);
+        }
+    }
+
+    public void PlayEffect(string _effectName)
+    {
+        if(_effectName == "use"){
+            if(mEffectUse != null){
+                GameObject effect = Instantiate(mEffectUse, this.transform.position, Quaternion.identity);
+                Destroy(effect, 2f); // 2초 후 자동 삭제 (필요에 따라 시간 조절)
+            }
+        }
+        else if(_effectName == "break"){
+            if(mEffectBreak != null){
+                GameObject effect = Instantiate(mEffectBreak, this.transform.position, Quaternion.identity);
+                Destroy(effect, 2f); // 2초 후 자동 삭제 (필요에 따라 시간 조절)
+            }
         }
     }
 

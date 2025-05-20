@@ -4,6 +4,8 @@ using UnityEngine.EventSystems;
 
 public class DeletePower : Power
 {
+    [Header("번개줄기 이펙트")]
+    [SerializeField] private GameObject mLightningEffect;
     [Header("번개치기 이펙트")]
     [SerializeField] private GameObject mLightningStrikeEffect;
     [Header("오브젝트 번개 이벤트")]
@@ -97,6 +99,7 @@ public class DeletePower : Power
 
         // 번개치기 이펙트
         Instantiate(mLightningStrikeEffect, cellCenter, Quaternion.identity);
+        Instantiate(mLightningEffect, cellCenter, Quaternion.identity);
 
         // NPC 레이어 체크 (NPC 레이어에 속하면 true)
         bool isNPC = ((1 << targetObject.layer) & TileManager.Instance.NPCLayerMask) != 0;
@@ -109,7 +112,8 @@ public class DeletePower : Power
             lightningEvent.mEventInfo.event_description += $" {interactable.InteractableName} is broken! at {interactable.CurrentLocation}";
             lightningEvent.mEventInfo.importance = 4;
             // 1초 대기
-            Destroy(targetObject, 1f);
+            interactable.PlayEffect("break");
+            Destroy(targetObject, 0.5f);
         }
         else
         {
