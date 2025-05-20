@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Altar_data
   m_EditorClassIdentifier: 
   mDescription: "\uC2E0\uAED8 \uAE30\uB3C4\uB4DC\uB9AC\uB294 \uC81C\uB2E8"
-  mName: Alter
+  mName: Altar
   mDescriptionPrompt: can use this to pray to God.
   mType: 3
   mState: 0

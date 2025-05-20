@@ -6,7 +6,7 @@ public class EffectController : MonoBehaviour
     [SerializeField]
     public GameObject mEffectObject;
     [SerializeField]
-    private int mLifeDuration; // 이펙트 수명(초)
+    private float mLifeDuration; // 이펙트 수명(초)
     [SerializeField]
     private float mStopBeforeDestroy = 1f; // 삭제 몇 초 전에 파티클 정지할지
 
@@ -20,9 +20,20 @@ public class EffectController : MonoBehaviour
 
     void Start()
     {
+        if (mEffectObject == null)
+        {
+            LogManager.Log("Effect", "mEffectObject가 할당되지 않아 자동으로 자기 자신을 할당합니다.");
+            mEffectObject = gameObject;
+        }
         mStartTime = TimeManager.Instance.GetCurrentGameTime();
-        mAnimator = mEffectObject.GetComponent<Animator>();
-        mParticleSystem = mEffectObject.GetComponent<ParticleSystem>();
+        if (mEffectObject.GetComponent<Animator>() != null)
+        {
+            mAnimator = mEffectObject.GetComponent<Animator>();
+        }
+        if (mEffectObject.GetComponent<ParticleSystem>() != null)
+        {
+            mParticleSystem = mEffectObject.GetComponent<ParticleSystem>();
+        }
     }
 
     void Update()
