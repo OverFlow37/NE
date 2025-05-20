@@ -195,3 +195,4 @@ agent/data/plans.json
 agent/data/memories.json
 agent/data/reflections.json
 agent/data/event_ids.json
+server/server_ready.txt
