@@ -82,7 +82,7 @@ Furniture can be used multiple times and affects conditions like fatigue or lone
 * **Telescope**: Enables stargazing at night. (Located in the house)
 * **Piano**: Reduces loneliness and increases cultural level. (Located in the house)
 * **Fishing Rod**: Used for catching fish. (Located at the beach)
-* **Willson**: A volleyball-shaped friend that reduces loneliness. (Located in the square)
+* **Wilson**: A volleyball-shaped friend that reduces loneliness. (Located in the square)
 * **Candle** : can pray what you want to god. (Located in the temple)
 ---
 

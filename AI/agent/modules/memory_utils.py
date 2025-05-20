@@ -171,6 +171,7 @@ class MemoryUtils:
             "event": event_sentence,
             "action": "",
             "feedback": "",
+            "feedback_negative": "",
             "conversation_detail": "",
             "time": event_time,
             "event_type": "",
@@ -310,6 +311,7 @@ class MemoryUtils:
             "event": event_sentence,
             "action": "",
             "feedback": "",
+            "feedback_negative": "",
             "conversation_detail": "",
             "time": event_time,
             "event_type": event_type,  # event_type 저장

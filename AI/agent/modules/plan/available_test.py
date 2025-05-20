@@ -6,7 +6,7 @@ VALID_ACTIONS = {"eat", "use", "break", "offer", "find"}
 # 🗺 지역 정보 (Location -> [Object])
 REGION_LOCATION_OBJECTS = {
     "house": ["Bed", "Bookshelf", "Desk", "Telescope", "Piano"],
-    "square": ["Willson"],
+    "square": ["Wilson"],
     "temple": ["Candle"],
     "mountain": ["Strawberry", "Tree", "Rock", "Flower", "Mushroom"],
     "forest": ["Apple", "Grape", "Tree", "Flower", "Mushroom"],

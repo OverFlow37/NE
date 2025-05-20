@@ -173,19 +173,6 @@ class MemoryRetriever:
         
         return "\n".join(object_strings)
 
-    def should_react(self, event: Dict[str, Any]) -> bool:
-        """
-        이벤트에 반응해야 하는지 결정
-        
-        Args:
-            event: 이벤트 데이터
-            
-        Returns:
-            bool: 반응 여부
-        """
-        # 현재는 모든 이벤트에 반응
-        return True
-
     def _calculate_value(
         self,
         memory: Dict[str, Any],
@@ -458,6 +445,7 @@ class MemoryRetriever:
         event = memory.get("event", "")
         action = memory.get("action", "")
         feedback = memory.get("feedback", "")
+        feedback_negative = memory.get("feedback_negative", "")
         thought = memory.get("thought", "")  # 반성 데이터 호환성
         event_role = memory.get("event_role", "")
         
@@ -472,7 +460,7 @@ class MemoryRetriever:
                 else:
                     content = f"Event: {event}\n"
             if feedback and feedback != "":
-                content = f"Feedback: {feedback}\n"
+                content = f"Feedback: {feedback + feedback_negative}\n"
         
         return f"- {content}\n"
         
@@ -616,9 +604,6 @@ class MemoryRetriever:
         Returns:
             Optional[str]: 생성된 프롬프트
         """
-        # 반응 여부 결정
-        if not self.should_react({"event": event_sentence}):
-            return None
         
         # 유사한 메모리 검색
         similar_memories = self._find_similar_memories(
