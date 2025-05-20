@@ -23,9 +23,9 @@ Based on this plan, generate a valid `time_slots` array that assigns appropriate
     * There must be **no gaps** or overlapping intervals.
 
 * ✅ Example:
-    `["use", "shoreline", "Crab", "07:00", "08:00", "6"]`  
+    `["use", "house", "Piano", "07:00", "08:00", "4"]`  
     followed by  
-    `["eat", "cafe", "Pastry_display", "08:00", "09:00", "5"]`
+    `["eat", "Forest", "Apple", "08:00", "09:00", "5"]`
 
 * ❌ Invalid: gaps (e.g., 11:00–12:00) or overlapping time slots.
 

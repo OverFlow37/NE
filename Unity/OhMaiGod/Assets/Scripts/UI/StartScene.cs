@@ -11,6 +11,7 @@ public class StartScene : MonoBehaviour
     private Button mContinueButton;
     private Button mContinueButtonDisabled;
     private Button mExitButton;
+    [SerializeField] private Canvas mLoadingUI;
 
     private void Awake()
     {
@@ -53,14 +54,21 @@ public class StartScene : MonoBehaviour
     // 새 게임 시작 버튼에 연결할 함수
     public void OnClickNewGame()
     {
+        mLoadingUI.gameObject.SetActive(true);   // 로딩 UI 활성화
         SaveLoadManager.Instance.ResetData();   // 기존 세이브 데이터 삭제
 
-        SaveLoadManager.Instance.LoadScene();
+        // AI 서버에 에이전트 메모리 데이터 삭제 요청
+        AIBridge_Perceive.Instance.ResetMemoryAllAgent(() =>
+        {
+            SaveLoadManager.Instance.LoadScene();  // AI서버의 메모리 데이터 삭제 완료 후, 동기 로드
+        });
     }
 
     // 이어하기 버튼에 연결할 함수
     public void OnClickContinue()
     {
+        mLoadingUI.gameObject.SetActive(true);   // 로딩 UI 활성화
+
         SaveLoadManager.Instance.LoadScene();
     }
 
@@ -81,7 +89,10 @@ public class StartScene : MonoBehaviour
     // 종료 버튼에 연결할 함수
     public void OnClickExit()
     {
-        Debug.Log("종료 버튼 클릭");
-        // TODO: 종료 버튼 클릭 시 종료 처리
+        #if UNITY_EDITOR
+            UnityEditor.EditorApplication.isPlaying = false;
+        #else
+            Application.Quit();
+        #endif
     }
 }

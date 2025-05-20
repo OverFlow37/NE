@@ -85,45 +85,55 @@ public class SaveLoadManager : MonoBehaviour
         // StartCoroutine(LoadAndSwitchSceneCoroutine());
     }
 
+    public void AsyncLoadScene()
+    {
+        TimeManager.Instance.gameObject.SetActive(true);
+
+        // 비동기 씬 로드 및 로딩 씬 언로드 코루틴 시작 => 오류 너무 많음...
+        StartCoroutine(LoadAndSwitchSceneCoroutine());
+    }
+
     // 비동기 로드 후 로딩 씬 언로드 코루틴
-    // private IEnumerator LoadAndSwitchSceneCoroutine()
-    // {
-    //     // Main_SYE 씬을 Additive로 비동기 로드
-    //     AsyncOperation mAsyncLoad = SceneManager.LoadSceneAsync("Main_SYE", LoadSceneMode.Additive);
-    //     LogManager.Log("SaveLoad", "Main_SYE 씬 비동기 로드 시작", 2);
+    private IEnumerator LoadAndSwitchSceneCoroutine()
+    {
+        // Main_SYE 씬을 Additive로 비동기 로드
+        AsyncOperation mAsyncLoad = SceneManager.LoadSceneAsync("Main", LoadSceneMode.Additive);
+        LogManager.Log("SaveLoad", "Main 씬 비동기 로드 시작", 2);
 
-    //     // 로딩 중에는 Main_SYE 오브젝트가 Hierarchy에 있지만, 아직 활성 씬은 아님
-    //     while (!mAsyncLoad.isDone)
-    //     {
-    //         yield return null;
-    //     }
+        // 로딩 중에는 Main_SYE 오브젝트가 Hierarchy에 있지만, 아직 활성 씬은 아님
+        while (!mAsyncLoad.isDone)
+        {
+            yield return null;
+        }
 
-    //     LogManager.Log("SaveLoad", "Main_SYE 씬 로드 완료, 활성 씬 전환 및 로딩 씬 언로드 시작", 2);
+        LogManager.Log("SaveLoad", "Main 씬 로드 완료, 활성 씬 전환 및 로딩 씬 언로드 시작", 2);
 
-    //     // Main_SYE를 활성 씬으로 설정
-    //     Scene mMainScene = SceneManager.GetSceneByName("Main_SYE");
-    //     if (mMainScene.IsValid())
-    //     {
-    //         SceneManager.SetActiveScene(mMainScene);
-    //     }
-    //     else
-    //     {
-    //         LogManager.Log("SaveLoad", "Main_SYE 씬 활성화 실패", 0);
-    //     }
+        // Main_SYE를 활성 씬으로 설정
+        Scene mMainScene = SceneManager.GetSceneByName("Main");
+        if (mMainScene.IsValid())
+        {
+            SceneManager.SetActiveScene(mMainScene);
+        }
+        else
+        {
+            LogManager.Log("SaveLoad", "Main 씬 활성화 실패", 0);
+        }
 
-    //     LoadData();
+        LoadData();
 
-    //     // 로딩 씬 언로드
-    //     string mLoadingSceneName = "LoadingScene";
-    //     AsyncOperation mAsyncUnload = SceneManager.UnloadSceneAsync(mLoadingSceneName);
+        // 기존 씬 언로드
+        string mLoadingSceneName = "StartScene";
+        AsyncOperation mAsyncUnload = SceneManager.UnloadSceneAsync(mLoadingSceneName);
 
-    //     while (!mAsyncUnload.isDone)
-    //     {
-    //         yield return null;
-    //     }
+        while (!mAsyncUnload.isDone)
+        {
+            yield return null;
+        }
 
-    //     LogManager.Log("SaveLoad", "로딩 씬 언로드 완료, Main_SYE 진입", 2);
-    // }
+        LogManager.Log("SaveLoad", "기존 씬 언로드 완료, Main 진입", 2);
+
+        // TimeManager.Instance.gameObject.SetActive(true);
+    }
 
     public void SaveData()
     {

@@ -61,8 +61,8 @@ def validate_unity_plan(plan_dict: Dict[str, List], retry_count: int = 0) -> Tup
         #             return False, f"[{i}] '{target}'는 '{location}'에서 발견 불가"
 
         # 대소문자 판별별
-        if not (target[0].isupper() and target[1:].islower()):
-            return False, f"[{i}] 타겟 대소문자 오류: '{target}'는 첫 글자만 대문자여야 함"
+        if not target[0].isupper():
+            return False, f"[{i}] 타겟 대소문자 오류: '{target}'는 첫 글자가 대문자여야 함"
 
     # 모두 통과
     return True, "✅ 유효한 계획입니다." if retry_count == 0 else "✅ 재생성된 계획이 유효합니다."

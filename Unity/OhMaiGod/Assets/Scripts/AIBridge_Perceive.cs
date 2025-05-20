@@ -726,12 +726,15 @@ public class AIBridge_Perceive : MonoBehaviour
         }
     }
 
-    // 기억 리셋
-    public void ResetMemoryAllAgent(){
-        StartCoroutine(ResetMemoryAllAgentCoroutine());
+    // 모든 에이전트의 기억을 리셋하는 함수 (콜백 지원)
+    public void ResetMemoryAllAgent(System.Action _onComplete = null)
+    {
+        StartCoroutine(ResetMemoryAllAgentCoroutine(_onComplete));
     }
 
-    IEnumerator ResetMemoryAllAgentCoroutine(){
+    // 모든 에이전트의 기억을 리셋하는 코루틴 (콜백 지원)
+    private IEnumerator ResetMemoryAllAgentCoroutine(System.Action _onComplete)
+    {
         UnityWebRequest request = new UnityWebRequest("http://127.0.0.1:5000/data/clear", "POST");
         request.uploadHandler = new UploadHandlerRaw(new byte[0]);
         request.downloadHandler = new DownloadHandlerBuffer();
@@ -747,6 +750,9 @@ public class AIBridge_Perceive : MonoBehaviour
         {
             LogManager.Log("AI", $"❌ 기억 리셋 실패: " + request.error, 0);
         }
+
+        // 콜백이 있으면 호출
+        _onComplete?.Invoke();
     }
 
 } 
