@@ -65,7 +65,7 @@ public class DeletePower : Power
                 LogManager.Log("Default", "UI 위에서는 삭제가 불가능합니다.", 1);
                 return;
             }
-            StartCoroutine(LightningStrike());
+            LightningStrike();
         }
 
         // 우클릭: 취소
@@ -86,7 +86,7 @@ public class DeletePower : Power
         }
     }
 
-    private IEnumerator LightningStrike()
+    private void LightningStrike()
     {
         // 코루틴 시작 시점의 오브젝트를 지역 변수로 저장
         GameObject targetObject = mHighlightedObject;
@@ -109,8 +109,7 @@ public class DeletePower : Power
             lightningEvent.mEventInfo.event_description += $" {interactable.InteractableName} is broken! at {interactable.CurrentLocation}";
             lightningEvent.mEventInfo.importance = 4;
             // 1초 대기
-            yield return new WaitForSeconds(1f);
-            Destroy(targetObject);
+            Destroy(targetObject, 1f);
         }
         else
         {
