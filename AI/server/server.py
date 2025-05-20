@@ -103,15 +103,23 @@ KV_PATH = os.path.join('models', 'word2vec-google-news-300.kv')
 
 # 1) .kv 파일이 없으면 압축 해제 후 변환
 if not os.path.exists(KV_PATH):
-    print("⚙️  .kv 포맷 파일이 없으므로 변환을 시작합니다...")
-    # api.load로 다운로드된 .bin 파일 경로 가져오기
-    bin_path = api.load('word2vec-google-news-300', return_path=True)
-    # 바이너리 포맷(.bin) 로드
-    kv = KeyedVectors.load_word2vec_format(bin_path, binary=True)
-    # 디렉토리 생성 후 저장
-    os.makedirs(os.path.dirname(KV_PATH), exist_ok=True)
-    kv.save(KV_PATH)
-    print("✅  .kv 포맷 변환 완료")
+    print("⚙️  KV 파일이 없습니다. prepare_server.py를 실행합니다...")
+    try:
+        # prepare_server.py의 main 함수 호출
+        prepare_server_path = os.path.join(CURRENT_DIR, "prepare_server.py")
+        if os.path.exists(prepare_server_path):
+            import importlib.util
+            spec = importlib.util.spec_from_file_location("prepare_server", prepare_server_path)
+            prepare_server = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(prepare_server)
+            prepare_server.main()
+        else:
+            print(f"❌ prepare_server.py 파일을 찾을 수 없습니다. 경로: {prepare_server_path}")
+            print("❌ 서버를 실행할 수 없습니다.")
+            sys.exit(1)
+    except Exception as e:
+        print(f"❌ prepare_server.py 실행 중 오류 발생: {e}")
+        sys.exit(1)
 
 # 2) 매핑(mmap) 방식으로 빠르게 로드
 print("🤖  KeyedVectors 모델 로딩 중...")
@@ -913,5 +921,14 @@ if __name__ == "__main__":
     print(f"\n=== 서버 초기화 완료 (총 소요시간: {time.time() - start_time:.2f}초) ===")
     import uvicorn
     # _perform_clear_all_data()  # 서버 시작 시 데이터 초기화 함수 호출
+    
+    # 서버 시작 직전에 준비 파일 생성 시도
+    try:
+        with open(os.path.join(CURRENT_DIR, "server_ready.txt"), "w") as f:
+            f.write(f"Server initialized and ready at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        print("✅ server_ready.txt 파일 생성 완료 - 게임 실행 신호")
+    except Exception as e:
+        print(f"❌ server_ready.txt 파일 생성 실패: {e}")
+    
     uvicorn.run(app, host="127.0.0.1", port=5000)
 

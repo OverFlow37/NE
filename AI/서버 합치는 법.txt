@@ -1,0 +1,7 @@
+패키징 시 AI서버를 이식하는 법
+
+1. batch_file_temp에 있는 실행 파일을 패키지의 최상위 폴더(OhMaiGod.exe이 있는 위치)에 넣기
+
+2. server 폴더에 있는 models와 venv를 삭제하기
+
+3. 최상위 폴더(OhMaiGod.exe이 있는 위치)에 'ai_server' 폴더를 만들고 AI 내부의 'agent', 'server' 폴더를 패키지의 'ai_server'로 옮기기
