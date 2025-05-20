@@ -912,6 +912,6 @@ async def get_all_data():
 if __name__ == "__main__":
     print(f"\n=== 서버 초기화 완료 (총 소요시간: {time.time() - start_time:.2f}초) ===")
     import uvicorn
-    _perform_clear_all_data()  # 서버 시작 시 데이터 초기화 함수 호출
+    # _perform_clear_all_data()  # 서버 시작 시 데이터 초기화 함수 호출
     uvicorn.run(app, host="127.0.0.1", port=5000)
 
