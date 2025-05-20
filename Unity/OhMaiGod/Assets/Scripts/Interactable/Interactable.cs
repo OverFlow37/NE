@@ -142,6 +142,10 @@ public class Interactable : MonoBehaviour
                         GameObject effect = Instantiate(mEffectUse, _interactor.transform.position, Quaternion.identity);
                         Destroy(effect, 2f); // 2초 후 자동 삭제 (필요에 따라 시간 조절)
                     }
+                    if(mEffectBreak != null && _actionName == "break"){
+                        GameObject effect = Instantiate(mEffectBreak, this.transform.position, Quaternion.identity);
+                        Destroy(effect, 2f); // 2초 후 자동 삭제 (필요에 따라 시간 조절)
+                    }
                     
                     _interactor.GetComponent<AgentController>().isSuccessForFeedback = true;
                     LogManager.Log("Interact", $"{mInteractableData.mName} 상호작용 성공.", 2);
@@ -260,14 +264,6 @@ public class Interactable : MonoBehaviour
             // 위치가 변경되면 이벤트 발생
             LogManager.Log("Interact", $"[{gameObject.name}] 위치 변경: {locationName}", 2);
             OnLocationChanged?.Invoke(this, locationName);
-        }
-    }
-    
-    void OnDestroy()
-    {
-        if(mEffectBreak != null){
-            GameObject effect = Instantiate(mEffectBreak, transform.position, Quaternion.identity);
-            Destroy(effect, 2f); // 2초 후 자동 삭제 (필요에 따라 시간 조절)
         }
     }
 }
