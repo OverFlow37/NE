@@ -105,18 +105,6 @@ public class AIBridge_Perceive : MonoBehaviour
         public DailySettlementAgent agent;
     }
 
-    // 하루 결산 계획 저장용 구조체
-    // [System.Serializable]
-    // public struct DayPlan
-    // {
-    //     public string action;
-    //     public string location;
-    //     public string interactable;
-    //     public string start_time;
-    //     public string end_time;
-    //     public int priority;
-    // }
-
     // ==== 데일리 플랜 파싱용 구조체 ====
     [System.Serializable]
     public class ReflectPlanRoot
