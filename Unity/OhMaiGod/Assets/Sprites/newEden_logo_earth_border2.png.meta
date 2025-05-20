@@ -1,19 +1,10 @@
 fileFormatVersion: 2
-guid: 7138e6abd095b07478bbe830923d8b4f
+guid: cfdf2c4c89ae24145ae337bb16f64d46
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -3285813391937164791
-    second: new_eden_logo_0
-  - first:
-      213: -6964394957807103635
-    second: new_eden_logo_1
-  - first:
-      213: -5165617920633514531
-    second: new_eden_logo_2
-  - first:
-      213: 8065679034203898613
-    second: new_eden_logo_3
+      213: 5327434271133025126
+    second: newEden_logo_earth_border2 1_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -122,13 +113,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: new_eden_logo_0
+      name: newEden_logo_earth_border2 1_0
       rect:
         serializedVersion: 2
-        x: 7
-        y: 195
-        width: 78
-        height: 78
+        x: 39
+        y: 19
+        width: 562
+        height: 507
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -137,74 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 90a2d5701227662d0800000000000000
-      internalID: -3285813391937164791
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: new_eden_logo_1
-      rect:
-        serializedVersion: 2
-        x: 89
-        y: 103
-        width: 447
-        height: 392
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: d61d2605faf795f90800000000000000
-      internalID: -6964394957807103635
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: new_eden_logo_2
-      rect:
-        serializedVersion: 2
-        x: 540
-        y: 195
-        width: 78
-        height: 78
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: dd55f3baed90058b0800000000000000
-      internalID: -5165617920633514531
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: new_eden_logo_3
-      rect:
-        serializedVersion: 2
-        x: 231
-        y: 59
-        width: 166
-        height: 56
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 5f20a0a095c0fef60800000000000000
-      internalID: 8065679034203898613
+      spriteID: 663402f5e39dee940800000000000000
+      internalID: 5327434271133025126
       vertices: []
       indices: 
       edges: []
@@ -223,10 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      new_eden_logo_0: -3285813391937164791
-      new_eden_logo_1: -6964394957807103635
-      new_eden_logo_2: -5165617920633514531
-      new_eden_logo_3: 8065679034203898613
+      newEden_logo_earth_border2 1_0: 5327434271133025126
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
