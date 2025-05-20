@@ -185,6 +185,11 @@ class MemoryUtils:
         if importance > 10 : 
             importance = 10
 
+
+        ## 디버그용 기본점수
+        if importance == 0:
+            importance = 3
+
         ## importance가 디폴트 값이 아니면 메모리에 저장
         if importance != 0 : 
             memory["importance"] = importance
@@ -304,7 +309,11 @@ class MemoryUtils:
             memory_id = most_recent_match_id
         else:
             memory_id = self._get_next_memory_id(agent_name)
-            
+
+        ## 디버그용 기본점수
+        if importance == 0:
+            importance = 5
+
         # 메모리 데이터 저장
         memory = {
             "event_role": event_role,
@@ -313,6 +322,7 @@ class MemoryUtils:
             "feedback": "",
             "feedback_negative": "",
             "conversation_detail": "",
+            "importance": importance,
             "time": event_time,
             "event_type": event_type,  # event_type 저장
             "event_location": event_location  # event_location 저장
@@ -327,6 +337,10 @@ class MemoryUtils:
         ## 10 이상의 importance -> 10 처리
         if importance > 10 : 
             importance = 10
+
+        ## 디버그용 기본점수
+        if importance == 0:
+            importance = 5
 
         ## importance가 디폴트 값이 아니면 메모리에 저장
         if importance != 0 : 
