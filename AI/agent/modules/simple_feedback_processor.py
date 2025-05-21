@@ -141,9 +141,9 @@ class SimpleFeedbackProcessor:
         # 스트레스
         stress = needs_diff.get("stress", 0)
         if stress > 30:
-            effects.append("a bit more stressed")
-        elif stress >= 10:
             effects.append("much more stressed")
+        elif stress > 10:
+            effects.append("a bit more stressed")
         
         # 효과 문장 결합
         if effects:

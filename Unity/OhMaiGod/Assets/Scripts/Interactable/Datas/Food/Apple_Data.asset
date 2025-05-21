@@ -19,8 +19,11 @@ MonoBehaviour:
   mType: 1
   mState: 0
   mInterest: 0
-  mFaith: 3
+  mFaith: 10
+  mFaithUse: 0
   mIcon: {fileID: 21300000, guid: 743e7d2047960ab418e60a2ed41ff5a7, type: 3}
+  mReplaceActionName: 
+  mReplacedActionName: 
   mActions:
   - mAction: {fileID: 11400000, guid: cbe91266aabd61348bd1864e9f7bac11, type: 2}
     mDuration: 120

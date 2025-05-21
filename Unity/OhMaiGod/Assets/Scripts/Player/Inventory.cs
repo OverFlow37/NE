@@ -11,7 +11,7 @@ public class Inventory : MonoBehaviour, ISaveable
     {
         public int wood = 0;
         public int stone = 0;
-        public int power = 0;
+        public int power = 100;
     }
 
     [SerializeField] private List<GameObject> mItems = new List<GameObject>();

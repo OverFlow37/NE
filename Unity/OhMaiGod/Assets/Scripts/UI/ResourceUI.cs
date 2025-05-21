@@ -1,14 +1,14 @@
 using UnityEngine;
 using UnityEngine.UI;
-
+using TMPro;
 public class ResourceUI : MonoBehaviour
 {
     [SerializeField] private Inventory.ResourceType mResourceType;
-    private Text mText;
+    private TextMeshProUGUI mText;
 
     private void Start()
     {
-        mText = GetComponent<Text>();
+        mText = GetComponent<TextMeshProUGUI>();
     }
 
     private void Update()
@@ -16,13 +16,13 @@ public class ResourceUI : MonoBehaviour
         switch (mResourceType)
         {
             case Inventory.ResourceType.Wood:
-                mText.text = "WOOD  : " + string.Format("{0}", Inventory.Instance.ResourceItems.wood);
+                mText.text = string.Format("{0}", Inventory.Instance.ResourceItems.wood);
                 break;
             case Inventory.ResourceType.Stone:
-                mText.text = "STONE : " + string.Format("{0}", Inventory.Instance.ResourceItems.stone);
+                mText.text = string.Format("{0}", Inventory.Instance.ResourceItems.stone);
                 break;
             case Inventory.ResourceType.Power:
-                mText.text = "POWER : " + string.Format("{0}", Inventory.Instance.ResourceItems.power);
+                mText.text = string.Format("{0}", Inventory.Instance.ResourceItems.power);
                 break;
         }
     }

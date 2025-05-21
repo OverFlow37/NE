@@ -154,7 +154,7 @@ public class TimeManager : MonoBehaviour, ISaveable
     // 현재 요일을 문자열로 반환
     public string GetDayOfWeekString()
     {
-        string[] dayNames = { "일", "월", "화", "수", "목", "금", "토" };
+        string[] dayNames = { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" };
         return dayNames[(int)mGameDate.DayOfWeek];
     }
 
@@ -167,7 +167,7 @@ public class TimeManager : MonoBehaviour, ISaveable
     // 현재 날짜를 "MM월 dd일 (요일)" 형식의 문자열로 반환
     public string GetDateString()
     {
-        return $"{mGameDate.Month}월 {mGameDate.Day}일 ({GetDayOfWeekString()})";
+        return $"{mGameDate.Month}/ {mGameDate.Day} ({GetDayOfWeekString()})";
     }
 
     // 특정 시간과 현재 시간의 차이를 반환
