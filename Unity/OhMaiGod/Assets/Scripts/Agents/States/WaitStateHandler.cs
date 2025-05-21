@@ -7,7 +7,7 @@ namespace OhMAIGod.Agent
 {
     public class WaitStateHandler : AgentStateHandler
     {
-        private int WAIT_TIME_THRESHOLD = 20;
+        private int WAIT_TIME_THRESHOLD = 10;
         public override void OnStateEnter(AgentController _controller)
         {
             _controller.animator.SetBool("isMoving", false);
