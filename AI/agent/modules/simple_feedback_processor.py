@@ -147,7 +147,7 @@ class SimpleFeedbackProcessor:
         
         # 효과 문장 결합
         if effects:
-            if negative_only: ## 긍정 변화부분이 없으면 여기부터 시작
+            if negative_only and hunger < 10: ## 긍정 변화부분이 없으면 여기부터 시작
                 result_text += f" feeling "
             else: ## 긍정 변화부분이 있으면 여기부터 시작
                 result_text += f", "
