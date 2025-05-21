@@ -693,7 +693,7 @@ public class AgentController : MonoBehaviour, ISaveable
 
     // AI 서버에 피드백 보냄
     public void SendFeedbackToAI(bool _success, string _interactableName = "", string _actionName = "", string _memoryID = ""){
-        mCurrentFeedback.current_location_name = "";
+        mCurrentFeedback.current_location_name = mCurrentLocation;
         mCurrentFeedback.time = TimeManager.Instance.GetCurrentGameDateString();
         mCurrentFeedback.interactable_name = _interactableName;
         mCurrentFeedback.action_name = _actionName;
@@ -725,7 +725,7 @@ public class AgentController : MonoBehaviour, ISaveable
             SendReactAction(perceiveEvent);
         }
         mCurrentFeedback.feedback.memory_id = mCurrentMemoryID;
-        mCurrentFeedback.importance = 2;
+        mCurrentFeedback.feedback.importance = 2;
         // 실제 전송되는 JSON 양식도 로그로 출력
         string feedbackJson = JsonUtility.ToJson(mCurrentFeedback);
         LogManager.Log("AI", $"{mName}: 피드백 전송 JSON: {feedbackJson}", 2);

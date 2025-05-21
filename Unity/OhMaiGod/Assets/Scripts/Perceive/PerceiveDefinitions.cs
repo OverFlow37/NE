@@ -64,6 +64,5 @@ namespace OhMAIGod.Perceive{
         public string action_name;
         public bool success;
         public feedback feedback;
-        public int importance;               // 이벤트 중요도
     }
 }
