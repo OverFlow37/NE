@@ -20,8 +20,14 @@ public class InteractableData : ScriptableObject
     [SerializeField, Range(0, 100)] public float mInterest;
     [Tooltip("Offer로 얻을 수 있는 신앙심 효과")]
     [SerializeField, Range(-99, 99)] public int mFaith;
+    [Tooltip("use로 얻을 수 있는 신앙심 효과")]
+    [SerializeField, Range(-99, 99)] public int mFaithUse;
     [Tooltip("아이템의 인벤토리 아이콘(스프라이트)")]
     [SerializeField] public Sprite mIcon; // 인벤토리에서 사용할 아이콘
+
+    // 대체될 액션과 대체할 액션(임시)
+    public string mReplaceActionName = "";
+    public string mReplacedActionName = "";
 
     [System.Serializable]
     public struct InteractionActionInfo

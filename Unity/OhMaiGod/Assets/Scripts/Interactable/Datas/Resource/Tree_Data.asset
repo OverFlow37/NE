@@ -19,11 +19,13 @@ MonoBehaviour:
   mState: 0
   mInterest: 0
   mFaith: 0
-  mIcon: {fileID: 1022713069, guid: f4b6bbcc2a3e13b4fb323220e94a9515, type: 3}
+  mIcon: {fileID: 208081912, guid: f4b6bbcc2a3e13b4fb323220e94a9515, type: 3}
+  mReplaceActionName: 
+  mReplacedActionName: 
   mActions:
   - mAction: {fileID: 11400000, guid: cbe91266aabd61348bd1864e9f7bac11, type: 2}
     mDuration: 120
-    mHungerEffect: 0
+    mHungerEffect: 10
     mSleepinessEffect: 0
     mLonelinessEffect: 0
     mStressEffect: 0

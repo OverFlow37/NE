@@ -457,6 +457,10 @@ public class AgentController : MonoBehaviour, ISaveable
             StopCoroutine(mInteractionCoroutine);
             mInteractionCoroutine = null;
         }
+        if(CurrentTargetInteractable != null && CurrentAction != null &&
+         CurrentTargetInteractable.mInteractableData.mReplaceActionName == CurrentAction.ActionName){
+            mCurrentAction.ActionName = CurrentTargetInteractable.mInteractableData.mReplacedActionName;
+        }
         mInteractionCoroutine = StartCoroutine(InteractionRoutine());
         // 상호작용 UI 시작
         if (mAgentUI != null)
