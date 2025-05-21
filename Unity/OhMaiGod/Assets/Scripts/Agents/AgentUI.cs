@@ -100,7 +100,7 @@ public class AgentUI : MonoBehaviour
                 // mSpeechBubble을 Canvas로 이동
                 HideInteractionInfo();
                 mSpeechBubble.transform.SetParent(mainCanvas.transform, false);
-                LogManager.Log("Agent", $"SpeechBubble을 Canvas로 이동시켰습니다.", 2);
+                mSpeechBubble.transform.SetAsFirstSibling(); // 맨 아래로 이동
             }
         }
         StartCoroutine(UpdateSpeechLate());
