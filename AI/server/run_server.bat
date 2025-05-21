@@ -1,6 +1,8 @@
 @echo off
 setlocal
 
+ollama list
+
 REM --------------------------------------------------------
 REM  Setup & Activate Python Virtual Environment (venv)
 REM --------------------------------------------------------
