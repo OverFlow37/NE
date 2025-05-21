@@ -30,7 +30,7 @@ MonoBehaviour:
     mHungerEffect: -30
     mSleepinessEffect: 0
     mLonelinessEffect: 0
-    mStressEffect: 0
+    mStressEffect: -10
   - mAction: {fileID: 11400000, guid: 8c8333f0289df39458a7a343f81ce4f3, type: 2}
     mDuration: 120
     mHungerEffect: 0

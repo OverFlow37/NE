@@ -27,10 +27,10 @@ MonoBehaviour:
   mActions:
   - mAction: {fileID: 11400000, guid: cbe91266aabd61348bd1864e9f7bac11, type: 2}
     mDuration: 120
-    mHungerEffect: 0
+    mHungerEffect: -3
     mSleepinessEffect: 0
     mLonelinessEffect: 0
-    mStressEffect: 0
+    mStressEffect: 10
   - mAction: {fileID: 11400000, guid: 834d1a928a543d444b3abefbce640270, type: 2}
     mDuration: 120
     mHungerEffect: 0

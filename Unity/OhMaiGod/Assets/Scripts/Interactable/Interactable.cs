@@ -85,7 +85,7 @@ public class Interactable : MonoBehaviour
             // 중앙 위치 y값에 따라 sorting order 계산
             mSpriteRenderer.sortingOrder = Mathf.FloorToInt(y * -1) + 50;
             if (gameObject.layer == LayerMask.NameToLayer("NPC")){
-                mSpriteRenderer.sortingOrder ++;
+                mSpriteRenderer.sortingOrder = 300;
             }
         }
     }
