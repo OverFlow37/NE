@@ -142,12 +142,12 @@ class SimpleFeedbackProcessor:
         stress = needs_diff.get("stress", 0)
         if stress > 30:
             effects.append("a bit more stressed")
-        elif stress > 10:
+        elif stress >= 10:
             effects.append("much more stressed")
         
         # 효과 문장 결합
         if effects:
-            if negative_only: ## 긍정 변화부분이 없으면 여기부터 시작
+            if negative_only and hunger < 10: ## 긍정 변화부분이 없으면 여기부터 시작
                 result_text += f" feeling "
             else: ## 긍정 변화부분이 있으면 여기부터 시작
                 result_text += f", "
