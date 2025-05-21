@@ -364,7 +364,7 @@ class MemoryRetriever:
             )
 
             valued_items.append((item, final_score, False))
-            to_print_items.append((item, final_score, sim_max, imp_norm, time_weight, event_sim, state_sim))
+            # to_print_items.append((item, final_score, sim_max, imp_norm, time_weight, event_sim, state_sim))
 
         ## 반성
         
@@ -400,13 +400,13 @@ class MemoryRetriever:
         # 인자로 넘어온 top_k 사용
         result = valued_items[:top_k]
 
-        for mem, score, sim_avg, imp_norm, tw, e_sim, s_sim in to_print_items[:top_k]:
-            print(f"=== 메모리 ID: {mem.get('memory_id')} ===")
-            print(f"  Final Score : {score:.4f}")
-            print(f"    sim_max   : {sim_avg:.4f}  (event_sim={e_sim:.4f}, state_sim={s_sim:.4f})")
-            print(f"    importance: {imp_norm:.4f}")
-            print(f"    time_weight: {tw:.4f}")
-            print()
+        # for mem, score, sim_avg, imp_norm, tw, e_sim, s_sim in to_print_items[:top_k]:
+        #     print(f"=== 메모리 ID: {mem.get('memory_id')} ===")
+        #     print(f"  Final Score : {score:.4f}")
+        #     print(f"    sim_max   : {sim_avg:.4f}  (event_sim={e_sim:.4f}, state_sim={s_sim:.4f})")
+        #     print(f"    importance: {imp_norm:.4f}")
+        #     print(f"    time_weight: {tw:.4f}")
+        #     print()
         
         # # 결과가 부족한 경우 최근 메모리로 채우기
         # if len(result) < top_k:
