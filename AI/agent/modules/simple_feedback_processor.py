@@ -297,7 +297,7 @@ class SimpleFeedbackProcessor:
 
             ## 디버그용 기본점수
             if importance == 0:
-                importance = 8
+                importance = 4
     
             # memory_id 처리 - 문자열로 변환하여 확인
             memory_id = str(feedback.get('memory_id', '')) if feedback.get('memory_id') is not None else ''
