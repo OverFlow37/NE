@@ -257,7 +257,7 @@ Keep your explanation concise and provide ONLY this JSON with NO additional text
             )
 
             valued_items.append((item, final_score, False))
-            to_print_items.append((item, final_score, sim_max, imp_norm, time_weight, event_sim, state_sim))
+            # to_print_items.append((item, final_score, sim_max, imp_norm, time_weight, event_sim, state_sim))
 
         ## 반성
         
@@ -458,9 +458,9 @@ Keep your explanation concise and provide ONLY this JSON with NO additional text
         processed_events = set()
         similar_events = []
         
-        for memory, _ in similar_memories:
+        for memory, _, is_reflection in similar_memories:
             # 메모리 문자열 생성
-            event_str = self._create_event_string(memory)
+            event_str = self._create_event_string(memory, is_reflection)
             if event_str not in processed_events:
                 similar_events.append(event_str)
                 processed_events.add(event_str)
