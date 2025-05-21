@@ -542,10 +542,10 @@ public class AIBridge_Perceive : MonoBehaviour
     // 반응 행동 이벤트 전송(반환값 true, false)
     public void SendReactActionEvent(AgentController _agent, PerceiveEvent _perceiveEvent)
     {
-        if(_agent.CurrentState == AgentState.WAITING_FOR_AI_RESPONSE) {
-            LogManager.Log("AI", $"[AIBridge_Perceive] 반응행동 응답 대기중입니다.", 2);
-            return;
-        }
+        // if(_agent.CurrentState == AgentState.WAITING_FOR_AI_RESPONSE) {
+        //     LogManager.Log("AI", $"[AIBridge_Perceive] 반응행동 응답 대기중입니다.", 2);
+        //     return;
+        // }
         LogManager.Log("AI", $"[AIBridge_Perceive] SendReactActionEvent: {_perceiveEvent.event_type}, {_perceiveEvent.event_location}, {_perceiveEvent.event_description}", 3);
         // TODO: 관찰 이벤트 전송 엔드포인트 구현 후 주석 해제
         StartCoroutine(SendReactActionEventData(_agent, _perceiveEvent));

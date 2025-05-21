@@ -64,8 +64,8 @@ public class ChatPower : Power
     private void OnInputEndEdit(string _input)
     {   
         // 에이전트가 반응 대기 중이면 채팅 입력 X
-        if(mAgentController.CurrentState == OhMAIGod.Agent.AgentState.WAITING_FOR_AI_RESPONSE)
-            return;
+        // if(mAgentController.CurrentState == OhMAIGod.Agent.AgentState.WAITING_FOR_AI_RESPONSE)
+        //     return;
         if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter) || !Application.isMobilePlatform)
         {
             SubmitChat();

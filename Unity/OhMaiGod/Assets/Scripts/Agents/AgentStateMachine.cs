@@ -43,7 +43,7 @@ namespace OhMAIGod.Agent
         public void ChangeState(AgentState _newStateType)
         {
             if (mCurrentStateType == _newStateType)  return;
-            if (!mAllowStateChange && mCurrentStateType == AgentState.WAITING_FOR_AI_RESPONSE) return;
+            //if (!mAllowStateChange && mCurrentStateType == AgentState.WAITING_FOR_AI_RESPONSE) return;
             // 디버깅용
             LogManager.Log("Agent", $"{mController.AgentName}: 상태 변경 {mCurrentStateType} -> {_newStateType}", 2);
 
