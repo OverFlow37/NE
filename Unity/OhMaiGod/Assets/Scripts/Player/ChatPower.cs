@@ -28,6 +28,14 @@ public class ChatPower : Power
 
          SetAgentController();
     }
+
+    private void Update(){
+        // 오른쪽 마우스 버튼 누르면 취소
+            if (Input.GetMouseButtonDown(1))
+            {
+                Deactive();
+            }
+    }
     
 
     private IEnumerator ScaleAnim(Vector3 _from, Vector3 _to, bool _afterShow)

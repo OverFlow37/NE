@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 using OhMAIGod.Perceive;
+using OhMAIGod.Agent;
 using UnityEngine.Tilemaps;
 
 // 에이전트 시야 관리
@@ -123,7 +124,7 @@ public class AgentVision : MonoBehaviour
         else if (other.gameObject.layer == LayerMask.NameToLayer("Event"))
         {
             EventController eventController = other.GetComponent<EventController>();
-            if (eventController != null)
+            if (eventController != null && mAgentController.CurrentState != AgentState.WAITING_FOR_AI_RESPONSE && !mAgentController.mIsReactJudge)
             {
                 LogManager.Log("Vision", $"이벤트 감지: {eventController.mEventInfo.event_type}, {eventController.mEventInfo.event_location}, {eventController.mEventInfo.event_description}", 3);
                 //PerceiveManager.Instance.SendEventToAIServer(eventController.mEventInfo.eventType, eventController.mEventInfo.eventLocation, eventController.mEventInfo.eventDescription);
