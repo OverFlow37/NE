@@ -55,6 +55,9 @@ public class UseAction : InteractionAction
         }
         if (agentController != null)
         {
+            if(targetInteractable.mInteractableData.mFaithUse > 0){
+                Inventory.Instance.AddResource(Inventory.ResourceType.Power, targetInteractable.mInteractableData.mFaithUse);
+            }
             agentController.ModifyNeed(AgentNeedsType.Hunger, actionInfo.mHungerEffect);
             agentController.ModifyNeed(AgentNeedsType.Sleepiness, actionInfo.mSleepinessEffect);
             agentController.ModifyNeed(AgentNeedsType.Loneliness, actionInfo.mLonelinessEffect);

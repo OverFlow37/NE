@@ -142,6 +142,11 @@ public class GenerateItemPower : Power
             LogManager.Log("Default", "해당 타일에 아이템을 생성할 수 없습니다.", 1);
             return;
         }
+        if(Inventory.Instance.ResourceItems.power < mPowerCost){
+            LogManager.Log("Default", "파워가 부족합니다.", 1);
+            return;
+        }
+        Inventory.Instance.AddResource(Inventory.ResourceType.Power, -mPowerCost);
         // 이벤트 생성
         EventController eventController = Instantiate(mSelectedEvent, cellCenter, Quaternion.identity).GetComponent<EventController>();
         eventController.mEventInfo.event_location = TileManager.Instance.GetTileController(cellPos).LocationName;

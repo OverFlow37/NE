@@ -67,6 +67,11 @@ public class DeletePower : Power
                 LogManager.Log("Default", "UI 위에서는 삭제가 불가능합니다.", 1);
                 return;
             }
+            if(Inventory.Instance.ResourceItems.power < mPowerCost){
+            LogManager.Log("Default", "파워가 부족합니다.", 1);
+            return;
+            }
+            Inventory.Instance.AddResource(Inventory.ResourceType.Power, -mPowerCost);
             LightningStrike();
         }
 

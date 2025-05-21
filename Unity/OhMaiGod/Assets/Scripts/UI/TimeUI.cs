@@ -20,7 +20,7 @@ public class TimeUI : MonoBehaviour
             mTimeText.text = TimeManager.Instance.GetTimeString();
 
             // 누적 일 수 표시
-            mDaysText.text = TimeManager.Instance.GetDays().ToString() + " 일차";
+            mDaysText.text = TimeManager.Instance.GetDays().ToString() + " days";
         }
     }
 }

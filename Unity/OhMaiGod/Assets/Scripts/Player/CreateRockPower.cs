@@ -143,6 +143,12 @@ public class CreateRockPower : Power
             LogManager.Log("Default", "mItemList가 비어있습니다.", 1);
             return;
         }
+        if(Inventory.Instance.ResourceItems.power < mPowerCost){
+            LogManager.Log("Default", "파워가 부족합니다.", 1);
+            return;
+        }
+        Inventory.Instance.AddResource(Inventory.ResourceType.Power, -mPowerCost);
+        
         GameObject randomItem = mItemList[Random.Range(0, mItemList.Count)];
         Instantiate(randomItem, cellCenter, Quaternion.identity);
         // 이벤트 생성
