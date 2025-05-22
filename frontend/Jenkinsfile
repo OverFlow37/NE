@@ -1,0 +1,88 @@
+pipeline {
+    agent any
+    
+    environment {
+        DOCKER_REGISTRY = ".com"
+        IMAGE_NAME = "frontend"
+        IMAGE_TAG = "${env.BUILD_NUMBER}"
+    }
+    
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+        
+        stage('Install Dependencies') {
+            steps {
+                sh 'npm ci'
+            }
+        }
+        
+        stage('Lint') {
+            steps {
+                sh 'npm run lint'
+            }
+        }
+        
+        stage('Test') {
+            steps {
+                sh 'npm test'
+            }
+        }
+        
+        stage('Build') {
+            steps {
+                sh 'npm run build'
+            }
+        }
+        
+        stage('Docker Build') {
+            when {
+                branch 'develop'
+            }
+            steps {
+                sh "docker build -t ${DOCKER_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG} ."
+                sh "docker tag ${DOCKER_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG} ${DOCKER_REGISTRY}/${IMAGE_NAME}:latest"
+            }
+        }
+        
+        stage('Docker Push') {
+            when {
+                branch 'develop'
+            }
+            steps {
+                withCredentials([string(credentialsId: 'docker-password', variable: 'DOCKER_PASSWORD')]) {
+                    sh "echo $DOCKER_PASSWORD | docker login ${DOCKER_REGISTRY} -u jenkins --password-stdin"
+                    sh "docker push ${DOCKER_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}"
+                    sh "docker push ${DOCKER_REGISTRY}/${IMAGE_NAME}:latest"
+                }
+            }
+        }
+        
+        stage('Deploy') {
+            when {
+                branch 'develop'
+            }
+            steps {
+                sshagent(['ec2-ssh-key']) {
+                    sh '''
+                        ssh -o StrictHostKeyChecking=no ubuntu@your-ec2-instance.amazonaws.com "
+                            cd /path/to/deployment &&
+                            docker-compose pull &&
+                            docker-compose down &&
+                            docker-compose up -d
+                        "
+                    '''
+                }
+            }
+        }
+    }
+    
+    post {
+        always {
+            cleanWs()
+        }
+    }
+}
