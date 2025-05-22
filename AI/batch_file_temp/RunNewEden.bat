@@ -42,7 +42,7 @@ python prepare_server.py
 
 REM Check server initialization
 echo [INFO] Waiting for server initialization...
-set MAX_WAIT=120
+set MAX_WAIT=3600
 set WAIT_TIME=0
 set INTERVAL=5
 
