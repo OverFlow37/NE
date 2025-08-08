@@ -1,10 +1,10 @@
 # 🗿 Project: New Eden
 
-**AI를 통해 스스로 생각하고 움직이는 자율 에이전트를 신이 되어 관찰해 보세요, 에이전트를 도와주거나 괴롭히거나 선택은 당신의 몫입니다.**
+**AI를 통해 스스로 생각하고 움직이는 자율 에이전트를 신이 되어 관찰해 보세요, 에이전트를 도와주거나 방해하거나 선택은 당신의 몫입니다.**
 
 ---
 
-[여기에 게임 플레이 스크린샷이나 GIF를 추가하세요]
+![Image](https://github.com/user-attachments/assets/82614633-23f7-485b-b410-754c10cb80b1)
 
 <br>
 
@@ -47,10 +47,6 @@
 
 ## 🛠️ 기술 스택 (Tech Stack)
 
-
-
-
-
 * **Game Engine**: ![Unity](https://img.shields.io/badge/unity-%23000000.svg?style=for-the-badge&logo=unity&logoColor=white)
 * **Language**: ![C#](https://img.shields.io/badge/c%23-%23239120.svg?style=for-the-badge&logo=csharp&logoColor=white) ![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
 * **AI**: <img src="https://img.shields.io/badge/ollama-000000?style=for-the-badge&logo=ollama&logoColor=white" style="border-radius:10px">
@@ -63,26 +59,14 @@
 
 이 프로젝트를 로컬 환경에서 실행하려면 아래의 안내를 따라주세요.
 
-[여기에 설치 및 실행 방법을 자세히 추가하세요. 아래는 예시입니다.]
-
 ### 사전 요구사항 (Prerequisites)
-* Unity Hub 및 Unity 2022.3.1f1 버전 설치
-* [필요한 경우] Python 3.9 이상 설치
+* Python 3.11 버전 설치
+* NVIDIA 그래픽 드라이버 설치
+* CUDA 설치
+* Ollama 설치
 
 ### 설치 (Installation)
-1.  Git 저장소를 복제합니다.
-    ```sh
-    git clone [https://github.com/](https://github.com/)[your-username]/[your-repo-name].git
-    ```
-2.  Unity Hub에서 프로젝트를 엽니다.
-3.  [API 키나 환경 변수 설정이 필요하다면 여기에 방법을 설명하세요.]
-    ```
-    예: Assets 폴더 내에 config.json 파일을 생성하고 아래 내용을 추가하세요.
-    {
-      "OPENAI_API_KEY": "YOUR_API_KEY"
-    }
-    ```
-4.  Unity 에디터에서 Play 버튼을 눌러 프로젝트를 실행합니다.
+자세한 설치 방법은 [링크 참조](https://github.com/OverFlow37/NE/blob/master/exec/1_%EB%B9%8C%EB%93%9C_%EB%B0%8F_%EB%B0%B0%ED%8F%AC_%EC%A0%95%EB%A6%AC_%EB%AC%B8%EC%84%9C.md)
 
 <br>
 
